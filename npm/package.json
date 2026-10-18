@@ -13,7 +13,8 @@
   },
   "files": [
     "bin/hvolt.js",
-    "LICENSE"
+    "LICENSE",
+    "lsp/dist/server.cjs"
   ],
   "engines": {
     "node": ">=18"

@@ -396,6 +396,13 @@ fn deveco_sdk_path(deveco: &Path) -> Option<PathBuf> {
         .find(|cand| cand.join("ets").is_dir() || cand.join("openharmony/ets").is_dir())
 }
 
+/// SDK component directory only — no tool checks. Used by consumers that need the
+/// SDK and nothing else (the language server), where requiring hvigor/ohpm would
+/// report an unrelated failure.
+pub(crate) fn sdk_dir(toml_override: &str) -> Result<PathBuf, String> {
+    find_ohos_sdk(toml_override)
+}
+
 fn find_ohos_sdk(toml_override: &str) -> Result<PathBuf, String> {
     // 1. hvolt.toml sdk_path
     if !toml_override.is_empty() {

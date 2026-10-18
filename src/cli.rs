@@ -77,6 +77,22 @@ pub enum Command {
         #[arg(long, value_parser = parse_size)]
         size_limit: Option<u64>,
     },
+    /// Language server for editors (LSP over stdio)
+    #[command(
+        after_help = "ArkTS semantics come from the TypeScript build inside the installed SDK\n\
+        (see lsp/DESIGN.md). Consumed by an editor extension, not by hand:\n\
+        \n\
+        \x20 VS Code (or any LSP client) spawns `hvolt lsp --stdio`.\n\
+        \x20 Requires an installed SDK (hvolt sdk download) and Node.js."
+    )]
+    Lsp {
+        /// Speak LSP on stdin/stdout (the only supported transport)
+        #[arg(long)]
+        stdio: bool,
+        /// Override the SDK the language service loads its TypeScript from
+        #[arg(long)]
+        sdk: Option<String>,
+    },
     /// Code Linter (DevEco's official codelinter engine) over the translated tree
     #[command(
         after_help = "This one command needs a DevEco Studio artifact: Huawei ships the\n\

@@ -7,6 +7,14 @@ versions may change the CLI surface.
 
 ## [Unreleased]
 
+### Added
+
+- `hvolt lsp --stdio`: a language server for editors. Semantics (hover, completion, definition,
+  signature help, rename) come from the TypeScript build inside the installed SDK, which parses
+  `.ets` and ArkUI structs; diagnostics deliberately stay with hvigor, codelinter and
+  `app_check_tool`, because the fork alone mis-reports legal ArkUI block-chains
+  (`Column() { … }.width()`). See `lsp/DESIGN.md`.
+
 ## [26.0.0-0] — 2026-10-18
 
 Version numbering switches to "SDK version + release counter" (`26.0.0-0`; see RELEASING.md).

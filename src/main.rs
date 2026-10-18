@@ -13,6 +13,7 @@ mod hap;
 mod hdc;
 mod http;
 mod lint;
+mod lsp;
 mod pipeline;
 mod platform;
 mod scaffold;
@@ -262,6 +263,16 @@ fn main() {
         }
         cli::Command::Check { size_limit } => {
             if let Err(e) = check::check_package(std::path::Path::new("."), size_limit) {
+                eprintln!("✗ {}", e);
+                std::process::exit(1);
+            }
+        }
+        cli::Command::Lsp { stdio, sdk } => {
+            if !stdio {
+                eprintln!("✗ hvolt lsp speaks LSP over stdio; pass --stdio");
+                std::process::exit(2);
+            }
+            if let Err(e) = crate::lsp::serve(sdk.as_deref()) {
                 eprintln!("✗ {}", e);
                 std::process::exit(1);
             }
