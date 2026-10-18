@@ -1,0 +1,29 @@
+{
+  "name": "@hvolt/cli",
+  "version": "0.1.0",
+  "description": "HarmonyOS build tool with a flat project layout (prebuilt binary launcher)",
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://github.com/hvolt-project/hvolt#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hvolt-project/hvolt.git"
+  },
+  "bin": {
+    "hvolt": "bin/hvolt.js"
+  },
+  "files": [
+    "bin/hvolt.js",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "optionalDependencies": {
+    "@hvolt/cli-darwin-arm64": "0.1.0",
+    "@hvolt/cli-linux-x64": "0.1.0",
+    "@hvolt/cli-win32-x64": "0.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

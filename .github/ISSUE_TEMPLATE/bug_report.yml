@@ -1,0 +1,57 @@
+name: Bug report
+description: Something behaves differently than documented
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please remove tokens, passwords, keystore content and profile content from any output you paste.
+  - type: input
+    id: version
+    attributes:
+      label: hvolt version
+      description: Output of `hvolt --version`
+      placeholder: hvolt 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Linux
+        - macOS
+        - Windows
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: Command that triggers it
+      placeholder: hvolt build
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: The output, including the exit code.
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: hvolt doctor output (optional)
+      description: The section that fails is usually enough.
+      render: text
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: SDK version (`hvolt sdk list`), node/JDK versions, whether DevEco Studio is installed.

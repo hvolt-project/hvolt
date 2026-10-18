@@ -1,0 +1,54 @@
+[package]
+name = "hvolt"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+description = "HarmonyOS community build tool — flat project structure, minimal config"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/hvolt-project/hvolt"
+homepage = "https://github.com/hvolt-project/hvolt#readme"
+readme = "README.md"
+keywords = ["harmonyos", "openharmony", "hap", "build-tool", "hvigor"]
+categories = ["command-line-utilities", "development-tools::build-utils"]
+
+[[bin]]
+name = "hvolt"
+path = "src/main.rs"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"   # no symbol names in shipped binaries
+panic = "abort"
+
+[features]
+# Compile the AppGallery Connect backend from an `agc-local/` overlay next to
+# this crate. The overlay is not part of this repository.
+agc-local = []
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+toml = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ureq = { version = "2", default-features = false, features = ["tls", "gzip", "json"] }
+sha2 = "0.10"
+base64 = "0.22"
+rand = "0.8"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+regex-lite = "0.1"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+# ─── Code cleanliness gate (see CONTRIBUTING.md) ───
+# These hold for the whole crate; `cargo clippy --all-targets -- -D warnings`
+# is the review gate, `cargo fmt --check` the formatting one.
+[lints.rust]
+unsafe_code = "warn"     # exactly one site: SIGPIPE reset in main.rs, documented there
+unused_must_use = "warn" # a dropped Result is a swallowed error
+
+[lints.clippy]
+dbg_macro = "deny"
+todo = "deny"
+unimplemented = "deny"

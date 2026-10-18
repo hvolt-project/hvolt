@@ -1,0 +1,36 @@
+# Module configuration
+#
+# Advanced options (uncomment as needed):
+#
+#   skills = [
+#     { actions = ["action.system.home"], entities = ["entity.system.home"] },
+#     { actions = ["ohos.want.action.viewData"], entities = ["entity.system.default"], uris = [{scheme = "https"}] },
+#   ]
+#
+#   [[module.abilities]]
+#   name = "ShareAbility"
+#   skills = [
+#     { actions = ["ohos.want.action.sendData"] },
+#   ]
+#
+#   [[module.abilities]]
+#   name = "EntryFormAbility"
+#   type = "form"
+#
+#   [[module.permissions]]
+#   name = "ohos.permission.INTERNET"
+#   reason = "$string:internet_reason"
+#   abilities = ["EntryAbility"]
+#   when = "always"
+#
+[module]
+name = "src"
+routes = ["pages/Index.ets"]
+entry = "EntryAbility.ets"
+device_types = [
+    "phone",
+    "tablet",
+    "2in1",
+    "car",
+]
+obfuscation = false

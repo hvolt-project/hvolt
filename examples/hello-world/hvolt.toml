@@ -1,0 +1,26 @@
+# hvolt project configuration
+# 
+# Advanced options (uncomment as needed):
+#
+#   bundle_type = "atomicService"    # for atomic service (default: "app")
+#
+#   [dependencies]
+#   scrypt = { path = "vendor/scrypt.har", version = "1.0" }
+#
+[app]
+bundle = "com.example.hello_world"
+name = "hello-world"
+version = "1.0.0"
+vendor = "example"
+icon = "$media:layered_image"
+sdk_version = "26.0.0"
+compile_sdk_version = "26.0.0"
+compatible_sdk_version = ""
+bundle_type = "app"
+products = ["default"]
+runtime_os = "HarmonyOS"
+members = ["src"]
+
+[app.signing]
+
+[dependencies]

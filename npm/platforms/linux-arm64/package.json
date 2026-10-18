@@ -1,0 +1,25 @@
+{
+  "name": "@hvolt/cli-linux-arm64",
+  "version": "0.1.0",
+  "description": "Prebuilt hvolt binary for linux arm64",
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://github.com/hvolt-project/hvolt#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hvolt-project/hvolt.git"
+  },
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "files": [
+    "bin/hvolt",
+    "bin/hvolt.exe",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
