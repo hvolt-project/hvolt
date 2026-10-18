@@ -30,8 +30,8 @@ VS Code extension (thin)                     hvolt (Rust CLI)
 │             file snapshots of the *flat* tree, plus SDK declarations        │
 │ ② semantics SDK fork's createLanguageService (tsserverlibrary.js)           │
 │             hover · completion · definition · signatureHelp · rename        │
-│             semantic/syntactic diagnostics                                  │
-│ ③ aggregate diagnostics from the real toolchain                             │
+│             (its own diagnostics are NOT published — see "Diagnostics")     │
+│ ③ diagnostics from the real toolchain                                       │
 │             hvigor build errors · codelinter (hvolt lint --json)            │
 │             app_check_tool (hvolt check)                                    │
 │ ④ commands  build · sign · push · screenshot · log (executeCommand)         │
@@ -48,7 +48,7 @@ editors that insist on their own language client).
 | Phase | Scope | Done when |
 |---|---|---|
 | **M1** | `hvolt lsp --stdio`: host layer + fork semantics + document sync | a real `.ets` file in `examples/hello-world` gets hover, completion and definition in VS Code |
-| **M2** | diagnostics aggregation, positions mapped back to real files | a deliberate build error shows as an inline diagnostic identical to `hvolt build`'s message |
+| **M2** | diagnostics from the toolchain only, positions mapped back to real files | a deliberate build error shows as an inline diagnostic identical to `hvolt build`'s message, and the block-chain idiom above produces none |
 | **M3** | hvolt intelligence: `hvolt.toml` validation/completion, route targets for `router.pushUrl`, cross-module definition, commands | editing `hvolt.toml` gives completions; `pushUrl('pages/…')` completes from routes; build/run available from the palette |
 | **M4** | VS Code extension published (`.ets` association, status bar, device picker) | installable extension drives M1–M3 |
 
@@ -62,9 +62,19 @@ editors that insist on their own language client).
 
 ## Risks and open questions
 
-1. **False diagnostics** — one semantic error surfaced in the spike (`Cannot find name 'width'` on a
-   chained `Column().width()`); must be understood before M2 ships, since a noisy server is worse than
-   none. Cause is likely snapshot versioning or missing `ets-loader` compiler options.
+1. **The fork's own diagnostics are wrong for a legal ArkUI idiom** (measured 2026-10-19):
+
+   ```
+   Column() { Text('x') }.width('100%')   → 1 diagnostic: Cannot find name 'width'
+   Column().width('100%')                 → 0 diagnostics
+   ```
+
+   Block-then-chain (`Block { … }.method()`) is valid ArkUI and is rewritten by `ets-loader`'s
+   transformer; the bare checker sees the `.method()` after a closing brace as a new statement. The
+   file is parsed as ETS (`ScriptKind` 8), so this is not a configuration mistake. Consequence for the
+   design: the language service is used for hover, completion, definition, signature help and rename,
+   **not** as a diagnostics source; diagnostics come from the real toolchain (`hvigor`, codelinter,
+   `app_check_tool`), which is also what makes an editor line match a build failure exactly.
 2. **Cost of loading declarations** — 5200+ files; measure time-to-first-hover and memory, and consider
    limiting to `api/` + `component/` + only the kits an import actually needs.
 3. **Licensing** — the fork is invoked from the user's own SDK, never redistributed with hvolt; same
