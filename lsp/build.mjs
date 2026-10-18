@@ -15,6 +15,15 @@ await build({
 });
 
 await build({
+  entryPoints: ["src/hvolttoml.ts"],
+  outfile: "dist/hvolttoml.mjs",
+  bundle: true,
+  platform: "node",
+  format: "esm",
+  target: "node18",
+});
+
+await build({
   entryPoints: ["src/server.ts"],
   outfile: "dist/server.cjs",
   bundle: true,

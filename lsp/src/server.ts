@@ -16,6 +16,7 @@ import { TextDocument } from "vscode-languageserver-textdocument";
 import { execFile } from "node:child_process";
 import { collectSources } from "./project.js";
 import { type Diagnostic, fromLint, parseHvigor } from "./diagnostics.js";
+import { completeKeys, declaredRoutes, inRouterCall } from "./hvolttoml.js";
 import { declarationDirs, loadTypeScript, readDeclarations } from "./sdk.js";
 
 const args = process.argv.slice(2);
@@ -127,6 +128,28 @@ connection.onHover(({ textDocument, position }) => {
 
 connection.onCompletion(({ textDocument, position }) => {
   const file = textDocument.uri.replace(/^file:\/\//, "");
+  const text = files.get(file) ?? "";
+  const lineText = (text.split(/\r?\n/)[position.line] ?? "");
+
+  // hvolt.toml: complete the documented keys of the section under the cursor.
+  if (file.endsWith("hvolt.toml")) {
+    return completeKeys(text, position.line).map((entry) => ({
+      label: entry.key,
+      kind: CompletionItemKind.Property,
+      detail: entry.detail,
+    }));
+  }
+
+  // `router.pushUrl('pages/…')`: complete the routes the module declares.
+  if (inRouterCall(lineText)) {
+    const moduleDir = file.slice(0, file.lastIndexOf("/pages/")) || file.replace(/\/[^/]+$/, "");
+    const moduleToml = files.get(moduleDir + "/hvolt.toml") ?? "";
+    return declaredRoutes(moduleToml).map((route) => ({
+      label: route,
+      kind: CompletionItemKind.File,
+      detail: "route declared in hvolt.toml",
+    }));
+  }
   const completions = service.getCompletionsAtPosition(file, offsetOf(file, position.line, position.character), {});
   if (!completions) return [];
   return completions.entries.map((entry: any) => ({
