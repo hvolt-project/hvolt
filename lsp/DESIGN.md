@@ -47,8 +47,9 @@ editors that insist on their own language client).
 
 | Phase | Scope | Done when |
 |---|---|---|
-| **M1** | `hvolt lsp --stdio`: host layer + fork semantics + document sync | a real `.ets` file in `examples/hello-world` gets hover, completion and definition in VS Code |
-| **M2** | diagnostics from the toolchain only, positions mapped back to real files | a deliberate build error shows as an inline diagnostic identical to `hvolt build`'s message, and the block-chain idiom above produces none |
+| **M1** ✅ | `hvolt lsp --stdio`: host layer + fork semantics + document sync | done — `RelativeContainer` hovers as `RelativeContainerInterface`, `Text` defines into `component/text.d.ts`, 940 completions, ~0.2 s to initialize |
+| **M2** ✅ | diagnostics from the toolchain only, positions mapped back to real files | done — codelinter findings (54 defects on a demo project) and a compile error (`pages/Index.ets L8:12 — Cannot find name 'noSuchVariable'`, matching hvigor's `Index.ets:8:12`) both arrive on flat paths; lint and build results are merged per source, so one does not clear the other |
+| **M3** | hvolt intelligence: `hvolt.toml` validation/completion, route targets for `router.pushUrl`, cross-module definition, commands | editing `hvolt.toml` gives completions; `pushUrl('pages/…')` completes from routes |
 | **M3** | hvolt intelligence: `hvolt.toml` validation/completion, route targets for `router.pushUrl`, cross-module definition, commands | editing `hvolt.toml` gives completions; `pushUrl('pages/…')` completes from routes; build/run available from the palette |
 | **M4** | VS Code extension published (`.ets` association, status bar, device picker) | installable extension drives M1–M3 |
 

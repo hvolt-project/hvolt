@@ -38,8 +38,8 @@ device.
 - **Devices** — hdc, cross-machine install targets, hilog, screenshot, UI tree dump, file transfer, uninstall
 - **Emulator** — list / start / stop / create / delete / images / license
 - **Editor support** — `hvolt lsp --stdio` serves ArkTS hover, completion, definition,
-  signature help and rename out of the TypeScript build inside the installed SDK (see
-  [lsp/DESIGN.md](lsp/DESIGN.md)); diagnostics stay with the real toolchain
+  signature help and rename out of the TypeScript build inside the installed SDK, and publishes
+  diagnostics from codelinter and from a real build (see [lsp/DESIGN.md](lsp/DESIGN.md))
 - **Few dependencies** — Rust to build; JDK 17+, Node.js, hvigorw and ohpm at runtime (hvolt installs the latter two)
 
 ## Install

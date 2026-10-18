@@ -13,7 +13,9 @@ import {
   TextDocumentSyncKind,
 } from "vscode-languageserver/node.js";
 import { TextDocument } from "vscode-languageserver-textdocument";
+import { execFile } from "node:child_process";
 import { collectSources } from "./project.js";
+import { type Diagnostic, fromLint, parseHvigor } from "./diagnostics.js";
 import { declarationDirs, loadTypeScript, readDeclarations } from "./sdk.js";
 
 const args = process.argv.slice(2);
@@ -73,20 +75,33 @@ const offsetOf = (file: string, line: number, character: number) => {
 
 // Explicit streams: the transport never comes from CLI flags, so the server can
 // take its own --sdk/--root options.
+interface HvoltSettings {
+  binaryPath?: string;
+  lintOnSave?: boolean;
+  /** Run codelinter with its broad rule sets (@performance/all + @typescript-eslint/all). */
+  lintAllRules?: boolean;
+}
+let settings: HvoltSettings = {};
+const binaryPath = () => settings.binaryPath ?? process.env.HVOLT_BIN ?? "hvolt";
+
 const connection = createConnection(ProposedFeatures.all, process.stdin, process.stdout);
 const documents = new TextDocuments(TextDocument);
 
-connection.onInitialize(() => ({
-  serverInfo: { name: "hvolt-lsp" },
-  capabilities: {
-    textDocumentSync: TextDocumentSyncKind.Full,
-    hoverProvider: true,
-    completionProvider: { resolveProvider: false, triggerCharacters: [".", "@", "'", "/"] },
-    definitionProvider: true,
-    signatureHelpProvider: { triggerCharacters: ["(", ","] },
-    renameProvider: true,
-  },
-}));
+connection.onInitialize((params) => {
+  settings = (params.initializationOptions?.hvolt ?? {}) as HvoltSettings;
+  return {
+    serverInfo: { name: "hvolt-lsp" },
+    capabilities: {
+      textDocumentSync: TextDocumentSyncKind.Full,
+      hoverProvider: true,
+      completionProvider: { resolveProvider: false, triggerCharacters: [".", "@", "'", "/"] },
+      definitionProvider: true,
+      signatureHelpProvider: { triggerCharacters: ["(", ","] },
+      renameProvider: true,
+      executeCommandProvider: { commands: ["hvolt.buildDiagnostics"] },
+    },
+  };
+});
 
 documents.onDidOpen((e) => {
   files.set(e.document.uri.replace(/^file:\/\//, ""), e.document.getText());
@@ -180,6 +195,112 @@ function completionKind(tsModule: any, kind: string): number {
   };
   return map[kind] ?? CompletionItemKind.Text;
 }
+
+
+// ── diagnostics ───────────────────────────────────────────────────────────
+// Sources are the real tools (see DESIGN.md); the fork's checker is not consulted.
+
+// Diagnostics are kept per source and merged for publication: a build result must
+// not wipe the linter's findings for the same file.
+const bySource = new Map<string, Diagnostic[]>();
+const published = new Set<string>();
+
+function flush(): void {
+  const merged = new Map<string, Diagnostic[]>();
+  for (const list of bySource.values()) {
+    for (const diagnostic of list) {
+      const bucket = merged.get(diagnostic.path) ?? [];
+      bucket.push(diagnostic);
+      merged.set(diagnostic.path, bucket);
+    }
+  }
+  for (const path of published) {
+    if (!merged.has(path)) {
+      connection.sendDiagnostics({ uri: "file://" + path, diagnostics: [] });
+      published.delete(path);
+    }
+  }
+  for (const [path, list] of merged) {
+    connection.sendDiagnostics({
+      uri: "file://" + path,
+      diagnostics: list.map((diagnostic) => ({
+        range: {
+          start: { line: Math.max(0, diagnostic.line - 1), character: Math.max(0, diagnostic.column - 1) },
+          end: { line: Math.max(0, diagnostic.line - 1), character: Math.max(0, diagnostic.column) },
+        },
+        message: diagnostic.message,
+        severity: diagnostic.severity === "error" ? 1 : diagnostic.severity === "warning" ? 2 : 3,
+        source: diagnostic.source,
+      })),
+    });
+    published.add(path);
+  }
+}
+
+function publish(source: string, diagnostics: Diagnostic[]): void {
+  bySource.set(source, diagnostics);
+  flush();
+}
+
+function run(binary: string, args: string[], cwd: string): Promise<string> {
+  return new Promise((resolve) => {
+    // Both streams matter: hvigor writes progress to stdout and the diagnostics to
+    // stderr, so the two are concatenated rather than picking one.
+    execFile(binary, args, { cwd, maxBuffer: 64 * 1024 * 1024 }, (_error, stdout, stderr) => {
+      resolve(`${stdout ?? ""}${stderr ?? ""}`);
+    });
+  });
+}
+
+let lintTimer: NodeJS.Timeout | undefined;
+function lintSoon(): void {
+  if (settings.lintOnSave === false) return;
+  clearTimeout(lintTimer);
+  lintTimer = setTimeout(async () => {
+    const args = ["lint", "--json"];
+    if (settings.lintAllRules) args.push("--all-rules");
+    const output = await run(binaryPath(), args, root);
+    if (process.env.HVOLT_LSP_DEBUG) {
+      process.stderr.write(`hvolt-lsp: lint ${args.join(" ")} → ${output.length} bytes\n`);
+    }
+    // `--json` writes one JSON document, but stderr carries human progress lines
+    // that may also start with "{", so the last JSON line wins.
+    const report = output
+      .split(/\r?\n/)
+      .filter((line) => line.trim().startsWith("{"))
+      .map((line) => {
+        try {
+          return JSON.parse(line) as Record<string, unknown>;
+        } catch {
+          return undefined;
+        }
+      })
+      .filter((value): value is Record<string, unknown> => Boolean(value) && "defects" in (value as object))
+      .pop();
+    if (!report) {
+      if (process.env.HVOLT_LSP_DEBUG) process.stderr.write("hvolt-lsp: lint report not found\n");
+      return;
+    }
+    const parsed = fromLint(report, root);
+    if (process.env.HVOLT_LSP_DEBUG) process.stderr.write(`hvolt-lsp: lint → ${parsed.length} diagnostics\n`);
+    publish("lint", parsed);
+  }, 400);
+}
+
+documents.onDidOpen(() => lintSoon());
+documents.onDidSave(() => lintSoon());
+
+connection.onExecuteCommand(async ({ command, arguments: args }) => {
+  if (command !== "hvolt.buildDiagnostics") return null;
+  const cwd = (args?.[0] as string | undefined) ?? root;
+  const output = await run(binaryPath(), ["build"], cwd);
+  const parsed = parseHvigor(output, root);
+  if (process.env.HVOLT_LSP_DEBUG) {
+    process.stderr.write(`hvolt-lsp: build in ${cwd} → ${output.length} bytes, ${parsed.length} diagnostics\n`);
+  }
+  publish("build", parsed);
+  return null;
+});
 
 documents.listen(connection);
 connection.listen();

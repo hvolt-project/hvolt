@@ -9,7 +9,10 @@ versions may change the CLI surface.
 
 ### Added
 
-- `hvolt lsp --stdio`: a language server for editors. Semantics (hover, completion, definition,
+- `hvolt lsp --stdio`: a language server for editors.
+- Diagnostics in the language server come from codelinter (`hvolt lint --json`, on open/save) and from
+  a real build (`hvolt.buildDiagnostics` command); both are mapped from the generated trees back to
+  the flat project paths and merged per source. Semantics (hover, completion, definition,
   signature help, rename) come from the TypeScript build inside the installed SDK, which parses
   `.ets` and ArkUI structs; diagnostics deliberately stay with hvigor, codelinter and
   `app_check_tool`, because the fork alone mis-reports legal ArkUI block-chains

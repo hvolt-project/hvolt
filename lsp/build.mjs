@@ -4,6 +4,16 @@ import { build } from "esbuild";
 import { mkdirSync } from "node:fs";
 
 mkdirSync("dist", { recursive: true });
+// The diagnostics module is also built on its own so tests can import it.
+await build({
+  entryPoints: ["src/diagnostics.ts"],
+  outfile: "dist/diagnostics.mjs",
+  bundle: true,
+  platform: "node",
+  format: "esm",
+  target: "node18",
+});
+
 await build({
   entryPoints: ["src/server.ts"],
   outfile: "dist/server.cjs",

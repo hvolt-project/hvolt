@@ -20,7 +20,9 @@ jobs:
           cache: npm
           cache-dependency-path: lsp/package-lock.json
       - run: npm ci --prefix lsp
-      - run: npm --prefix lsp exec -- tsc --noEmit
+      - name: tsc --noEmit
+        working-directory: lsp
+        run: npx tsc --noEmit
       - run: npm --prefix lsp run build
 
   gate:
