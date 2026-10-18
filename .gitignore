@@ -1,0 +1,21 @@
+# Rust build output
+target/
+
+# Python build output
+dist/
+*.egg-info/
+
+# Generated HarmonyOS projects (for testing)
+build/
+
+# npm packaging output (built by npm/stage.mjs, not source)
+npm/prebuilt/
+npm/platforms/*/bin/
+*.tgz
+
+# HarmonyOS build artifacts
+.hvigor/
+output/
+oh_modules/
+*.hap
+.hvolt_manifest

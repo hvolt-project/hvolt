@@ -1,0 +1,187 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Build and test only — skip GitHub release and npm publish"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build (${{ matrix.key }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - key: darwin-arm64
+            os: macos-14
+            target: aarch64-apple-darwin
+            bin: hvolt
+            archive: tar.gz
+          - key: linux-x64
+            os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            bin: hvolt
+            archive: tar.gz
+          - key: win32-x64
+            os: windows-2022
+            target: x86_64-pc-windows-msvc
+            bin: hvolt.exe
+            archive: zip
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Gate (fmt, clippy, tests)
+        if: matrix.key == 'linux-x64'
+        run: |
+          cargo fmt --all --check
+          cargo clippy --all-targets -- -D warnings
+          cargo test
+
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Package (tar.gz)
+        if: matrix.archive == 'tar.gz'
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          src="target/${{ matrix.target }}/release/${{ matrix.bin }}"
+          mkdir -p dist
+          chmod +x "$src"
+          tar -czf "dist/hvolt-${version}-${{ matrix.key }}.tar.gz" -C "$(dirname "$src")" "${{ matrix.bin }}"
+          "$src" --version
+
+      - name: Package (zip)
+        # GNU tar on the Windows runner treats "D:" in -f as a remote host, so
+        # zip archives are produced with PowerShell instead.
+        if: matrix.archive == 'zip'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $version = "${{ github.ref_name }}".TrimStart("v")
+          $src = "target/${{ matrix.target }}/release/${{ matrix.bin }}"
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Compress-Archive -Path $src -DestinationPath "dist/hvolt-$version-${{ matrix.key }}.zip"
+          & $src --version
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.key }}
+          path: dist/*
+          if-no-files-found: error
+
+  publish:
+    name: publish
+    needs: build
+    if: github.event_name == 'push' || inputs.dry_run == false
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write     # create the GitHub release
+      id-token: write     # npm provenance
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Check tag matches package version
+        run: |
+          set -euo pipefail
+          tag_version="${GITHUB_REF_NAME#v}"
+          pkg_version="$(node -p 'require("./npm/package.json").version')"
+          test "$tag_version" = "$pkg_version" || {
+            echo "tag $GITHUB_REF_NAME does not match npm/package.json $pkg_version"; exit 1; }
+          echo "version $pkg_version"
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Checksums
+        run: |
+          set -euo pipefail
+          # Plain file names, so the installer can match by name alone.
+          (cd dist && sha256sum */* | sed 's|  .*/|  |' > SHA256SUMS.txt && cat SHA256SUMS.txt)
+
+      - name: Stage binaries into platform packages
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          mkdir -p npm/platforms/darwin-arm64/bin npm/platforms/linux-x64/bin npm/platforms/win32-x64/bin
+          tar -xzf "dist/darwin-arm64/hvolt-${version}-darwin-arm64.tar.gz" -C npm/platforms/darwin-arm64/bin
+          tar -xzf "dist/linux-x64/hvolt-${version}-linux-x64.tar.gz" -C npm/platforms/linux-x64/bin
+          unzip -q "dist/win32-x64/hvolt-${version}-win32-x64.zip" -d npm/platforms/win32-x64/bin
+          chmod +x npm/platforms/darwin-arm64/bin/hvolt npm/platforms/linux-x64/bin/hvolt
+          ls -l npm/platforms/*/bin/
+
+      - name: Attach LICENSE to every package
+        if: vars.NPM_PUBLISH == 'true'
+        run: |
+          set -euo pipefail
+          cp LICENSE npm/LICENSE
+          for key in darwin-arm64 linux-x64 win32-x64; do cp LICENSE "npm/platforms/$key/LICENSE"; done
+
+      - name: Publish platform packages
+        if: vars.NPM_PUBLISH == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          for key in darwin-arm64 linux-x64 win32-x64; do
+            pkg="@hvolt/cli-$key"
+            if npm view "$pkg@$version" version >/dev/null 2>&1; then
+              echo "  $pkg@$version already published — skipping"
+            else
+              (cd "npm/platforms/$key" && npm publish --access public --provenance)
+            fi
+          done
+
+      - name: Publish launcher
+        if: vars.NPM_PUBLISH == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          if npm view "@hvolt/cli@$version" version >/dev/null 2>&1; then
+            echo "  @hvolt/cli@$version already published — skipping"
+          else
+            cd npm && npm publish --access public --provenance
+          fi
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          assets=(dist/*/* dist/SHA256SUMS.txt)
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            # Re-running a release (e.g. publishing npm after the fact) must not fail
+            # on the release that already exists.
+            gh release upload "$GITHUB_REF_NAME" "${assets[@]}" --clobber
+            # Uploading does not publish a draft: a release recreated against a moved
+            # tag stays draft, and /releases/latest then 404s for the installers.
+            gh release edit "$GITHUB_REF_NAME" --draft=false --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$GITHUB_REF_NAME" "${assets[@]}" \
+              --title "$GITHUB_REF_NAME" \
+              --notes-file "CHANGELOG.md" \
+              --verify-tag
+          fi

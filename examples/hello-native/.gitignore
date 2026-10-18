@@ -1,0 +1,20 @@
+# hvolt build output
+build/
+
+# hvolt signing output
+output/
+
+# auth tokens
+.hvolt/
+
+# IDE
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+
+# HarmonyOS
+oh_modules/
+.preview/
+.hvigor/

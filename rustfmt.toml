@@ -1,0 +1,5 @@
+# Formatting baseline for hvolt — stable rustfmt options only, so plain
+# `cargo fmt` works on any toolchain (no nightly flags).
+edition = "2021"
+max_width = 100
+use_field_init_shorthand = true
