@@ -1,6 +1,6 @@
 {
   "name": "@hvolt/cli-win32-x64",
-  "version": "0.1.0",
+  "version": "26.0.0-0",
   "description": "Prebuilt hvolt binary for win32 x64",
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/hvolt-project/hvolt#readme",

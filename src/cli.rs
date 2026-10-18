@@ -5,6 +5,7 @@ use clap::{Parser, Subcommand};
     name = "hvolt",
     about = "HarmonyOS community build tool",
     version = env!("CARGO_PKG_VERSION"),
+    long_version = concat!(env!("CARGO_PKG_VERSION"), " (SDK ", "26.0.0", ")"),
     after_help = "Examples:\n  \
         hvolt init myapp && cd myapp && hvolt run        # project → device in one line\n  \
         hvolt sdk list-remote && hvolt sdk download 26.0.0.38\n  \

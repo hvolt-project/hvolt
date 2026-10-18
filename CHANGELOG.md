@@ -7,6 +7,19 @@ versions may change the CLI surface.
 
 ## [Unreleased]
 
+## [26.0.0-0] — 2026-10-18
+
+Version numbering switches to "SDK version + release counter" (`26.0.0-0`; see RELEASING.md).
+`hvolt --version` now prints the SDK the build defaults to. Behaviour is otherwise the same as 0.1.0,
+plus the fixes below.
+
+### Fixed
+
+- `hvolt tools install ohpm` no longer hard-fails when the mirror drops the pinned 5.0.2 archive: it
+  falls back to the newest small, host-matching build and says which one it picked.
+- releases upload their `SHA256SUMS.txt`, and the installers verify downloads against it.
+- an SDK skeleton left behind by an uninstalled DevEco Studio no longer shadows `~/.hvolt/sdk`.
+
 ## [0.1.0] — 2026-10-18
 
 First public release: a HarmonyOS build tool with its own flat project layout.

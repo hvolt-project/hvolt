@@ -137,6 +137,27 @@ jobs:
           cp LICENSE npm/LICENSE
           for key in darwin-arm64 linux-x64 win32-x64; do cp LICENSE "npm/platforms/$key/LICENSE"; done
 
+      - name: Sync package versions from the tag
+        # Versions live in five manifests; deriving them from the tag keeps the
+        # published packages and the release in step without hand edits.
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          node -e '
+            const fs = require("fs");
+            const version = process.argv[1];
+            const keys = ["darwin-arm64", "darwin-x64", "linux-x64", "linux-arm64", "win32-x64"];
+            const files = ["npm/package.json", ...keys.map(k => `npm/platforms/${k}/package.json`)];
+            for (const file of files) {
+              const pkg = JSON.parse(fs.readFileSync(file, "utf8"));
+              pkg.version = version;
+              for (const dep of Object.keys(pkg.optionalDependencies || {})) {
+                pkg.optionalDependencies[dep] = version;
+              }
+              fs.writeFileSync(file, JSON.stringify(pkg, null, 2) + "\n");
+            }
+          ' "$version"
+
       - name: Publish platform packages
         if: vars.NPM_PUBLISH == 'true'
         env:
@@ -149,7 +170,7 @@ jobs:
             if npm view "$pkg@$version" version >/dev/null 2>&1; then
               echo "  $pkg@$version already published — skipping"
             else
-              (cd "npm/platforms/$key" && npm publish --access public --provenance)
+              (cd "npm/platforms/$key" && npm publish --access public --provenance --tag latest)
             fi
           done
 
@@ -163,7 +184,7 @@ jobs:
           if npm view "@hvolt/cli@$version" version >/dev/null 2>&1; then
             echo "  @hvolt/cli@$version already published — skipping"
           else
-            cd npm && npm publish --access public --provenance
+            cd npm && npm publish --access public --provenance --tag latest
           fi
 
       - name: Create GitHub release
