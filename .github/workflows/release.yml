@@ -141,8 +141,12 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           registry-url: https://registry.npmjs.org
+
+      # Trusted publishing needs a newer npm than the one bundled with Node 22.
+      - name: npm with OIDC support
+        run: npm install -g npm@11
 
       - name: Check tag matches package version
         run: |
@@ -150,7 +154,7 @@ jobs:
           tag_version="${{ needs.guard.outputs.version }}"
           pkg_version="$(node -p 'require("./npm/package.json").version')"
           test "$tag_version" = "$pkg_version" || {
-            echo "tag $GITHUB_REF_NAME does not match npm/package.json $pkg_version"; exit 1; }
+            echo "guard version does not match npm/package.json $pkg_version"; exit 1; }
           echo "version $pkg_version"
 
       - uses: actions/download-artifact@v4
@@ -215,8 +219,6 @@ jobs:
 
       - name: Publish platform packages
         if: vars.NPM_PUBLISH == 'true'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -euo pipefail
           version="${{ needs.guard.outputs.version }}"
@@ -231,8 +233,6 @@ jobs:
 
       - name: Publish launcher
         if: vars.NPM_PUBLISH == 'true'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -euo pipefail
           version="${{ needs.guard.outputs.version }}"
@@ -247,17 +247,18 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
+          tag="v${{ needs.guard.outputs.version }}"
           assets=(dist/*/* dist/SHA256SUMS.txt)
-          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             # Re-running a release (e.g. publishing npm after the fact) must not fail
             # on the release that already exists.
-            gh release upload "$GITHUB_REF_NAME" "${assets[@]}" --clobber
+            gh release upload "$tag" "${assets[@]}" --clobber
             # Uploading does not publish a draft: a release recreated against a moved
             # tag stays draft, and /releases/latest then 404s for the installers.
-            gh release edit "$GITHUB_REF_NAME" --draft=false --repo "$GITHUB_REPOSITORY"
+            gh release edit "$tag" --draft=false --repo "$GITHUB_REPOSITORY"
           else
-            gh release create "$GITHUB_REF_NAME" "${assets[@]}" \
-              --title "$GITHUB_REF_NAME" \
+            gh release create "$tag" "${assets[@]}" \
+              --title "$tag" \
               --notes-file "CHANGELOG.md" \
               --verify-tag
           fi
