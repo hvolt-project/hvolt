@@ -449,6 +449,7 @@ connection.onInitialize((params) => {
       foldingRangeProvider: true,
       selectionRangeProvider: true,
       workspaceSymbolProvider: true,
+      callHierarchyProvider: true,
       documentLinkProvider: { resolveProvider: false },
       referencesProvider: true,
       documentSymbolProvider: true,
@@ -862,6 +863,77 @@ connection.onDefinition(({ textDocument, position }) => {
       range: { start: { line: start.line, character: start.character }, end: { line: end.line, character: end.character } },
     };
   });
+});
+
+/** One call-hierarchy item, with both spans mapped back to the user's text. */
+function hierarchyItem(item: any): any {
+  const start = originalOffset(item.file, item.span.start) ?? 0;
+  const end = originalOffset(item.file, item.span.start + item.span.length) ?? start;
+  const from = positionOf(item.file, start);
+  const to = positionOf(item.file, end);
+  const selectionStart = originalOffset(item.file, item.selectionSpan.start) ?? start;
+  const selectionEnd = originalOffset(item.file, item.selectionSpan.start + item.selectionSpan.length) ?? selectionStart;
+  const a = positionOf(item.file, selectionStart);
+  const b = positionOf(item.file, selectionEnd);
+  return {
+    name: item.name,
+    kind: symbolKind(item.kind),
+    detail: item.containerName,
+    uri: "file://" + item.file,
+    range: { start: { line: from.line, character: from.character }, end: { line: to.line, character: to.character } },
+    selectionRange: { start: { line: a.line, character: a.character }, end: { line: b.line, character: b.character } },
+    // The protocol hands the item back for the incoming/outgoing requests.
+    data: { file: item.file },
+  };
+}
+
+/** The service wants the item's position; the client only gives back the item. */
+function hierarchyPosition(item: any): { file: string; position: number } {
+  const file = item.data?.file ?? item.uri.replace(/^file:\/\//, "");
+  const line = item.selectionRange.start.line;
+  const character = item.selectionRange.start.character;
+  return { file, position: servicePosition(file, line, character) };
+}
+
+connection.languages.callHierarchy.onPrepare(({ textDocument, position }) => {
+  const file = textDocument.uri.replace(/^file:\/\//, "");
+  const prepared = service.prepareCallHierarchy(file, servicePosition(file, position.line, position.character));
+  if (!prepared) return null;
+  const items = (Array.isArray(prepared) ? prepared : [prepared]).map(hierarchyItem);
+  log(`prepareCallHierarchy ${file.split("/").slice(-1)[0]} → ${items.length}`);
+  return items;
+});
+
+connection.languages.callHierarchy.onIncomingCalls(({ item }) => {
+  const { file, position } = hierarchyPosition(item);
+  const calls = service.provideCallHierarchyIncomingCalls(file, position) ?? [];
+  log(`incomingCalls → ${calls.length}`);
+  return calls.map((call: any) => ({
+    from: hierarchyItem(call.from),
+    fromRanges: call.fromSpans.map((span: any) => {
+      const start = originalOffset(call.from.file, span.start) ?? 0;
+      const end = originalOffset(call.from.file, span.start + span.length) ?? start;
+      const a = positionOf(call.from.file, start);
+      const b = positionOf(call.from.file, end);
+      return { start: { line: a.line, character: a.character }, end: { line: b.line, character: b.character } };
+    }),
+  }));
+});
+
+connection.languages.callHierarchy.onOutgoingCalls(({ item }) => {
+  const { file, position } = hierarchyPosition(item);
+  const calls = service.provideCallHierarchyOutgoingCalls(file, position) ?? [];
+  log(`outgoingCalls → ${calls.length}`);
+  return calls.map((call: any) => ({
+    to: hierarchyItem(call.to),
+    fromRanges: call.fromSpans.map((span: any) => {
+      const start = originalOffset(item.data?.file ?? file, span.start) ?? 0;
+      const end = originalOffset(item.data?.file ?? file, span.start + span.length) ?? start;
+      const a = positionOf(item.data?.file ?? file, start);
+      const b = positionOf(item.data?.file ?? file, end);
+      return { start: { line: a.line, character: a.character }, end: { line: b.line, character: b.character } };
+    }),
+  }));
 });
 
 connection.onWorkspaceSymbol(({ query }) => {

@@ -125,6 +125,20 @@ navigation set. Measured behaviour, including the parts that are weaker than ide
   spans that begin or end in injected syntax are dropped;
 - selectionRanges: 8 nesting levels on `this.message`, each mapped back.
 
+## Call hierarchy
+
+The fork implements it, so the server only maps positions: `prepareCallHierarchy`,
+`provideCallHierarchyIncomingCalls`, `provideCallHierarchyOutgoingCalls`. Measured on a
+two-function module: `add` prepares as one item, its incoming call is `twice`, `add` has
+no outgoing calls, and `twice`'s outgoing call is `add` with the call-site range.
+
+## Running the tests
+
+The SDK-backed suites each spawn a server that loads the SDK's declarations, so running
+them in parallel oversubscribes memory: in one parallel run two type-diagnostic cases
+failed, and the same file passed 5/5 alone and in a sequential run. Use
+`node --test --test-concurrency=1` for the whole set (measured: 42 passing, 94 s).
+
 ## Workspace search and links
 
 - `workspaceSymbol`: the program is the workspace, so the service's own index answers
