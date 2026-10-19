@@ -48,6 +48,7 @@ device.
 
 ```bash
 hvolt lsp --stdio          # any LSP client can drive this
+hvolt lsp --stdio --log-file /tmp/lsp.log   # record the protocol traffic
 cd editor/vscode && npm ci && node build.mjs
 npx @vscode/vsce package   # produces hvolt-vscode-0.1.0.vsix
 ```
