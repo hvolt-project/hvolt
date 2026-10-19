@@ -7,6 +7,7 @@
 import {
   createConnection,
   CompletionItemKind,
+  type CompletionItem,
   MarkupKind,
   ProposedFeatures,
   TextDocuments,
@@ -141,6 +142,26 @@ let enumIndex: Map<string, string[]> | undefined;
 function enums(): Map<string, string[]> {
   enumIndex ??= buildEnumIndex(ts, files);
   return enumIndex;
+}
+
+const KEYWORDS = [
+  "const", "let", "var", "if", "else", "for", "while", "return", "new", "import", "export",
+  "class", "struct", "async", "await", "switch", "case", "break", "continue", "try", "catch",
+  "finally", "throw", "interface", "type", "enum", "extends", "implements", "private",
+  "public", "protected", "readonly", "static", "this", "null", "true", "false", "undefined",
+];
+
+/** Keywords matching the typed prefix; the service offers none, so they are added here. */
+function keywordCompletions(lineText: string, character: number): CompletionItem[] {
+  const prefix = /([A-Za-z_$][\w$]*)$/.exec(lineText.slice(0, character))?.[1];
+  if (!prefix) return [];
+  return KEYWORDS.filter((keyword) => keyword.startsWith(prefix) && keyword !== prefix).map((keyword) => ({
+    label: keyword,
+    kind: CompletionItemKind.Keyword,
+    detail: "keyword",
+    // Tier 0.5: after reachable names, before the SDK globals.
+    sortText: "05" + keyword,
+  }));
 }
 
 /** Component of the chain the cursor is in, if any. */
@@ -280,6 +301,27 @@ connection.onHover(({ textDocument, position }) => {
   if (!info) return null;
   let text = ts.displayPartsToString(info.displayParts ?? []);
   const docs = ts.displayPartsToString(info.documentation ?? []);
+  if (!text.trim() || text.trim() === "any") {
+    // Inside a component chain the fork cannot resolve anything, so hover answered
+    // `any` for `.fontWeight(…)` itself. The declaration knows the signature.
+    const lines = (files.get(file) ?? "").split(/\r?\n/);
+    const lineText = lines[position.line] ?? "";
+    const word = /[\w$]+/g;
+    let under = "";
+    for (let match = word.exec(lineText); match; match = word.exec(lineText)) {
+      if (position.character >= match.index && position.character <= match.index + match[0].length) {
+        under = match[0];
+        break;
+      }
+    }
+    const signature = under ? attributeSignature(under, chainComponentAt(file, position)) : undefined;
+    if (signature) {
+      log(`hover fallback → declaration for ${under}`);
+      return {
+        contents: { kind: MarkupKind.Markdown, value: "```ts\n" + signature.replace(/:\s*T$/, `: ${chainComponentAt(file, position) ?? "T"}`) + "\n```" },
+      };
+    }
+  }
   if (!text.trim()) {
     // Some symbols report documentation but no display parts (measured on
     // `hilog.error`: hover showed only "Prints ERROR logs."). Fall back to the
@@ -459,7 +501,50 @@ connection.onCompletion(({ textDocument, position }) => {
   }
 
   const completions = service.getCompletionsAtPosition(file, offsetOf(file, position.line, position.character), {});
-  if (!completions) return [];
+  if (!completions) return keywordCompletions(lineText, position.character);
+  // The service returns 1,757 entries in its own order, which puts `arguments` first and
+  // buries the local variable being typed. Locals, parameters, imports and members are
+  // ranked ahead of everything else.
+  // Tier 0: what is reachable in this scope (locals, parameters, imports, members of
+  // the current object). Tier 1: keywords. Tier 2: global declarations. Tier 3: the
+  // rest — the SDK contributes ~1,750 entries at tier 2+.
+  const rank = (kind: string): string => {
+    switch (kind) {
+      case ts.ScriptElementKind.localVariableElement:
+      case ts.ScriptElementKind.parameterElement:
+      case ts.ScriptElementKind.variableElement:
+      case ts.ScriptElementKind.constElement:
+      case ts.ScriptElementKind.alias:
+      case ts.ScriptElementKind.moduleElement:
+        return "0";
+      case ts.ScriptElementKind.memberVariableElement:
+      case ts.ScriptElementKind.memberGetAccessorElement:
+      case ts.ScriptElementKind.memberSetAccessorElement:
+      case ts.ScriptElementKind.memberFunctionElement:
+        return "0";
+      case ts.ScriptElementKind.functionElement:
+      case ts.ScriptElementKind.classElement:
+      case ts.ScriptElementKind.enumElement:
+        return "2";
+      default:
+        return "9";
+    }
+  };
+  // Which names this file actually uses: libraries contribute `variableElement`s too, so
+  // the kind alone cannot tell a local from a lib global (measured: `Concurrent` came
+  // before the local `counter`). Anything spelled in the file ranks above the SDK.
+  const usedHere = new Set((files.get(file) ?? "").match(/[A-Za-z_$][\w$]*/g) ?? []);
+  const items = completions.entries.map((entry: any) => ({
+    label: entry.name,
+    kind: entry.kind === ts.ScriptElementKind.memberFunctionElement ? CompletionItemKind.Method : CompletionItemKind.Text,
+    detail: entry.kind,
+    sortText: (usedHere.has(entry.name) ? rank(entry.kind) : "2") + (entry.sortText ?? entry.name),
+  }));
+  // Keywords are not in the service's list at all; without them `con` never offers `const`.
+  const merged = [...keywordCompletions(lineText, position.character), ...items];
+  // Sorted here as well: the server's order is what a plain client shows first.
+  merged.sort((a, b) => (a.sortText ?? a.label).localeCompare(b.sortText ?? b.label));
+  return merged;
   return completions.entries.map((entry: any) => ({
     label: entry.name,
     kind: completionKind(ts, entry.kind),
