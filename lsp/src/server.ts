@@ -331,6 +331,23 @@ const SEMANTIC_MAP: Record<string, { type: string; modifiers?: string[] }> = {
   operator: { type: "operator" },
 };
 
+/** Definition-like results, with positions mapped back to the user's text. */
+function locationsOf(found: ReadonlyArray<{ fileName: string; textSpan: { start: number; length: number } }>): any[] {
+  const locations: any[] = [];
+  for (const entry of found) {
+    const start = originalOffset(entry.fileName, entry.textSpan.start);
+    const end = originalOffset(entry.fileName, entry.textSpan.start + entry.textSpan.length);
+    if (start === undefined || end === undefined) continue;
+    const from = positionOf(entry.fileName, start);
+    const to = positionOf(entry.fileName, end);
+    locations.push({
+      uri: "file://" + entry.fileName,
+      range: { start: { line: from.line, character: from.character }, end: { line: to.line, character: to.character } },
+    });
+  }
+  return locations;
+}
+
 const symbolKind = (kind: string): number => {
   const map: Record<string, number> = {
     class: 5, interface: 11, module: 2, method: 6, function: 12, property: 7, variable: 13,
@@ -427,6 +444,10 @@ connection.onInitialize((params) => {
       signatureHelpProvider: { triggerCharacters: ["(", ","], retriggerCharacters: [","] },
       completionProvider: { resolveProvider: true, triggerCharacters: [".", "@", "'", "/"] },
       definitionProvider: true,
+      typeDefinitionProvider: true,
+      implementationProvider: true,
+      foldingRangeProvider: true,
+      selectionRangeProvider: true,
       referencesProvider: true,
       documentSymbolProvider: true,
       documentHighlightProvider: true,
@@ -838,6 +859,59 @@ connection.onDefinition(({ textDocument, position }) => {
       uri: "file://" + def.fileName,
       range: { start: { line: start.line, character: start.character }, end: { line: end.line, character: end.character } },
     };
+  });
+});
+
+connection.onTypeDefinition(({ textDocument, position }) => {
+  const file = textDocument.uri.replace(/^file:\/\//, "");
+  const found = service.getTypeDefinitionAtPosition(file, servicePosition(file, position.line, position.character)) ?? [];
+  return locationsOf(found);
+});
+
+connection.onImplementation(({ textDocument, position }) => {
+  const file = textDocument.uri.replace(/^file:\/\//, "");
+  const found = service.getImplementationAtPosition(file, servicePosition(file, position.line, position.character)) ?? [];
+  return locationsOf(found);
+});
+
+connection.onFoldingRanges(({ textDocument }) => {
+  const file = textDocument.uri.replace(/^file:\/\//, "");
+  const text = originals.get(file);
+  if (text === undefined) return [];
+  const ranges: Array<{ startLine: number; endLine: number; kind?: string }> = [];
+  for (const span of service.getOutliningSpans(file)) {
+    // Both ends must exist in the user's text: a span that begins or ends in injected
+    // syntax has no meaningful line range.
+    const start = originalOffset(file, span.textSpan.start);
+    const end = originalOffset(file, span.textSpan.start + span.textSpan.length);
+    if (start === undefined || end === undefined) continue;
+    const from = positionOf(file, start).line;
+    const to = positionOf(file, end).line;
+    if (to > from) ranges.push({ startLine: from, endLine: to, kind: span.kind === "comment" ? "comment" : "region" });
+  }
+  log(`foldingRanges ${file.split("/").slice(-1)[0]} → ${ranges.length}`);
+  return ranges;
+});
+
+connection.onSelectionRanges(({ textDocument, positions }) => {
+  const file = textDocument.uri.replace(/^file:\/\//, "");
+  const text = originals.get(file);
+  if (text === undefined) return positions.map(() => null);
+  const levels: string[] = [];
+  const convert = (node: any): any => {
+    if (!node) return undefined;
+    const start = originalOffset(file, node.textSpan.start);
+    const end = originalOffset(file, node.textSpan.start + node.textSpan.length);
+    if (start === undefined || end === undefined) return convert(node.parent);
+    const from = positionOf(file, start);
+    const to = positionOf(file, end);
+    const range = { start: { line: from.line, character: from.character }, end: { line: to.line, character: to.character } };
+    const parent = convert(node.parent);
+    return parent ? { range, parent } : { range };
+  };
+  return positions.map((position: any) => {
+    const node = service.getSmartSelectionRange(file, servicePosition(file, position.line, position.character));
+    return convert(node) ?? null;
   });
 });
 

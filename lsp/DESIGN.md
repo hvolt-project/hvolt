@@ -111,6 +111,20 @@ is dropped rather than shown at a wrong place. Measured on a two-use example: tw
 locations, an outline with `Index` → `constructor`, `build`, `message`, and one quick fix
 returned for a known diagnostic code.
 
+## Navigation, part two
+
+`typeDefinition`, `implementation`, `foldingRange` and `selectionRange` complete the
+navigation set. Measured behaviour, including the parts that are weaker than ideal:
+
+- typeDefinition: SDK symbols resolve (`hilog` → `@ohos.hilog.d.ts`); a symbol whose type
+  is a lib type (`string`, `number`) returns nothing, because the fork does not offer the
+  lib declaration here;
+- implementation: answers with a list, but for an interface-typed value it lands on the
+  import site rather than the class body — the alias is resolved first;
+- foldingRanges: the component body folds (`startLine 7 → endLine 11` in the sample) and
+  spans that begin or end in injected syntax are dropped;
+- selectionRanges: 8 nesting levels on `this.message`, each mapped back.
+
 ## Semantic tokens
 
 The SDK's classifier cannot be used: `getEncodedSemanticClassifications` aborts on ArkUI
