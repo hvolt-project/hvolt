@@ -162,7 +162,22 @@ jobs:
 
       # Trusted publishing needs a newer npm than the one bundled with Node 22.
       - name: npm with OIDC support
-        run: npm install -g npm@11
+        run: |
+          npm install -g npm@11
+          npm --version
+
+      # The publish below authenticates through the OIDC identity, so a missing token
+      # request URL is the difference between "trusted publisher not configured" and
+      # "something else went wrong" — print it before publishing rather than after.
+      - name: publish preflight
+        run: |
+          echo "npm $(npm --version), node $(node --version)"
+          if [ -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then
+            echo "OIDC: available"
+          else
+            echo "OIDC: MISSING — the job needs permissions: id-token: write"
+            exit 1
+          fi
 
       - name: Check tag matches package version
         run: |
@@ -243,7 +258,15 @@ jobs:
             if npm view "$pkg@$version" version >/dev/null 2>&1; then
               echo "  $pkg@$version already published — skipping"
             else
-              (cd "npm/platforms/$key" && npm publish --access public --provenance --tag latest)
+              echo "  publishing $pkg@$version"
+              # ENEEDAUTH here means npm found no OIDC identity for this package: the
+              # trusted publisher is configured per package on npmjs.com, so each of the
+              # four needs the same three fields, not just the launcher.
+              (cd "npm/platforms/$key" && npm publish --access public --provenance --tag latest) || {
+                echo "::error::$pkg did not authenticate. Set its trusted publisher on npmjs.com:"
+                echo "::error::  owner/repository hvolt-project/hvolt, workflow file release.yml"
+                exit 1
+              }
             fi
           done
 
