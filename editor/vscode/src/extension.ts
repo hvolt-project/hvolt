@@ -4,9 +4,10 @@
 // exposes are thin wrappers that call the server's `workspace/executeCommand`, so the
 // editor and any other LSP client share one implementation.
 import * as vscode from "vscode";
-import { LanguageClient, type LanguageClientOptions, type ServerOptions } from "vscode-languageclient/node";
+import { CloseAction, ErrorAction, LanguageClient, type LanguageClientOptions, type ServerOptions } from "vscode-languageclient/node";
 
 const COMMANDS = ["hvolt.build", "hvolt.run", "hvolt.sign", "hvolt.push", "hvolt.screenshot", "hvolt.log"];
+
 
 interface CommandResult {
   ok: boolean;
@@ -43,10 +44,20 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
           lintOnSave: config.get<boolean>("lintOnSave") ?? true,
           lintOnType: config.get<boolean>("lintOnType") ?? true,
           lintDelay: config.get<number>("lintDelay") ?? 2000,
+          lintAllRules: config.get<boolean>("lintAllRules") ?? false,
+          typeDiagnostics: config.get<boolean>("typeDiagnostics") ?? true,
           logFile: config.get<string>("logFile") || undefined,
         },
       },
       synchronize: { fileEvents: vscode.workspace.createFileSystemWatcher("**/hvolt.toml") },
+      // Restart rather than stay dead: a crashed or replaced server heals on its own,
+      // so a changed `lsp/dist/server.cjs` never needs a window reload.
+      errorHandler: {
+        // `error` is required by the client's contract; the server reports failures
+        // in-band, so it only has to keep the client alive.
+        error: () => ({ action: ErrorAction.Continue, handled: false }),
+        closed: () => ({ action: CloseAction.Restart, handled: true }),
+      },
     };
 
     client = new LanguageClient("hvolt", "hvolt", server, clientOptions);

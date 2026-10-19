@@ -70,6 +70,25 @@ lint reported `@parsing-error/parsing-error | Parsing error: Variable declaratio
 `lintOnType` (default on, 2.0 s debounce) refreshes diagnostics after typing stops;
 `lintOnSave` keeps the on-save run.
 
+## Type diagnostics
+
+Source: the SDK's TypeScript service (`createLanguageService` in the same fork the hover
+uses). Measured on the two example modules:
+
+| File | Diagnostics | What happens |
+|---|---|---|
+| `EntryAbility.ets` (clean) | 0 | published |
+| `EntryAbility.ets` + `const broken: number = 'text'` | 1 — "Type 'string' is not assignable to type 'number'" | published (buffer only, file unsaved) |
+| `src/pages/Index.ets` (ArkUI `}.modifier(…)` chains) | 4 false parse errors | file skipped entirely, logged |
+
+The skip is a source test (`}` followed by `.name(`), not a per-diagnostic filter: the
+fork's parser rejects legal ArkUI chains, so anything it says about such a file is
+unreliable. Type errors in files without chains still reach the editor.
+
+Two measured constraints: the check walks every SDK declaration, so it is debounced
+(600 ms) with one run at a time — a concurrent run exhausts the heap — and the server
+is started with `--max-old-space-size=4096` for room.
+
 ## Protocol log
 
 `--log-file <path>`, `HVOLT_LSP_LOG` or the editor setting `hvolt.logFile` makes the server

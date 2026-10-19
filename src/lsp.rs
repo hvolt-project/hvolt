@@ -17,7 +17,11 @@ pub fn serve(sdk_override: Option<&str>) -> Result<(), String> {
     let server = resolve_server()?;
     let root = std::env::current_dir().map_err(|e| format!("current dir: {}", e))?;
 
+    // The SDK's TypeScript fork holds every declaration file in memory; checking a
+    // project there needs far more than node's default heap (measured: the process
+    // aborted with "Ineffective mark-compacts near heap limit"). Give it room.
     let status = Command::new(&node)
+        .arg("--max-old-space-size=4096")
         .arg(&server)
         .arg("--sdk")
         .arg(&sdk)

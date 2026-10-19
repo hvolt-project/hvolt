@@ -98,6 +98,16 @@
           "type": "number",
           "default": 2000,
           "description": "Debounce for lintOnType, in milliseconds. A full lint run measured 2.2 s."
+        },
+        "lintAllRules": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use the broad rule sets (@performance/all + @typescript-eslint/all). The official default stays silent on defects these catch."
+        },
+        "typeDiagnostics": {
+          "type": "boolean",
+          "default": true,
+          "description": "Publish type errors from the SDK's TypeScript service. Files whose ArkUI block-chains it mis-parses are skipped."
         }
       }
     },

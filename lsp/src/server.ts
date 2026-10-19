@@ -45,11 +45,29 @@ const files = readDeclarations(declarationDirs(sdkRoot));
 for (const [path, text] of collectSources(root)) files.set(path, text);
 const versions = new Map<string, number>();
 
+/**
+ * Files the program may read beyond the in-memory map: the SDK's declaration tree and
+ * the compiler's own lib files. Anything else (notably the SDK's node_modules) is
+ * refused — resolution happily walks into it and exhausts the heap.
+ */
+function onDisk(file: string): string | undefined {
+  const allowed =
+    file.startsWith(etsRoot) ||
+    file.includes("ets-loader/node_modules/typescript/lib/") ||
+    file.startsWith(root);
+  if (!allowed || !existsSync(file)) return undefined;
+  try {
+    return readFileSync(file, "utf8");
+  } catch {
+    return undefined;
+  }
+}
+
 const host = {
   getScriptFileNames: () => [...files.keys()],
   getScriptVersion: (file: string) => String(versions.get(file) ?? 0),
   getScriptSnapshot: (file: string) => {
-    const text = files.get(file);
+    const text = files.get(file) ?? onDisk(file);
     return text === undefined ? undefined : ts.ScriptSnapshot.fromString(text);
   },
   getCurrentDirectory: () => root,
@@ -79,8 +97,13 @@ const host = {
   }),
   getDefaultLibFileName: (options: any) =>
     `${etsRoot}/build-tools/ets-loader/node_modules/typescript/lib/${ts.getDefaultLibFileName(options)}`,
-  fileExists: (file: string) => files.has(file),
-  readFile: (file: string) => files.get(file),
+  // The map holds the SDK declarations and project sources; the standard library and
+  // the compiler's own lib files are only on disk. Without a fallback the program
+  // loads no lib and reports "Cannot find name 'JSON'" on clean code — but an
+  // unrestricted fallback lets module resolution wander into the SDK's node_modules
+  // and exhausts the heap (measured: 4 GB, OOM abort), so it is scoped.
+  fileExists: (file: string) => files.has(file) || (onDisk(file) !== undefined),
+  readFile: (file: string) => files.get(file) ?? onDisk(file),
   // The resolver probes `.ts`, `.tsx`, `.d.ts`; the SDK also ships `.d.ets`.
   directoryExists: (dir: string) => declarationDirs(sdkRoot).some((d) => dir.startsWith(d)),
   getDirectories: () => ["api", "kits", "component", "arkts"].map((d) => `${etsRoot}/${d}`),
@@ -108,6 +131,8 @@ interface HvoltSettings {
   lintOnSave?: boolean;
   /** Refresh diagnostics shortly after typing stops (default: on). */
   lintOnType?: boolean;
+  /** Publish type diagnostics from the SDK's TypeScript service (default: on). */
+  typeDiagnostics?: boolean;
   /** Debounce for lintOnType, milliseconds (default 1200). */
   lintDelay?: number;
   /** Run codelinter with its broad rule sets (@performance/all + @typescript-eslint/all). */
@@ -436,6 +461,77 @@ async function lintNow(paths?: string[]): Promise<void> {
   }
 }
 
+/**
+ * Type diagnostics from the SDK's own TypeScript service.
+ *
+ * It understands ArkTS types (that is the same service behind hover), but its parser
+ * rejects legal ArkUI block-chains: measured on `examples/hello-world`, `Index.ets`
+ * reports TS1005 "'}' expected' style errors at a `}.modifier(…)` chain plus two
+ * cascade errors, while `EntryAbility.ets` is clean. A file whose diagnostics include
+ * a parse error immediately after a `}.` chain is therefore skipped as a whole rather
+ * than published with fabricated red lines; genuine type errors in other files still
+ * reach the editor.
+ */
+let typeTimer: NodeJS.Timeout | undefined;
+let typeRunning = false;
+let typeQueued = false;
+
+/**
+ * Debounced because a type check walks the whole SDK declaration set: doing it per
+ * keystroke OOMs the process (measured: node aborts on heap exhaustion). Only open
+ * documents are checked, which is also all an editor can show.
+ */
+function scheduleTypeDiagnostics(): void {
+  if (settings.typeDiagnostics === false) return;
+  clearTimeout(typeTimer);
+  typeTimer = setTimeout(() => void arktsDiagnostics(), 600);
+}
+
+function arktsDiagnostics(): void {
+  if (settings.typeDiagnostics === false) return;
+  if (typeRunning) {
+    // Coalesce: one check at a time, one more afterwards if anything changed.
+    typeQueued = true;
+    return;
+  }
+  typeRunning = true;
+  const collected: Array<{ path: string; line: number; column: number; message: string; severity: "error" | "warning" | "info"; source: string }> = [];
+  const open = [...documents.all()]
+    .map((document) => document.uri.replace(/^file:\/\//, ""))
+    .filter((path) => path.endsWith(".ets") && path.startsWith(root));
+  for (const path of open) {
+    const text = files.get(path) ?? "";
+    if (!text) continue;
+    // The parser rejects `View() { … }.modifier(…)`, so the test is on the source, not
+    // on a diagnostic: any `}` directly followed by `.name(` marks an ArkUI DSL chain.
+    const syntactic = service.getSyntacticDiagnostics(path);
+    const chained = /\}\s*\.[A-Za-z_$][\w$]*\s*\(/.test(text);
+    if (chained) {
+      log(`type diagnostics skipped for ${path.replace(root + "/", "")}: ArkUI block-chain parse`);
+      continue;
+    }
+    const all = [...syntactic, ...service.getSemanticDiagnostics(path)];
+    for (const d of all) {
+      const pos = d.file?.getLineAndCharacterOfPosition(d.start ?? 0);
+      if (!pos) continue;
+      collected.push({
+        path,
+        line: pos.line + 1,
+        column: pos.character + 1,
+        message: ts.flattenDiagnosticMessageText(d.messageText, " "),
+        severity: d.category === ts.DiagnosticCategory.Error ? "error" : "warning",
+        source: "arkts",
+      });
+    }
+  }
+  publish("arkts", collected);
+  typeRunning = false;
+  if (typeQueued) {
+    typeQueued = false;
+    scheduleTypeDiagnostics();
+  }
+}
+
 function validateTomlDocument(path: string, text: string): void {
   if (!path.endsWith("hvolt.toml")) return;
   const moduleDir = dirname(path);
@@ -460,6 +556,9 @@ documents.onDidOpen((e) => validateTomlDocument(e.document.uri.replace(/^file:\/
 documents.onDidChangeContent((e) => validateTomlDocument(e.document.uri.replace(/^file:\/\//, ""), e.document.getText()));
 
 documents.onDidOpen(() => lintSoon());
+documents.onDidOpen(() => scheduleTypeDiagnostics());
+documents.onDidChangeContent(() => scheduleTypeDiagnostics());
+documents.onDidSave(() => scheduleTypeDiagnostics());
 documents.onDidSave(() => lintSoon());
 documents.onDidChangeContent((e) => {
   if (settings.lintOnType === false) return;
