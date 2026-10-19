@@ -297,6 +297,14 @@ function attributeSignature(member: string, component?: string): string | undefi
   }
   return undefined;
 }
+const symbolKind = (kind: string): number => {
+  const map: Record<string, number> = {
+    class: 5, interface: 11, module: 2, method: 6, function: 12, property: 7, variable: 13,
+    const: 14, let: 13, enum: 10, "enum member": 22, struct: 23, constructor: 9,
+  };
+  return map[kind] ?? 13;
+};
+
 const positionOf = (file: string, offset: number) => {
   const text = originals.get(file) ?? files.get(file) ?? "";
   const source = ts.createSourceFile(file, text, ts.ScriptTarget.ES2021);
@@ -385,6 +393,9 @@ connection.onInitialize((params) => {
       signatureHelpProvider: { triggerCharacters: ["(", ","], retriggerCharacters: [","] },
       completionProvider: { resolveProvider: false, triggerCharacters: [".", "@", "'", "/"] },
       definitionProvider: true,
+      referencesProvider: true,
+      documentSymbolProvider: true,
+      codeActionProvider: { codeActionKinds: ["quickfix"] },
       renameProvider: true,
       // The editor contributes its own `hvolt.*` commands, so the server must not
       // declare the same ids — vscode-languageclient registers provided commands and
@@ -731,6 +742,87 @@ connection.onDefinition(({ textDocument, position }) => {
       range: { start: { line: start.line, character: start.character }, end: { line: end.line, character: end.character } },
     };
   });
+});
+
+connection.onReferences(({ textDocument, position, context }) => {
+  const file = textDocument.uri.replace(/^file:\/\//, "");
+  const found = service.findReferences(file, servicePosition(file, position.line, position.character)) ?? [];
+  const locations: Array<{ uri: string; range: any }> = [];
+  for (const reference of found) {
+    for (const entry of reference.references) {
+      // Positions inside injected syntax do not exist for the user.
+      const start = originalOffset(entry.fileName, entry.textSpan.start);
+      const end = originalOffset(entry.fileName, entry.textSpan.start + entry.textSpan.length);
+      if (start === undefined || end === undefined) continue;
+      const from = positionOf(entry.fileName, start);
+      const to = positionOf(entry.fileName, end);
+      locations.push({
+        uri: "file://" + entry.fileName,
+        range: { start: { line: from.line, character: from.character }, end: { line: to.line, character: to.character } },
+      });
+    }
+  }
+  log(`references ${position.line + 1}:${position.character + 1} → ${locations.length}`);
+  return locations.length > 0 ? locations : null;
+});
+
+connection.onDocumentSymbol(({ textDocument }) => {
+  const file = textDocument.uri.replace(/^file:\/\//, "");
+  const tree = service.getNavigationTree(file);
+  if (!tree) return [];
+  const convert = (node: any): any => {
+    const start = originalOffset(file, node.spans[0]?.start ?? 0) ?? 0;
+    const length = node.spans[0]?.length ?? 0;
+    const end = originalOffset(file, (node.spans[0]?.start ?? 0) + length) ?? start;
+    const from = positionOf(file, start);
+    const to = positionOf(file, end);
+    const item: any = {
+      name: node.text,
+      kind: symbolKind(node.kind),
+      range: { start: { line: from.line, character: from.character }, end: { line: to.line, character: to.character } },
+      selectionRange: { start: { line: from.line, character: from.character }, end: { line: to.line, character: to.character } },
+    };
+    const children = (node.childItems ?? []).map(convert).filter(Boolean);
+    if (children.length > 0) item.children = children;
+    return item;
+  };
+  const symbols = convert(tree);
+  // The navigation tree is rooted at `<global>`; the outline should show what is
+  // inside it, not that synthetic node.
+  if (symbols.name === "<global>") return symbols.children ?? [];
+  return [symbols];
+});
+
+connection.onCodeAction(({ textDocument, range, context }) => {
+  const file = textDocument.uri.replace(/^file:\/\//, "");
+  const start = servicePosition(file, range.start.line, range.start.character);
+  const end = servicePosition(file, range.end.line, range.end.character);
+  const codes = (context.diagnostics ?? [])
+    .map((diagnostic) => Number(diagnostic.code))
+    .filter((code) => Number.isFinite(code));
+  if (codes.length === 0) return [];
+  const format = { indentSize: 2, tabSize: 2, newLineCharacter: "\n", convertTabsToSpaces: true, insertSpaceAfterCommaDelimiter: true };
+  const fixes = service.getCodeFixesAtPosition(file, start, end, codes, format, {}) ?? [];
+  const actions = fixes.map((fix: any) => {
+    const changes: Record<string, any[]> = {};
+    for (const change of fix.changes) {
+      for (const textChange of change.textChanges) {
+        const from = originalOffset(change.fileName, textChange.span.start);
+        const to = originalOffset(change.fileName, textChange.span.start + textChange.span.length);
+        if (from === undefined || to === undefined) continue;
+        const a = positionOf(change.fileName, from);
+        const b = positionOf(change.fileName, to);
+        const uri = "file://" + change.fileName;
+        (changes[uri] ??= []).push({
+          range: { start: { line: a.line, character: a.character }, end: { line: b.line, character: b.character } },
+          newText: textChange.newText ?? "",
+        });
+      }
+    }
+    return { title: fix.description, kind: "quickfix", edit: { changes } };
+  });
+  log(`code actions ${codes.join(",")} → ${actions.length}`);
+  return actions;
 });
 
 connection.onRenameRequest(({ textDocument, position, newName }) => {

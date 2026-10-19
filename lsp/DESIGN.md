@@ -103,6 +103,14 @@ factory and every component call reported "is not callable" — verified by reso
 symbol: `lib.dom.d.ts InterfaceDeclaration, VariableDeclaration`. `console` (which lives
 in lib.dom) is supplied by the injected shim instead.
 
+## Navigation
+
+`references`, `documentSymbol` and `codeAction` come from the same service as hover and
+completion, so they inherit the position mapping: a reference inside transformed syntax
+is dropped rather than shown at a wrong place. Measured on a two-use example: two
+locations, an outline with `Index` → `constructor`, `build`, `message`, and one quick fix
+returned for a known diagnostic code.
+
 ## Type diagnostics
 
 Source: the SDK's TypeScript service (`createLanguageService` in the same fork the hover
