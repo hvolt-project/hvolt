@@ -83,6 +83,11 @@
           "type": "boolean",
           "default": true,
           "description": "Run codelinter on open/save and publish its findings."
+        },
+        "logFile": {
+          "type": "string",
+          "default": "",
+          "description": "Record language-server protocol traffic to this file (empty: no log)."
         }
       }
     },

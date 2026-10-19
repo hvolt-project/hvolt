@@ -41,6 +41,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         hvolt: {
           binaryPath: binary,
           lintOnSave: config.get<boolean>("lintOnSave") ?? true,
+          logFile: config.get<string>("logFile") || undefined,
         },
       },
       synchronize: { fileEvents: vscode.workspace.createFileSystemWatcher("**/hvolt.toml") },

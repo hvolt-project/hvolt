@@ -19,7 +19,7 @@ import { type Diagnostic, fromLint, parseHvigor } from "./diagnostics.js";
 import { COMMANDS, type CommandRequest, commandSpec } from "./commands.js";
 import { completeKeys, declaredRoutes, inRouterCall } from "./hvolttoml.js";
 import { dependencyAt, dependencyTarget, validateToml } from "./tomlcheck.js";
-import { existsSync, readFileSync } from "node:fs";
+import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { declarationDirs, loadTypeScript, readDeclarations } from "./sdk.js";
 
@@ -82,18 +82,36 @@ const offsetOf = (file: string, line: number, character: number) => {
 // take its own --sdk/--root options.
 interface HvoltSettings {
   binaryPath?: string;
+  /** Where to record protocol traffic (also settable with --log-file / HVOLT_LSP_LOG). */
+  logFile?: string;
   lintOnSave?: boolean;
   /** Run codelinter with its broad rule sets (@performance/all + @typescript-eslint/all). */
   lintAllRules?: boolean;
 }
 let settings: HvoltSettings = {};
+let logFile: string | undefined;
 const binaryPath = () => settings.binaryPath ?? process.env.HVOLT_BIN ?? "hvolt";
 
 const connection = createConnection(ProposedFeatures.all, process.stdin, process.stdout);
+
+// `--log-file <path>` (or HVOLT_LSP_LOG) records the protocol traffic: which documents
+// the editor opened and which requests it made. Useful when a client misbehaves and
+// there is no other way to see the exchange.
+logFile = option("--log-file") ?? process.env.HVOLT_LSP_LOG;
+function log(line: string): void {
+  if (!logFile) return;
+  try {
+    appendFileSync(logFile, `${new Date().toISOString()} ${line}\n`);
+  } catch {
+    // a broken log file must not break the server
+  }
+}
 const documents = new TextDocuments(TextDocument);
 
 connection.onInitialize((params) => {
+  log(`initialize rootUri=${params.rootUri ?? "(none)"} client=${params.clientInfo?.name ?? "?"}`);
   settings = (params.initializationOptions?.hvolt ?? {}) as HvoltSettings;
+  logFile = settings.logFile ?? logFile;
   return {
     serverInfo: { name: "hvolt-lsp" },
     capabilities: {
@@ -112,6 +130,7 @@ connection.onInitialize((params) => {
 });
 
 documents.onDidOpen((e) => {
+  log(`didOpen ${e.document.uri} (${e.document.languageId}, ${e.document.getText().split("\n").length} lines)`);
   files.set(e.document.uri.replace(/^file:\/\//, ""), e.document.getText());
   versions.set(e.document.uri.replace(/^file:\/\//, ""), e.document.version);
 });
@@ -122,6 +141,7 @@ documents.onDidChangeContent((e) => {
 });
 
 connection.onHover(({ textDocument, position }) => {
+  log(`hover ${textDocument.uri}:${position.line + 1}:${position.character + 1}`);
   const file = textDocument.uri.replace(/^file:\/\//, "");
   const info = service.getQuickInfoAtPosition(file, offsetOf(file, position.line, position.character));
   if (!info) return null;
@@ -134,6 +154,7 @@ connection.onHover(({ textDocument, position }) => {
 });
 
 connection.onCompletion(({ textDocument, position }) => {
+  log(`completion ${textDocument.uri}:${position.line + 1}:${position.character + 1}`);
   const file = textDocument.uri.replace(/^file:\/\//, "");
   const text = files.get(file) ?? "";
   const lineText = (text.split(/\r?\n/)[position.line] ?? "");
