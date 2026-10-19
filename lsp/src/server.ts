@@ -139,6 +139,8 @@ interface HvoltSettings {
   lintOnSave?: boolean;
   /** Refresh diagnostics shortly after typing stops (default: on). */
   lintOnType?: boolean;
+  /** Rule ids to drop from codelinter reports, e.g. "@typescript-eslint/no-magic-numbers". */
+  lintIgnoreRules?: string[];
   /** Publish type diagnostics from the SDK's TypeScript service (default: on). */
   typeDiagnostics?: boolean;
   /** Debounce for lintOnType, milliseconds (default 1200). */
@@ -303,8 +305,17 @@ connection.onCompletion(({ textDocument, position }) => {
     const attributeName = index.components.get(chain);
     const members = attributeName ? index.attributes.get(attributeName) : undefined;
     if (members && members.size > 0) {
-      log(`chain completion ${chain}.${members.size} attributes`);
-      return [...members].map((name) => ({ label: name, kind: CompletionItemKind.Method, detail: `${chain} attribute` }));
+      // Offer only what the typed prefix can still match: the full 268-entry list
+      // buries the attributes the user is after.
+      const prefix = /\.([\w$]*)$/.exec(lineText.slice(0, position.character))?.[1] ?? "";
+      const entries = [...members].filter(([name]) => name.startsWith(prefix));
+      log(`chain completion ${chain}.${prefix || "*"} → ${entries.length}/${members.size} attributes`);
+      return entries.map(([name, signature]) => ({
+        label: name,
+        kind: CompletionItemKind.Method,
+        // Inherited signatures end in the generic `: T`; name the attribute instead.
+        detail: signature.replace(/\):\s*T$/, `): ${attributeName}`),
+      }));
     }
   }
 
@@ -503,6 +514,13 @@ async function lintNow(paths?: string[]): Promise<void> {
       })
       .filter((value): value is Record<string, unknown> => Boolean(value) && "defects" in (value as object))
       .pop();
+    const ignored = new Set(settings.lintIgnoreRules ?? []);
+    if (ignored.size > 0) {
+      const defects = ((report as { defects?: Array<{ rule?: string }> }).defects ?? []).filter(
+        (defect) => !(defect.rule && ignored.has(defect.rule)),
+      );
+      (report as { defects?: unknown }).defects = defects;
+    }
     if (!report) {
       if (process.env.HVOLT_LSP_DEBUG) process.stderr.write("hvolt-lsp: lint report not found\n");
       return;

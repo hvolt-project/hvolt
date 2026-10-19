@@ -8,15 +8,15 @@
 import type { TsModule } from "./sdk.js";
 
 export interface AttributeIndex {
-  /** `TextAttribute` -> member names, inheritance already resolved. */
-  attributes: Map<string, Set<string>>;
+  /** `TextAttribute` -> member name → signature text, inheritance already resolved. */
+  attributes: Map<string, Map<string, string>>;
   /** `Text` -> `TextAttribute`. */
   components: Map<string, string>;
 }
 
 /** Parse `XAttribute` interfaces out of the SDK's component declarations. */
 export function buildAttributeIndex(ts: TsModule, declarations: Map<string, string>): AttributeIndex {
-  const own = new Map<string, Set<string>>();
+  const own = new Map<string, Map<string, string>>();
   const parents = new Map<string, string[]>();
   const components = new Map<string, string>();
 
@@ -30,10 +30,21 @@ export function buildAttributeIndex(ts: TsModule, declarations: Map<string, stri
       if (!ts.isInterfaceDeclaration(statement) && !ts.isClassDeclaration(statement)) continue;
       if (!statement.name) continue;
       const name = statement.name.text;
-      const members = new Set<string>();
+      const members = new Map<string, string>();
       for (const member of statement.members) {
         const memberName = member.name && ts.isIdentifier(member.name) ? member.name.text : undefined;
-        if (memberName) members.add(memberName);
+        if (!memberName) continue;
+        // Keep the declaration text so completion can show `align(value: Alignment): TextAttribute`
+        // instead of a bare name.
+        const signature = member.getText
+          ? member
+              .getText()
+              .split("\n")[0]
+              .replace(/\s*\{\s*$/, "")
+              .replace(/;$/, "")
+              .trim()
+          : memberName;
+        members.set(memberName, signature);
       }
       own.set(name, members);
       parents.set(
@@ -50,15 +61,15 @@ export function buildAttributeIndex(ts: TsModule, declarations: Map<string, stri
   }
 
   // Resolve inheritance: an attribute object exposes its own members plus its ancestors'.
-  const resolved = new Map<string, Set<string>>();
-  const resolve = (name: string, seen = new Set<string>()): Set<string> => {
+  const resolved = new Map<string, Map<string, string>>();
+  const resolve = (name: string, seen = new Set<string>()): Map<string, string> => {
     const cached = resolved.get(name);
     if (cached) return cached;
-    if (seen.has(name)) return new Set();
+    if (seen.has(name)) return new Map();
     seen.add(name);
-    const all = new Set(own.get(name) ?? []);
+    const all = new Map(own.get(name) ?? []);
     for (const parent of parents.get(name) ?? []) {
-      for (const member of resolve(parent, seen)) all.add(member);
+      for (const [member, signature] of resolve(parent, seen)) all.set(member, signature);
     }
     resolved.set(name, all);
     return all;
@@ -75,14 +86,23 @@ export function buildAttributeIndex(ts: TsModule, declarations: Map<string, stri
  * with the chain on following lines that start with `.`.
  */
 export function chainComponent(lines: string[], line: number, character: number): string | undefined {
+  // Assemble the whole chain first: the component call may be several lines above
+  // (measured: `Text(this.message)` then `.id(…)`, `.fontSize(…)`, `.align`), and
+  // taking only the line above yields a modifier call instead of the component.
+  const parts: string[] = [(lines[line] ?? "").slice(0, character)];
   let current = line;
-  let text = (lines[current] ?? "").slice(0, character);
-  // Walk up while the line is only a continuation of the chain.
-  while (current > 0 && /^\s*\./.test(text)) {
+  while (current > 0) {
+    const previous = lines[current - 1] ?? "";
+    const trimmed = previous.trim();
+    const continues = trimmed.startsWith(".") || /[),]$/.test(trimmed) || parts[0].trim().startsWith(".");
+    if (!continues) break;
+    parts.unshift(previous);
     current--;
-    text = (lines[current] ?? "") + text.trimStart();
-    if (!/^\s*\./.test((lines[current] ?? ""))) break;
   }
-  const match = /([A-Z][A-Za-z0-9_]*)\s*\(/.exec(text);
-  return match?.[1];
+  const text = parts.join("");
+  // The component is the first capitalised call that is not a `.member(` access.
+  for (const match of text.matchAll(/(^|[^.\w])([A-Z][A-Za-z0-9_]*)\s*\(/g)) {
+    return match[2];
+  }
+  return undefined;
 }

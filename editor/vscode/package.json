@@ -108,6 +108,14 @@
           "type": "boolean",
           "default": true,
           "description": "Publish type errors from the SDK's TypeScript service. Files whose ArkUI block-chains it mis-parses are skipped."
+        },
+        "lintIgnoreRules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "codelinter rule ids to drop, e.g. @typescript-eslint/no-magic-numbers. Only useful with lintAllRules."
         }
       }
     },

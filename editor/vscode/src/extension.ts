@@ -45,6 +45,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
           lintOnType: config.get<boolean>("lintOnType") ?? true,
           lintDelay: config.get<number>("lintDelay") ?? 2000,
           lintAllRules: config.get<boolean>("lintAllRules") ?? false,
+          lintIgnoreRules: config.get<string[]>("lintIgnoreRules") ?? [],
           typeDiagnostics: config.get<boolean>("typeDiagnostics") ?? true,
           logFile: config.get<string>("logFile") || undefined,
         },
