@@ -116,7 +116,10 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $version = "${{ github.ref_name }}".TrimStart("v")
+          # `github.ref_name` is the branch name on a push to main: the archive came out
+          # as `hvolt-main-win32-x64.zip` while publish expected the version, and the
+          # release run failed there (measured: run 39275018157, "Stage binaries").
+          $version = "${{ needs.guard.outputs.version }}"
           $src = "target/${{ matrix.target }}/release/${{ matrix.bin }}"
           New-Item -ItemType Directory -Force -Path dist | Out-Null
           Compress-Archive -Path $src -DestinationPath "dist/hvolt-$version-${{ matrix.key }}.zip"
@@ -141,8 +144,11 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
+          # No `registry-url`: setup-node then writes an .npmrc with
+          # `_authToken=${NODE_AUTH_TOKEN}` and exports the placeholder
+          # `XXXXX-XXXXX-XXXXX-XXXXX` when the env var is absent (its source), which
+          # makes npm try token auth instead of trusted publishing.
           node-version: 22
-          registry-url: https://registry.npmjs.org
 
       # Trusted publishing needs a newer npm than the one bundled with Node 22.
       - name: npm with OIDC support
