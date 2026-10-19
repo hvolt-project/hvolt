@@ -130,6 +130,17 @@ jobs:
           chmod +x npm/platforms/darwin-arm64/bin/hvolt npm/platforms/linux-x64/bin/hvolt
           ls -l npm/platforms/*/bin/
 
+      - name: Build language server bundle
+        # The launcher package ships lsp/dist/server.cjs; it is built here rather
+        # than committed.
+        run: |
+          set -euo pipefail
+          npm ci --prefix lsp
+          npm --prefix lsp run build
+          # npm packages can only ship files under npm/, so the bundle is copied in.
+          mkdir -p npm/lsp/dist
+          cp lsp/dist/server.cjs npm/lsp/dist/server.cjs
+
       - name: Attach LICENSE to every package
         if: vars.NPM_PUBLISH == 'true'
         run: |

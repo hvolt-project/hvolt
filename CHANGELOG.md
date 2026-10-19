@@ -7,6 +7,23 @@ versions may change the CLI surface.
 
 ## [Unreleased]
 
+### Added
+
+- A VS Code extension in `editor/vscode`: registers `.ets`, launches `hvolt lsp --stdio`, shows
+  build state in the status bar and exposes Build / Run / Sign / Install / Screenshot / Log.
+
+- `hvolt lsp --stdio`: a language server for editors.
+- Palette commands in the language server: `hvolt.build`, `assemble`, `sign`, `push`, `run`,
+  `screenshot`, `log` — each returns `{ok, seconds, tail}` (success taken from the exit code) and
+  posts a `window/showMessage` notification.
+- Diagnostics in the language server come from codelinter (`hvolt lint --json`, on open/save) and from
+  a real build (`hvolt.buildDiagnostics` command); both are mapped from the generated trees back to
+  the flat project paths and merged per source. Semantics (hover, completion, definition,
+  signature help, rename) come from the TypeScript build inside the installed SDK, which parses
+  `.ets` and ArkUI structs; diagnostics deliberately stay with hvigor, codelinter and
+  `app_check_tool`, because the fork alone mis-reports legal ArkUI block-chains
+  (`Column() { … }.width()`). See `lsp/DESIGN.md`.
+
 ## [26.0.0-0] — 2026-10-18
 
 Version numbering switches to "SDK version + release counter" (`26.0.0-0`; see RELEASING.md).

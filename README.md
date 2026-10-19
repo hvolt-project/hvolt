@@ -37,7 +37,27 @@ device.
 - **Signing** — OpenHarmony localSign (public test chain) in this tree; AppGallery Connect remote signing through an optional backend that is not published here
 - **Devices** — hdc, cross-machine install targets, hilog, screenshot, UI tree dump, file transfer, uninstall
 - **Emulator** — list / start / stop / create / delete / images / license
+- **Editor support** — `hvolt lsp --stdio` serves ArkTS hover, completion, definition,
+  signature help and rename out of the TypeScript build inside the installed SDK, and publishes
+  diagnostics from codelinter and from a real build (see [lsp/DESIGN.md](lsp/DESIGN.md))
 - **Few dependencies** — Rust to build; JDK 17+, Node.js, hvigorw and ohpm at runtime (hvolt installs the latter two)
+
+## Editors
+
+`hvolt lsp --stdio` is a language server; `editor/vscode` is a thin VS Code client for it.
+
+```bash
+hvolt lsp --stdio          # any LSP client can drive this
+hvolt lsp --stdio --log-file /tmp/lsp.log   # record the protocol traffic
+cd editor/vscode && npm ci && node build.mjs
+npx @vscode/vsce package   # produces hvolt-vscode-0.1.0.vsix
+```
+
+What it provides: ArkTS syntax highlighting (TypeScript grammar + ArkTS rules), hover/completion/
+definition/signature help/rename from the SDK's own
+TypeScript build; diagnostics from codelinter and from real builds, mapped onto the flat sources;
+`hvolt.toml` key completion, route completion, validation and dependency navigation; commands for
+build, sign, install, screenshot and log. Design and measurements: [lsp/DESIGN.md](lsp/DESIGN.md).
 
 ## Install
 

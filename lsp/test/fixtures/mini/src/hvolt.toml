@@ -1,0 +1,5 @@
+[module]
+name = "src"
+entry = "EntryAbility.ets"
+device_types = ["phone"]
+routes = ["pages/Index"]

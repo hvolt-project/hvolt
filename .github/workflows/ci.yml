@@ -1,14 +1,52 @@
 name: ci
 
 on:
+  # Every branch: work happens off `main`, which stays at the released state, and a
+  # push of that work must still be gated. Releases are tag-driven (release.yml), so
+  # nothing here can publish.
   push:
-    branches: [main]
+    branches: ["**"]
   pull_request:
 
 permissions:
   contents: read
 
 jobs:
+  lsp:
+    name: lsp (typecheck + bundle)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: lsp/package-lock.json
+      - run: npm ci --prefix lsp
+      - name: tsc --noEmit
+        working-directory: lsp
+        run: npx tsc --noEmit
+      - run: npm --prefix lsp run build
+
+  vscode:
+    name: vscode extension
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: editor/vscode/package-lock.json
+      - run: npm ci
+        working-directory: editor/vscode
+      - run: npx tsc --noEmit
+        working-directory: editor/vscode
+      - run: node build.mjs
+        working-directory: editor/vscode
+      - run: node --test test/
+        working-directory: editor/vscode
+
   gate:
     name: fmt, clippy, tests
     runs-on: ubuntu-22.04

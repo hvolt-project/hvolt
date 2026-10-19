@@ -13,6 +13,7 @@ mod hap;
 mod hdc;
 mod http;
 mod lint;
+mod lsp;
 mod pipeline;
 mod platform;
 mod scaffold;
@@ -266,6 +267,16 @@ fn main() {
                 std::process::exit(1);
             }
         }
+        cli::Command::Lsp { stdio, sdk } => {
+            if !stdio {
+                eprintln!("✗ hvolt lsp speaks LSP over stdio; pass --stdio");
+                std::process::exit(2);
+            }
+            if let Err(e) = crate::lsp::serve(sdk.as_deref()) {
+                eprintln!("✗ {}", e);
+                std::process::exit(1);
+            }
+        }
         cli::Command::Lint {
             paths,
             config,
@@ -274,13 +285,29 @@ fn main() {
             fix,
             fail_on,
             max_defects,
+            overlay_file,
+            scoped,
         } => {
             let cfg = config.as_deref().map(std::path::Path::new);
             let opts = lint::LintOptions {
                 json,
                 fix,
+                scoped,
                 fail_on: fail_on.unwrap_or(1).clamp(1, 3),
                 max_defects: max_defects.unwrap_or(0),
+                overlay: overlay_file
+                    .as_deref()
+                    .map(|path| {
+                        let raw = std::fs::read_to_string(path).unwrap_or_else(|e| {
+                            eprintln!("✗ overlay {}: {}", path.display(), e);
+                            std::process::exit(1);
+                        });
+                        lint::parse_overlay(&raw).unwrap_or_else(|e| {
+                            eprintln!("✗ {}", e);
+                            std::process::exit(1);
+                        })
+                    })
+                    .unwrap_or_default(),
             };
             if let Err(e) =
                 lint::lint_with(std::path::Path::new("."), &paths, cfg, all_rules, &opts)

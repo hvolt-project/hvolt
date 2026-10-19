@@ -12,7 +12,7 @@ function platformKey() {
   const key = `${process.platform}-${process.arch}`;
   if (!SUPPORTED.includes(key)) {
     console.error(`hvolt: no prebuilt binary for ${key} (supported: ${SUPPORTED.join(", ")})`);
-    console.error("hvolt: build from source instead — https://github.com/iamhyc/hvolt");
+    console.error("hvolt: build from source instead — https://github.com/hvolt-project/hvolt");
     process.exit(1);
   }
   return key;
@@ -32,6 +32,12 @@ function binaryPath(key) {
 }
 
 const key = platformKey();
+// The language server bundle ships in this (platform-independent) package; the
+// binary looks it up through HVOLT_LSP_SERVER.
+if (!process.env.HVOLT_LSP_SERVER) {
+  const bundled = path.join(__dirname, "..", "lsp", "dist", "server.cjs");
+  if (require("node:fs").existsSync(bundled)) process.env.HVOLT_LSP_SERVER = bundled;
+}
 const child = spawn(binaryPath(key), process.argv.slice(2), { stdio: "inherit" });
 
 for (const sig of ["SIGINT", "SIGTERM", "SIGHUP"]) {

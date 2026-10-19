@@ -77,6 +77,22 @@ pub enum Command {
         #[arg(long, value_parser = parse_size)]
         size_limit: Option<u64>,
     },
+    /// Language server for editors (LSP over stdio)
+    #[command(
+        after_help = "ArkTS semantics come from the TypeScript build inside the installed SDK\n\
+        (see lsp/DESIGN.md). Consumed by an editor extension, not by hand:\n\
+        \n\
+        \x20 VS Code (or any LSP client) spawns `hvolt lsp --stdio`.\n\
+        \x20 Requires an installed SDK (hvolt sdk download) and Node.js."
+    )]
+    Lsp {
+        /// Speak LSP on stdin/stdout (the only supported transport)
+        #[arg(long)]
+        stdio: bool,
+        /// Override the SDK the language service loads its TypeScript from
+        #[arg(long)]
+        sdk: Option<String>,
+    },
     /// Code Linter (DevEco's official codelinter engine) over the translated tree
     #[command(
         after_help = "This one command needs a DevEco Studio artifact: Huawei ships the\n\
@@ -106,6 +122,10 @@ pub enum Command {
         /// written into the managed tree copy would be thrown away.
         #[arg(long)]
         fix: bool,
+        /// Check only the files handed over by `--overlay-file` (editor path).
+        /// A whole-tree run costs seconds; the changed files cost a fraction.
+        #[arg(long)]
+        scoped: bool,
         /// Fail when a defect at or above this severity exists (1 = most
         /// severe, 2 = warning, 3 = info). Default 1.
         #[arg(long, value_name = "SEV")]
@@ -113,6 +133,12 @@ pub enum Command {
         /// Tolerate up to N qualifying defects (default 0 = any fails).
         #[arg(long, value_name = "N")]
         max_defects: Option<usize>,
+        /// Check the contents in this file instead of what is on disk. It must
+        /// hold a JSON object mapping a source path to its text — an editor's
+        /// unsaved buffers, so lint reflects what is on screen rather than the
+        /// last save. A file rather than inline JSON: a buffer is easily 100 KB.
+        #[arg(long, value_name = "FILE")]
+        overlay_file: Option<std::path::PathBuf>,
     },
     /// HAP introspection straight from the package
     Hap {
