@@ -9,7 +9,9 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const sdk = process.env.HVOLT_SDK;
-const root = process.env.HVOLT_TEST_ROOT ?? fileURLToPath(new URL("../../examples/hello-world", import.meta.url));
+// Hermetic fixture: the example projects get edited while the extension is being
+// used, so tests must not depend on their current content.
+const root = process.env.HVOLT_TEST_ROOT ?? fileURLToPath(new URL("./fixtures/mini", import.meta.url));
 const server = fileURLToPath(new URL("../dist/server.cjs", import.meta.url));
 const skip = !sdk && "HVOLT_SDK not set";
 
@@ -56,6 +58,21 @@ function run(file, needle, replacement) {
 test("a clean file yields no type diagnostics", { skip }, async () => {
   const diagnostics = await run("src/EntryAbility.ets");
   assert.deepEqual(diagnostics, []);
+});
+
+test("the published range covers the offending token", { skip }, async () => {
+  const diagnostics = await run(
+    "src/EntryAbility.ets",
+    "onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {",
+    "onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {\n    const broken: number = 'text';",
+  );
+  assert.equal(diagnostics.length, 1);
+  const { start, end } = diagnostics[0].range;
+  assert.ok(end.line === start.line, "a one-line diagnostic");
+  assert.ok(
+    end.character - start.character > 1,
+    `range is only ${end.character - start.character} character wide — a point range, not a token`,
+  );
 });
 
 test("a type error in the buffer is reported", { skip }, async () => {

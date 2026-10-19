@@ -1,0 +1,9 @@
+[app]
+bundle = "com.example.mini"
+name = "mini"
+version = "1.0.0"
+
+[dependencies]
+
+[module]
+path = "src"

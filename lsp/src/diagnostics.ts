@@ -11,9 +11,39 @@ export interface Diagnostic {
   path: string;
   line: number; // 1-based
   column: number; // 1-based
+  /** Highlight width in characters. Sources that only report a point position leave
+   *  this unset and the server widens it to the token under the cursor. */
+  length?: number;
   message: string;
   severity: "error" | "warning" | "info";
   source: string;
+}
+
+/**
+ * Highlight width of the token starting at a 1-based column.
+ *
+ * codelinter reports a point position only, so a published 1-character range looks
+ * like a stray mark under the wrong character — the user reported exactly that. The
+ * token is recovered from the line: a quoted string, otherwise a word.
+ */
+export function tokenLengthAt(lineText: string, column: number): number {
+  const rest = lineText.slice(column - 1);
+  const quoted = /^(?:'[^']*'|"[^"]*"|`[^`]*`)/.exec(rest);
+  if (quoted) return quoted[0].length;
+  const word = /^[\w$@.-]+/.exec(rest);
+  return word ? word[0].length : 1;
+}
+
+/** LSP range for a diagnostic: explicit length wins, otherwise the token's width. */
+export function rangeOf(
+  diagnostic: Diagnostic,
+  text: string | undefined,
+): { line: number; start: number; end: number } {
+  const lineIndex = Math.max(0, diagnostic.line - 1);
+  const lineText = text?.split(/\r?\n/)[lineIndex] ?? "";
+  const start = Math.max(0, diagnostic.column - 1);
+  const width = diagnostic.length ?? (lineText ? tokenLengthAt(lineText, diagnostic.column) : 1);
+  return { line: lineIndex, start, end: start + Math.max(1, width) };
 }
 
 const LINT_TREE = /([\\/])\.hvolt[\\/]lint[\\/]tree[\\/][^\\/]+[\\/]/;

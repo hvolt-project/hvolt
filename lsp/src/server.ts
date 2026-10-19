@@ -15,7 +15,7 @@ import {
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { execFile } from "node:child_process";
 import { collectSources } from "./project.js";
-import { type Diagnostic, fromLint, parseHvigor } from "./diagnostics.js";
+import { type Diagnostic, fromLint, parseHvigor, rangeOf } from "./diagnostics.js";
 import { COMMANDS, type CommandRequest, commandSpec } from "./commands.js";
 import { completeKeys, declaredRoutes, inRouterCall } from "./hvolttoml.js";
 import { dependencyAt, dependencyTarget, validateToml } from "./tomlcheck.js";
@@ -339,10 +339,10 @@ function flush(): void {
     connection.sendDiagnostics({
       uri: "file://" + path,
       diagnostics: list.map((diagnostic) => ({
-        range: {
-          start: { line: Math.max(0, diagnostic.line - 1), character: Math.max(0, diagnostic.column - 1) },
-          end: { line: Math.max(0, diagnostic.line - 1), character: Math.max(0, diagnostic.column) },
-        },
+        range: (() => {
+          const r = rangeOf(diagnostic, files.get(diagnostic.path));
+          return { start: { line: r.line, character: r.start }, end: { line: r.line, character: r.end } };
+        })(),
         message: diagnostic.message,
         severity: diagnostic.severity === "error" ? 1 : diagnostic.severity === "warning" ? 2 : 3,
         source: diagnostic.source,
@@ -495,7 +495,7 @@ function arktsDiagnostics(): void {
     return;
   }
   typeRunning = true;
-  const collected: Array<{ path: string; line: number; column: number; message: string; severity: "error" | "warning" | "info"; source: string }> = [];
+  const collected: Diagnostic[] = [];
   const open = [...documents.all()]
     .map((document) => document.uri.replace(/^file:\/\//, ""))
     .filter((path) => path.endsWith(".ets") && path.startsWith(root));
@@ -518,6 +518,7 @@ function arktsDiagnostics(): void {
         path,
         line: pos.line + 1,
         column: pos.character + 1,
+        length: Math.max(1, d.length ?? 1),
         message: ts.flattenDiagnosticMessageText(d.messageText, " "),
         severity: d.category === ts.DiagnosticCategory.Error ? "error" : "warning",
         source: "arkts",

@@ -2,7 +2,7 @@
 // tools (a codelinter report and a hvigor compile failure).
 import assert from "node:assert/strict";
 import test from "node:test";
-import { fromLint, mapToProject, parseHvigor } from "../dist/diagnostics.mjs";
+import { fromLint, mapToProject, parseHvigor, rangeOf } from "../dist/diagnostics.mjs";
 
 const ROOT = "/home/u/proj";
 
@@ -56,4 +56,22 @@ test("codelinter defects are mapped and severity is translated", () => {
   assert.equal(found[0].path, "/home/u/proj/src/entryability/EntryAbility.ets");
   assert.equal(found[0].severity, "warning");
   assert.match(found[0].message, /@typescript-eslint\/quotes/);
+});
+
+test("a point-only diagnostic is widened to the token it sits on", () => {
+  // codelinter reports a 1-based line/column and no length at all.
+  const code = "        hilog.erro(DOMAIN, 'testTag', 'x');\n  const greeting = 'Hello';";
+  const identifier = { path: "/p/a.ets", line: 1, column: 15, message: "m", severity: "warning", source: "codelinter" };
+  const r = rangeOf(identifier, code);
+  assert.equal(code.split("\n")[0].slice(r.start, r.end), "erro");
+
+  const quoted = { path: "/p/a.ets", line: 2, column: 20, message: "m", severity: "warning", source: "codelinter" };
+  const q = rangeOf(quoted, code);
+  assert.equal(code.split("\n")[1].slice(q.start, q.end), "'Hello'");
+});
+
+test("an explicit length wins over the token width", () => {
+  const d = { path: "/p/a.ets", line: 1, column: 3, length: 7, message: "m", severity: "error", source: "arkts" };
+  const r = rangeOf(d, "abcdefghijkl");
+  assert.deepEqual(r, { line: 0, start: 2, end: 9 });
 });
