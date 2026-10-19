@@ -7,7 +7,7 @@
   "publisher": "hvolt-project",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hvolt-project/hvolt"
+    "url": "https://github.com/hvolt-project/hvolt-vscode"
   },
   "engines": {
     "vscode": "^1.85.0"
@@ -141,5 +141,9 @@
     "typescript": "^5.5.0",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.3.2"
+  },
+  "homepage": "https://github.com/hvolt-project/hvolt-vscode#readme",
+  "bugs": {
+    "url": "https://github.com/hvolt-project/hvolt-vscode/issues"
   }
 }
