@@ -3,6 +3,7 @@ name: release
 on:
   push:
     tags: ["v*"]
+    branches: [main]
   workflow_dispatch:
     inputs:
       dry_run:
@@ -14,8 +15,51 @@ permissions:
   contents: read
 
 jobs:
+  guard:
+    name: does this version need a release?
+    runs-on: ubuntu-22.04
+    outputs:
+      publish: ${{ steps.check.outputs.publish }}
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      # A merge to main only releases when the version actually moved, so ordinary
+      # merges do not republish. The tag is the record of what has shipped, and the
+      # version in the manifests is the source of truth for the next one.
+      - id: check
+        run: |
+          set -euo pipefail
+          manifest="$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -1)"
+          pkg="$(node -p 'require("./npm/package.json").version')"
+          test "$manifest" = "$pkg" || {
+            echo "Cargo.toml says $manifest, npm/package.json says $pkg"; exit 1; }
+
+          # Two ways in: a tag (someone decided to release) or a merge to main (the
+          # version moved). Both end at the same place, and neither needs the other.
+          if [ "${GITHUB_REF_TYPE:-}" = "tag" ]; then
+            version="${GITHUB_REF_NAME#v}"
+            test "$version" = "$manifest" || {
+              echo "tag $GITHUB_REF_NAME does not match the manifests ($manifest)"; exit 1; }
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "releasing the tag v$version"
+          elif git rev-parse -q --verify "refs/tags/v$manifest" >/dev/null; then
+            version="$manifest"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "v$version is already tagged — nothing to release"
+          else
+            version="$manifest"
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "v$version is new — release it"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
   build:
     name: build (${{ matrix.key }})
+    needs: guard
+    if: needs.guard.outputs.publish == 'true'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -58,7 +102,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          version="${GITHUB_REF_NAME#v}"
+          version="${{ needs.guard.outputs.version }}"
           src="target/${{ matrix.target }}/release/${{ matrix.bin }}"
           mkdir -p dist
           chmod +x "$src"
@@ -86,8 +130,8 @@ jobs:
 
   publish:
     name: publish
-    needs: build
-    if: github.event_name == 'push' || inputs.dry_run == false
+    needs: [guard, build]
+    if: needs.guard.outputs.publish == 'true' && (github.event_name != 'workflow_dispatch' || inputs.dry_run == false)
     runs-on: ubuntu-22.04
     permissions:
       contents: write     # create the GitHub release
@@ -103,7 +147,7 @@ jobs:
       - name: Check tag matches package version
         run: |
           set -euo pipefail
-          tag_version="${GITHUB_REF_NAME#v}"
+          tag_version="${{ needs.guard.outputs.version }}"
           pkg_version="$(node -p 'require("./npm/package.json").version')"
           test "$tag_version" = "$pkg_version" || {
             echo "tag $GITHUB_REF_NAME does not match npm/package.json $pkg_version"; exit 1; }
@@ -122,7 +166,7 @@ jobs:
       - name: Stage binaries into platform packages
         run: |
           set -euo pipefail
-          version="${GITHUB_REF_NAME#v}"
+          version="${{ needs.guard.outputs.version }}"
           mkdir -p npm/platforms/darwin-arm64/bin npm/platforms/linux-x64/bin npm/platforms/win32-x64/bin
           tar -xzf "dist/darwin-arm64/hvolt-${version}-darwin-arm64.tar.gz" -C npm/platforms/darwin-arm64/bin
           tar -xzf "dist/linux-x64/hvolt-${version}-linux-x64.tar.gz" -C npm/platforms/linux-x64/bin
@@ -153,7 +197,7 @@ jobs:
         # published packages and the release in step without hand edits.
         run: |
           set -euo pipefail
-          version="${GITHUB_REF_NAME#v}"
+          version="${{ needs.guard.outputs.version }}"
           node -e '
             const fs = require("fs");
             const version = process.argv[1];
@@ -175,7 +219,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -euo pipefail
-          version="${GITHUB_REF_NAME#v}"
+          version="${{ needs.guard.outputs.version }}"
           for key in darwin-arm64 linux-x64 win32-x64; do
             pkg="@hvolt/cli-$key"
             if npm view "$pkg@$version" version >/dev/null 2>&1; then
@@ -191,7 +235,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -euo pipefail
-          version="${GITHUB_REF_NAME#v}"
+          version="${{ needs.guard.outputs.version }}"
           if npm view "@hvolt/cli@$version" version >/dev/null 2>&1; then
             echo "  @hvolt/cli@$version already published — skipping"
           else
