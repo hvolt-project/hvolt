@@ -42,6 +42,10 @@ versions may change the CLI surface.
   key in `[app]`, although the parser reads it. `type` is no longer offered there — it is
   the toml name of `ModuleInfo.module_type` and belongs to `[module]` only. A test now
   reads `src/config.rs` so the editor's key list cannot drift from the parser again.
+- Semantic highlighting no longer reads strings or comments: `'@kit.AbilityKit'` in an
+  import was coloured as a decorator plus a property, because the classifier scanned the
+  raw line. Strings, template literals and comments are masked before identifiers are
+  matched, with the line length kept so positions stay exact.
 
 ## [26.0.0-0] — 2026-10-18
 
