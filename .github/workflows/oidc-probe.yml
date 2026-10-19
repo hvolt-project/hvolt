@@ -1,5 +1,7 @@
 name: oidc-probe
 on:
+  push:
+    branches: [fix/publish-diagnostics]
   workflow_dispatch:
 permissions:
   contents: read
