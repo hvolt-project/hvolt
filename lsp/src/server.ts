@@ -23,7 +23,16 @@ import { appendFileSync, existsSync, readFileSync, rmSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { declarationDirs, etsBase, loadTypeScript, readDeclarations } from "./sdk.js";
-import { buildAttributeIndex, chainComponent, type AttributeIndex } from "./arkui.js";
+import {
+  buildAttributeIndex,
+  buildTypeIndex,
+  chainCallAt,
+  chainComponent,
+  membersOf,
+  parameterTypes,
+  type AttributeIndex,
+  type TypeIndex,
+} from "./arkui.js";
 
 const args = process.argv.slice(2);
 const option = (name: string): string | undefined => {
@@ -118,6 +127,37 @@ let attributeIndex: AttributeIndex | undefined;
 function attributes(): AttributeIndex {
   attributeIndex ??= buildAttributeIndex(ts, files);
   return attributeIndex;
+}
+
+let typeIndex: TypeIndex | undefined;
+function types(): TypeIndex {
+  typeIndex ??= buildTypeIndex(ts, files);
+  return typeIndex;
+}
+
+/** The whole chain up to the cursor, so a call may span lines. */
+function chainText(path: string, line: number, character: number): string {
+  const lines = (files.get(path) ?? "").split(/\r?\n/);
+  const parts: string[] = [(lines[line] ?? "").slice(0, character)];
+  let current = line;
+  while (current > 0) {
+    const previous = lines[current - 1] ?? "";
+    const trimmed = previous.trim();
+    if (!(trimmed.startsWith(".") || /[),]$/.test(trimmed) || parts[0].trim().startsWith("."))) break;
+    parts.unshift(previous);
+    current--;
+  }
+  return parts.join("");
+}
+
+/** Signature declared for an attribute method, whichever component declares it. */
+function attributeSignature(member: string): string | undefined {
+  const index = attributes();
+  for (const members of index.attributes.values()) {
+    const signature = members.get(member);
+    if (signature) return signature;
+  }
+  return undefined;
 }
 const positionOf = (file: string, offset: number) => {
   const text = files.get(file) ?? "";
@@ -242,7 +282,19 @@ connection.onSignatureHelp(({ textDocument, position }) => {
   log(`signatureHelp ${textDocument.uri}:${position.line + 1}:${position.character + 1}`);
   const file = textDocument.uri.replace(/^file:\/\//, "");
   const items = service.getSignatureHelpItems(file, offsetOf(file, position.line, position.character), {});
-  if (!items) return null;
+  if (!items) {
+    // Component chains are beyond the fork's parser; the declaration still knows the
+    // signature, and that is what the user needs while typing the arguments.
+    const call = chainCallAt(chainText(file, position.line, position.character));
+    const signature = call ? attributeSignature(call.member) : undefined;
+    if (!call || !signature) return null;
+    const parameters = parameterTypes(signature).map((text) => ({ label: text }));
+    return {
+      signatures: [{ label: signature.replace(/\):\s*T$/, "): T"), parameters }],
+      activeSignature: 0,
+      activeParameter: parameters.length > 0 ? Math.min(call.argument, parameters.length - 1) : 0,
+    };
+  }
   // The SDK's functions sometimes come back with empty display parts (measured on
   // `hilog.info`), so the label falls back to the type the service reports for the
   // same symbol — an empty signature box is worse than no signature help.
@@ -308,6 +360,25 @@ connection.onCompletion(({ textDocument, position }) => {
       detail: "route declared in hvolt.toml",
     }));
   }
+  // Inside a chain call (`alignRules({ | })`) the argument is an object literal whose
+  // shape is declared in the SDK; the fork cannot parse the chain at all, so the
+  // members are served from the declarations.
+  const call = chainCallAt(chainText(file, position.line, position.character));
+  if (call) {
+    const signature = attributeSignature(call.member);
+    const declared = signature ? parameterTypes(signature) : [];
+    const target = declared[call.argument] ?? declared[0];
+    const members = membersOf(types(), target, call.keys);
+    if (members.size > 0) {
+      log(`argument completion ${call.member}(${call.argument})${call.keys.map((k) => `.${k}`).join("")} → ${members.size}`);
+      return [...members].map(([name, declared]) => ({
+        label: name,
+        kind: CompletionItemKind.Property,
+        detail: declared,
+      }));
+    }
+  }
+
   // A component chain is beyond the fork's parser, so attributes come from the
   // declarations instead of from the language service.
   const chain = chainComponent((files.get(file) ?? "").split(/\r?\n/), position.line, position.character);
