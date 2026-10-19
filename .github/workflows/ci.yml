@@ -1,8 +1,11 @@
 name: ci
 
 on:
+  # Every branch: work happens off `main`, which stays at the released state, and a
+  # push of that work must still be gated. Releases are tag-driven (release.yml), so
+  # nothing here can publish.
   push:
-    branches: [main]
+    branches: ["**"]
   pull_request:
 
 permissions:
