@@ -168,6 +168,17 @@ function log(line: string): void {
 }
 const documents = new TextDocuments(TextDocument);
 
+connection.onDidChangeConfiguration((change) => {
+  const next = (change?.settings?.hvolt ?? {}) as HvoltSettings;
+  if (Object.keys(next).length === 0) return;
+  settings = { ...settings, ...next };
+  log(`configuration: ${JSON.stringify(settings)}`);
+  // Findings from the previous rule set must go, or the editor keeps showing them.
+  bySource.delete("lint");
+  lintSoon();
+  scheduleTypeDiagnostics();
+});
+
 connection.onInitialize((params) => {
   log(`initialize rootUri=${params.rootUri ?? "(none)"} client=${params.clientInfo?.name ?? "?"}`);
   settings = (params.initializationOptions?.hvolt ?? {}) as HvoltSettings;

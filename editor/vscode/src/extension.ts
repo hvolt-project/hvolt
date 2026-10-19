@@ -50,7 +50,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
           logFile: config.get<string>("logFile") || undefined,
         },
       },
-      synchronize: { fileEvents: vscode.workspace.createFileSystemWatcher("**/hvolt.toml") },
+      synchronize: {
+        fileEvents: vscode.workspace.createFileSystemWatcher("**/hvolt.toml"),
+        // Settings must reach the server when they change, not only at activation:
+        // `hvolt.lintAllRules` was captured once, so flipping it did nothing.
+        configurationSection: "hvolt",
+      },
       // Restart rather than stay dead: a crashed or replaced server heals on its own,
       // so a changed `lsp/dist/server.cjs` never needs a window reload.
       errorHandler: {
