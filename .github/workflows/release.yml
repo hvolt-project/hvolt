@@ -14,6 +14,16 @@ on:
 permissions:
   contents: read
 
+# Merging two pull requests in a row started two releases for the same version, each
+# building three targets on the same runners (measured 2026-10-19: runs 39277516701 and
+# 39277548684, both for 26.0.0-1, both with the same three builds). They are idempotent —
+# a published package is skipped and a release is re-uploaded with --clobber — but they
+# queue behind each other, so one is enough. `cancel-in-progress` stays false: cancelling a
+# run halfway through `npm publish` is worse than waiting for it.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   guard:
     name: does this version need a release?
