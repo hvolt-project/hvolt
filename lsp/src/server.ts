@@ -218,6 +218,27 @@ function enums(): Map<string, string[]> {
   return enumIndex;
 }
 
+let arktsGlobals: { decorators: string[]; functions: string[] } | undefined;
+
+/**
+ * Declarations ArkTS adds to the global scope: decorators (`declare const Component:
+ * ClassDecorator`) and DSL functions (`declare function $r(…)`). They are ordinary
+ * global declarations to the type checker, so they arrive buried in the same long list
+ * — and the service returns nothing at all inside a component chain.
+ */
+function globals(): { decorators: string[]; functions: string[] } {
+  if (arktsGlobals) return arktsGlobals;
+  const decorators = new Set<string>();
+  const functions = new Set<string>();
+  for (const [path, text] of files) {
+    if (!/[\\/]component[\\/]/.test(path)) continue;
+    for (const match of text.matchAll(/declare const (\w+)\s*:\s*[^;]*Decorator/g)) decorators.add(match[1]);
+    for (const match of text.matchAll(/declare function (\w+)\s*[(<]/g)) functions.add(match[1]);
+  }
+  arktsGlobals = { decorators: [...decorators].sort(), functions: [...functions].sort() };
+  return arktsGlobals;
+}
+
 const KEYWORDS = [
   "const", "let", "var", "if", "else", "for", "while", "return", "new", "import", "export",
   "class", "struct", "async", "await", "switch", "case", "break", "continue", "try", "catch",
@@ -519,6 +540,21 @@ connection.onCompletion(({ textDocument, position }) => {
       detail: "route declared in hvolt.toml",
     }));
   }
+  // `@|` — the decorator position. They are plain global consts to the checker and get
+  // lost among a thousand entries, so they are offered first here.
+  const decoratorPrefix = /(^|\s)@([\w$]*)$/.exec(lineText.slice(0, position.character));
+  if (decoratorPrefix) {
+    const typed = decoratorPrefix[2];
+    const names = globals().decorators.filter((name) => name.startsWith(typed));
+    log(`decorator completion @${typed} → ${names.length}`);
+    return names.map((name) => ({
+      label: name,
+      kind: CompletionItemKind.Constant,
+      detail: "ArkTS decorator",
+      sortText: "0" + name,
+    }));
+  }
+
   // `Alignment.|` — component attributes take enums, and the fork answers nothing here
   // because the chain does not parse. Members come from the declarations.
   const enumRef = enumAt(lineText.slice(0, position.character));
@@ -596,7 +632,16 @@ connection.onCompletion(({ textDocument, position }) => {
   }
 
   const completions = service.getCompletionsAtPosition(file, servicePosition(file, position.line, position.character), {});
-  if (!completions) return keywordCompletions(lineText, position.character);
+  if (!completions) {
+    // Inside a component chain the service returns nothing at all; ArkTS's DSL functions
+    // (`$r`, `$rawfile`) are still what the user needs there.
+    const typed = /([A-Za-z_$][\w$]*)$/.exec(lineText.slice(0, position.character))?.[1] ?? "";
+    const functions = globals().functions.filter((name) => name.startsWith(typed));
+    log(`fallback completion ${typed || "*"} → ${functions.length} ArkTS globals`);
+    return functions.length > 0
+      ? functions.map((name) => ({ label: name, kind: CompletionItemKind.Function, detail: "ArkTS global", sortText: "0" + name }))
+      : keywordCompletions(lineText, position.character);
+  }
   // The service returns 1,757 entries in its own order, which puts `arguments` first and
   // buries the local variable being typed. Locals, parameters, imports and members are
   // ranked ahead of everything else.
@@ -638,8 +683,18 @@ connection.onCompletion(({ textDocument, position }) => {
     detail: entry.kind,
     sortText: (usedHere.has(entry.name) ? rank(entry.kind) : "2") + (entry.sortText ?? entry.name),
   }));
-  // Keywords are not in the service's list at all; without them `con` never offers `const`.
-  const merged = [...keywordCompletions(lineText, position.character), ...items];
+  // ArkTS's own globals (`$r`, `$rawfile`) and keywords are not in the service's list at
+  // all inside a component chain, and even where they are, a thousand entries bury them.
+  const typed = /([A-Za-z_$][\w$]*)$/.exec(lineText.slice(0, position.character))?.[1] ?? "";
+  const arktsGlobals = globals().functions
+    .filter((name) => name.startsWith(typed))
+    .map((name) => ({
+      label: name,
+      kind: CompletionItemKind.Function,
+      detail: "ArkTS global",
+      sortText: "0" + name,
+    }));
+  const merged = [...arktsGlobals, ...keywordCompletions(lineText, position.character), ...items];
   // Sorted here as well: the server's order is what a plain client shows first.
   merged.sort((a, b) => (a.sortText ?? a.label).localeCompare(b.sortText ?? b.label));
   return merged;
