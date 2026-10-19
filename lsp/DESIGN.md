@@ -125,6 +125,14 @@ navigation set. Measured behaviour, including the parts that are weaker than ide
   spans that begin or end in injected syntax are dropped;
 - selectionRanges: 8 nesting levels on `this.message`, each mapped back.
 
+## Workspace search and links
+
+- `workspaceSymbol`: the program is the workspace, so the service's own index answers
+  (measured: `Sto` → `Store` in `src/model/Store.ets`);
+- `documentLink` on `hvolt.toml`: a value that looks like a relative path (`path =
+  "./lib"`) becomes a link to that module's directory. The file is read from disk when it
+  is not open, because links are requested for documents outside the buffer set.
+
 ## Semantic tokens
 
 The SDK's classifier cannot be used: `getEncodedSemanticClassifications` aborts on ArkUI

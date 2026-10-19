@@ -448,6 +448,8 @@ connection.onInitialize((params) => {
       implementationProvider: true,
       foldingRangeProvider: true,
       selectionRangeProvider: true,
+      workspaceSymbolProvider: true,
+      documentLinkProvider: { resolveProvider: false },
       referencesProvider: true,
       documentSymbolProvider: true,
       documentHighlightProvider: true,
@@ -860,6 +862,53 @@ connection.onDefinition(({ textDocument, position }) => {
       range: { start: { line: start.line, character: start.character }, end: { line: end.line, character: end.character } },
     };
   });
+});
+
+connection.onWorkspaceSymbol(({ query }) => {
+  // The whole program is the workspace here, so the service's own index answers.
+  const found = service.getNavigateToItems(query, 200, undefined, true) ?? [];
+  const symbols = found.map((item: any) => {
+    const start = originalOffset(item.fileName, item.textSpan.start);
+    if (start === undefined) return undefined;
+    const position = positionOf(item.fileName, start);
+    return {
+      name: item.name,
+      kind: symbolKind(item.kind),
+      location: {
+        uri: "file://" + item.fileName,
+        range: { start: { line: position.line, character: position.character }, end: { line: position.line, character: position.character } },
+      },
+    };
+  }).filter(Boolean);
+  log(`workspaceSymbol "${query}" → ${symbols.length}`);
+  return symbols;
+});
+
+connection.onDocumentLinks(({ textDocument }) => {
+  const file = textDocument.uri.replace(/^file:\/\//, "");
+  // Only project files have paths worth opening; the SDK declarations would produce a
+  // link carpet.
+  if (!file.endsWith("hvolt.toml")) return [];
+  // Links are asked for on files that may not be open in a buffer yet.
+  const text = files.get(file) ?? (existsSync(file) ? readFileSync(file, "utf8") : "");
+  const links: Array<{ range: any; target: string }> = [];
+  const lines = text.split(/\r?\n/);
+  for (let line = 0; line < lines.length; line++) {
+    const content = lines[line];
+    const value = /^\s*[\w.-]+\s*=\s*"([^"]+)"/.exec(content);
+    if (!value) continue;
+    const raw = value[1];
+    const target = raw.startsWith(".") ? join(dirname(file), raw) : undefined;
+    if (!target) continue;
+    const start = (value.index ?? 0) + value[0].indexOf('"') + 1;
+    const end = start + raw.length;
+    links.push({
+      range: { start: { line, character: start }, end: { line, character: end } },
+      target: "file://" + target,
+    });
+  }
+  log(`documentLinks ${file.split("/").slice(-1)[0]} → ${links.length}`);
+  return links;
 });
 
 connection.onTypeDefinition(({ textDocument, position }) => {
