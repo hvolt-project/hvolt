@@ -85,7 +85,21 @@ test("a type error in the buffer is reported", { skip }, async () => {
   assert.match(diagnostics[0].message, /not assignable to type 'number'/);
 });
 
-test("a file with ArkUI block-chains is left alone", { skip }, async () => {
+test("a clean ArkUI file publishes nothing", { skip }, async () => {
   const diagnostics = await run("src/pages/Index.ets");
-  assert.deepEqual(diagnostics, [], "the fork's parse errors must not reach the editor");
+  assert.deepEqual(diagnostics, [], "the transform must not invent findings");
+});
+
+test("a type error inside build() is reported at its original position", { skip }, async () => {
+  // Impossible before the transform: the whole file was skipped because the parser
+  // rejected the ArkUI block.
+  const diagnostics = await run(
+    "src/pages/Index.ets",
+    "  build() {",
+    "  build() {\n    const broken: number = 'text';",
+  );
+  assert.equal(diagnostics.length, 1, JSON.stringify(diagnostics).slice(0, 240));
+  assert.match(diagnostics[0].message, /not assignable to type 'number'/);
+  // 0-based: the error sits on the 7th line of the fixture, one below `build() {`.
+  assert.equal(diagnostics[0].range.start.line, 6, "the line must map back to the original text");
 });

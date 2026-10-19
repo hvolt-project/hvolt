@@ -71,14 +71,28 @@ files.set(
   "// Injected by the hvolt language server so the ArkUI transform parses.\ndeclare function __arkui(build: () => void): any;\n",
 );
 
+/** Names declared as `struct` in the project: those blocks are ArkUI too. */
+function projectStructs(): Set<string> {
+  const names = new Set<string>();
+  for (const text of originals.values()) {
+    for (const match of text.matchAll(/\bstruct\s+([A-Z][A-Za-z0-9_]*)/g)) names.add(match[1]);
+  }
+  return names;
+}
+
 /** Recompute the transformed text for one file. */
 function refreshTransform(path: string): void {
   const text = originals.get(path);
   if (text === undefined) return;
-  const result = transformArkts(text, (name) => attributes().components.has(name));
+  const structs = projectStructs();
+  const result = transformArkts(
+    text,
+    (name) => attributes().components.has(name) || structs.has(name),
+  );
   transformed.set(path, result);
   files.set(path, result.code);
   log(`transform ${path.replace(root + "/", "")}: changed=${result.changed} ${text.length}→${result.code.length}`);
+  if (process.env.HVOLT_LSP_DEBUG) log(result.code.replace(/\n/g, "⏎").slice(0, 400));
 }
 
 for (const [path, text] of collectSources(root)) {
@@ -149,7 +163,9 @@ const host = {
   // The resolver probes `.ts`, `.tsx`, `.d.ts`; the SDK also ships `.d.ets`.
   directoryExists: (dir: string) => declarationDirs(sdkRoot).some((d) => dir.startsWith(d)),
   getDirectories: () => ["api", "kits", "component", "arkts"].map((d) => `${etsRoot}/${d}`),
-  getScriptKind: (file: string) => (file.endsWith(".ets") ? (ts.ScriptKind.ETS ?? 8) : undefined),
+  // The transformed text is plain TypeScript; keeping ScriptKind.ETS here made the fork
+  // treat components as constructors only (measured: TS2348 "is not callable" on every
+  // `Text(…)`).
 };
 
 const service = ts.createLanguageService(host, ts.createDocumentRegistry());
@@ -861,27 +877,33 @@ function arktsDiagnostics(): void {
     .map((document) => document.uri.replace(/^file:\/\//, ""))
     .filter((path) => path.endsWith(".ets") && path.startsWith(root));
   for (const path of open) {
-    // The block-chain test has to look at the user's text: the transformed copy no
-    // longer contains `}.modifier(…)`, which is exactly what marks an ArkUI DSL file.
     const text = originals.get(path) ?? files.get(path) ?? "";
     if (!text) continue;
-    // The parser rejects `View() { … }.modifier(…)`, so the test is on the source, not
-    // on a diagnostic: any `}` directly followed by `.name(` marks an ArkUI DSL chain.
-    const syntactic = service.getSyntacticDiagnostics(path);
-    const chained = /\}\s*\.[A-Za-z_$][\w$]*\s*\(/.test(text);
-    if (chained) {
-      log(`type diagnostics skipped for ${path.replace(root + "/", "")}: ArkUI block-chain parse`);
-      continue;
-    }
-    const all = [...syntactic, ...service.getSemanticDiagnostics(path)];
+    const all = [...service.getSyntacticDiagnostics(path), ...service.getSemanticDiagnostics(path)];
     for (const d of all) {
-      const pos = d.file?.getLineAndCharacterOfPosition(d.start ?? 0);
-      if (!pos) continue;
+      // The transform turns `Column() { … }` into `Column() ;__arkui(…)`, so the ArkUI
+      // factory is called as a function. This program types the components as classes,
+      // so every call site reports "is not callable" — an artifact of the rewrite, not
+      // of the user's code (measured: exactly one such diagnostic on a clean file).
+      if (
+        (d.code === 2348 || d.code === 2349) &&
+        /is not callable/.test(ts.flattenDiagnosticMessageText(d.messageText, " "))
+      ) {
+        continue;
+      }
+      const offset = d.start ?? 0;
+      // Diagnostics inside injected syntax have no original position: publishing them
+      // would put a marker on code the user never wrote.
+      const origOffset = originalOffset(path, offset);
+      if (origOffset === undefined) continue;
+      const original = ts.createSourceFile(path, text, ts.ScriptTarget.ES2021);
+      const pos = original.getLineAndCharacterOfPosition(Math.min(origOffset, text.length));
+      const end = original.getLineAndCharacterOfPosition(Math.min(origOffset + (d.length ?? 1), text.length));
       collected.push({
         path,
         line: pos.line + 1,
         column: pos.character + 1,
-        length: Math.max(1, d.length ?? 1),
+        length: Math.max(1, end.character - pos.character),
         message: ts.flattenDiagnosticMessageText(d.messageText, " "),
         severity: d.category === ts.DiagnosticCategory.Error ? "error" : "warning",
         source: "arkts",
