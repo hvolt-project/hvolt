@@ -62,6 +62,32 @@ test("comments and plain names are left to the grammar", () => {
   assert.deepEqual(found, ["Index:class", "build:method"]);
 });
 
+test("a module specifier is not a name", () => {
+  // Reported from the editor: `@kit` inside `'@kit.AbilityKit'` was coloured as a
+  // decorator and `AbilityKit` as a property, because the classifier read the raw line.
+  const source = [
+    "import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';",
+    "import { hilog } from '@kit.PerformanceAnalysisKit';",
+    "import { window } from '@kit.ArkUI';",
+  ].join("\n");
+  assert.deepEqual(semanticTokens(source, indexes, () => undefined), []);
+});
+
+test("strings, template literals and comments are left to the grammar", () => {
+  const source = [
+    "struct Index {",
+    "  @State message: string = 'Text in a string'; // Text in a comment",
+    "  build() {",
+    "    console.log(`${Text}`);",
+    "  }",
+    "}",
+  ].join("\n");
+  const found = named(semanticTokens(source, indexes, () => undefined), source);
+  // `console.log` is real code, so `log` is classified (a member access); the `Text`
+  // inside the string and the comment must not appear.
+  assert.deepEqual(found, ["Index:class", "State:decorator", "message:property", "build:method", "log:property"]);
+});
+
 test("encoding is delta pairs from the previous token", () => {
   const data = encode([
     { line: 0, character: 1, length: 3, type: 1 },

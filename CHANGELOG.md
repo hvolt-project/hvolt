@@ -7,6 +7,8 @@ versions may change the CLI surface.
 
 ## [Unreleased]
 
+## [26.0.0-1] — 2026-10-19
+
 ### Added
 
 - A VS Code client, maintained in its own repository
@@ -33,6 +35,13 @@ versions may change the CLI surface.
   what gets judged. The rule run is skipped when its inputs are unchanged, because engine startup
   dominates the cost (whole tree 2.94 s, one file 2.78 s, identical content again 0 ms).
 - `hvolt lint --scoped` checks only the files an overlay replaced.
+
+### Fixed
+
+- `hvolt.toml` accepts `members` again: the language server reported it as an unknown
+  key in `[app]`, although the parser reads it. `type` is no longer offered there — it is
+  the toml name of `ModuleInfo.module_type` and belongs to `[module]` only. A test now
+  reads `src/config.rs` so the editor's key list cannot drift from the parser again.
 
 ## [26.0.0-0] — 2026-10-18
 
