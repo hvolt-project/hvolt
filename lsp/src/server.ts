@@ -17,6 +17,9 @@ import { execFile } from "node:child_process";
 import { collectSources } from "./project.js";
 import { type Diagnostic, fromLint, parseHvigor } from "./diagnostics.js";
 import { completeKeys, declaredRoutes, inRouterCall } from "./hvolttoml.js";
+import { dependencyAt, dependencyTarget, validateToml } from "./tomlcheck.js";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { declarationDirs, loadTypeScript, readDeclarations } from "./sdk.js";
 
 const args = process.argv.slice(2);
@@ -162,6 +165,20 @@ connection.onCompletion(({ textDocument, position }) => {
 
 connection.onDefinition(({ textDocument, position }) => {
   const file = textDocument.uri.replace(/^file:\/\//, "");
+
+  // Inside `lib = { path = "../lib" }`: jump to that module's hvolt.toml.
+  if (file.endsWith("hvolt.toml")) {
+    const text = files.get(file) ?? "";
+    const dependency = dependencyAt(text, position.line, position.character);
+    if (!dependency) return [];
+    const target = dependencyTarget(file, dependency);
+    return [
+      {
+        uri: "file://" + target,
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+      },
+    ];
+  }
   const defs = service.getDefinitionAtPosition(file, offsetOf(file, position.line, position.character)) ?? [];
   return defs.map((def: any) => {
     const start = positionOf(def.fileName, def.textSpan.start);
@@ -309,6 +326,29 @@ function lintSoon(): void {
     publish("lint", parsed);
   }, 400);
 }
+
+function validateTomlDocument(path: string, text: string): void {
+  if (!path.endsWith("hvolt.toml")) return;
+  const moduleDir = dirname(path);
+  const diagnostics = validateToml(text, {
+    routeExists: (route) => existsSync(join(moduleDir, route)),
+  });
+  bySource.set(
+    "hvolt.toml",
+    diagnostics.map((diagnostic) => ({
+      path,
+      line: diagnostic.line + 1,
+      column: diagnostic.character + 1,
+      message: diagnostic.message,
+      severity: diagnostic.severity,
+      source: "hvolt.toml",
+    })),
+  );
+  flush();
+}
+
+documents.onDidOpen((e) => validateTomlDocument(e.document.uri.replace(/^file:\/\//, ""), e.document.getText()));
+documents.onDidChangeContent((e) => validateTomlDocument(e.document.uri.replace(/^file:\/\//, ""), e.document.getText()));
 
 documents.onDidOpen(() => lintSoon());
 documents.onDidSave(() => lintSoon());
