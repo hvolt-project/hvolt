@@ -11,6 +11,7 @@ export default class EntryAbility extends UIAbility {
 
   onWindowStageCreate(windowStage: window.WindowStage): void {
     windowStage.loadContent('pages/Index', (err) => {
+      hilog.error(DOMAIN, 'testTag', 'x');
       if (err.code) {
         hilog.error(DOMAIN, 'testTag', 'Failed to load the content.');
         return;

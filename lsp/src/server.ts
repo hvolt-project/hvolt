@@ -23,6 +23,7 @@ import { appendFileSync, existsSync, readFileSync, rmSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { declarationDirs, etsBase, loadTypeScript, readDeclarations } from "./sdk.js";
+import { buildAttributeIndex, chainComponent, type AttributeIndex } from "./arkui.js";
 
 const args = process.argv.slice(2);
 const option = (name: string): string | undefined => {
@@ -111,6 +112,13 @@ const host = {
 };
 
 const service = ts.createLanguageService(host, ts.createDocumentRegistry());
+
+// Parsed on first use: ~120 declaration files, and only chain completion needs it.
+let attributeIndex: AttributeIndex | undefined;
+function attributes(): AttributeIndex {
+  attributeIndex ??= buildAttributeIndex(ts, files);
+  return attributeIndex;
+}
 const positionOf = (file: string, offset: number) => {
   const text = files.get(file) ?? "";
   const source = ts.createSourceFile(file, text, ts.ScriptTarget.ES2021);
@@ -167,9 +175,9 @@ connection.onInitialize((params) => {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Full,
       hoverProvider: true,
+      signatureHelpProvider: { triggerCharacters: ["(", ","], retriggerCharacters: [","] },
       completionProvider: { resolveProvider: false, triggerCharacters: [".", "@", "'", "/"] },
       definitionProvider: true,
-      signatureHelpProvider: { triggerCharacters: ["(", ","] },
       renameProvider: true,
       // The editor contributes its own `hvolt.*` commands, so the server must not
       // declare the same ids — vscode-languageclient registers provided commands and
@@ -195,11 +203,70 @@ connection.onHover(({ textDocument, position }) => {
   const file = textDocument.uri.replace(/^file:\/\//, "");
   const info = service.getQuickInfoAtPosition(file, offsetOf(file, position.line, position.character));
   if (!info) return null;
-  const text = ts.displayPartsToString(info.displayParts ?? []);
+  let text = ts.displayPartsToString(info.displayParts ?? []);
   const docs = ts.displayPartsToString(info.documentation ?? []);
+  if (!text.trim()) {
+    // Some symbols report documentation but no display parts (measured on
+    // `hilog.error`: hover showed only "Prints ERROR logs."). Fall back to the
+    // signature the service already knows how to build.
+    const items = service.getSignatureHelpItems(file, offsetOf(file, position.line, position.character), {});
+    const first = items?.items?.[0];
+    if (first) {
+      const params = first.parameters.map((parameter: any) => ts.displayPartsToString(parameter.displayParts ?? []));
+      text =
+        ts.displayPartsToString(first.prefixDisplayParts ?? []) +
+        params.join(ts.displayPartsToString(first.separatorDisplayParts ?? [])) +
+        ts.displayPartsToString(first.suffixDisplayParts ?? []);
+    }
+  }
   return {
     contents: { kind: MarkupKind.Markdown, value: "```ts\n" + text + "\n```" + (docs ? "\n\n" + docs : "") },
     range: undefined,
+  };
+});
+
+connection.onSignatureHelp(({ textDocument, position }) => {
+  log(`signatureHelp ${textDocument.uri}:${position.line + 1}:${position.character + 1}`);
+  const file = textDocument.uri.replace(/^file:\/\//, "");
+  const items = service.getSignatureHelpItems(file, offsetOf(file, position.line, position.character), {});
+  if (!items) return null;
+  // The SDK's functions sometimes come back with empty display parts (measured on
+  // `hilog.info`), so the label falls back to the type the service reports for the
+  // same symbol — an empty signature box is worse than no signature help.
+  // The callee is to the left of the cursor (inside the argument list), so quick info
+  // has to be asked for at the call's name, not at the cursor.
+  const quickLabel = (): string => {
+    const text = files.get(file) ?? "";
+    const lineText = text.split(/\r?\n/)[position.line] ?? "";
+    let cursor = Math.min(position.character, lineText.length);
+    const open = lineText.lastIndexOf("(", cursor);
+    if (open < 0) return "";
+    let start = open;
+    while (start > 0 && /[\w$]/.test(lineText[start - 1])) start--;
+    const info = service.getQuickInfoAtPosition(file, offsetOf(file, position.line, start));
+    return ts.displayPartsToString(info?.displayParts ?? []).trim();
+  };
+  const signatures = items.items.map((item: any) => {
+    const params = item.parameters.map((parameter: any) => ts.displayPartsToString(parameter.displayParts ?? []));
+    const prefix = ts.displayPartsToString(item.prefixDisplayParts ?? []);
+    const separator = ts.displayPartsToString(item.separatorDisplayParts ?? []);
+    const suffix = ts.displayPartsToString(item.suffixDisplayParts ?? []);
+    const docs = ts.displayPartsToString(item.documentation ?? []);
+    const assembled = prefix + params.join(separator) + suffix;
+    return {
+      label: assembled.trim() || quickLabel() || "(unknown signature)",
+      documentation: docs ? { kind: MarkupKind.Markdown, value: docs } : undefined,
+      parameters: params.map((text: string) => ({ label: text })),
+    };
+  });
+  if (signatures.length === 0) return null;
+  return {
+    signatures,
+    activeSignature: Math.min(items.selectedItemIndex ?? 0, signatures.length - 1),
+    activeParameter:
+      signatures[0] && signatures[0].parameters.length > 0
+        ? Math.min(items.argumentIndex ?? 0, signatures[0].parameters.length - 1)
+        : 0,
   };
 });
 
@@ -228,6 +295,19 @@ connection.onCompletion(({ textDocument, position }) => {
       detail: "route declared in hvolt.toml",
     }));
   }
+  // A component chain is beyond the fork's parser, so attributes come from the
+  // declarations instead of from the language service.
+  const chain = chainComponent((files.get(file) ?? "").split(/\r?\n/), position.line, position.character);
+  if (chain && /\.[\w$]*$/.test(lineText.slice(0, position.character))) {
+    const index = attributes();
+    const attributeName = index.components.get(chain);
+    const members = attributeName ? index.attributes.get(attributeName) : undefined;
+    if (members && members.size > 0) {
+      log(`chain completion ${chain}.${members.size} attributes`);
+      return [...members].map((name) => ({ label: name, kind: CompletionItemKind.Method, detail: `${chain} attribute` }));
+    }
+  }
+
   const completions = service.getCompletionsAtPosition(file, offsetOf(file, position.line, position.character), {});
   if (!completions) return [];
   return completions.entries.map((entry: any) => ({
@@ -263,20 +343,6 @@ connection.onDefinition(({ textDocument, position }) => {
       range: { start: { line: start.line, character: start.character }, end: { line: end.line, character: end.character } },
     };
   });
-});
-
-connection.onSignatureHelp(({ textDocument, position }) => {
-  const file = textDocument.uri.replace(/^file:\/\//, "");
-  const help = service.getSignatureHelpItems(file, offsetOf(file, position.line, position.character), {});
-  if (!help) return null;
-  return {
-    activeSignature: help.selectedItemIndex ?? 0,
-    activeParameter: help.argumentIndex ?? 0,
-    signatures: help.items.map((item: any) => ({
-      label: ts.displayPartsToString(item.prefix) + ts.displayPartsToString(item.suffix),
-      documentation: { kind: MarkupKind.Markdown, value: ts.displayPartsToString(item.documentation ?? []) },
-    })),
-  };
 });
 
 connection.onRenameRequest(({ textDocument, position, newName }) => {
@@ -537,7 +603,12 @@ function validateTomlDocument(path: string, text: string): void {
   if (!path.endsWith("hvolt.toml")) return;
   const moduleDir = dirname(path);
   const diagnostics = validateToml(text, {
-    routeExists: (route) => existsSync(join(moduleDir, route)),
+    // A route may be declared as `pages/Index`, `pages/Index.ets`, or `pages/Index/Index.ets`
+    // depending on where it is written; only the file's existence matters here.
+    routeExists: (route) =>
+      [route, `${route}.ets`, `${route}.ts`, join(route, "Index.ets")].some((candidate) =>
+        existsSync(join(moduleDir, candidate)),
+      ),
   });
   bySource.set(
     "hvolt.toml",
