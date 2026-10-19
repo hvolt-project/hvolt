@@ -8,6 +8,7 @@ support that was never exercised.
 """
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -99,6 +100,30 @@ def main() -> int:
     if not newest:
         drift.append("SDK list returned nothing (endpoint or supportVersion changed)")
     print("DRIFT: " + ("; ".join(drift) if drift else "none"))
+
+    # The workflow decides between "bump automatically" and "open an issue" from this
+    # file: a tool patch bump is mechanical, anything touching the SDK platform or a
+    # major tool version needs a machine with that SDK.
+    summary = {
+        "hvolt_version": crate_version,
+        "sdk_support_version": support_version,
+        "sdk_newest_build": newest[0][0] if newest else "",
+        "sdk_newest_platform": newest_platform if newest else "",
+        "sdk_pinned_platform": pinned_platform,
+        "hvigor_pinned": hvigor_pin,
+        "hvigor_latest": hvigor_latest,
+        "ohpm_pinned": ohpm_pin,
+        "drift": drift,
+        "tool_bump_only": bool(newest)
+        and newest_platform == pinned_platform
+        and hvigor_latest != hvigor_pin
+        and hvigor_latest.split(".")[0] == hvigor_pin.split(".")[0],
+    }
+    path = os.environ.get("SUMMARY_PATH")
+    if path:
+        with open(path, "w", encoding="utf-8") as handle:
+            json.dump(summary, handle, indent=2)
+    print(json.dumps(summary))
     return 0
 
 
