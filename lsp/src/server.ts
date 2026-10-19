@@ -19,7 +19,8 @@ import { type Diagnostic, fromLint, parseHvigor } from "./diagnostics.js";
 import { COMMANDS, type CommandRequest, commandSpec } from "./commands.js";
 import { completeKeys, declaredRoutes, inRouterCall } from "./hvolttoml.js";
 import { dependencyAt, dependencyTarget, validateToml } from "./tomlcheck.js";
-import { appendFileSync, existsSync, readFileSync } from "node:fs";
+import { appendFileSync, existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { declarationDirs, loadTypeScript, readDeclarations } from "./sdk.js";
 
@@ -85,6 +86,10 @@ interface HvoltSettings {
   /** Where to record protocol traffic (also settable with --log-file / HVOLT_LSP_LOG). */
   logFile?: string;
   lintOnSave?: boolean;
+  /** Refresh diagnostics shortly after typing stops (default: on). */
+  lintOnType?: boolean;
+  /** Debounce for lintOnType, milliseconds (default 1200). */
+  lintDelay?: number;
   /** Run codelinter with its broad rule sets (@performance/all + @typescript-eslint/all). */
   lintAllRules?: boolean;
 }
@@ -326,16 +331,53 @@ function run(binary: string, args: string[], cwd: string): Promise<RunResult> {
 }
 
 let lintTimer: NodeJS.Timeout | undefined;
-function lintSoon(): void {
-  if (settings.lintOnSave === false) return;
+let lintGeneration = 0;
+let lintRunning = false;
+let lintAgain = false;
+
+/**
+ * Lint after a short pause.
+ *
+ * Measured (Linux, 3-file project): a full run takes 2.2 s and re-translates the
+ * tree every time, so it always reflects the current text. Path-scoped runs are not
+ * usable — codelinter resolves paths inside that translated tree, where the layout
+ * differs, and answers "engine failed". A run that started before the latest
+ * keystroke is therefore dropped instead of published, and overlapping runs coalesce.
+ */
+function lintSoon(paths?: string[]): void {
+  if (settings.lintOnSave === false && !paths) return;
   clearTimeout(lintTimer);
-  lintTimer = setTimeout(async () => {
+  lintTimer = setTimeout(() => void lintNow(), paths ? settings.lintDelay ?? 2000 : 400);
+}
+
+async function lintNow(paths?: string[]): Promise<void> {
+  if (lintRunning) {
+    lintAgain = true;
+    return;
+  }
+  lintRunning = true;
+  const generation = ++lintGeneration;
+  const startedAt = Date.now();
+  let overlayFile: string | undefined;
+  try {
+    // Hand the editor's buffers over, so lint judges what is on screen rather than
+    // the last save — otherwise the indicator is silent exactly when it matters.
+    const overlay = new Map<string, string>();
+    for (const document of documents.all()) {
+      const path = document.uri.replace(/^file:\/\//, "");
+      if (!path.endsWith(".ets")) continue;
+      const onDisk = existsSync(path) ? readFileSync(path, "utf8") : "";
+      if (onDisk === document.getText()) continue;
+      overlay.set(path, document.getText());
+    }
     const args = ["lint", "--json"];
     if (settings.lintAllRules) args.push("--all-rules");
-    const { output } = await run(binaryPath(), args, root);
-    if (process.env.HVOLT_LSP_DEBUG) {
-      process.stderr.write(`hvolt-lsp: lint ${args.join(" ")} → ${output.length} bytes\n`);
+    if (overlay.size > 0) {
+      overlayFile = join(tmpdir(), `hvolt-lsp-overlay-${process.pid}-${generation}.json`);
+      writeFileSync(overlayFile, JSON.stringify(Object.fromEntries(overlay)));
+      args.push("--overlay-file", overlayFile);
     }
+    const { output } = await run(binaryPath(), args, root);
     // `--json` writes one JSON document, but stderr carries human progress lines
     // that may also start with "{", so the last JSON line wins.
     const report = output
@@ -354,10 +396,24 @@ function lintSoon(): void {
       if (process.env.HVOLT_LSP_DEBUG) process.stderr.write("hvolt-lsp: lint report not found\n");
       return;
     }
+    if (generation !== lintGeneration) return; // a newer run supersedes this one
     const parsed = fromLint(report, root);
-    if (process.env.HVOLT_LSP_DEBUG) process.stderr.write(`hvolt-lsp: lint → ${parsed.length} diagnostics\n`);
+    log(`lint → ${parsed.length} diagnostics in ${Date.now() - startedAt} ms (${parsed.length === 0 ? "clean" : "findings"})`);
     publish("lint", parsed);
-  }, 400);
+  } finally {
+    if (overlayFile) {
+      try {
+        rmSync(overlayFile, { force: true });
+      } catch {
+        // a leftover temp file is harmless; never mask the lint result
+      }
+    }
+    lintRunning = false;
+    if (lintAgain) {
+      lintAgain = false;
+      void lintNow(paths);
+    }
+  }
 }
 
 function validateTomlDocument(path: string, text: string): void {
@@ -385,6 +441,13 @@ documents.onDidChangeContent((e) => validateTomlDocument(e.document.uri.replace(
 
 documents.onDidOpen(() => lintSoon());
 documents.onDidSave(() => lintSoon());
+documents.onDidChangeContent((e) => {
+  if (settings.lintOnType === false) return;
+  const path = e.document.uri.replace(/^file:\/\//, "");
+  if (!path.endsWith(".ets")) return;
+  const relative = path.startsWith(root + "/") ? path.slice(root.length + 1) : path;
+  lintSoon([relative]);
+});
 
 connection.onExecuteCommand(async ({ command, arguments: args }) => {
   const cwd = (args?.[0] as string | undefined) ?? root;

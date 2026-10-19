@@ -88,6 +88,16 @@
           "type": "string",
           "default": "",
           "description": "Record language-server protocol traffic to this file (empty: no log)."
+        },
+        "lintOnType": {
+          "type": "boolean",
+          "default": true,
+          "description": "Refresh diagnostics shortly after typing stops (checks the edited file)."
+        },
+        "lintDelay": {
+          "type": "number",
+          "default": 2000,
+          "description": "Debounce for lintOnType, in milliseconds. A full lint run measured 2.2 s."
         }
       }
     },

@@ -120,6 +120,82 @@ pub fn dot_form_version(v: &str) -> String {
     }
 }
 
+/// Parse `--overlay`: a JSON object of source path → text.
+pub fn parse_overlay(json: &str) -> Result<Vec<(String, String)>, String> {
+    let value: serde_json::Value =
+        serde_json::from_str(json).map_err(|e| format!("overlay is not JSON: {}", e))?;
+    let object = value
+        .as_object()
+        .ok_or_else(|| "overlay must be a JSON object of path → text".to_string())?;
+    Ok(object
+        .iter()
+        .filter_map(|(path, text)| text.as_str().map(|t| (path.clone(), t.to_string())))
+        .collect())
+}
+
+/// Write overlay contents over the linted copy of the tree.
+///
+/// The mirrored layout renames directories (`src/pages/x.ets` becomes
+/// `<member>/src/main/ets/pages/x.ets`, the entry ability gets its own folder), so a
+/// path match is done on the suffix below `ets/`, falling back to a unique basename.
+/// Files that cannot be located are reported instead of silently ignored: a buffer
+/// that is not linted would make the editor lie.
+pub fn apply_overlay(tree: &Path, overlay: &[(String, String)]) -> Result<usize, String> {
+    if overlay.is_empty() {
+        return Ok(0);
+    }
+    let mut files = Vec::new();
+    collect_files(tree, &mut files)?;
+    let mut written = 0usize;
+    for (source, text) in overlay {
+        let normalized = source.replace('\\', "/");
+        // Absolute paths (what an editor sends) and project-relative ones both reduce
+        // to the part below the module's `src/`.
+        let rest = normalized
+            .split_once("/src/")
+            .map(|(_, r)| r.to_string())
+            .or_else(|| normalized.strip_prefix("src/").map(str::to_string))
+            .unwrap_or_else(|| normalized.clone());
+        let base = rest.rsplit('/').next().unwrap_or(rest.as_str()).to_string();
+        let by_suffix = files.iter().find(|f| {
+            f.to_string_lossy()
+                .replace('\\', "/")
+                .ends_with(&format!("/ets/{}", rest))
+        });
+        let by_name: Vec<&PathBuf> = files
+            .iter()
+            .filter(|f| {
+                f.file_name()
+                    .map(|n| n.to_string_lossy() == base)
+                    .unwrap_or(false)
+            })
+            .collect();
+        let target = match (by_suffix, by_name.len()) {
+            (Some(p), _) => Some(p.clone()),
+            (None, 1) => Some(by_name[0].clone()),
+            _ => None,
+        };
+        let path =
+            target.ok_or_else(|| format!("overlay path not found in the tree: {}", source))?;
+        std::fs::write(&path, text).map_err(|e| format!("write {}: {}", path.display(), e))?;
+        written += 1;
+    }
+    Ok(written)
+}
+
+fn collect_files(dir: &Path, out: &mut Vec<PathBuf>) -> Result<(), String> {
+    let entries = std::fs::read_dir(dir).map_err(|e| format!("read {}: {}", dir.display(), e))?;
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            collect_files(&path, out)?;
+        } else {
+            out.push(path);
+        }
+    }
+    Ok(())
+}
+
 /// The `--dir` value: a JSON array of paths (note 2 above).
 pub fn dir_json(paths: &[String]) -> String {
     let items: Vec<String> = paths
@@ -346,12 +422,17 @@ pub fn format_defect(d: &serde_json::Value) -> String {
 }
 
 /// Reporting/gating options — they never change how the engine is driven.
-#[derive(Clone, Copy)]
+///
+/// Not `Copy`: the overlay carries buffer text.
+#[derive(Clone)]
 pub struct LintOptions {
     pub json: bool,
     pub fix: bool,
     pub fail_on: u8,
     pub max_defects: usize,
+    /// Source path → replacement text, applied to the linted copy of the tree.
+    /// Editors use it to hand over unsaved buffers.
+    pub overlay: Vec<(String, String)>,
 }
 
 impl Default for LintOptions {
@@ -361,6 +442,7 @@ impl Default for LintOptions {
             fix: false,
             fail_on: 1,
             max_defects: 0,
+            overlay: Vec::new(),
         }
     }
 }
@@ -437,6 +519,14 @@ pub fn lint_with(
     };
     if !opts.fix {
         let linked = sync_tree(&std_tree, &lint_tree)?;
+        let overlaid = apply_overlay(&lint_tree, &opts.overlay)?;
+        if overlaid > 0 && !opts.json {
+            println!(
+                "  ({} buffer{} from the editor used instead of disk)",
+                overlaid,
+                if overlaid == 1 { "" } else { "s" }
+            );
+        }
         if linked > 0 && !opts.json {
             println!(
                 "  ({linked} linked entr{} skipped — links are not followed)",
@@ -869,6 +959,62 @@ mod tests {
             "[\"/a b\",\"/c\\\\d\\\"e\"]"
         );
         assert_eq!(dir_json(&[]), "[]");
+    }
+
+    #[test]
+    fn overlay_parses_path_to_text() {
+        let parsed = parse_overlay(r#"{"src/pages/A.ets": "struct A {}"}"#).unwrap();
+        assert_eq!(
+            parsed,
+            vec![("src/pages/A.ets".to_string(), "struct A {}".to_string())]
+        );
+        assert!(parse_overlay("not json").is_err());
+        assert!(
+            parse_overlay("[1,2]").is_err(),
+            "an array is not a path→text map"
+        );
+    }
+
+    #[test]
+    fn overlay_replaces_the_mirrored_copy_only() {
+        let root = std::env::temp_dir().join(format!("hvolt-overlay-{}", std::process::id()));
+        let mirrored = root.join("entry/src/main/ets/pages/A.ets");
+        std::fs::create_dir_all(mirrored.parent().unwrap()).unwrap();
+        std::fs::write(&mirrored, "// on disk").unwrap();
+        let source = root.join("src/pages/A.ets");
+        std::fs::create_dir_all(source.parent().unwrap()).unwrap();
+        std::fs::write(&source, "// on disk").unwrap();
+
+        let written = apply_overlay(
+            &root,
+            &[(
+                "src/pages/A.ets".to_string(),
+                "// from the editor".to_string(),
+            )],
+        )
+        .unwrap();
+
+        assert_eq!(written, 1);
+        assert_eq!(
+            std::fs::read_to_string(&mirrored).unwrap(),
+            "// from the editor"
+        );
+        assert_eq!(
+            std::fs::read_to_string(&source).unwrap(),
+            "// on disk",
+            "the editor's buffer must never be written back to the source file"
+        );
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    #[test]
+    fn overlay_reports_a_path_it_cannot_place() {
+        let root = std::env::temp_dir().join(format!("hvolt-overlay-miss-{}", std::process::id()));
+        std::fs::create_dir_all(&root).unwrap();
+        let err =
+            apply_overlay(&root, &[("src/pages/Gone.ets".to_string(), "x".into())]).unwrap_err();
+        assert!(err.contains("Gone.ets"), "{}", err);
+        std::fs::remove_dir_all(&root).ok();
     }
 
     #[test]

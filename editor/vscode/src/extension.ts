@@ -41,6 +41,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         hvolt: {
           binaryPath: binary,
           lintOnSave: config.get<boolean>("lintOnSave") ?? true,
+          lintOnType: config.get<boolean>("lintOnType") ?? true,
+          lintDelay: config.get<number>("lintDelay") ?? 2000,
           logFile: config.get<string>("logFile") || undefined,
         },
       },

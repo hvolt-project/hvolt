@@ -129,6 +129,12 @@ pub enum Command {
         /// Tolerate up to N qualifying defects (default 0 = any fails).
         #[arg(long, value_name = "N")]
         max_defects: Option<usize>,
+        /// Check the contents in this file instead of what is on disk. It must
+        /// hold a JSON object mapping a source path to its text — an editor's
+        /// unsaved buffers, so lint reflects what is on screen rather than the
+        /// last save. A file rather than inline JSON: a buffer is easily 100 KB.
+        #[arg(long, value_name = "FILE")]
+        overlay_file: Option<std::path::PathBuf>,
     },
     /// HAP introspection straight from the package
     Hap {

@@ -52,6 +52,24 @@ editors that insist on their own language client).
 | **M3** ✅ | hvolt intelligence. Key completion per section; route completion from the module's `routes`; validation (unknown keys, non-array `device_types`, missing route files); dependency navigation (`lib = { path = "mylib" }` → `mylib/hvolt.toml`); palette commands `hvolt.build` / `assemble` / `sign` / `push` / `run` / `screenshot` / `log`, each returning `{ok, seconds, tail}` and a `window/showMessage` notification | done — measured on the GPU server (`hvolt build → ok (0.9s)`) and on a machine without hvigor (`failed`, from the exit code, not from grepping text) |
 | **M4** ✅ | VS Code extension in `editor/vscode`: `.ets` language, launches `hvolt lsp --stdio`, status bar, Build / Run / Sign / Install / Screenshot / Log, settings for binary, SDK, device, lint-on-save | done — `@vscode/vsce package` produces a 128 KB `.vsix` (10 files); a manifest test keeps contributed commands, language id and the launched server in step |
 
+## Real-time diagnostics
+
+Measured on Linux (3-file project), 2026-10-19:
+
+| Fact | Value |
+|---|---|
+| Full `hvolt lint` (re-translates, always current) | 2.2 s |
+| Path-scoped `hvolt lint <file>` | unusable — codelinter resolves paths inside its translated tree |
+| Keystroke → published diagnostics, end to end | 2.7 s (2.0 s debounce + 2.2 s lint overlap measured at 2.7 s total) |
+
+Unsaved buffers are linted: `hvolt lint --overlay-file <json>` writes the editor's text
+over the mirrored copy in the linted tree, so the engine judges what is on screen.
+Verified by putting a syntax error in the buffer only — the disk file stayed clean while
+lint reported `@parsing-error/parsing-error | Parsing error: Variable declaration expected. (line 7)`.
+
+`lintOnType` (default on, 2.0 s debounce) refreshes diagnostics after typing stops;
+`lintOnSave` keeps the on-save run.
+
 ## Protocol log
 
 `--log-file <path>`, `HVOLT_LSP_LOG` or the editor setting `hvolt.logFile` makes the server
