@@ -1,0 +1,62 @@
+name: sdk-refresh
+
+# HarmonyOS ships new SDK builds and hvigor releases on its own schedule. This job only
+# reports the difference — it never bumps a pin. A pin that moves without the gates
+# having seen the new SDK would claim support nobody exercised, and the adaptation needed
+# (ets-loader's TypeScript version, codelinter's config schema, hvigor's flags) is work
+# that requires a machine with the SDK, not a cron job.
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    name: compare pins with upstream
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: read upstream versions
+        id: check
+        run: |
+          python3 scripts/check-versions.py | tee report.txt
+          if grep -q "^DRIFT: none$" report.txt; then
+            echo "drift=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "drift=true" >> "$GITHUB_OUTPUT"
+          fi
+          {
+            echo "### Version check"
+            echo '```'
+            cat report.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: keep one issue for the current drift
+        if: steps.check.outputs.drift == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="chore: SDK/tool version refresh"
+          body="$(printf '%s\n\n' \
+            '`scripts/check-versions.py` found a difference between the pinned versions and upstream.' \
+            '```' && cat report.txt && printf '```\n\n%s\n%s\n%s\n' \
+            '- [ ] decide whether the new SDK needs code changes (ets-loader TypeScript version, codelinter config schema, hvigor flags)' \
+            '- [ ] bump the pin in the commit that carries the adaptation, not before' \
+            '- [ ] release only after the gates have run against the new version')"
+          existing="$(gh issue list --state open --search "$title in:title" --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+            echo "commented on #$existing"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi
