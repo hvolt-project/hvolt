@@ -111,6 +111,21 @@ is dropped rather than shown at a wrong place. Measured on a two-use example: tw
 locations, an outline with `Index` → `constructor`, `build`, `message`, and one quick fix
 returned for a known diagnostic code.
 
+## Editor-experience features
+
+Four things that separate a language plugin from a usable one, all measured:
+
+- **occurrences** (`documentHighlight`): 3 spans for `message` in the sample file; each
+  mapped back, with write/read kinds;
+- **inlay hints**: every category is off by default in the service, so the preferences
+  turn them on — 4 hints on the sample (`: void`, `value:`, `content:`, `...data:`);
+- **auto-import**: completion is asked for module exports, and `completionItem/resolve`
+  returns the import edit together with the documentation. The service's own module
+  specifier came out as `"../../../../T/…/src/model/Store"` because its view of the paths
+  differs from the editor's, so the specifier is recomputed from the entry's target file
+  (`"../model/Store"`);
+- **completion documentation**: the entry's JSDoc, shown in the resolve step.
+
 ## Type diagnostics
 
 Source: the SDK's TypeScript service (`createLanguageService` in the same fork the hover

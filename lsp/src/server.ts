@@ -22,7 +22,7 @@ import { completeKeys, declaredRoutes, inRouterCall } from "./hvolttoml.js";
 import { dependencyAt, dependencyTarget, validateToml } from "./tomlcheck.js";
 import { appendFileSync, existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, join, relative } from "node:path";
 import { declarationDirs, etsBase, loadTypeScript, readDeclarations } from "./sdk.js";
 import { transformArkts, toOriginal, toTransformed, type Transformed } from "./transform.js";
 import {
@@ -391,10 +391,12 @@ connection.onInitialize((params) => {
       textDocumentSync: TextDocumentSyncKind.Full,
       hoverProvider: true,
       signatureHelpProvider: { triggerCharacters: ["(", ","], retriggerCharacters: [","] },
-      completionProvider: { resolveProvider: false, triggerCharacters: [".", "@", "'", "/"] },
+      completionProvider: { resolveProvider: true, triggerCharacters: [".", "@", "'", "/"] },
       definitionProvider: true,
       referencesProvider: true,
       documentSymbolProvider: true,
+      documentHighlightProvider: true,
+      inlayHintProvider: true,
       codeActionProvider: { codeActionKinds: ["quickfix"] },
       renameProvider: true,
       // The editor contributes its own `hvolt.*` commands, so the server must not
@@ -642,7 +644,13 @@ connection.onCompletion(({ textDocument, position }) => {
     }
   }
 
-  const completions = service.getCompletionsAtPosition(file, servicePosition(file, position.line, position.character), {});
+  const completions = service.getCompletionsAtPosition(file, servicePosition(file, position.line, position.character), {
+    // Project exports are offered as completions even before they are imported; the
+    // import itself arrives through `completionItem/resolve`.
+    includeCompletionsForModuleExports: true,
+    includeCompletionsWithInsertText: true,
+    includeCompletionsWithClassMemberSnippets: true,
+  });
   if (!completions) {
     // Inside a component chain the service returns nothing at all; ArkTS's DSL functions
     // (`$r`, `$rawfile`) are still what the user needs there.
@@ -693,6 +701,9 @@ connection.onCompletion(({ textDocument, position }) => {
     kind: entry.kind === ts.ScriptElementKind.memberFunctionElement ? CompletionItemKind.Method : CompletionItemKind.Text,
     detail: entry.kind,
     sortText: (usedHere.has(entry.name) ? rank(entry.kind) : "2") + (entry.sortText ?? entry.name),
+    // `completionItem/resolve` needs the position and the entry identity to fetch full
+    // documentation and, for a project export, the import edit.
+    data: { file, line: position.line, character: position.character, name: entry.name, source: entry.source },
   }));
   // ArkTS's own globals (`$r`, `$rawfile`) and keywords are not in the service's list at
   // all inside a component chain, and even where they are, a thousand entries bury them.
@@ -709,12 +720,60 @@ connection.onCompletion(({ textDocument, position }) => {
   // Sorted here as well: the server's order is what a plain client shows first.
   merged.sort((a, b) => (a.sortText ?? a.label).localeCompare(b.sortText ?? b.label));
   return merged;
-  return completions.entries.map((entry: any) => ({
-    label: entry.name,
-    kind: completionKind(ts, entry.kind),
-    detail: entry.kind,
-    sortText: entry.sortText,
-  }));
+});
+
+connection.onCompletionResolve((item: any) => {
+  const data = item.data;
+  if (!data?.name || !data.file) return item;
+  const file = data.file as string;
+  const details = service.getCompletionEntryDetails(
+    file,
+    servicePosition(file, data.line, data.character),
+    data.name,
+    {},
+    data.source,
+    {},
+    undefined,
+  );
+  if (!details) return item;
+  const parts = details.documentation ?? details.displayParts ?? [];
+  const documentation = ts.displayPartsToString(parts).trim();
+  if (documentation) {
+    item.documentation = { kind: MarkupKind.Markdown, value: documentation };
+  }
+  // Auto-import: when the entry is exported by a project module, the service returns the
+  // import edit along with it.
+  const edits: any[] = [];
+  for (const change of details.codeActions ?? []) {
+    for (const textChange of change.changes[0]?.textChanges ?? []) {
+      const from = originalOffset(change.changes[0].fileName, textChange.span.start);
+      const to = originalOffset(change.changes[0].fileName, textChange.span.start + textChange.span.length);
+      if (from === undefined || to === undefined) continue;
+      const a = positionOf(change.changes[0].fileName, from);
+      const b = positionOf(change.changes[0].fileName, to);
+      edits.push({
+        range: { start: { line: a.line, character: a.character }, end: { line: b.line, character: b.character } },
+        newText: textChange.newText ?? "",
+      });
+    }
+  }
+  if (edits.length > 0) {
+    // The service's own module specifier is computed from its view of the paths, which
+    // can differ from what the editor sees (symlinked roots produced
+    // `"../../../../T/…/src/model/Store"`); the entry knows the target file, so the
+    // relative specifier is computed here instead.
+    const target = typeof data.source === "string" && data.source.startsWith("/") ? data.source : "";
+    if (target) {
+      let specifier = relative(dirname(file), target).replace(/\\/g, "/");
+      if (!specifier.startsWith(".")) specifier = `./${specifier}`;
+      for (const edit of edits) {
+        edit.newText = String(edit.newText).replace(/from\s+"[^"]*"/, `from "${specifier}"`).replace(/\r\n/g, "\n");
+      }
+    }
+    item.additionalTextEdits = edits;
+    item.detail = `${item.detail ?? ""} · imports`.trim();
+  }
+  return item;
 });
 
 connection.onDefinition(({ textDocument, position }) => {
@@ -791,6 +850,59 @@ connection.onDocumentSymbol(({ textDocument }) => {
   // inside it, not that synthetic node.
   if (symbols.name === "<global>") return symbols.children ?? [];
   return [symbols];
+});
+
+connection.onDocumentHighlight(({ textDocument, position }) => {
+  const file = textDocument.uri.replace(/^file:\/\//, "");
+  const found = service.getDocumentHighlights(file, servicePosition(file, position.line, position.character), [file]) ?? [];
+  const highlights: Array<{ range: any; kind: 2 | 3 }> = [];
+  for (const group of found) {
+    for (const highlight of group.highlightSpans) {
+      const start = originalOffset(file, highlight.textSpan.start);
+      const end = originalOffset(file, highlight.textSpan.start + highlight.textSpan.length);
+      if (start === undefined || end === undefined) continue;
+      const a = positionOf(file, start);
+      const b = positionOf(file, end);
+      highlights.push({
+        range: { start: { line: a.line, character: a.character }, end: { line: b.line, character: b.character } },
+        // 1 = text, 2 = read, 3 = write, as the protocol numbers them.
+        kind: highlight.kind === ts.HighlightSpanKind.writtenReference ? 3 : 2,
+      });
+    }
+  }
+  log(`documentHighlight ${position.line + 1}:${position.character + 1} → ${highlights.length}`);
+  return highlights;
+});
+
+connection.languages.inlayHint.on(({ textDocument, range }) => {
+  const file = textDocument.uri.replace(/^file:\/\//, "");
+  const from = servicePosition(file, range.start.line, range.start.character);
+  const to = servicePosition(file, range.end.line, range.end.character);
+  // Every category is off by default; these are the ones an ArkTS editor wants.
+  const hints = service.provideInlayHints(file, { start: from, length: Math.max(0, to - from) }, {
+    includeInlayParameterNameHints: "all",
+    includeInlayParameterNameHintsWhenArgumentMatchesName: false,
+    includeInlayFunctionParameterTypeHints: true,
+    includeInlayVariableTypeHints: true,
+    includeInlayPropertyDeclarationTypeHints: true,
+    includeInlayFunctionLikeReturnTypeHints: true,
+    includeInlayEnumMemberValueHints: true,
+  }) ?? [];
+  const converted: any[] = [];
+  for (const hint of hints) {
+    const offset = originalOffset(file, hint.position);
+    if (offset === undefined) continue;
+    const at = positionOf(file, offset);
+    converted.push({
+      position: { line: at.line, character: at.character },
+      label: ts.displayPartsToString(hint.displayParts ?? []) || hint.text,
+      kind: hint.kind === ts.InlayHintKind.Type ? 1 : 2,
+      paddingLeft: hint.whitespaceBefore ?? false,
+      paddingRight: hint.whitespaceAfter ?? false,
+    });
+  }
+  log(`inlayHints ${range.start.line + 1}-${range.end.line + 1} → ${converted.length}`);
+  return converted;
 });
 
 connection.onCodeAction(({ textDocument, range, context }) => {
