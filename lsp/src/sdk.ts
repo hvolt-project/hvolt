@@ -33,9 +33,22 @@ export function loadTypeScript(sdkRoot: string): TsModule {
 }
 
 /** Declaration roots the language service needs: SDK API, ArkUI components, kits. */
+/**
+ * The directory that holds `api/`, `component/`, `kits/` and `arkts/`.
+ *
+ * `--sdk` is given either as `…/openharmony` or `…/openharmony/ets`; module
+ * resolution needs the real one, or every path mapping lands one level off and
+ * every ArkTS import silently becomes `any`.
+ */
+export function etsBase(sdkRoot: string): string | undefined {
+  const candidates = ["ets", "default/openharmony/ets", ""].map((rel) => join(sdkRoot, rel));
+  return candidates.find(
+    (dir) => existsSync(join(dir, "oh-uni-package.json")) || existsSync(join(dir, "api")),
+  );
+}
+
 export function declarationDirs(sdkRoot: string): string[] {
-  const ets = ["ets", "default/openharmony/ets", ""].map((rel) => join(sdkRoot, rel));
-  const base = ets.find((dir) => existsSync(join(dir, "oh-uni-package.json")) || existsSync(join(dir, "api")));
+  const base = etsBase(sdkRoot);
   if (!base) return [];
   return ["api", "component", "kits", "arkts"].map((sub) => join(base, sub)).filter((dir) => existsSync(dir));
 }

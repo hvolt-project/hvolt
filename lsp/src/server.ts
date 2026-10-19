@@ -22,7 +22,7 @@ import { dependencyAt, dependencyTarget, validateToml } from "./tomlcheck.js";
 import { appendFileSync, existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { declarationDirs, loadTypeScript, readDeclarations } from "./sdk.js";
+import { declarationDirs, etsBase, loadTypeScript, readDeclarations } from "./sdk.js";
 
 const args = process.argv.slice(2);
 const option = (name: string): string | undefined => {
@@ -39,6 +39,7 @@ if (!sdkRoot) {
 }
 
 const ts = loadTypeScript(sdkRoot);
+const etsRoot = etsBase(sdkRoot) ?? sdkRoot;
 const root = process.env.HVOLT_LSP_ROOT ?? rootDir;
 const files = readDeclarations(declarationDirs(sdkRoot));
 for (const [path, text] of collectSources(root)) files.set(path, text);
@@ -59,11 +60,30 @@ const host = {
     experimentalDecorators: true,
     strict: true,
     allowNonTsExtensions: true,
+    skipLibCheck: true,
+    types: [],
+    // ArkTS modules are bare specifiers (`import { window } from '@kit.ArkUI'`,
+    // `import http from '@ohos.net.http'`). Without this map the resolver cannot find
+    // them, every such import degrades to `any`, and hover answers
+    // "window.WindowStage = /*unresolved*/ any" — measured on EntryAbility.ets.
+    baseUrl: etsRoot,
+    // ArkTS specifiers are dotted (`@ohos.window` → `api/@ohos.window.d.ts`), not
+    // slashed: a `@ohos/*` mapping resolves the kit file but not what it re-exports,
+    // which leaves `window` as `any` and every `window.X` unresolved (measured).
+    paths: {
+      "@ohos.*": ["api/@ohos.*"],
+      "@kit.*": ["kits/@kit.*"],
+      "@system.*": ["api/@system.*"],
+      "@arkts.*": ["arkts/@arkts.*"],
+    },
   }),
   getDefaultLibFileName: (options: any) =>
-    `${sdkRoot}/build-tools/ets-loader/node_modules/typescript/lib/${ts.getDefaultLibFileName(options)}`,
+    `${etsRoot}/build-tools/ets-loader/node_modules/typescript/lib/${ts.getDefaultLibFileName(options)}`,
   fileExists: (file: string) => files.has(file),
   readFile: (file: string) => files.get(file),
+  // The resolver probes `.ts`, `.tsx`, `.d.ts`; the SDK also ships `.d.ets`.
+  directoryExists: (dir: string) => declarationDirs(sdkRoot).some((d) => dir.startsWith(d)),
+  getDirectories: () => ["api", "kits", "component", "arkts"].map((d) => `${etsRoot}/${d}`),
   getScriptKind: (file: string) => (file.endsWith(".ets") ? (ts.ScriptKind.ETS ?? 8) : undefined),
 };
 
