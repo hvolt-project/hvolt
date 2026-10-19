@@ -22,7 +22,7 @@ export interface Entry {
   column: number;
 }
 
-const APP_KEYS = new Set([
+export const APP_KEYS = new Set([
   "bundle",
   "name",
   "version",
@@ -34,12 +34,12 @@ const APP_KEYS = new Set([
   "compatible_sdk_version",
   "runtime_os",
   "products",
+  "members",
   "sdk_path",
   "signing",
-  "type",
 ]);
 
-const MODULE_KEYS = new Set([
+export const MODULE_KEYS = new Set([
   "name",
   "entry",
   "routes",
