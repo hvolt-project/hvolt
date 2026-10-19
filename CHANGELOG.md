@@ -9,20 +9,30 @@ versions may change the CLI surface.
 
 ### Added
 
-- A VS Code extension in `editor/vscode`: registers `.ets`, launches `hvolt lsp --stdio`, shows
-  build state in the status bar and exposes Build / Run / Sign / Install / Screenshot / Log.
-
+- A VS Code client, maintained in its own repository
+  ([hvolt-project/hvolt-vscode](https://github.com/hvolt-project/hvolt-vscode)): registers `.ets`,
+  launches `hvolt lsp --stdio`, shows build state in the status bar and exposes Build / Run / Sign /
+  Install / Screenshot / Log. The copy that lived in `editor/` was removed once its files and history
+  moved there.
 - `hvolt lsp --stdio`: a language server for editors.
 - Palette commands in the language server: `hvolt.build`, `assemble`, `sign`, `push`, `run`,
   `screenshot`, `log` — each returns `{ok, seconds, tail}` (success taken from the exit code) and
   posts a `window/showMessage` notification.
-- Diagnostics in the language server come from codelinter (`hvolt lint --json`, on open/save) and from
-  a real build (`hvolt.buildDiagnostics` command); both are mapped from the generated trees back to
-  the flat project paths and merged per source. Semantics (hover, completion, definition,
-  signature help, rename) come from the TypeScript build inside the installed SDK, which parses
-  `.ets` and ArkUI structs; diagnostics deliberately stay with hvigor, codelinter and
-  `app_check_tool`, because the fork alone mis-reports legal ArkUI block-chains
-  (`Column() { … }.width()`). See `lsp/DESIGN.md`.
+- Editor features: completion (component attributes, declared object arguments, enum members, ArkTS
+  decorators, `$r`/`$rawfile`, module exports together with their import edit), hover, signature help,
+  definition, type definition, implementation, references, document highlights, outline, workspace
+  symbols, folding, smart selection, rename, quick fixes, semantic highlighting, inlay hints,
+  `hvolt.toml` path links and call hierarchy.
+- ArkUI blocks are rewritten before the SDK's TypeScript service reads a file (`Column() { … }` becomes
+  `Column() ;__arkui(() => { … })`, with a segment map for positions), because the service's parser
+  rejects the block syntax and so has no scope inside `build()` — measured 2026-10-19: a completion
+  request there returned 1,757 global entries and the local variable was not among them.
+- Diagnostics in the language server come from codelinter (`hvolt lint --json`) and from the SDK's
+  TypeScript service (type errors), both mapped from the generated trees back to the flat project paths
+  and merged per source. Unsaved buffers reach codelinter through an overlay, so what is on screen is
+  what gets judged. The rule run is skipped when its inputs are unchanged, because engine startup
+  dominates the cost (whole tree 2.94 s, one file 2.78 s, identical content again 0 ms).
+- `hvolt lint --scoped` checks only the files an overlay replaced.
 
 ## [26.0.0-0] — 2026-10-18
 
