@@ -1,0 +1,69 @@
+{
+  "name": "hvolt-vscode",
+  "displayName": "hvolt",
+  "description": "ArkTS support for hvolt projects: language server, diagnostics and build commands",
+  "version": "0.1.0",
+  "license": "GPL-3.0-or-later",
+  "publisher": "hvolt-project",
+  "repository": { "type": "git", "url": "https://github.com/hvolt-project/hvolt" },
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Programming Languages", "Linters"],
+  "activationEvents": ["onLanguage:ets", "workspaceContains:hvolt.toml"],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "ets",
+        "aliases": ["ArkTS", "ets"],
+        "extensions": [".ets"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "commands": [
+      { "command": "hvolt.build", "title": "hvolt: Build" },
+      { "command": "hvolt.run", "title": "hvolt: Build, sign, install and launch" },
+      { "command": "hvolt.sign", "title": "hvolt: Sign (local chain)" },
+      { "command": "hvolt.push", "title": "hvolt: Install on device" },
+      { "command": "hvolt.screenshot", "title": "hvolt: Screenshot device" },
+      { "command": "hvolt.log", "title": "hvolt: Fetch device log" }
+    ],
+    "configuration": {
+      "title": "hvolt",
+      "properties": {
+        "hvolt.binaryPath": {
+          "type": "string",
+          "default": "hvolt",
+          "description": "Path to the hvolt executable."
+        },
+        "hvolt.sdkPath": {
+          "type": "string",
+          "default": "",
+          "description": "SDK to load the language service from (empty: hvolt picks the installed one)."
+        },
+        "hvolt.device": {
+          "type": "string",
+          "default": "",
+          "description": "Device serial or host:port used by the device commands."
+        },
+        "hvolt.lintOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run codelinter on open/save and publish its findings."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.14.0",
+    "esbuild": "^0.23.0",
+    "typescript": "^5.5.0"
+  }
+}

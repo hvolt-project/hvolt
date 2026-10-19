@@ -9,7 +9,13 @@ versions may change the CLI surface.
 
 ### Added
 
+- A VS Code extension in `editor/vscode`: registers `.ets`, launches `hvolt lsp --stdio`, shows
+  build state in the status bar and exposes Build / Run / Sign / Install / Screenshot / Log.
+
 - `hvolt lsp --stdio`: a language server for editors.
+- Palette commands in the language server: `hvolt.build`, `assemble`, `sign`, `push`, `run`,
+  `screenshot`, `log` — each returns `{ok, seconds, tail}` (success taken from the exit code) and
+  posts a `window/showMessage` notification.
 - Diagnostics in the language server come from codelinter (`hvolt lint --json`, on open/save) and from
   a real build (`hvolt.buildDiagnostics` command); both are mapped from the generated trees back to
   the flat project paths and merged per source. Semantics (hover, completion, definition,

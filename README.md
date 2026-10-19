@@ -42,6 +42,21 @@ device.
   diagnostics from codelinter and from a real build (see [lsp/DESIGN.md](lsp/DESIGN.md))
 - **Few dependencies** — Rust to build; JDK 17+, Node.js, hvigorw and ohpm at runtime (hvolt installs the latter two)
 
+## Editors
+
+`hvolt lsp --stdio` is a language server; `editor/vscode` is a thin VS Code client for it.
+
+```bash
+hvolt lsp --stdio          # any LSP client can drive this
+cd editor/vscode && npm ci && node build.mjs
+npx @vscode/vsce package   # produces hvolt-vscode-0.1.0.vsix
+```
+
+What it provides: ArkTS hover/completion/definition/signature help/rename from the SDK's own
+TypeScript build; diagnostics from codelinter and from real builds, mapped onto the flat sources;
+`hvolt.toml` key completion, route completion, validation and dependency navigation; commands for
+build, sign, install, screenshot and log. Design and measurements: [lsp/DESIGN.md](lsp/DESIGN.md).
+
 ## Install
 
 Version numbers are `SDK version` + a release counter: **`26.0.0-0`** is the first release for SDK

@@ -9,6 +9,8 @@ dist/
 build/
 
 node_modules/
+*.vsix
+editor/vscode/LICENSE
 
 # npm packaging output (built by npm/stage.mjs, not source)
 npm/prebuilt/

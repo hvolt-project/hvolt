@@ -50,7 +50,7 @@ editors that insist on their own language client).
 | **M1** ✅ | `hvolt lsp --stdio`: host layer + fork semantics + document sync | done — `RelativeContainer` hovers as `RelativeContainerInterface`, `Text` defines into `component/text.d.ts`, 940 completions, ~0.2 s to initialize |
 | **M2** ✅ | diagnostics from the toolchain only, positions mapped back to real files | done — codelinter findings (54 defects on a demo project) and a compile error (`pages/Index.ets L8:12 — Cannot find name 'noSuchVariable'`, matching hvigor's `Index.ets:8:12`) both arrive on flat paths; lint and build results are merged per source, so one does not clear the other |
 | **M3** ✅ | hvolt intelligence. Key completion per section; route completion from the module's `routes`; validation (unknown keys, non-array `device_types`, missing route files); dependency navigation (`lib = { path = "mylib" }` → `mylib/hvolt.toml`); palette commands `hvolt.build` / `assemble` / `sign` / `push` / `run` / `screenshot` / `log`, each returning `{ok, seconds, tail}` and a `window/showMessage` notification | done — measured on the GPU server (`hvolt build → ok (0.9s)`) and on a machine without hvigor (`failed`, from the exit code, not from grepping text) |
-| **M4** | VS Code extension published (`.ets` association, status bar, device picker) | installable extension drives M1–M3 |
+| **M4** ✅ | VS Code extension in `editor/vscode`: `.ets` language, launches `hvolt lsp --stdio`, status bar, Build / Run / Sign / Install / Screenshot / Log, settings for binary, SDK, device, lint-on-save | done — `@vscode/vsce package` produces a 128 KB `.vsix` (10 files); a manifest test keeps contributed commands, language id and the launched server in step |
 
 ## Protocol contract
 
