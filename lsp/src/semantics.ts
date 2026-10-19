@@ -40,6 +40,88 @@ const typeIndex = (name: (typeof TOKEN_TYPES)[number]): number => TOKEN_TYPES.in
 
 const IDENTIFIER = /[A-Za-z_$][\w$]*/g;
 
+interface ScanState {
+  blockComment: boolean;
+  template: boolean;
+}
+
+/**
+ * Blank out everything that is not code, keeping the string length so positions stay
+ * exact. Measured failure without this: `import { hilog } from '@kit.PerformanceAnalysisKit'`
+ * produced a `decorator` token for `kit` (the `@` before it) and a `property` token for
+ * `PerformanceAnalysisKit` (the `.`), so a module specifier was coloured as code.
+ */
+function maskNonCode(line: string, state: ScanState): string {
+  const out = line.split("");
+  let index = 0;
+  while (index < line.length) {
+    if (state.blockComment) {
+      const end = line.indexOf("*/", index);
+      const stop = end === -1 ? line.length : end + 2;
+      for (let k = index; k < stop; k++) out[k] = " ";
+      index = stop;
+      if (end !== -1) state.blockComment = false;
+      continue;
+    }
+    if (state.template) {
+      while (index < line.length) {
+        if (line[index] === "\\") {
+          out[index] = " ";
+          if (index + 1 < line.length) out[index + 1] = " ";
+          index += 2;
+          continue;
+        }
+        const closing = line[index] === "`";
+        out[index] = " ";
+        index++;
+        if (closing) {
+          state.template = false;
+          break;
+        }
+      }
+      continue;
+    }
+    const character = line[index];
+    if (character === "/" && line[index + 1] === "/") {
+      for (let k = index; k < line.length; k++) out[k] = " ";
+      break;
+    }
+    if (character === "/" && line[index + 1] === "*") {
+      state.blockComment = true;
+      out[index] = " ";
+      out[index + 1] = " ";
+      index += 2;
+      continue;
+    }
+    if (character === '"' || character === "'") {
+      const quote = character;
+      out[index] = " ";
+      index++;
+      while (index < line.length) {
+        if (line[index] === "\\") {
+          out[index] = " ";
+          if (index + 1 < line.length) out[index + 1] = " ";
+          index += 2;
+          continue;
+        }
+        const closing = line[index] === quote;
+        out[index] = " ";
+        index++;
+        if (closing) break;
+      }
+      continue;
+    }
+    if (character === "`") {
+      state.template = true;
+      out[index] = " ";
+      index++;
+      continue;
+    }
+    index++;
+  }
+  return out.join("");
+}
+
 /** The name right before `at`, skipping whitespace. */
 function previousWord(line: string, at: number): { word: string; end: number } {
   let index = at - 1;
@@ -60,12 +142,13 @@ export function semanticTokens(
 ): SemanticToken[] {
   const lines = text.split(/\r?\n/);
   const tokens: SemanticToken[] = [];
+  const state: ScanState = { blockComment: false, template: false };
   for (let line = 0; line < lines.length; line++) {
     const content = lines[line];
-    // Skip comment lines outright; the grammar handles the rest.
-    const trimmed = content.trimStart();
-    if (trimmed.startsWith("//") || trimmed.startsWith("*") || trimmed.startsWith("/*")) continue;
-    for (const match of content.matchAll(IDENTIFIER)) {
+    // Only code is classified: strings, template literals and comments are the grammar's
+    // business, and a module specifier is not a name.
+    const code = maskNonCode(content, state);
+    for (const match of code.matchAll(IDENTIFIER)) {
       const word = match[0];
       const start = match.index ?? 0;
       const before = content.slice(0, start).trimEnd();
