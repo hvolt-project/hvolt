@@ -24,6 +24,7 @@ import { appendFileSync, existsSync, readFileSync, rmSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { declarationDirs, etsBase, loadTypeScript, readDeclarations } from "./sdk.js";
+import { transformArkts, toOriginal, toTransformed, type Transformed } from "./transform.js";
 import {
   buildAttributeIndex,
   buildEnumIndex,
@@ -55,7 +56,35 @@ const ts = loadTypeScript(sdkRoot);
 const etsRoot = etsBase(sdkRoot) ?? sdkRoot;
 const root = process.env.HVOLT_LSP_ROOT ?? rootDir;
 const files = readDeclarations(declarationDirs(sdkRoot));
-for (const [path, text] of collectSources(root)) files.set(path, text);
+
+/**
+ * Project sources: `originals` is what the editor holds and everything we answer with;
+ * `transformed` is the same code with ArkUI blocks rewritten so the language service can
+ * parse it. Only the service ever sees the transformed text.
+ */
+const originals = new Map<string, string>();
+const transformed = new Map<string, Transformed>();
+
+const SHIM_PATH = join(root, ".hvolt", "arkui-shim.d.ts");
+files.set(
+  SHIM_PATH,
+  "// Injected by the hvolt language server so the ArkUI transform parses.\ndeclare function __arkui(build: () => void): any;\n",
+);
+
+/** Recompute the transformed text for one file. */
+function refreshTransform(path: string): void {
+  const text = originals.get(path);
+  if (text === undefined) return;
+  const result = transformArkts(text, (name) => attributes().components.has(name));
+  transformed.set(path, result);
+  files.set(path, result.code);
+  log(`transform ${path.replace(root + "/", "")}: changed=${result.changed} ${text.length}→${result.code.length}`);
+}
+
+for (const [path, text] of collectSources(root)) {
+  originals.set(path, text);
+  files.set(path, text);
+}
 const versions = new Map<string, number>();
 
 /**
@@ -203,15 +232,31 @@ function attributeSignature(member: string, component?: string): string | undefi
   return undefined;
 }
 const positionOf = (file: string, offset: number) => {
-  const text = files.get(file) ?? "";
+  const text = originals.get(file) ?? files.get(file) ?? "";
   const source = ts.createSourceFile(file, text, ts.ScriptTarget.ES2021);
   return source.getLineAndCharacterOfPosition(offset);
 };
 const offsetOf = (file: string, line: number, character: number) => {
-  const text = files.get(file) ?? "";
+  const text = originals.get(file) ?? files.get(file) ?? "";
   const source = ts.createSourceFile(file, text, ts.ScriptTarget.ES2021);
   return source.getPositionOfLineAndCharacter(line, character);
 };
+
+/** Original offset → offset inside the transformed text the service sees. */
+const serviceOffset = (file: string, offset: number): number => {
+  const result = transformed.get(file);
+  return result ? toTransformed(result, offset) : offset;
+};
+
+/** Transformed offset → original offset (undefined for injected syntax). */
+const originalOffset = (file: string, offset: number): number | undefined => {
+  const result = transformed.get(file);
+  return result ? toOriginal(result, offset) : offset;
+};
+
+/** LSP position → offset in the transformed text. */
+const servicePosition = (file: string, line: number, character: number): number =>
+  serviceOffset(file, offsetOf(file, line, character));
 
 // Explicit streams: the transport never comes from CLI flags, so the server can
 // take its own --sdk/--root options.
@@ -285,19 +330,22 @@ connection.onInitialize((params) => {
 
 documents.onDidOpen((e) => {
   log(`didOpen ${e.document.uri} (${e.document.languageId}, ${e.document.getText().split("\n").length} lines)`);
-  files.set(e.document.uri.replace(/^file:\/\//, ""), e.document.getText());
-  versions.set(e.document.uri.replace(/^file:\/\//, ""), e.document.version);
+  const path = e.document.uri.replace(/^file:\/\//, "");
+  originals.set(path, e.document.getText());
+  versions.set(path, e.document.version);
+  refreshTransform(path);
 });
 documents.onDidChangeContent((e) => {
   const path = e.document.uri.replace(/^file:\/\//, "");
-  files.set(path, e.document.getText());
+  originals.set(path, e.document.getText());
+  refreshTransform(path);
   versions.set(path, e.document.version);
 });
 
 connection.onHover(({ textDocument, position }) => {
   log(`hover ${textDocument.uri}:${position.line + 1}:${position.character + 1}`);
   const file = textDocument.uri.replace(/^file:\/\//, "");
-  const info = service.getQuickInfoAtPosition(file, offsetOf(file, position.line, position.character));
+  const info = service.getQuickInfoAtPosition(file, servicePosition(file, position.line, position.character));
   if (!info) return null;
   let text = ts.displayPartsToString(info.displayParts ?? []);
   const docs = ts.displayPartsToString(info.documentation ?? []);
@@ -326,7 +374,7 @@ connection.onHover(({ textDocument, position }) => {
     // Some symbols report documentation but no display parts (measured on
     // `hilog.error`: hover showed only "Prints ERROR logs."). Fall back to the
     // signature the service already knows how to build.
-    const items = service.getSignatureHelpItems(file, offsetOf(file, position.line, position.character), {});
+    const items = service.getSignatureHelpItems(file, servicePosition(file, position.line, position.character), {});
     const first = items?.items?.[0];
     if (first) {
       const params = first.parameters.map((parameter: any) => ts.displayPartsToString(parameter.displayParts ?? []));
@@ -345,7 +393,7 @@ connection.onHover(({ textDocument, position }) => {
 connection.onSignatureHelp(({ textDocument, position }) => {
   log(`signatureHelp ${textDocument.uri}:${position.line + 1}:${position.character + 1}`);
   const file = textDocument.uri.replace(/^file:\/\//, "");
-  const items = service.getSignatureHelpItems(file, offsetOf(file, position.line, position.character), {});
+  const items = service.getSignatureHelpItems(file, servicePosition(file, position.line, position.character), {});
   if (!items) {
     // Component chains are beyond the fork's parser; the declaration still knows the
     // signature, and that is what the user needs while typing the arguments.
@@ -365,14 +413,16 @@ connection.onSignatureHelp(({ textDocument, position }) => {
   // The callee is to the left of the cursor (inside the argument list), so quick info
   // has to be asked for at the call's name, not at the cursor.
   const quickLabel = (): string => {
-    const text = files.get(file) ?? "";
+    // The callee sits to the left of the cursor: ask quick info for the name, not for
+    // the argument position.
+    const text = originals.get(file) ?? "";
     const lineText = text.split(/\r?\n/)[position.line] ?? "";
-    let cursor = Math.min(position.character, lineText.length);
+    const cursor = Math.min(position.character, lineText.length);
     const open = lineText.lastIndexOf("(", cursor);
     if (open < 0) return "";
     let start = open;
     while (start > 0 && /[\w$]/.test(lineText[start - 1])) start--;
-    const info = service.getQuickInfoAtPosition(file, offsetOf(file, position.line, start));
+    const info = service.getQuickInfoAtPosition(file, serviceOffset(file, offsetOf(file, position.line, start)));
     return ts.displayPartsToString(info?.displayParts ?? []).trim();
   };
   const signatures = items.items.map((item: any) => {
@@ -500,7 +550,7 @@ connection.onCompletion(({ textDocument, position }) => {
     }
   }
 
-  const completions = service.getCompletionsAtPosition(file, offsetOf(file, position.line, position.character), {});
+  const completions = service.getCompletionsAtPosition(file, servicePosition(file, position.line, position.character), {});
   if (!completions) return keywordCompletions(lineText, position.character);
   // The service returns 1,757 entries in its own order, which puts `arguments` first and
   // buries the local variable being typed. Locals, parameters, imports and members are
@@ -512,6 +562,9 @@ connection.onCompletion(({ textDocument, position }) => {
     switch (kind) {
       case ts.ScriptElementKind.localVariableElement:
       case ts.ScriptElementKind.parameterElement:
+      // `let counter = 1` reports kind "let" — measured; missing it ranked the local
+      // below every SDK global.
+      case "let":
       case ts.ScriptElementKind.variableElement:
       case ts.ScriptElementKind.constElement:
       case ts.ScriptElementKind.alias:
@@ -569,7 +622,7 @@ connection.onDefinition(({ textDocument, position }) => {
       },
     ];
   }
-  const defs = service.getDefinitionAtPosition(file, offsetOf(file, position.line, position.character)) ?? [];
+  const defs = service.getDefinitionAtPosition(file, servicePosition(file, position.line, position.character)) ?? [];
   return defs.map((def: any) => {
     const start = positionOf(def.fileName, def.textSpan.start);
     const end = positionOf(def.fileName, def.textSpan.start + def.textSpan.length);
@@ -582,7 +635,7 @@ connection.onDefinition(({ textDocument, position }) => {
 
 connection.onRenameRequest(({ textDocument, position, newName }) => {
   const file = textDocument.uri.replace(/^file:\/\//, "");
-  const rename = service.findRenameLocations(file, offsetOf(file, position.line, position.character), false, false) ?? [];
+  const rename = service.findRenameLocations(file, servicePosition(file, position.line, position.character), false, false) ?? [];
   const changes: Record<string, any[]> = {};
   for (const loc of rename) {
     const start = positionOf(loc.fileName, loc.textSpan.start);
@@ -808,7 +861,9 @@ function arktsDiagnostics(): void {
     .map((document) => document.uri.replace(/^file:\/\//, ""))
     .filter((path) => path.endsWith(".ets") && path.startsWith(root));
   for (const path of open) {
-    const text = files.get(path) ?? "";
+    // The block-chain test has to look at the user's text: the transformed copy no
+    // longer contains `}.modifier(…)`, which is exactly what marks an ArkUI DSL file.
+    const text = originals.get(path) ?? files.get(path) ?? "";
     if (!text) continue;
     // The parser rejects `View() { … }.modifier(…)`, so the test is on the source, not
     // on a diagnostic: any `}` directly followed by `.name(` marks an ArkUI DSL chain.

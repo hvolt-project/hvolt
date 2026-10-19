@@ -6,6 +6,15 @@ import { mkdirSync } from "node:fs";
 mkdirSync("dist", { recursive: true });
 // The diagnostics module is also built on its own so tests can import it.
 await build({
+  entryPoints: ["src/transform.ts"],
+  outfile: "dist/transform.mjs",
+  bundle: true,
+  platform: "node",
+  format: "esm",
+  external: ["typescript"],
+});
+
+await build({
   entryPoints: ["src/arkui.ts"],
   outfile: "dist/arkui.mjs",
   bundle: true,

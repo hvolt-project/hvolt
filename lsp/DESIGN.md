@@ -70,6 +70,33 @@ lint reported `@parsing-error/parsing-error | Parsing error: Variable declaratio
 `lintOnType` (default on, 2.0 s debounce) refreshes diagnostics after typing stops;
 `lintOnSave` keeps the on-save run.
 
+## ArkTS → TS transform
+
+The SDK's parser rejects ArkUI block syntax, and that single limitation explained every
+completion/hover gap: inside `build()` the language service had no scope at all (measured:
+`coun` → 1,757 global entries, the local `counter` absent).
+
+The server now rewrites the blocks before the service sees the file, keeping every ArkUI
+call an expression and turning its block into a helper call:
+
+```ts
+Column() {              Column() ;__arkui(()=>{
+  Text('x').fontSize(20)    Text('x').fontSize(20)
+}.width('100%')         })   .width('100%')
+```
+
+`transformArkts` records a segment map, so request positions are converted into the
+transformed text and results are converted back; inserted syntax has no original
+position. `__arkui` is declared to the program by a shim file the server injects.
+Measured after the change: local variables, imports and keywords all complete inside
+`build()` (`counter`, `hilog`, `const` first in their prefix), and hover on an attribute
+returns the declared signature instead of `any`.
+
+Known limits: the transform only rewrites blocks whose component name is in the SDK's
+component index (custom structs are not yet included), and type diagnostics still skip
+files that contain ArkUI chains, because the rewritten program reports errors that only
+exist in the synthetic code.
+
 ## Type diagnostics
 
 Source: the SDK's TypeScript service (`createLanguageService` in the same fork the hover

@@ -89,6 +89,8 @@ const labels = (answer) => {
   return items.map((item) => item.label);
 };
 const signature = (answer) => answer?.signatures?.[0]?.label ?? "";
+/** Client-side prefix filtering, as VS Code does before showing the list. */
+const matching = (found, prefix) => found.filter((label) => label.toLowerCase().startsWith(prefix));
 
 test("hover: local variable, parameter, enum member, component, attribute", { skip }, async () => {
   assert.match(hoverText(await ask("hover", ["    let counter: number = 1;", "    counter|;"])), /counter: number/);
@@ -110,20 +112,20 @@ test("signature help: plain call and ArkUI attribute", { skip }, async () => {
   assert.match(signature(await ask("signature", ["    Text(this.message).fontWeight(|)"])), /fontWeight\(/);
 });
 
-// Measured gaps. Inside `build()` the SDK's parser rejects the ArkUI block, so the
-// language service has no scope at all: even `coun` returns the 1,757 global entries.
-// Every item below needs an ArkTS→TS transform, not another special case.
-test("completion: a local declared in the same build() body", { skip, todo: "needs an ArkTS transform; the fork has no scope inside build()" }, async () => {
-  const found = labels(await ask("completion", ["    let counter: number = 1;", "    coun|"]));
-  assert.ok(found.includes("counter"), `only globals came back: ${found.slice(0, 6)}`);
+test("completion: a local declared in the same build() body", { skip }, async () => {
+  // Was impossible before the ArkTS transform: the fork had no scope inside build().
+  const found = matching(labels(await ask("completion", ["    let counter: number = 1;", "    coun|"])), "coun");
+  assert.equal(found[0], "counter", `matching candidates: ${found.slice(0, 5)}`);
 });
 
-test("completion: an imported name", { skip, todo: "same cause: imports are invisible inside build()" }, async () => {
-  const found = labels(await ask("completion", ["    hil|"]));
-  assert.deepEqual(found, ["hilog"]);
+test("completion: an imported name", { skip }, async () => {
+  // VS Code filters by the typed prefix client-side, so the top *matching* candidate is
+  // what the user sees first.
+  const found = matching(labels(await ask("completion", ["    hil|"])), "hil");
+  assert.equal(found[0], "hilog", `matching candidates: ${found.slice(0, 5)}`);
 });
 
-test("completion: a keyword", { skip, todo: "keywords are merged, but ranked below the SDK's globals" }, async () => {
-  const found = labels(await ask("completion", ["    con|"]));
-  assert.equal(found[0], "const");
+test("completion: a keyword outranks the SDK globals", { skip }, async () => {
+  const found = matching(labels(await ask("completion", ["    con|"])), "con");
+  assert.equal(found[0], "const", `matching candidates: ${found.slice(0, 5)}`);
 });
