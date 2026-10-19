@@ -238,3 +238,36 @@ export function membersOf(
   if (current) members = types.get(current) ?? new Map();
   return members;
 }
+
+/** Declared enums of the component tree: `Alignment` → ["Top", "Center", …]. */
+export type EnumIndex = Map<string, string[]>;
+
+export function buildEnumIndex(ts: TsModule, declarations: Map<string, string>): EnumIndex {
+  const enums: EnumIndex = new Map();
+  for (const [path, text] of declarations) {
+    if (!/[\\/]component[\\/]/.test(path)) continue;
+    const source = ts.createSourceFile(path, text, ts.ScriptTarget.ES2021, true);
+    for (const statement of source.statements) {
+      if (!ts.isEnumDeclaration(statement)) continue;
+      const name = statement.name.text;
+      const members = statement.members
+        .map((member: any) => (member.name && ts.isIdentifier(member.name) ? member.name.text : ""))
+        .filter(Boolean);
+      const existing = enums.get(name) ?? [];
+      enums.set(name, [...new Set([...existing, ...members])]);
+    }
+  }
+  return enums;
+}
+
+/**
+ * `Alignment.` / `Alignment.Top` at the cursor — the enum being referenced.
+ *
+ * Component attributes take enums (`align(alignment: Alignment)`), and the fork cannot
+ * answer for them inside a chain, so their members come from the declarations too.
+ */
+export function enumAt(text: string): { name: string; members: string[] } | undefined {
+  const match = /([A-Z][A-Za-z0-9_]*)\s*\.\s*([A-Za-z0-9_]*)$/.exec(text);
+  if (!match) return undefined;
+  return { name: match[1], members: [] };
+}

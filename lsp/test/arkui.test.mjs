@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createRequire } from "node:module";
-import { buildAttributeIndex, buildTypeIndex, chainCallAt, chainComponent, membersOf, parameterTypes } from "../dist/arkui.mjs";
+import { buildAttributeIndex, buildEnumIndex, buildTypeIndex, chainCallAt, chainComponent, enumAt, membersOf, parameterTypes } from "../dist/arkui.mjs";
 
 const require = createRequire(import.meta.url);
 const ts = require("typescript");
@@ -69,4 +69,13 @@ test("the cursor's position in a chain call is recovered", () => {
   assert.deepEqual(chainCallAt("      .alignRules({"), { member: "alignRules", argument: 0, keys: [] });
   assert.deepEqual(chainCallAt("      .alignRules({ center: {"), { member: "alignRules", argument: 0, keys: ["center"] });
   assert.equal(chainCallAt("      .width(100)"), undefined, "a closed call is not an open argument list");
+});
+
+test("enum members are collected from the declarations", () => {
+  const enums = buildEnumIndex(ts, new Map([
+    ["/sdk/component/enums.d.ts", "declare enum FontWeight { Lighter = 0, Normal = 1, Bold = 2 }"],
+  ]));
+  assert.deepEqual(enums.get("FontWeight"), ["Lighter", "Normal", "Bold"]);
+  assert.deepEqual(enumAt("        .fontWeight(FontWeight.Bo"), { name: "FontWeight", members: [] });
+  assert.equal(enumAt("        .align(this.message"), undefined);
 });

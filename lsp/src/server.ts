@@ -25,7 +25,9 @@ import { dirname, join } from "node:path";
 import { declarationDirs, etsBase, loadTypeScript, readDeclarations } from "./sdk.js";
 import {
   buildAttributeIndex,
+  buildEnumIndex,
   buildTypeIndex,
+  enumAt,
   chainCallAt,
   chainComponent,
   membersOf,
@@ -133,6 +135,12 @@ let typeIndex: TypeIndex | undefined;
 function types(): TypeIndex {
   typeIndex ??= buildTypeIndex(ts, files);
   return typeIndex;
+}
+
+let enumIndex: Map<string, string[]> | undefined;
+function enums(): Map<string, string[]> {
+  enumIndex ??= buildEnumIndex(ts, files);
+  return enumIndex;
 }
 
 /** The whole chain up to the cursor, so a call may span lines. */
@@ -360,6 +368,20 @@ connection.onCompletion(({ textDocument, position }) => {
       detail: "route declared in hvolt.toml",
     }));
   }
+  // `Alignment.|` — component attributes take enums, and the fork answers nothing here
+  // because the chain does not parse. Members come from the declarations.
+  const enumRef = enumAt(lineText.slice(0, position.character));
+  const enumName = enumRef && enums().has(enumRef.name) ? enumRef.name : undefined;
+  if (enumName) {
+    const members = enums().get(enumName) ?? [];
+    log(`enum completion ${enumName} → ${members.length}`);
+    return members.map((name) => ({
+      label: name,
+      kind: CompletionItemKind.EnumMember,
+      detail: enumName,
+    }));
+  }
+
   // Inside a chain call (`alignRules({ | })`) the argument is an object literal whose
   // shape is declared in the SDK; the fork cannot parse the chain at all, so the
   // members are served from the declarations.
@@ -382,7 +404,9 @@ connection.onCompletion(({ textDocument, position }) => {
   // A component chain is beyond the fork's parser, so attributes come from the
   // declarations instead of from the language service.
   const chain = chainComponent((files.get(file) ?? "").split(/\r?\n/), position.line, position.character);
-  if (chain && /\.[\w$]*$/.test(lineText.slice(0, position.character))) {
+  // Only after a closed call: inside `(` the answer is argument completion, and
+  // offering the component's 268 attributes there was the reported bug.
+  if (chain && !call && /\.[\w$]*$/.test(lineText.slice(0, position.character))) {
     const index = attributes();
     const attributeName = index.components.get(chain);
     const members = attributeName ? index.attributes.get(attributeName) : undefined;
