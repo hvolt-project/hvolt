@@ -125,6 +125,32 @@ navigation set. Measured behaviour, including the parts that are weaker than ide
   spans that begin or end in injected syntax are dropped;
 - selectionRanges: 8 nesting levels on `this.message`, each mapped back.
 
+## How fast rule diagnostics can get (measured)
+
+The engine's startup dominates, so per-file scope buys almost nothing:
+
+| run | measured |
+|---|---|
+| whole tree | 2.94 s |
+| one file (`--scoped` with a one-file overlay) | 2.78 s |
+| one file, all rules | 2.96 s |
+| identical content again | 0 ms (cache) |
+
+What was done, in order of effect:
+
+- **content fingerprint**: the run's inputs (rule set + every buffer's text) are hashed;
+  identical inputs answer from the previous result without starting the engine
+  (measured in the editor: 0 ms, log line `lint → cached`);
+- **single flight** + coalescing: one engine at a time, the newest request wins;
+- **120 s timeout** on the child, so a wedged engine cannot hold the slot forever;
+- `--scoped` exists for callers that want only the replaced files, but the numbers above
+  are why the editor does not use it: 0.16 s of 2.94 s.
+
+codelinter's own `--incremental` is not usable here: it runs `git diff HEAD --name-status`
+inside the project, and the tree hvolt lints is a managed copy without a repository
+(measured: `rc=255`, "engine failed"). Getting below ~2.7 s would need a resident engine,
+which the CLI does not offer.
+
 ## Call hierarchy
 
 The fork implements it, so the server only maps positions: `prepareCallHierarchy`,

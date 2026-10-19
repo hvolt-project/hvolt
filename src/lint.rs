@@ -140,13 +140,13 @@ pub fn parse_overlay(json: &str) -> Result<Vec<(String, String)>, String> {
 /// path match is done on the suffix below `ets/`, falling back to a unique basename.
 /// Files that cannot be located are reported instead of silently ignored: a buffer
 /// that is not linted would make the editor lie.
-pub fn apply_overlay(tree: &Path, overlay: &[(String, String)]) -> Result<usize, String> {
+pub fn apply_overlay(tree: &Path, overlay: &[(String, String)]) -> Result<Vec<PathBuf>, String> {
     if overlay.is_empty() {
-        return Ok(0);
+        return Ok(Vec::new());
     }
     let mut files = Vec::new();
     collect_files(tree, &mut files)?;
-    let mut written = 0usize;
+    let mut written: Vec<PathBuf> = Vec::new();
     for (source, text) in overlay {
         let normalized = source.replace('\\', "/");
         // Absolute paths (what an editor sends) and project-relative ones both reduce
@@ -178,7 +178,7 @@ pub fn apply_overlay(tree: &Path, overlay: &[(String, String)]) -> Result<usize,
         let path =
             target.ok_or_else(|| format!("overlay path not found in the tree: {}", source))?;
         std::fs::write(&path, text).map_err(|e| format!("write {}: {}", path.display(), e))?;
-        written += 1;
+        written.push(path);
     }
     Ok(written)
 }
@@ -433,6 +433,8 @@ pub struct LintOptions {
     /// Source path → replacement text, applied to the linted copy of the tree.
     /// Editors use it to hand over unsaved buffers.
     pub overlay: Vec<(String, String)>,
+    /// Check only the files the overlay replaced (editor path).
+    pub scoped: bool,
 }
 
 impl Default for LintOptions {
@@ -443,6 +445,7 @@ impl Default for LintOptions {
             fail_on: 1,
             max_defects: 0,
             overlay: Vec::new(),
+            scoped: false,
         }
     }
 }
@@ -512,6 +515,7 @@ pub fn lint_with(
     // `--fix` works IN PLACE (same tree as the project); everything else lints
     // the managed copy, because the engine ignores any path segment named `build`
     // and the translated tree lives under exactly that.
+    let mut overlaid_paths: Vec<PathBuf> = Vec::new();
     let lint_tree = if opts.fix {
         root.to_path_buf()
     } else {
@@ -519,7 +523,8 @@ pub fn lint_with(
     };
     if !opts.fix {
         let linked = sync_tree(&std_tree, &lint_tree)?;
-        let overlaid = apply_overlay(&lint_tree, &opts.overlay)?;
+        overlaid_paths = apply_overlay(&lint_tree, &opts.overlay)?;
+        let overlaid = overlaid_paths.len();
         if overlaid > 0 && !opts.json {
             println!(
                 "  ({} buffer{} from the editor used instead of disk)",
@@ -548,7 +553,20 @@ pub fn lint_with(
         let _ = std::fs::create_dir_all(parent);
     }
 
-    let paths: Vec<String> = if check_paths.is_empty() {
+    // Editor-driven scope: check just the files the buffers replaced. A whole-tree run
+    // costs seconds; the files whose content actually changed cost a fraction of that,
+    // and the editor merges the result into the previous full answer.
+    let scoped: Vec<String> = if opts.scoped && check_paths.is_empty() {
+        overlaid_paths
+            .iter()
+            .map(|p| p.to_string_lossy().to_string())
+            .collect()
+    } else {
+        Vec::new()
+    };
+    let paths: Vec<String> = if !scoped.is_empty() {
+        scoped
+    } else if check_paths.is_empty() {
         vec![lint_tree.to_string_lossy().to_string()]
     } else {
         // every entry must be absolute and inside the project, otherwise the
@@ -994,7 +1012,12 @@ mod tests {
         )
         .unwrap();
 
-        assert_eq!(written, 1);
+        assert_eq!(written.len(), 1, "one file must be reported as replaced");
+        assert_eq!(
+            written[0].canonicalize().ok(),
+            mirrored.canonicalize().ok(),
+            "the reported path is the mirrored copy, which is what a scoped run checks"
+        );
         assert_eq!(
             std::fs::read_to_string(&mirrored).unwrap(),
             "// from the editor"

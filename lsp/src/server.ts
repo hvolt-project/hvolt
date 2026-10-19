@@ -1282,7 +1282,7 @@ function run(binary: string, args: string[], cwd: string): Promise<RunResult> {
     // stderr, so the two are concatenated rather than picking one. The exit code is
     // the only reliable success signal — grepping the text misses messages such as
     // "SDK not available".
-    execFile(binary, args, { cwd, maxBuffer: 64 * 1024 * 1024 }, (error, stdout, stderr) => {
+    execFile(binary, args, { cwd, maxBuffer: 64 * 1024 * 1024, timeout: 120_000 }, (error, stdout, stderr) => {
       const raw = (error as { code?: unknown } | null)?.code;
       resolve({ code: typeof raw === "number" ? raw : error ? 1 : 0, output: `${stdout ?? ""}${stderr ?? ""}` });
     });
@@ -1309,6 +1309,10 @@ function lintSoon(paths?: string[]): void {
   lintTimer = setTimeout(() => void lintNow(), paths ? settings.lintDelay ?? 2000 : 400);
 }
 
+/** Content the last lint run saw, so an identical request costs nothing. */
+let lastLintContent: string | undefined;
+let lastLintPublish: (() => void) | undefined;
+
 async function lintNow(paths?: string[]): Promise<void> {
   if (lintRunning) {
     lintAgain = true;
@@ -1328,6 +1332,19 @@ async function lintNow(paths?: string[]): Promise<void> {
       const onDisk = existsSync(path) ? readFileSync(path, "utf8") : "";
       if (onDisk === document.getText()) continue;
       overlay.set(path, document.getText());
+    }
+    // The engine's startup alone costs ~2.7 s (measured: one file 2.78 s, whole tree
+    // 2.94 s), so a run is only worth starting when its answer could differ. Editors
+    // ask again on saves, focus changes and undo; identical content answers instantly.
+    const mark = `${settings.lintAllRules ? "all" : "recommended"}|${[...overlay]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([path, text]) => `${path}:${text.length}:${text}`)
+      .join("\u0000")}`;
+    if (mark === lastLintContent && lastLintPublish) {
+      log(`lint → cached (content unchanged, ${Date.now() - startedAt} ms)`);
+      lastLintPublish();
+      lintRunning = false;
+      return;
     }
     const args = ["lint", "--json"];
     if (settings.lintAllRules) args.push("--all-rules");
@@ -1365,6 +1382,10 @@ async function lintNow(paths?: string[]): Promise<void> {
     if (generation !== lintGeneration) return; // a newer run supersedes this one
     const parsed = fromLint(report, root);
     log(`lint → ${parsed.length} diagnostics in ${Date.now() - startedAt} ms (${parsed.length === 0 ? "clean" : "findings"})`);
+    // Remember what this answer belongs to, so the same content can be answered from
+    // memory instead of starting the engine again.
+    lastLintContent = mark;
+    lastLintPublish = () => publish("lint", parsed);
     publish("lint", parsed);
   } finally {
     if (overlayFile) {

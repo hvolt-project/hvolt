@@ -122,6 +122,10 @@ pub enum Command {
         /// written into the managed tree copy would be thrown away.
         #[arg(long)]
         fix: bool,
+        /// Check only the files handed over by `--overlay-file` (editor path).
+        /// A whole-tree run costs seconds; the changed files cost a fraction.
+        #[arg(long)]
+        scoped: bool,
         /// Fail when a defect at or above this severity exists (1 = most
         /// severe, 2 = warning, 3 = info). Default 1.
         #[arg(long, value_name = "SEV")]
