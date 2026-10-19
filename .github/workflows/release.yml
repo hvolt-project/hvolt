@@ -144,8 +144,11 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
+          # No `registry-url`: setup-node then writes an .npmrc with
+          # `_authToken=${NODE_AUTH_TOKEN}` and exports the placeholder
+          # `XXXXX-XXXXX-XXXXX-XXXXX` when the env var is absent (its source), which
+          # makes npm try token auth instead of trusted publishing.
           node-version: 22
-          registry-url: https://registry.npmjs.org
 
       # Trusted publishing needs a newer npm than the one bundled with Node 22.
       - name: npm with OIDC support
