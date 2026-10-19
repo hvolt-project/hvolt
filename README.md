@@ -52,7 +52,8 @@ cd editor/vscode && npm ci && node build.mjs
 npx @vscode/vsce package   # produces hvolt-vscode-0.1.0.vsix
 ```
 
-What it provides: ArkTS hover/completion/definition/signature help/rename from the SDK's own
+What it provides: ArkTS syntax highlighting (TypeScript grammar + ArkTS rules), hover/completion/
+definition/signature help/rename from the SDK's own
 TypeScript build; diagnostics from codelinter and from real builds, mapped onto the flat sources;
 `hvolt.toml` key completion, route completion, validation and dependency navigation; commands for
 build, sign, install, screenshot and log. Design and measurements: [lsp/DESIGN.md](lsp/DESIGN.md).

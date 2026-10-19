@@ -1,0 +1,55 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "ArkTS",
+  "scopeName": "source.ets",
+  "comment": "ArkTS = TypeScript + ArkUI. Everything standard is delegated to the built-in `source.ts` grammar; only the ArkTS-specific forms are described here.",
+  "patterns": [
+    { "include": "#arkts-decorators" },
+    { "include": "#arkts-keywords" },
+    { "include": "#arkts-resources" },
+    { "include": "#arkui-components" },
+    { "include": "source.ts" }
+  ],
+  "repository": {
+    "arkts-decorators": {
+      "patterns": [
+        {
+          "comment": "ArkUI decorators: @Entry, @Component, @State, @Link, @Builder, …",
+          "match": "@(Entry|Component|ComponentV2|State|Prop|Link|Watch|Provide|Consume|Observed|ObjectLink|Require|Track|Builder|LocalBuilder|BuilderParam|Styles|Extend|AnimatableExtend|LocalStorageLink|LocalStorageProp|StorageLink|StorageProp|Reusable|CustomDialog)\\b",
+          "name": "meta.decorator.arkts"
+        }
+      ]
+    },
+    "arkts-keywords": {
+      "patterns": [
+        {
+          "comment": "The `struct` declaration is ArkTS-only; `declare` is common to both.",
+          "match": "\\b(struct)\\b",
+          "name": "storage.type.struct.arkts"
+        }
+      ]
+    },
+    "arkts-resources": {
+      "patterns": [
+        {
+          "match": "\\$r\\(\\s*(['\"])([^'\"]*)\\1\\s*\\)",
+          "name": "constant.other.resource.arkts",
+          "captures": { "2": { "name": "string.quoted.resource.arkts" } }
+        },
+        {
+          "match": "\\$(rawfile|rawfileSync)\\(\\s*(['\"])([^'\"]*)\\2\\s*\\)",
+          "name": "constant.other.resource.arkts"
+        }
+      ]
+    },
+    "arkui-components": {
+      "comment": "ArkUI declarative components. Matching them as builtin classes is enough to make the UI tree readable; anything not listed still highlights as a normal identifier.",
+      "patterns": [
+        {
+          "match": "\\b(Text|Span|Image|Button|Toggle|Checkbox|Radio|Rating|TextInput|TextArea|Search|Divider|Blank|Progress|LoadingProgress|Column|Row|Stack|Flex|Grid|GridItem|List|ListItem|ListItemGroup|Swiper|Scroll|Tabs|TabContent|RelativeContainer|WaterFlow|Navigator|Navigation|NavDestination|NavRouter|Badge|Counter|Marquee|Select|Slider|Stepper|Web|Video|Canvas|Shape|Line|Path|Circle|Rect|Polygon|Polyline|Ellipse)\\s*(?=\\()",
+          "name": "support.class.arkui"
+        }
+      ]
+    }
+  }
+}

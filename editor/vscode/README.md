@@ -2,6 +2,9 @@
 
 ArkTS support for [hvolt](https://github.com/hvolt-project/hvolt) projects.
 
+- Syntax highlighting: TypeScript comes from VS Code's built-in `source.ts` grammar; the ArkTS additions
+  (decorators such as `@Entry`/`@State`, the `struct` keyword, `$r(...)` resources, ArkUI components)
+  are defined in `syntaxes/ets.tmLanguage.json`.
 - Language server: hover, completion, definition, signature help and rename, with semantics from
   the TypeScript build inside the installed SDK — no DevEco Studio needed.
 - Diagnostics from the real toolchain: codelinter on save, plus build errors mapped onto the
