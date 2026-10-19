@@ -68,7 +68,31 @@ const transformed = new Map<string, Transformed>();
 const SHIM_PATH = join(root, ".hvolt", "arkui-shim.d.ts");
 files.set(
   SHIM_PATH,
-  "// Injected by the hvolt language server so the ArkUI transform parses.\ndeclare function __arkui(build: () => void): any;\n",
+  [
+    "// Injected by the hvolt language server. Two things are needed and both are absent",
+    "// from the ArkTS typings: the ArkUI transform's helper, and `console` (which lives in",
+    "// lib.dom, a library ArkTS projects must not load — its `Text` shadows the ArkUI one).",
+    "declare function __arkui(build: () => void): any;",
+    "declare const console: {",
+    "  log(...data: any[]): void;",
+    "  debug(...data: any[]): void;",
+    "  info(...data: any[]): void;",
+    "  warn(...data: any[]): void;",
+    "  error(...data: any[]): void;",
+    "  assert(condition?: boolean, ...data: any[]): void;",
+    "  count(label?: string): void;",
+    "  countReset(label?: string): void;",
+    "  time(label?: string): void;",
+    "  timeEnd(label?: string): void;",
+    "  timeLog(label?: string, ...data: any[]): void;",
+    "  trace(...data: any[]): void;",
+    "  dir(item?: any, options?: any): void;",
+    "  table(data?: any): void;",
+    "  group(...data: any[]): void;",
+    "  groupEnd(): void;",
+    "};",
+    "",
+  ].join("\n"),
 );
 
 /** Names declared as `struct` in the project: those blocks are ArkUI too. */
@@ -136,6 +160,11 @@ const host = {
     allowNonTsExtensions: true,
     skipLibCheck: true,
     types: [],
+    // ArkTS has no DOM. Without this the default lib is `lib.es2021.full.d.ts`, whose
+    // `Text` (the DOM constructor) shadows the ArkUI `Text` factory — measured: every
+    // component call then reported "is not callable". The SDK's own ets-loader tsconfig
+    // pins `lib: ["es2021"]` for the same reason.
+    lib: ["lib.es2021.d.ts"],
     // ArkTS modules are bare specifiers (`import { window } from '@kit.ArkUI'`,
     // `import http from '@ohos.net.http'`). Without this map the resolver cannot find
     // them, every such import degrades to `any`, and hover answers
@@ -881,16 +910,6 @@ function arktsDiagnostics(): void {
     if (!text) continue;
     const all = [...service.getSyntacticDiagnostics(path), ...service.getSemanticDiagnostics(path)];
     for (const d of all) {
-      // The transform turns `Column() { … }` into `Column() ;__arkui(…)`, so the ArkUI
-      // factory is called as a function. This program types the components as classes,
-      // so every call site reports "is not callable" — an artifact of the rewrite, not
-      // of the user's code (measured: exactly one such diagnostic on a clean file).
-      if (
-        (d.code === 2348 || d.code === 2349) &&
-        /is not callable/.test(ts.flattenDiagnosticMessageText(d.messageText, " "))
-      ) {
-        continue;
-      }
       const offset = d.start ?? 0;
       // Diagnostics inside injected syntax have no original position: publishing them
       // would put a marker on code the user never wrote.

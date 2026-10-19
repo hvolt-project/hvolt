@@ -100,6 +100,14 @@ test("hover: local variable, parameter, enum member, component, attribute", { sk
   assert.match(hoverText(await ask("hover", ["    Text(this.message).fontWe|ight(1)"])), /fontWeight\(/);
 });
 
+test("hover: a component is the ArkUI factory, not the DOM constructor", { skip }, async () => {
+  // Loading lib.dom made `Text` resolve to the DOM constructor; ArkTS projects pin
+  // lib.es2021, and the shim supplies `console` so nothing else is lost.
+  const text = hoverText(await ask("hover", ["    Te|xt(this.message)"]));
+  assert.match(text, /TextInterface/);
+  assert.doesNotMatch(text, /prototype: Text/);
+});
+
 test("completion: module members and enum names inside a call", { skip }, async () => {
   const members = labels(await ask("completion", ["    hilog.|"]));
   assert.ok(members.includes("info") && members.includes("error"), `hilog members: ${members.slice(0, 6)}`);

@@ -92,10 +92,16 @@ Measured after the change: local variables, imports and keywords all complete in
 `build()` (`counter`, `hilog`, `const` first in their prefix), and hover on an attribute
 returns the declared signature instead of `any`.
 
-Known limits: the transform only rewrites blocks whose component name is in the SDK's
-component index (custom structs are not yet included), and type diagnostics still skip
-files that contain ArkUI chains, because the rewritten program reports errors that only
-exist in the synthetic code.
+Custom structs are included: every `struct X` declared in the project is treated as an
+ArkUI block. Type diagnostics no longer skip ArkUI files — they are computed on the
+transformed program and each position is mapped back; findings inside injected syntax are
+dropped.
+
+The program pins `lib: ["lib.es2021.d.ts"]`, as the SDK's own ets-loader does. With the
+default `lib.es2021.full.d.ts` the DOM's `Text` constructor shadowed the ArkUI `Text`
+factory and every component call reported "is not callable" — verified by resolving the
+symbol: `lib.dom.d.ts InterfaceDeclaration, VariableDeclaration`. `console` (which lives
+in lib.dom) is supplied by the injected shim instead.
 
 ## Type diagnostics
 
