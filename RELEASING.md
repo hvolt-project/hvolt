@@ -5,33 +5,49 @@ Nothing is built on a developer machine, so a release is reproducible from the t
 
 ## One-time setup
 
-1. **npm organisation** — create the `hvolt` organisation on npm. The workflow publishes
-   `@hvolt/cli` plus `@hvolt/cli-darwin-arm64`, `@hvolt/cli-linux-x64`, `@hvolt/cli-win32-x64`.
-2. **npm token** — create an automation token with publish rights for the `@hvolt` scope and store it
-   as the repository secret `NPM_TOKEN` (Settings → Secrets and variables → Actions).
+1. **npm organisation** — the `@hvolt` scope publishes `@hvolt/cli` plus
+   `@hvolt/cli-darwin-arm64`, `@hvolt/cli-linux-x64`, `@hvolt/cli-win32-x64`.
+2. **Trusted publisher, not a token** — for each of those four packages on npmjs.com set
+   the trusted publisher to this repository and workflow:
+
+   ```
+   owner/repository  hvolt-project/hvolt
+   workflow file     release.yml
+   ```
+
+   Publishing then authenticates through the workflow's OIDC identity (`id-token: write`),
+   and `--provenance` records the same identity in the package. No `NPM_TOKEN` is read, so
+   nothing expires: a classic npm token lives 7 days by default, and a release that trusted
+   one would start failing silently a week later.
 3. **GitHub security** — enable *Private vulnerability reporting* so the advisory link in
    [`SECURITY.md`](SECURITY.md) resolves.
 
 ## Release procedure
 
-1. Update the version in `Cargo.toml`, `npm/package.json` and every `npm/platforms/*/package.json`
-   (they must match) and add a `CHANGELOG.md` entry under the new version.
-2. Commit, push to `main`, and let CI finish.
-3. Tag and push:
+Publishing is automatic once a version is new; nobody pushes a tag by hand.
 
-   ```bash
-   git tag -a v0.1.0 -m "hvolt 0.1.0"
-   git push origin v0.1.0
-   ```
+1. Bump the version in `Cargo.toml` and `npm/package.json` (they must match) and add a
+   `CHANGELOG.md` entry, in the pull request that carries the change.
+2. Merge. `.github/workflows/release.yml` runs on every push to `main` and asks one
+   question: does `v<version>` exist yet?
 
-4. The workflow then:
-   - runs `cargo fmt --check`, `cargo clippy -D warnings` and `cargo test` on Linux,
-   - builds `darwin-arm64`, `linux-x64`, `win32-x64`,
-   - verifies the tag equals `npm/package.json`'s version,
-   - publishes the three platform packages, then the launcher (both with provenance),
-   - writes `SHA256SUMS.txt` over the archives,
-   - creates the GitHub release with the three archives plus `SHA256SUMS.txt` attached and the
-     changelog as notes.
+   - **no** → it builds all three targets, runs the gates, publishes to npm (when
+     `NPM_PUBLISH` is `true`), creates the tag itself and attaches the archives plus
+     `SHA256SUMS.txt` to the release;
+   - **yes** → it stops after the version check, so ordinary merges cost nothing.
+
+3. Nothing else. Re-running is safe: the publish steps skip a package that already exists
+   and upload assets with `--clobber`.
+
+A tag push (`git push origin v26.0.0-1`) still works and is the way to re-drive a release
+after fixing something in CI; the guard then takes the version from the tag and refuses if
+it disagrees with the manifests.
+
+### What this does not decide
+
+The version bump itself. That is the one deliberate act left: the number says which SDK
+platform the release claims to support (`26.0.0` = platform 26.0.0), so it changes when the
+project decides to support a new platform or to ship a fix — not on every merge.
 
 `install.sh` and `install.ps1` read those assets, so a release is installable as soon as it exists.
 
