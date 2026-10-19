@@ -16,6 +16,7 @@ import { TextDocument } from "vscode-languageserver-textdocument";
 import { execFile } from "node:child_process";
 import { collectSources } from "./project.js";
 import { type Diagnostic, fromLint, parseHvigor } from "./diagnostics.js";
+import { COMMANDS, type CommandRequest, commandSpec } from "./commands.js";
 import { completeKeys, declaredRoutes, inRouterCall } from "./hvolttoml.js";
 import { dependencyAt, dependencyTarget, validateToml } from "./tomlcheck.js";
 import { existsSync, readFileSync } from "node:fs";
@@ -102,7 +103,7 @@ connection.onInitialize((params) => {
       definitionProvider: true,
       signatureHelpProvider: { triggerCharacters: ["(", ","] },
       renameProvider: true,
-      executeCommandProvider: { commands: ["hvolt.buildDiagnostics"] },
+      executeCommandProvider: { commands: ["hvolt.buildDiagnostics", ...COMMANDS] },
     },
   };
 });
@@ -282,12 +283,20 @@ function publish(source: string, diagnostics: Diagnostic[]): void {
   flush();
 }
 
-function run(binary: string, args: string[], cwd: string): Promise<string> {
+interface RunResult {
+  code: number | null;
+  output: string;
+}
+
+function run(binary: string, args: string[], cwd: string): Promise<RunResult> {
   return new Promise((resolve) => {
     // Both streams matter: hvigor writes progress to stdout and the diagnostics to
-    // stderr, so the two are concatenated rather than picking one.
-    execFile(binary, args, { cwd, maxBuffer: 64 * 1024 * 1024 }, (_error, stdout, stderr) => {
-      resolve(`${stdout ?? ""}${stderr ?? ""}`);
+    // stderr, so the two are concatenated rather than picking one. The exit code is
+    // the only reliable success signal — grepping the text misses messages such as
+    // "SDK not available".
+    execFile(binary, args, { cwd, maxBuffer: 64 * 1024 * 1024 }, (error, stdout, stderr) => {
+      const raw = (error as { code?: unknown } | null)?.code;
+      resolve({ code: typeof raw === "number" ? raw : error ? 1 : 0, output: `${stdout ?? ""}${stderr ?? ""}` });
     });
   });
 }
@@ -299,7 +308,7 @@ function lintSoon(): void {
   lintTimer = setTimeout(async () => {
     const args = ["lint", "--json"];
     if (settings.lintAllRules) args.push("--all-rules");
-    const output = await run(binaryPath(), args, root);
+    const { output } = await run(binaryPath(), args, root);
     if (process.env.HVOLT_LSP_DEBUG) {
       process.stderr.write(`hvolt-lsp: lint ${args.join(" ")} → ${output.length} bytes\n`);
     }
@@ -354,15 +363,36 @@ documents.onDidOpen(() => lintSoon());
 documents.onDidSave(() => lintSoon());
 
 connection.onExecuteCommand(async ({ command, arguments: args }) => {
-  if (command !== "hvolt.buildDiagnostics") return null;
   const cwd = (args?.[0] as string | undefined) ?? root;
-  const output = await run(binaryPath(), ["build"], cwd);
-  const parsed = parseHvigor(output, root);
-  if (process.env.HVOLT_LSP_DEBUG) {
-    process.stderr.write(`hvolt-lsp: build in ${cwd} → ${output.length} bytes, ${parsed.length} diagnostics\n`);
+
+  if (command === "hvolt.buildDiagnostics") {
+    const { output } = await run(binaryPath(), ["build"], cwd);
+    const parsed = parseHvigor(output, root);
+    if (process.env.HVOLT_LSP_DEBUG) {
+      process.stderr.write(`hvolt-lsp: build in ${cwd} → ${output.length} bytes, ${parsed.length} diagnostics\n`);
+    }
+    publish("build", parsed);
+    return null;
   }
-  publish("build", parsed);
-  return null;
+
+  const spec = commandSpec(command, (args?.[1] ?? {}) as CommandRequest);
+  if (!spec) return { ok: false, message: `unknown command ${command}` };
+
+  const started = Date.now();
+  const { code, output } = await run(binaryPath(), spec.args, cwd);
+  const seconds = ((Date.now() - started) / 1000).toFixed(1);
+
+  // A build's failures belong on the file that caused them.
+  if (spec.args[0] === "build" || spec.args[0] === "assemble") {
+    publish("build", parseHvigor(output, root));
+  }
+  const failed = code !== 0;
+  const summary = `hvolt ${spec.args.join(" ")} → ${failed ? "failed" : "ok"} (${seconds}s)`;
+  // A notification, not showInformationMessage(): the latter is a request and dangles
+  // until the client answers, which some clients never do.
+  connection.sendNotification("window/showMessage", { type: 3, message: summary });
+  if (process.env.HVOLT_LSP_DEBUG) process.stderr.write(`hvolt-lsp: ${summary}\n`);
+  return { ok: !failed, seconds, tail: output.split(/\r?\n/).slice(-20).join("\n") };
 });
 
 documents.listen(connection);

@@ -24,6 +24,15 @@ await build({
 });
 
 await build({
+  entryPoints: ["src/commands.ts"],
+  outfile: "dist/commands.mjs",
+  bundle: true,
+  platform: "node",
+  format: "esm",
+  target: "node18",
+});
+
+await build({
   entryPoints: ["src/tomlcheck.ts"],
   outfile: "dist/tomlcheck.mjs",
   bundle: true,
