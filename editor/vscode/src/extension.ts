@@ -69,8 +69,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         status.text = `hvolt: ${command.replace("hvolt.", "")}…`;
         try {
           const result = (await client.sendRequest("workspace/executeCommand", {
-            command,
-            arguments: [root, options],
+            command: "hvolt.executeCli",
+            arguments: [root, command, options],
           })) as CommandResult | null;
           if (!result) {
             status.text = "hvolt";

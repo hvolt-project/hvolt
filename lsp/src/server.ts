@@ -103,7 +103,10 @@ connection.onInitialize((params) => {
       definitionProvider: true,
       signatureHelpProvider: { triggerCharacters: ["(", ","] },
       renameProvider: true,
-      executeCommandProvider: { commands: ["hvolt.buildDiagnostics", ...COMMANDS] },
+      // The editor contributes its own `hvolt.*` commands, so the server must not
+      // declare the same ids — vscode-languageclient registers provided commands and
+      // throws on a duplicate. One generic entry point keeps both sides happy.
+      executeCommandProvider: { commands: ["hvolt.buildDiagnostics", "hvolt.executeCli"] },
     },
   };
 });
@@ -375,8 +378,10 @@ connection.onExecuteCommand(async ({ command, arguments: args }) => {
     return null;
   }
 
-  const spec = commandSpec(command, (args?.[1] ?? {}) as CommandRequest);
-  if (!spec) return { ok: false, message: `unknown command ${command}` };
+  const cliCommand = command === "hvolt.executeCli" ? String(args?.[1] ?? "") : command;
+  const request = (command === "hvolt.executeCli" ? args?.[2] : args?.[1]) as CommandRequest | undefined;
+  const spec = commandSpec(cliCommand, request ?? {});
+  if (!spec) return { ok: false, message: `unknown command ${cliCommand}` };
 
   const started = Date.now();
   const { code, output } = await run(binaryPath(), spec.args, cwd);

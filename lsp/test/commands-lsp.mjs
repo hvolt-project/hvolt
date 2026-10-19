@@ -60,7 +60,7 @@ await send("initialize", {
 });
 notify("initialized", {});
 
-const total = await send("workspace/executeCommand", { command: "hvolt.build", arguments: [root] });
+const total = await send("workspace/executeCommand", { command: "hvolt.executeCli", arguments: [root, "hvolt.build"] });
 await new Promise((r) => setTimeout(r, 1200));
 
 const result = total.result;

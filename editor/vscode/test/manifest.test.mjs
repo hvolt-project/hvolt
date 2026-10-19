@@ -42,3 +42,20 @@ test("the client launches `hvolt lsp --stdio` from the configured binary", () =>
   assert.equal(typeof binary.default, "string");
   assert.ok(binary.default.length > 0);
 });
+
+test("server commands do not collide with the commands the extension contributes", () => {
+  // vscode-languageclient registers every command the server advertises; a duplicate
+  // id throws during activation (measured: ExecuteCommandFeature.register failed).
+  const serverSource = readFileSync(join(dir, "..", "..", "lsp", "src", "server.ts"), "utf8");
+  const declared = /executeCommandProvider: \{ commands: \[([^\]]+)\] \}/.exec(serverSource);
+  assert.ok(declared, "the server no longer declares executeCommandProvider in the expected form");
+  const serverCommands = [...declared[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+  const contributed = manifest.contributes.commands.map((c) => c.command);
+  for (const command of serverCommands) {
+    assert.ok(
+      !contributed.includes(command),
+      `${command} is both contributed by the extension and advertised by the server`,
+    );
+  }
+  assert.ok(serverCommands.includes("hvolt.executeCli"), "the generic entry point must stay available");
+});
