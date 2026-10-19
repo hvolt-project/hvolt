@@ -116,7 +116,10 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $version = "${{ github.ref_name }}".TrimStart("v")
+          # `github.ref_name` is the branch name on a push to main: the archive came out
+          # as `hvolt-main-win32-x64.zip` while publish expected the version, and the
+          # release run failed there (measured: run 39275018157, "Stage binaries").
+          $version = "${{ needs.guard.outputs.version }}"
           $src = "target/${{ matrix.target }}/release/${{ matrix.bin }}"
           New-Item -ItemType Directory -Force -Path dist | Out-Null
           Compress-Archive -Path $src -DestinationPath "dist/hvolt-$version-${{ matrix.key }}.zip"
