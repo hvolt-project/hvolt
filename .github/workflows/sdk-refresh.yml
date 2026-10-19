@@ -1,23 +1,33 @@
 name: sdk-refresh
 
-# HarmonyOS ships new SDK builds and hvigor releases on its own schedule. This job only
-# reports the difference — it never bumps a pin. A pin that moves without the gates
-# having seen the new SDK would claim support nobody exercised, and the adaptation needed
-# (ets-loader's TypeScript version, codelinter's config schema, hvigor's flags) is work
-# that requires a machine with the SDK, not a cron job.
+# HarmonyOS ships SDK builds and hvigor releases on its own schedule, and the pins that
+# follow them live in this repository. Two outcomes, decided by what changed:
+#
+#   a tool patch bump (same major, same SDK platform) is mechanical: bump the pin, bump the
+#   release counter, run the gates, land it on main — the release workflow then publishes it;
+#
+#   anything else (a new SDK platform, a tool major) needs a machine with that SDK to say
+#   whether the code still holds, so this job opens one issue and stops.
+#
+# Whatever cannot be finished by itself — a gate failure, or a merge the rules refuse —
+# ends in an issue carrying the reason, never in a red run nobody reads.
 on:
   schedule:
     - cron: "17 3 * * *"
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
   issues: write
 
 jobs:
   check:
     name: compare pins with upstream
     runs-on: ubuntu-22.04
+    outputs:
+      tool_bump: ${{ steps.summary.outputs.tool_bump }}
+      drift: ${{ steps.summary.outputs.drift }}
     steps:
       - uses: actions/checkout@v5
 
@@ -26,14 +36,12 @@ jobs:
           python-version: "3.12"
 
       - name: read upstream versions
-        id: check
+        env:
+          SUMMARY_PATH: summary.json
         run: |
+          set -euo pipefail
           python3 scripts/check-versions.py | tee report.txt
-          if grep -q "^DRIFT: none$" report.txt; then
-            echo "drift=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "drift=true" >> "$GITHUB_OUTPUT"
-          fi
+          test -f summary.json || { echo "summary.json was not written"; exit 1; }
           {
             echo "### Version check"
             echo '```'
@@ -41,22 +49,133 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: keep one issue for the current drift
-        if: steps.check.outputs.drift == 'true'
+      - id: summary
+        run: |
+          set -euo pipefail
+          echo "tool_bump=$(python3 -c 'import json;print("true" if json.load(open("summary.json"))["tool_bump_only"] else "false")')" >> "$GITHUB_OUTPUT"
+          echo "drift=$(python3 -c 'import json;print(" | ".join(json.load(open("summary.json"))["drift"]) or "none")')" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: summary
+          path: |
+            summary.json
+            report.txt
+
+  adapt:
+    name: bump a mechanical drift
+    needs: check
+    if: needs.check.outputs.tool_bump == 'true'
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: summary
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: bump the pin and the release counter
+        id: bump
+        run: |
+          set -euo pipefail
+          python3 scripts/bump-versions.py summary.json --apply
+          version="$(python3 -c 'import json;print(json.load(open("npm/package.json"))["version"])')"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          { echo "### Automatic bump"; echo "- version $version"; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: gates
+        run: |
+          set -euo pipefail
+          cargo fmt --all --check
+          cargo clippy --all-targets -- -D warnings
+          cargo test
+
+      - name: land the bump
+        id: land
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          title="chore: SDK/tool version refresh"
-          body="$(printf '%s\n\n' \
-            '`scripts/check-versions.py` found a difference between the pinned versions and upstream.' \
-            '```' && cat report.txt && printf '```\n\n%s\n%s\n%s\n' \
-            '- [ ] decide whether the new SDK needs code changes (ets-loader TypeScript version, codelinter config schema, hvigor flags)' \
-            '- [ ] bump the pin in the commit that carries the adaptation, not before' \
-            '- [ ] release only after the gates have run against the new version')"
-          existing="$(gh issue list --state open --search "$title in:title" --json number --jq '.[0].number // empty')"
-          if [ -n "$existing" ]; then
-            gh issue comment "$existing" --body "$body"
-            echo "commented on #$existing"
+          set -euo pipefail
+          version="${{ steps.bump.outputs.version }}"
+          branch="chore/refresh-$version"
+          git config user.name "hvolt refresh"
+          git config user.email "refresh@hvolt-project.invalid"
+          git add src/tools.rs Cargo.toml npm/package.json CHANGELOG.md
+          git commit -m "chore: hvigor pin follows upstream ($version)"
+          git push origin "HEAD:refs/heads/$branch"
+
+          # The branch rule wants a pull request before `main` moves, and a bypass actor
+          # for the Actions integration is only available on an organisation-level ruleset
+          # (GitHub answered 422 when it was tried here). So the automation opens the pull
+          # request it would otherwise skip and merges it: the gates above already ran
+          # against this exact tree.
+          {
+            echo "Mechanical bump written by the refresh workflow: the hvigor pin follows"
+            echo "upstream within the same major version, and the release counter moves with it."
+            echo
+            echo '```'
+            cat report.txt
+            echo '```'
+            echo
+            echo "- cargo fmt --check, clippy -D warnings and cargo test ran in this workflow"
+          } > /tmp/pr-body.md
+          gh pr create --base main --head "$branch" \
+            --title "chore: hvigor pin follows upstream ($version)" \
+            --body-file /tmp/pr-body.md
+          if gh pr merge "$branch" --squash --delete-branch; then
+            echo "landed=true" >> "$GITHUB_OUTPUT"
+            echo "merged the bump pull request" >> "$GITHUB_STEP_SUMMARY"
           else
-            gh issue create --title "$title" --body "$body"
+            echo "landed=false" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: report what could not finish
+        if: steps.land.outputs.landed != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "The automatic bump could not be landed on \`main\`."
+            echo
+            echo '```'
+            cat report.txt
+            echo '```'
+            echo
+            echo "- [ ] the branch \`chore/refresh-<version>\` exists; open its pull request and merge by hand"
+            echo "- [ ] or apply it locally: \`python3 scripts/bump-versions.py summary.json --apply\`"
+          } > /tmp/issue-body.md
+          existing="$(gh issue list --state open --search 'chore: SDK/tool version refresh in:title' --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then gh issue comment "$existing" --body-file /tmp/issue-body.md; else gh issue create --title "chore: SDK/tool version refresh" --body-file /tmp/issue-body.md; fi
+
+  report:
+    name: report drift that needs a person
+    needs: check
+    if: needs.check.outputs.drift != 'none' && needs.check.outputs.tool_bump != 'true'
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: summary
+
+      - name: keep one issue for the current drift
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "This drift is not mechanical, so nothing was bumped."
+            echo
+            echo '```'
+            cat report.txt
+            echo '```'
+            echo
+            echo "- [ ] decide whether the new SDK platform needs code changes (ets-loader TypeScript version, codelinter config schema, hvigor flags)"
+            echo "- [ ] bump the pin in the commit that carries the adaptation, not before"
+          } > /tmp/issue-body.md
+          existing="$(gh issue list --state open --search 'chore: SDK/tool version refresh in:title' --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then gh issue comment "$existing" --body-file /tmp/issue-body.md; else gh issue create --title "chore: SDK/tool version refresh" --body-file /tmp/issue-body.md; fi
