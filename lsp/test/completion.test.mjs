@@ -118,3 +118,16 @@ test("a declared object argument lists its properties", { skip }, async () => {
     assert.ok(labels.includes(key), `${key} missing from ${labels.slice(0, 8)}`);
   }
 });
+
+test("the enum a parameter expects is offered by name, first", { skip }, async () => {
+  // The name exists in the fork's global list, but at 1,755 entries it is unusable;
+  // the parameter's declared type puts it first.
+  const labels = await completeAt(["      Text(this.message)", "        .fontWeight(|)"]);
+  assert.equal(labels[0], "FontWeight", `first candidate was ${labels[0]}`);
+});
+
+test("a union of enums offers every member of the union", { skip }, async () => {
+  const labels = await completeAt(["      Text(this.message)", "        .align(|)"]);
+  assert.ok(labels.includes("Alignment"), `Alignment missing: ${labels.slice(0, 5)}`);
+  assert.ok(labels.includes("LocalizedAlignment"));
+});

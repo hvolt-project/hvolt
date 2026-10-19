@@ -143,6 +143,11 @@ function enums(): Map<string, string[]> {
   return enumIndex;
 }
 
+/** Component of the chain the cursor is in, if any. */
+function chainComponentAt(file: string, position: { line: number; character: number }): string | undefined {
+  return chainComponent((files.get(file) ?? "").split(/\r?\n/), position.line, position.character);
+}
+
 /** The whole chain up to the cursor, so a call may span lines. */
 function chainText(path: string, line: number, character: number): string {
   const lines = (files.get(path) ?? "").split(/\r?\n/);
@@ -158,9 +163,18 @@ function chainText(path: string, line: number, character: number): string {
   return parts.join("");
 }
 
-/** Signature declared for an attribute method, whichever component declares it. */
-function attributeSignature(member: string): string | undefined {
+/**
+ * Signature declared for an attribute method.
+ *
+ * The component on the chain is preferred: different components declare different
+ * overloads of the same name, and taking "any" signature produced the wrong parameter
+ * type (measured on `fontWeight`).
+ */
+function attributeSignature(member: string, component?: string): string | undefined {
   const index = attributes();
+  const own = component ? index.components.get(component) : undefined;
+  const fromComponent = own ? index.attributes.get(own)?.get(member) : undefined;
+  if (fromComponent) return fromComponent;
   for (const members of index.attributes.values()) {
     const signature = members.get(member);
     if (signature) return signature;
@@ -294,7 +308,7 @@ connection.onSignatureHelp(({ textDocument, position }) => {
     // Component chains are beyond the fork's parser; the declaration still knows the
     // signature, and that is what the user needs while typing the arguments.
     const call = chainCallAt(chainText(file, position.line, position.character));
-    const signature = call ? attributeSignature(call.member) : undefined;
+    const signature = call ? attributeSignature(call.member, chainComponentAt(file, position)) : undefined;
     if (!call || !signature) return null;
     const parameters = parameterTypes(signature).map((text) => ({ label: text }));
     return {
@@ -387,9 +401,28 @@ connection.onCompletion(({ textDocument, position }) => {
   // members are served from the declarations.
   const call = chainCallAt(chainText(file, position.line, position.character));
   if (call) {
-    const signature = attributeSignature(call.member);
+    const signature = attributeSignature(call.member, chainComponentAt(file, position));
     const declared = signature ? parameterTypes(signature) : [];
     const target = declared[call.argument] ?? declared[0];
+
+    // The parameter may be an enum (`fontWeight(value: FontWeight)`); the name itself is
+    // what the user types next, and in the fork's 1,755-entry global list it is buried,
+    // so the matching enum names are offered first.
+    if (call.keys.length === 0) {
+      const wanted = (target ?? "").split("|").map((part) => part.trim());
+      const known = wanted.filter((name) => enums().has(name));
+      const typed = /([A-Za-z_$][\w$]*)$/.exec(lineText.slice(0, position.character))?.[1] ?? "";
+      if (known.length > 0 && (!typed || known.some((name) => name.startsWith(typed)))) {
+        log(`enum name completion ${call.member}(${call.argument}) → ${known.join(" | ")}`);
+        return known.map((name) => ({
+          label: name,
+          kind: CompletionItemKind.Enum,
+          detail: `expected by ${call.member}()`,
+          sortText: "0",
+        }));
+      }
+    }
+
     const members = membersOf(types(), target, call.keys);
     if (members.size > 0) {
       log(`argument completion ${call.member}(${call.argument})${call.keys.map((k) => `.${k}`).join("")} → ${members.size}`);
