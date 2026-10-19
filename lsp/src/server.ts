@@ -20,6 +20,7 @@ import { type Diagnostic, fromLint, parseHvigor, rangeOf } from "./diagnostics.j
 import { COMMANDS, type CommandRequest, commandSpec } from "./commands.js";
 import { completeKeys, declaredRoutes, inRouterCall } from "./hvolttoml.js";
 import { dependencyAt, dependencyTarget, validateToml } from "./tomlcheck.js";
+import { TOKEN_TYPES, encode, semanticTokens } from "./semantics.js";
 import { appendFileSync, existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, relative } from "node:path";
@@ -297,6 +298,39 @@ function attributeSignature(member: string, component?: string): string | undefi
   }
   return undefined;
 }
+/** Token types, in the order the legend declares them. */
+const SEMANTIC_TYPES = [
+  "namespace", "class", "interface", "enum", "typeParameter", "type",
+  "parameter", "variable", "property", "method", "function", "enumMember",
+  "decorator", "keyword", "comment", "string", "number", "operator",
+];
+const SEMANTIC_MODIFIERS: string[] = [];
+
+/** The service's classification names → (token type, modifier bits). */
+const SEMANTIC_MAP: Record<string, { type: string; modifiers?: string[] }> = {
+  "class name": { type: "class" },
+  "interface name": { type: "interface" },
+  "enum name": { type: "enum" },
+  "enum member name": { type: "enumMember" },
+  "module name": { type: "namespace" },
+  "type parameter name": { type: "typeParameter" },
+  "type alias name": { type: "type" },
+  "parameter name": { type: "parameter" },
+  "local name": { type: "variable" },
+  "property name": { type: "property" },
+  "member function name": { type: "method" },
+  "member get accessor name": { type: "method" },
+  "member set accessor name": { type: "method" },
+  "function name": { type: "function" },
+  "constructor name": { type: "method" },
+  keyword: { type: "keyword" },
+  comment: { type: "comment" },
+  stringLiteral: { type: "string" },
+  numericLiteral: { type: "number" },
+  bigintLiteral: { type: "number" },
+  operator: { type: "operator" },
+};
+
 const symbolKind = (kind: string): number => {
   const map: Record<string, number> = {
     class: 5, interface: 11, module: 2, method: 6, function: 12, property: 7, variable: 13,
@@ -397,6 +431,10 @@ connection.onInitialize((params) => {
       documentSymbolProvider: true,
       documentHighlightProvider: true,
       inlayHintProvider: true,
+      semanticTokensProvider: {
+        legend: { tokenTypes: SEMANTIC_TYPES, tokenModifiers: SEMANTIC_MODIFIERS },
+        full: true,
+      },
       codeActionProvider: { codeActionKinds: ["quickfix"] },
       renameProvider: true,
       // The editor contributes its own `hvolt.*` commands, so the server must not
@@ -850,6 +888,29 @@ connection.onDocumentSymbol(({ textDocument }) => {
   // inside it, not that synthetic node.
   if (symbols.name === "<global>") return symbols.children ?? [];
   return [symbols];
+});
+
+connection.languages.semanticTokens.on(({ textDocument }) => {
+  const file = textDocument.uri.replace(/^file:\/\//, "");
+  const text = originals.get(file);
+  if (text === undefined) return { data: [] };
+  const tokens = semanticTokens(
+    text,
+    {
+      components: new Set(attributes().components.keys()),
+      structs: projectStructs(),
+      enums: enums(),
+      decorators: new Set(globals().decorators),
+      functions: new Set(globals().functions),
+      attributes: (component) => {
+        const attribute = component ? attributes().components.get(component) : undefined;
+        return new Set(attribute ? (attributes().attributes.get(attribute) ?? new Map()).keys() : []);
+      },
+    },
+    (line) => chainComponentAt(file, { line, character: (text.split(/\r?\n/)[line] ?? "").length }),
+  );
+  log(`semanticTokens ${file.split("/").slice(-1)[0]} → ${tokens.length}`);
+  return { data: encode(tokens) };
 });
 
 connection.onDocumentHighlight(({ textDocument, position }) => {

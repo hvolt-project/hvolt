@@ -6,6 +6,14 @@ import { mkdirSync } from "node:fs";
 mkdirSync("dist", { recursive: true });
 // The diagnostics module is also built on its own so tests can import it.
 await build({
+  entryPoints: ["src/semantics.ts"],
+  outfile: "dist/semantics.mjs",
+  bundle: true,
+  platform: "node",
+  format: "esm",
+});
+
+await build({
   entryPoints: ["src/transform.ts"],
   outfile: "dist/transform.mjs",
   bundle: true,

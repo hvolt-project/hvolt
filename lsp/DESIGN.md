@@ -111,6 +111,20 @@ is dropped rather than shown at a wrong place. Measured on a two-use example: tw
 locations, an outline with `Index` → `constructor`, `build`, `message`, and one quick fix
 returned for a known diagnostic code.
 
+## Semantic tokens
+
+The SDK's classifier cannot be used: `getEncodedSemanticClassifications` aborts on ArkUI
+files with `Debug Failure. False expression: Classification had non-positive length of 0`,
+and the deprecated `getSemanticClassifications` fails the same way; a plain TypeScript
+file in the same program classifies fine. So the tokens come from the indexes the server
+already builds — components, structs, enums and their members, component attributes,
+decorators and the DSL functions (`semantics.ts`, a pure function over the user's text).
+
+Measured on the sample file: 8 tokens — `Entry`/`Component`/`State` as decorators,
+`Index` as a class, `Column`/`Text` as classes, `message` as a property, `fontSize` as a
+method. Keywords, strings and operators are deliberately not emitted: the grammar already
+colours those, and a second opinion there fights the theme.
+
 ## Editor-experience features
 
 Four things that separate a language plugin from a usable one, all measured:
