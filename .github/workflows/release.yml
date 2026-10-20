@@ -302,5 +302,9 @@ jobs:
             gh release create "$tag" "${assets[@]}" \
               --title "$tag" \
               --notes-file "CHANGELOG.md" \
-              --verify-tag
+              # `--verify-tag` aborts when the tag is absent, which is exactly the case
+              # for a release triggered by a merge to main (measured 2026-10-19: every
+              # publish step succeeded and the job failed at "tag v26.0.0-1 doesn't
+              # exist"). The tag is part of what a release is, so it is created here.
+              --target "$GITHUB_SHA"
           fi
