@@ -215,13 +215,20 @@ impl VersionStrategy for V26Strategy {
     ) -> String {
         let entries: Vec<String> = modules
             .iter()
-            .map(|(dir, _)| {
+            .map(|(dir, module)| {
                 let apply_products: Vec<String> = app
                     .app
                     .products
                     .iter()
                     .map(|p| format!("\"{}\"", p))
                     .collect();
+                // hvigor requires this name to match module.json5's moduleName, which comes
+                // from [module] name — the directory only decides where sources live.
+                let module_name = if module.module.name.is_empty() {
+                    dir.clone()
+                } else {
+                    module.module.name.clone()
+                };
                 format!(
                     r#"    {{
       "name": "{}",
@@ -235,7 +242,7 @@ impl VersionStrategy for V26Strategy {
         }}
       ]
     }}"#,
-                    dir,
+                    module_name,
                     dir,
                     apply_products.join(",\n            ")
                 )
@@ -342,11 +349,16 @@ impl VersionStrategy for V26Strategy {
         let is_entry = ht.is_empty() || ht == "entry" || ht == "feature";
         let is_atomic = app_config.app.bundle_type == "atomicService";
 
-        let install_section = if is_atomic {
-            "    \"deliveryWithInstall\": false,\n    \"installationFree\": true"
-        } else {
-            "    \"deliveryWithInstall\": true,\n    \"installationFree\": false"
-        };
+        // Explicitly configurable: an atomic service may still be delivered with the install,
+        // and a plain app may be installation-free. Fall back to the bundle_type default.
+        let default_with_install = !is_atomic;
+        let default_install_free = is_atomic;
+        let with_install = m.delivery_with_install.unwrap_or(default_with_install);
+        let install_free = m.installation_free.unwrap_or(default_install_free);
+        let install_section = format!(
+            "    \"deliveryWithInstall\": {},\n    \"installationFree\": {}",
+            with_install, install_free
+        );
 
         let main_element_name = super::normalize_ets(&m.entry);
         let main_element = if is_entry {
@@ -362,6 +374,17 @@ impl VersionStrategy for V26Strategy {
         };
 
         let icon = &app_config.app.icon;
+        let ability_icon = if m.icon.is_empty() { icon } else { &m.icon };
+        let start_window_icon = if m.start_window_icon.is_empty() {
+            ability_icon
+        } else {
+            &m.start_window_icon
+        };
+        let orientation = if m.orientation.is_empty() {
+            "auto_rotation"
+        } else {
+            &m.orientation
+        };
 
         let abilities_json = if is_entry {
             let mut ui_abilities: Vec<String> = Vec::new();
@@ -381,11 +404,11 @@ impl VersionStrategy for V26Strategy {
         "name": "{entry_name}",
         "srcEntry": "{entry_src}",
         "description": "$string:{entry_name}_desc",
-        "icon": "{icon}",
+        "icon": "{ability_icon}",
         "label": "$string:{entry_name}_label",
-        "startWindowIcon": "{icon}",
+        "startWindowIcon": "{start_window_icon}",
         "startWindowBackground": "$color:start_window_background",
-        "orientation": "auto_rotation",
+        "orientation": "{orientation}",
         "exported": true,
         "skills": [
           {{
@@ -529,10 +552,16 @@ impl VersionStrategy for V26Strategy {
             .collect::<Vec<_>>()
             .join(",\n");
 
-        let src_entry_line = format!(
-            ",\n    \"srcEntry\": \"./ets/entryability/{}\"",
-            super::with_ets_suffix(&m.entry)
-        );
+        // Entry modules declare each ability's srcEntry inside `abilities`; a second module-level
+        // srcEntry is what DevEco projects never have, so it is only emitted for HSP/HAR.
+        let src_entry_line = if is_entry {
+            String::new()
+        } else {
+            format!(
+                ",\n    \"srcEntry\": \"./ets/entryability/{}\"",
+                super::with_ets_suffix(&m.entry)
+            )
+        };
 
         format!(
             r#"{{
@@ -936,4 +965,76 @@ fn extension_metadata(ea: &crate::config::AbilityConfig) -> String {
         ]"#,
         ea.ability_type, config_name
     )
+}
+
+#[cfg(test)]
+mod module_output_tests {
+    use super::*;
+
+    fn module_named(module_name: &str) -> ModuleConfig {
+        let mut cfg = ModuleConfig::default_entry();
+        cfg.module.name = module_name.to_string();
+        cfg.module.device_types = vec!["phone".to_string()];
+        cfg
+    }
+
+    /// hvigor rejects the project when build-profile's module name differs from module.json5's.
+    /// The name comes from `[module] name`; the directory only says where the sources are.
+    #[test]
+    fn build_profile_uses_the_declared_module_name() {
+        let app = AppConfig::default_for("aigis");
+        let modules = vec![("src".to_string(), module_named("entry"))];
+        let out = V26Strategy::new(26).generate_root_build_profile(&modules, &app, &[]);
+        assert!(out.contains("\"name\": \"entry\""), "{}", out);
+        assert!(out.contains("\"srcPath\": \"./src\""), "{}", out);
+    }
+
+    /// An atomic service can still be delivered with the installation, and a plain app can be
+    /// installation-free — both are user decisions, not bundle_type consequences.
+    #[test]
+    fn install_flags_can_be_overridden() {
+        let atomic_app = AppConfig::default_for("aigis");
+        let mut atomic_app = atomic_app;
+        atomic_app.app.bundle_type = "atomicService".to_string();
+
+        let mut cfg = module_named("entry");
+        cfg.module.delivery_with_install = Some(true);
+        cfg.module.installation_free = Some(true);
+        let out = V26Strategy::new(26).generate_module_json5(&cfg, &atomic_app);
+        assert!(out.contains("\"deliveryWithInstall\": true"), "{}", out);
+        assert!(out.contains("\"installationFree\": true"), "{}", out);
+    }
+
+    /// The entry ability's presentation is configurable; DevEco projects routinely differ
+    /// from the app icon and from `auto_rotation`.
+    #[test]
+    fn entry_ability_presentation_is_configurable() {
+        let app = AppConfig::default_for("aigis");
+        let mut cfg = module_named("entry");
+        cfg.module.icon = "$media:startIcon".to_string();
+        cfg.module.start_window_icon = "$media:startIcon".to_string();
+        cfg.module.orientation = "auto_rotation_unspecified".to_string();
+        let out = V26Strategy::new(26).generate_module_json5(&cfg, &app);
+        assert!(out.contains("\"icon\": \"$media:startIcon\""), "{}", out);
+        assert!(
+            out.contains("\"startWindowIcon\": \"$media:startIcon\""),
+            "{}",
+            out
+        );
+        assert!(
+            out.contains("\"orientation\": \"auto_rotation_unspecified\""),
+            "{}",
+            out
+        );
+    }
+
+    /// Entry modules carry srcEntry per ability; a module-level duplicate is not what
+    /// DevEco writes and only adds noise to diffs.
+    #[test]
+    fn entry_module_has_no_module_level_src_entry() {
+        let app = AppConfig::default_for("aigis");
+        let cfg = module_named("entry");
+        let out = V26Strategy::new(26).generate_module_json5(&cfg, &app);
+        assert_eq!(out.matches("\"srcEntry\"").count(), 1, "{}", out);
+    }
 }

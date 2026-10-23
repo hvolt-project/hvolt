@@ -211,12 +211,23 @@ pub(crate) fn render_hap_info(j: &serde_json::Value, n_entries: usize) -> String
             .unwrap_or_else(|| "?".into())
     ));
     lines.push(format!("deviceTypes: {}", fmt_arr("deviceTypes")));
+    // DevEco module.json5 keeps srcEntry inside each ability; fall back to the main element's
+    // own entry so `hap info` still answers "where does this module start".
+    let main_element = g(m, "mainElement")
+        .or_else(|| g(m, "mainAbility"))
+        .unwrap_or_else(|| "?".into());
+    let src_entry = g(m, "srcEntry")
+        .or_else(|| {
+            m["abilities"]
+                .as_array()
+                .and_then(|a| a.iter().find(|x| x["name"] == main_element.as_str()))
+                .and_then(|x| x["srcEntry"].as_str())
+                .map(|s| s.to_string())
+        })
+        .unwrap_or_else(|| "?".into());
     lines.push(format!(
         "mainElement: {} | srcEntry: {}",
-        g(m, "mainElement")
-            .or_else(|| g(m, "mainAbility"))
-            .unwrap_or_else(|| "?".into()),
-        g(m, "srcEntry").unwrap_or_else(|| "?".into())
+        main_element, src_entry
     ));
     let abilities = m["abilities"].as_array().map(|a| a.len()).unwrap_or(0);
     let ext = m["extensionAbilities"]
@@ -290,5 +301,31 @@ mod tests {
         assert!(st2.suffixes.is_empty());
         assert!(parse_package_stat("not json").is_err());
         assert!(parse_package_stat("{}").is_err()); // top-level list expected
+    }
+}
+
+#[cfg(test)]
+mod src_entry_fallback_tests {
+    use super::render_hap_info;
+
+    /// Entry modules carry srcEntry per ability; `hap info` must resolve it from mainElement.
+    #[test]
+    fn src_entry_falls_back_to_main_element() {
+        let j: serde_json::Value = serde_json::from_str(
+            r#"{
+          "app": {"bundleName":"com.example.demo","versionCode":2,"versionName":"1.0.1"},
+          "module": {"name":"entry","type":"entry","deviceTypes":["phone"],
+                     "mainElement":"EntryAbility",
+                     "abilities":[{"name":"EntryAbility","srcEntry":"./ets/entryability/EntryAbility.ets"}]}
+        }"#,
+        )
+        .unwrap();
+        let out = render_hap_info(&j, 0);
+        assert!(
+            out.contains("./ets/entryability/EntryAbility.ets"),
+            "{}",
+            out
+        );
+        assert!(!out.contains("srcEntry: ?"), "{}", out);
     }
 }

@@ -177,10 +177,13 @@ fn mirror_source_files(
             translator_resources::hardlink_or_copy(&ability_src, &ability_dest);
         }
 
+        let placed: Vec<String> = std::iter::once(module.module.entry.clone())
+            .chain(module.module.abilities.iter().map(|a| a.entry.clone()))
+            .collect();
         translator_resources::mirror_ets_files_skip(
             &module_root,
             &module_ets,
-            &module.module.entry,
+            &placed,
             &native_skip_dirs,
         );
 
