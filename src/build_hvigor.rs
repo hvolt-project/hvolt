@@ -53,6 +53,7 @@ pub fn run_ohpm_install(sdk: &SdkEnv, project_dir: &Path) -> Result<(), String> 
         .current_dir(project_dir)
         .env("DEVECO_SDK_HOME", &sdk.ohos_sdk);
     apply_tool_path(&mut cmd, sdk);
+    apply_cache_home(&mut cmd);
 
     let status = cmd.status().map_err(|e| format!("ohpm: {}", e))?;
     if status.success() {
@@ -73,6 +74,27 @@ fn ohpm_command(sdk: &SdkEnv) -> Command {
         }
     }
     Command::new(&sdk.ohpm)
+}
+
+/// Point the child process's home at a caller-chosen directory.
+///
+/// ohpm keeps its store under `$HOME/.ohpm` and hvigor under `$HOME/.hvigor`; in a sandbox,
+/// a container with a read-only home, or CI with an ephemeral HOME, both fail with `EPERM`
+/// that reads like a project error. `HVOLT_CACHE_HOME` (or `hvolt build --cache-dir`)
+/// relocates them without touching hvolt's own `~/.hvolt` (tools and SDK stay put).
+fn apply_cache_home(cmd: &mut Command) {
+    let Some(dir) = crate::tools::cache_home() else {
+        return;
+    };
+    if let Err(e) = std::fs::create_dir_all(&dir) {
+        eprintln!("Warning: cannot create cache dir {}: {}", dir.display(), e);
+        return;
+    }
+    // ohpm/hvigor/npm all derive their cache path from the home directory.
+    cmd.env("HOME", &dir);
+    if cfg!(windows) {
+        cmd.env("USERPROFILE", &dir);
+    }
 }
 
 /// Prepend node/bin and java/bin to PATH for child processes:
@@ -171,6 +193,8 @@ pub fn run_hqf(sdk: &SdkEnv, build_dir: &Path, module: &str) -> Result<(), Strin
         }
     }
     apply_tool_path(&mut cmd, sdk);
+    apply_cache_home(&mut cmd);
+    apply_cache_home(&mut cmd);
     let status = cmd.status().map_err(|e| format!("hvigorw hqf: {}", e))?;
     if !status.success() {
         return Err(format!(
@@ -224,6 +248,7 @@ pub fn run_assemble(sdk: &SdkEnv, project_dir: &Path) -> Result<(), String> {
     }
 
     apply_tool_path(&mut cmd, sdk);
+    apply_cache_home(&mut cmd);
 
     println!("  hvigorw: {}", sdk.hvigorw.display());
     println!("  DEVECO_SDK_HOME: {}", sdk.ohos_sdk.display());

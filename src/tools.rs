@@ -47,6 +47,18 @@ pub fn tools_root() -> PathBuf {
 }
 
 /// Root for hvigor installation
+/// Cache root handed to ohpm/hvigor children: `HVOLT_CACHE_HOME`, or the value
+/// `hvolt build --cache-dir` exported before the pipeline runs.
+pub fn cache_home() -> Option<PathBuf> {
+    let raw = std::env::var("HVOLT_CACHE_HOME").ok()?;
+    let trimmed = raw.trim();
+    if trimmed.is_empty() {
+        None
+    } else {
+        Some(PathBuf::from(trimmed))
+    }
+}
+
 pub fn hvigor_dir() -> PathBuf {
     tools_root().join("hvigor")
 }

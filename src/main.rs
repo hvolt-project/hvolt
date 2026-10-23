@@ -12,6 +12,7 @@ mod emulator;
 mod hap;
 mod hdc;
 mod http;
+mod import;
 mod lint;
 mod lsp;
 mod pipeline;
@@ -24,6 +25,14 @@ mod target;
 mod tools;
 mod translator;
 mod translator_resources;
+
+/// Publish `--cache-dir` to the build children; hvolt's own home is left untouched so the
+/// managed SDK/tools keep resolving from ~/.hvolt.
+fn export_cache_dir(dir: Option<std::path::PathBuf>) {
+    if let Some(dir) = dir {
+        std::env::set_var("HVOLT_CACHE_HOME", dir);
+    }
+}
 
 /// Report an AGC command that this build cannot serve.
 fn agc_failed(r: Result<(), String>) {
@@ -82,10 +91,17 @@ fn main() {
             println!("✓ Created hvolt project: {}/", name);
             println!("  Next: cd {} && hvolt build", name);
         }
+        cli::Command::Import { from, out, dry_run } => {
+            if let Err(e) = import::run(from.as_deref(), out.as_deref(), dry_run) {
+                eprintln!("✗ {}", e);
+                std::process::exit(1);
+            }
+        }
         cli::Command::Assemble => {
             assemble::assemble(std::path::Path::new("."));
         }
-        cli::Command::Build => {
+        cli::Command::Build { cache_dir } => {
+            export_cache_dir(cache_dir);
             pipeline::build_and_sign(std::path::Path::new(".")).unwrap_or_else(|e| {
                 eprintln!("✗ {}", e);
                 std::process::exit(1);
@@ -126,7 +142,9 @@ fn main() {
         cli::Command::Run {
             device,
             device_flag,
+            cache_dir,
         } => {
+            export_cache_dir(cache_dir);
             let device = warn_if_conflict(device, device_flag, "run");
             pipeline::run(std::path::Path::new("."), device.as_deref());
         }

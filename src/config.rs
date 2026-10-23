@@ -135,7 +135,7 @@ pub struct Skill {
 }
 
 /// Additional (non-entry) ability. type="" = UIAbility, type="form" = ExtensionAbility.
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
 pub struct AbilityConfig {
     pub name: String,
     /// Source entry file (e.g. "EntryFormAbility.ets").
