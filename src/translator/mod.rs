@@ -277,9 +277,14 @@ pub fn full_translate(
     let app_json5 = gen.strategy.generate_app_json5(app_config);
     write_file(&build_dir.join("AppScope/app.json5"), &app_json5);
 
-    // AppScope resources: copy media files (layered_image, etc.)
-    // Try resources/media/ (flat) first, then resources/base/media/ (standard)
+    // AppScope resources. Two inputs:
+    //   app-resources/  — application-scope resources (element/*.json, media, …)
+    //   resources/base/media — the app icon that older flat projects keep here
     let appscope_res = build_dir.join("AppScope/resources/base");
+    let app_res = project_root.join("app-resources");
+    if app_res.exists() {
+        translator_resources::translate_resources(&app_res, &appscope_res);
+    }
     let project_media = project_root.join("resources/media");
     let effective_media = if project_media.exists() {
         &project_media
@@ -290,22 +295,12 @@ pub fn full_translate(
         fs::create_dir_all(appscope_res.join("media")).expect("create appscope media");
         translator_resources::copy_dir_contents(effective_media, &appscope_res.join("media"));
     }
-    // Generate AppScope element/string.json with app_name
+    // AppScope element/string.json: keep whatever the project declares and only supply
+    // `app_name` when it is missing — application strings are user data, not boilerplate.
     let appscope_element = appscope_res.join("element");
     fs::create_dir_all(&appscope_element).expect("create appscope element");
     let appscope_string_json = appscope_element.join("string.json");
-    let appscope_strings = format!(
-        r#"{{
-  "string": [
-    {{
-      "name": "app_name",
-      "value": "{}"
-    }}
-  ]
-}}"#,
-        app_config.app.name
-    );
-    write_file(&appscope_string_json, &appscope_strings);
+    merge_app_scope_strings(&appscope_string_json, &app_config.app.name);
 
     // Hvigor boilerplate
     write_file(
@@ -539,25 +534,32 @@ pub fn full_translate(
             }
         }
 
-        // Copy any remaining .ets files from module root → ets/
+        // Copy any remaining .ets files from module root → ets/.
+        // Abilities are placed by path (entryability/ or entryformability/), so their source
+        // files must not also land at the ets root.
+        let placed: Vec<String> = std::iter::once(module.module.entry.clone())
+            .chain(module.module.abilities.iter().map(|a| a.entry.clone()))
+            .collect();
         translator_resources::copy_ets_files_skip(
             &module_root,
             &module_ets,
-            &module.module.entry,
+            &placed,
             &native_skip_dirs,
         );
 
-        // Copy resources/: project-level resources go to entry module,
-        // module-level resources (if any) go to that specific module.
+        // Copy resources/. Both a project-level `resources/` (app icon, shared elements) and a
+        // module-level `<member>/resources/` (locales, dark, rawfile) exist in real projects,
+        // so they are merged instead of one replacing the other — the module wins on conflicts.
         let project_res = project_root.join("resources");
         let module_res_src = module_root.join("resources");
+        for source in resource_source_order(is_hsp, project_res.exists(), module_res_src.exists()) {
+            let path = match source {
+                ResourceSource::Project => &project_res,
+                ResourceSource::Module => &module_res_src,
+            };
+            translator_resources::translate_resources(path, &module_res);
+        }
         if is_hsp {
-            // HSP uses module-level resources if present, else project-level
-            if module_res_src.exists() {
-                translator_resources::translate_resources(&module_res_src, &module_res);
-            } else if project_res.exists() {
-                translator_resources::translate_resources(&project_res, &module_res);
-            }
             // Ensure HSP has at least a minimal string.json for ResourceTable
             let element_dir = module_res.join("element");
             fs::create_dir_all(&element_dir).expect("create element dir");
@@ -568,11 +570,6 @@ pub fn full_translate(
                     r#"{"string":[{"name":"module_desc","value":"shared module"}]}"#,
                 );
             }
-        } else if project_res.exists() {
-            // Entry module: use project-level resources
-            translator_resources::translate_resources(&project_res, &module_res);
-        } else if module_res_src.exists() {
-            translator_resources::translate_resources(&module_res_src, &module_res);
         }
 
         // Re-inject ability/form strings after resource mirroring
@@ -608,10 +605,30 @@ pub fn full_translate(
         write_file(&module_build.join("build-profile.json5"), &module_bp);
 
         // obfuscation-rules.txt (if enabled)
+        // A project-level rules file wins over the template: obfuscation settings are a
+        // deliberate release decision (size, log stripping), so they must survive translation.
         if module.module.obfuscation {
             let obfuscation_path = module_build.join("obfuscation-rules.txt");
-            if !obfuscation_path.exists() {
+            let configured = if module.module.obfuscation_rules.is_empty() {
+                module_root.join("obfuscation-rules.txt")
+            } else {
+                module_root.join(&module.module.obfuscation_rules)
+            };
+            if configured.is_file() {
+                if let Err(e) = fs::copy(&configured, &obfuscation_path) {
+                    eprintln!(
+                        "Warning: copy {} → {}: {}",
+                        configured.display(),
+                        obfuscation_path.display(),
+                        e
+                    );
+                }
+            } else if !obfuscation_path.exists() {
                 write_file(&obfuscation_path, OBFUSCATION_RULES_TEMPLATE);
+                eprintln!(
+                    "Note: {} enables obfuscation but ships no rules file — using the default template",
+                    module.module.name
+                );
             }
         }
 
@@ -629,6 +646,77 @@ pub fn full_translate(
                 .generate_module_oh_package(&module.module, app_config, native_modules);
         write_file(&module_build.join("oh-package.json5"), &oh_pkg);
     }
+}
+
+/// Which resource directories feed a module, in application order (later wins).
+///
+/// A real project keeps shared/app-level resources under the project `resources/` **and**
+/// module-owned ones (locales, dark, rawfile) under `<member>/resources/`. Treating the two as
+/// alternatives silently dropped every module resource, so both are applied — the module last.
+/// Shared (HSP/HAR) modules own their resources outright; the project copy is only a fallback.
+#[derive(Debug, PartialEq)]
+enum ResourceSource {
+    Project,
+    Module,
+}
+
+fn resource_source_order(
+    is_hsp: bool,
+    project_exists: bool,
+    module_exists: bool,
+) -> Vec<ResourceSource> {
+    if is_hsp {
+        if module_exists {
+            vec![ResourceSource::Module]
+        } else if project_exists {
+            vec![ResourceSource::Project]
+        } else {
+            Vec::new()
+        }
+    } else {
+        let mut order = Vec::new();
+        if project_exists {
+            order.push(ResourceSource::Project);
+        }
+        if module_exists {
+            order.push(ResourceSource::Module);
+        }
+        order
+    }
+}
+
+/// Add an `app_name` entry only when the project did not declare one.
+fn with_app_name(mut entries: Vec<serde_json::Value>, app_name: &str) -> Vec<serde_json::Value> {
+    let has_app_name = entries
+        .iter()
+        .any(|e| e.get("name").and_then(|n| n.as_str()) == Some("app_name"));
+    if !has_app_name {
+        entries.push(serde_json::json!({ "name": "app_name", "value": app_name }));
+    }
+    entries
+}
+
+/// Ensure `AppScope/resources/base/element/string.json` exists and declares `app_name`.
+///
+/// Application-scope strings are user data (version label, privacy links, …), so a file that
+/// the project already supplies is preserved as-is; only a missing `app_name` is added.
+fn merge_app_scope_strings(path: &Path, app_name: &str) {
+    let entries: Vec<serde_json::Value> = if path.is_file() {
+        fs::read_to_string(path)
+            .ok()
+            .and_then(|s| serde_json::from_str::<serde_json::Value>(&s).ok())
+            .and_then(|v| v.get("string").and_then(|s| s.as_array()).cloned())
+            .unwrap_or_default()
+    } else {
+        Vec::new()
+    };
+
+    let entries = with_app_name(entries, app_name);
+    let doc = serde_json::json!({ "string": entries });
+    write_file(
+        path,
+        &serde_json::to_string_pretty(&doc).unwrap_or_default(),
+    );
 }
 
 fn generate_main_pages(config: &ModuleConfig) -> String {
@@ -851,5 +939,68 @@ mod native_detect_tests {
         assert!(!is_native_module("type = \"ets\""));
         assert!(!is_native_module("type = 12"));
         assert!(!is_native_module("this is not toml at all ]["));
+    }
+}
+
+#[cfg(test)]
+mod app_scope_tests {
+    use super::with_app_name;
+
+    /// Application strings belong to the project: they must survive translation untouched.
+    #[test]
+    fn project_app_strings_are_kept_verbatim() {
+        let entries = vec![
+            serde_json::json!({ "name": "app_name", "value": "Aigis" }),
+            serde_json::json!({ "name": "app_version", "value": "0.2.5 (2005)" }),
+        ];
+        let merged = with_app_name(entries, "aigis");
+        assert_eq!(merged.len(), 2);
+        assert_eq!(merged[0]["value"], "Aigis");
+        assert_eq!(merged[1]["name"], "app_version");
+    }
+
+    /// A project that declares nothing still gets the label app.json5 points at.
+    #[test]
+    fn missing_app_name_is_supplied() {
+        let merged = with_app_name(Vec::new(), "aigis");
+        assert_eq!(merged.len(), 1);
+        assert_eq!(merged[0]["name"], "app_name");
+        assert_eq!(merged[0]["value"], "aigis");
+    }
+}
+
+#[cfg(test)]
+mod resource_order_tests {
+    use super::{resource_source_order, ResourceSource};
+
+    /// Entry modules merge both sources, module last so its locales win on conflicts.
+    #[test]
+    fn entry_module_merges_project_and_module() {
+        assert_eq!(
+            resource_source_order(false, true, true),
+            vec![ResourceSource::Project, ResourceSource::Module]
+        );
+        assert_eq!(
+            resource_source_order(false, false, true),
+            vec![ResourceSource::Module]
+        );
+        assert_eq!(
+            resource_source_order(false, true, false),
+            vec![ResourceSource::Project]
+        );
+    }
+
+    /// A shared module owns its resources; the project directory never overrides it.
+    #[test]
+    fn shared_module_prefers_its_own_resources() {
+        assert_eq!(
+            resource_source_order(true, true, true),
+            vec![ResourceSource::Module]
+        );
+        assert_eq!(
+            resource_source_order(true, true, false),
+            vec![ResourceSource::Project]
+        );
+        assert!(resource_source_order(true, false, false).is_empty());
     }
 }

@@ -261,6 +261,25 @@ pub struct ModuleInfo {
     /// Enable code obfuscation.
     #[serde(default)]
     pub obfuscation: bool,
+    /// Custom obfuscation rules, relative to the module directory.
+    /// Defaults to a file named `obfuscation-rules.txt` beside `hvolt.toml` when it exists.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub obfuscation_rules: String,
+    /// Entry ability icon (default: the app icon).
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub icon: String,
+    /// Entry ability start-window icon (default: `icon`).
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub start_window_icon: String,
+    /// Entry ability orientation (default: `auto_rotation`).
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub orientation: String,
+    /// Override `deliveryWithInstall` (default: derived from `bundle_type`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub delivery_with_install: Option<bool>,
+    /// Override `installationFree` (default: derived from `bundle_type`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub installation_free: Option<bool>,
     /// ABIs compiled for native modules (default: ["arm64-v8a"]).
     #[serde(default = "default_abi_filters")]
     pub abi_filters: Vec<String>,
@@ -445,6 +464,12 @@ impl ModuleConfig {
                 device_types: vec!["phone".into(), "tablet".into(), "2in1".into(), "car".into()],
                 permissions: vec![],
                 obfuscation: false,
+                obfuscation_rules: String::new(),
+                icon: String::new(),
+                start_window_icon: String::new(),
+                orientation: String::new(),
+                delivery_with_install: None,
+                installation_free: None,
                 abi_filters: default_abi_filters(),
             },
         }

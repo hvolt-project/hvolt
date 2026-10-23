@@ -62,11 +62,18 @@ pub fn copy_dir_recursive(src: &Path, dest: &Path) {
 }
 
 /// Copy .ets files, skipping additional directories (e.g. native module directories).
-pub fn copy_ets_files_skip(src: &Path, ets_dest: &Path, entry_file: &str, skip_dirs: &[String]) {
+/// Copy module-root `.ets`/`.ts` files into `ets/`, skipping files that the caller has
+/// already placed elsewhere (the entry ability, extension abilities) and native dirs.
+pub fn copy_ets_files_skip(
+    src: &Path,
+    ets_dest: &Path,
+    skip_files: &[String],
+    skip_dirs: &[String],
+) {
     if !src.exists() {
         return;
     }
-    let entry_ets = with_ets_suffix(entry_file);
+    let skip_ets: Vec<String> = skip_files.iter().map(|f| with_ets_suffix(f)).collect();
     fs::create_dir_all(ets_dest).expect("create ets dir");
     if let Ok(entries) = fs::read_dir(src) {
         for entry in entries.flatten() {
@@ -81,7 +88,7 @@ pub fn copy_ets_files_skip(src: &Path, ets_dest: &Path, entry_file: &str, skip_d
             {
                 continue;
             }
-            if name == entry_ets {
+            if skip_ets.contains(&name) {
                 continue;
             }
             if path.is_dir() {
@@ -248,13 +255,13 @@ pub fn mirror_dir(src: &Path, dest: &Path) {
 pub fn mirror_ets_files_skip(
     module_root: &Path,
     ets_dest: &Path,
-    entry_file: &str,
+    skip_files: &[String],
     skip_dirs: &[String],
 ) {
     if !module_root.exists() {
         return;
     }
-    let entry_ets = with_ets_suffix(entry_file);
+    let skip_ets: Vec<String> = skip_files.iter().map(|f| with_ets_suffix(f)).collect();
     if fs::create_dir_all(ets_dest).is_err() {
         eprintln!("Warning: mkdir {} failed", ets_dest.display());
         return;
@@ -273,7 +280,7 @@ pub fn mirror_ets_files_skip(
             {
                 continue;
             }
-            if name == entry_ets {
+            if skip_ets.contains(&name) {
                 continue;
             }
             if entry.path().is_dir() {
