@@ -391,9 +391,20 @@ pub(crate) fn managed_sdk_root() -> Option<PathBuf> {
 /// uninstalled IDE leaves `<install>/sdk` behind with no components, and that
 /// skeleton must not shadow the managed store.
 fn deveco_sdk_path(deveco: &Path) -> Option<PathBuf> {
-    [deveco.join("sdk/default/openharmony"), deveco.join("sdk")]
-        .into_iter()
-        .find(|cand| cand.join("ets").is_dir() || cand.join("openharmony/ets").is_dir())
+    // Prefer the SDK root that also carries `hms`: pointing DEVECO_SDK_HOME at
+    // `<sdk>/default/openharmony` makes hvigor report "SDK component missing" for every
+    // runtimeOS=HarmonyOS project, because the HMS components are not under openharmony/.
+    let root = deveco.join("sdk");
+    let candidates = [
+        root.clone(),
+        root.join("default"),
+        root.join("default/openharmony"),
+    ];
+    candidates.into_iter().find(|cand| {
+        cand.join("ets").is_dir()
+            || cand.join("openharmony/ets").is_dir()
+            || cand.join("default/openharmony/ets").is_dir()
+    })
 }
 
 /// SDK component directory only — no tool checks. Used by consumers that need the
@@ -401,6 +412,13 @@ fn deveco_sdk_path(deveco: &Path) -> Option<PathBuf> {
 /// report an unrelated failure.
 pub(crate) fn sdk_dir(toml_override: &str) -> Result<PathBuf, String> {
     find_ohos_sdk(toml_override)
+}
+
+/// SDK root resolved through the same order `hvolt build` uses, but without demanding
+/// build tools. `doctor` reports this so "DevEco is installed" and "the SDK is missing"
+/// stop being told at the same time.
+pub(crate) fn discovered_sdk_root(toml_override: &str) -> Option<PathBuf> {
+    find_ohos_sdk(toml_override).ok()
 }
 
 fn find_ohos_sdk(toml_override: &str) -> Result<PathBuf, String> {
@@ -1917,13 +1935,27 @@ mod sdk_resolution_tests {
         std::fs::remove_dir_all(&root).ok();
     }
 
+    /// The SDK root wins over its `default/openharmony` child: HMS components live beside
+    /// openharmony, and handing hvigor the child alone makes runtimeOS=HarmonyOS builds
+    /// fail with "SDK component missing".
     #[test]
-    fn deveco_install_with_components_is_accepted() {
+    fn deveco_install_prefers_the_root_that_carries_hms() {
         let root = scratch("full");
         let deveco = root.join("DevEco Studio");
         std::fs::create_dir_all(deveco.join("sdk/default/openharmony/ets")).unwrap();
+        std::fs::create_dir_all(deveco.join("sdk/default/hms")).unwrap();
         let found = deveco_sdk_path(&deveco).expect("component dir");
-        assert!(found.ends_with("sdk/default/openharmony"));
+        assert_eq!(found, deveco.join("sdk"));
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    #[test]
+    fn deveco_single_tree_install_is_accepted() {
+        let root = scratch("single");
+        let deveco = root.join("DevEco Studio");
+        std::fs::create_dir_all(deveco.join("sdk/openharmony/ets")).unwrap();
+        let found = deveco_sdk_path(&deveco).expect("component dir");
+        assert!(found.ends_with("sdk"));
         std::fs::remove_dir_all(&root).ok();
     }
 }

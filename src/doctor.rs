@@ -300,52 +300,56 @@ fn check_executable(
 }
 
 fn check_sdk(rep: &Report) -> Option<PathBuf> {
-    let configured = sdk::configured_sdk_path();
-    let root = if !configured.is_empty() {
-        PathBuf::from(configured)
-    } else if sdk::sdk_store_home().exists() {
-        sdk::sdk_store_home()
-    } else {
+    // Resolution order is the same one `hvolt build` follows, including env vars and an
+    // installed DevEco Studio — doctor used to look only at the managed store and reported
+    // "no SDK" on machines where the build then succeeded with the IDE's SDK.
+    let Some(root) = sdk::discovered_sdk_root("") else {
         rep.line(
             false,
             false,
             "sdk",
             "sdk_path",
-            "not set and ~/.hvolt/sdk missing",
-            "hvolt sdk download <version>",
+            "not found (no sdk_path, no ~/.hvolt/sdk, no DevEco install)",
+            "hvolt sdk download <version>  (or hvolt sdk set <path>)",
         );
         return None;
     };
+    let managed = root == sdk::sdk_store_home();
     let default_link = root.join("default");
-    if !default_link.join("sdk-pkg.json").exists() {
-        rep.line(
-            false,
-            false,
-            "sdk",
-            "store",
-            &format!("{} has no default/sdk-pkg.json", root.display()),
-            "hvolt sdk download <version> (or hvolt sdk use <version>)",
-        );
-        return None;
-    }
     rep.line(
         true,
         false,
         "sdk",
-        "store",
+        if managed { "store" } else { "detected" },
         &format!(
-            "{} (default -> {})",
+            "{}{}",
             root.display(),
-            std::fs::canonicalize(&default_link)
-                .ok()
-                .and_then(|p| p.file_name().map(|n| n.to_string_lossy().into_owned()))
-                .unwrap_or_else(|| "?".into())
+            if managed {
+                format!(
+                    " (default -> {})",
+                    std::fs::canonicalize(&default_link)
+                        .ok()
+                        .and_then(|p| p.file_name().map(|n| n.to_string_lossy().into_owned()))
+                        .unwrap_or_else(|| "?".into())
+                )
+            } else {
+                " (external install: DevEco Studio / env var)".to_string()
+            }
         ),
         "",
     );
 
-    // components present?
-    let oh = default_link.join("openharmony");
+    // Component root: managed store keeps them under default/openharmony, an external
+    // install may be the SDK root itself or already point at the openharmony tree.
+    let oh = [
+        default_link.join("openharmony"),
+        root.join("openharmony"),
+        root.clone(),
+    ]
+    .into_iter()
+    .find(|p| p.join("ets").is_dir() || p.join("native").is_dir())
+    .unwrap_or_else(|| default_link.join("openharmony"));
+
     let mut comps: Vec<String> = Vec::new();
     for c in &["ets", "js", "native", "previewer", "toolchains"] {
         if oh.join(c).exists() {
@@ -358,7 +362,7 @@ fn check_sdk(rep: &Report) -> Option<PathBuf> {
             false,
             "sdk",
             "components",
-            "openharmony/ empty",
+            &format!("{} has no components", oh.display()),
             "hvolt sdk download <version>",
         );
     } else {
@@ -389,7 +393,19 @@ fn check_sdk(rep: &Report) -> Option<PathBuf> {
     }
 
     // hms presence decides runtimeOS=HarmonyOS viability
-    let has_hms = default_link.join("hms").exists();
+    // hms sits next to openharmony: <sdk>/hms for a managed store, <install>/sdk/hms for
+    // DevEco, which hands us <install>/sdk/default/openharmony as the component root.
+    let has_hms = [
+        default_link.join("hms"),
+        root.join("hms"),
+        root.parent().map(|p| p.join("hms")).unwrap_or_default(),
+        root.parent()
+            .and_then(|p| p.parent())
+            .map(|p| p.join("hms"))
+            .unwrap_or_default(),
+    ]
+    .iter()
+    .any(|p| !p.as_os_str().is_empty() && p.exists());
     if has_hms {
         rep.line(
             true,
@@ -405,34 +421,36 @@ fn check_sdk(rep: &Report) -> Option<PathBuf> {
             "no public hms distribution for this platform; set runtime_os = \"OpenHarmony\" in [app]");
     }
 
-    // OpenHarmony runtime view
-    let view = root.parent().map(|p| p.join("sdk-ohos"));
-    match view.as_deref() {
-        Some(v) if v.exists() => {
-            let apis: Vec<String> = std::fs::read_dir(v)
-                .map(|rd| {
-                    rd.flatten()
-                        .filter_map(|e| e.file_name().to_str().map(|s| s.to_string()))
-                        .collect()
-                })
-                .unwrap_or_default();
-            rep.line(
-                true,
+    // OpenHarmony runtime view (only the managed store has one)
+    if managed {
+        let view = root.parent().map(|p| p.join("sdk-ohos"));
+        match view.as_deref() {
+            Some(v) if v.exists() => {
+                let apis: Vec<String> = std::fs::read_dir(v)
+                    .map(|rd| {
+                        rd.flatten()
+                            .filter_map(|e| e.file_name().to_str().map(|s| s.to_string()))
+                            .collect()
+                    })
+                    .unwrap_or_default();
+                rep.line(
+                    true,
+                    false,
+                    "sdk",
+                    "sdk-ohos",
+                    &format!("view for api(s): {}", apis.join(",")),
+                    "",
+                );
+            }
+            _ => rep.line(
                 false,
+                true,
                 "sdk",
                 "sdk-ohos",
-                &format!("view for api(s): {}", apis.join(",")),
-                "",
-            );
+                "missing — OpenHarmony runtime builds will fail",
+                "re-run: hvolt sdk download <version> (creates the view)",
+            ),
         }
-        _ => rep.line(
-            false,
-            true,
-            "sdk",
-            "sdk-ohos",
-            "missing — OpenHarmony runtime builds will fail",
-            "re-run: hvolt sdk download <version> (creates the view)",
-        ),
     }
     Some(root)
 }

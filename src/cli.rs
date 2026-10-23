@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
@@ -24,10 +26,26 @@ pub enum Command {
         /// Project name
         name: String,
     },
+    /// Import: DevEco Studio layout → flat hvolt project (reverse of assemble)
+    Import {
+        /// Project to import (default: current directory)
+        #[arg(long, value_name = "DIR")]
+        from: Option<PathBuf>,
+        /// Where to write the flat project (default: <cwd>/<name>-flat)
+        #[arg(long, value_name = "DIR")]
+        out: Option<PathBuf>,
+        /// Only report the mapping and the fields the flat layout cannot express
+        #[arg(long)]
+        dry_run: bool,
+    },
     /// Assemble: translate user structure → HarmonyOS standard layout
     Assemble,
     /// Build: assemble + invoke hvigorw + sign
-    Build,
+    Build {
+        /// Put ohpm/hvigor caches here instead of $HOME (containers, CI, sandboxes)
+        #[arg(long, value_name = "DIR")]
+        cache_dir: Option<PathBuf>,
+    },
     /// Sign: generate signing materials (.p12, .cer, .p7b) and configure project
     #[command(
         after_help = "`--local` works in every build. Remote signing through AppGallery Connect\n\
@@ -70,6 +88,9 @@ pub enum Command {
         /// Target device (same as positional)
         #[arg(short = 'd', long = "device", value_name = "DEVICE")]
         device_flag: Option<String>,
+        /// Put ohpm/hvigor caches here instead of $HOME
+        #[arg(long, value_name = "DIR")]
+        cache_dir: Option<PathBuf>,
     },
     /// Package-side quality gate (official app_check_tool engine)
     Check {
