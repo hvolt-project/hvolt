@@ -54,14 +54,8 @@ pub fn run(from: Option<&Path>, out: Option<&Path>, dry_run: bool) -> Result<(),
             cfg.module.routes.len()
         );
     }
-    if !gaps.is_empty() {
-        println!("  not expressible in the flat layout ({}):", gaps.len());
-        for g in &gaps {
-            println!("    - {}", g);
-        }
-    }
-
     if dry_run {
+        print_gaps(&gaps);
         println!("  (dry run: nothing written)");
         return Ok(());
     }
@@ -75,21 +69,43 @@ pub fn run(from: Option<&Path>, out: Option<&Path>, dry_run: bool) -> Result<(),
     for (dir, cfg) in &modules {
         let module_root = out.join(dir);
         let src_main = from.join(dir).join("src/main");
-        copy_ets(&src_main.join("ets"), &module_root, &mut gaps)?;
+        let mut ability_files: Vec<String> = vec![cfg.module.entry.clone()];
+        ability_files.extend(cfg.module.abilities.iter().map(|a| a.entry.clone()));
+        copy_ets(
+            &src_main.join("ets"),
+            &module_root,
+            &ability_files,
+            &mut gaps,
+        )?;
         copy_resources(&src_main.join("resources"), &module_root.join("resources"))?;
+        // In-module native code is copied here and wired by `assemble`, which declares
+        // externalNativeOptions for `<member>/cpp` and packs `<member>/libs` — no gap to report.
+        let cpp = src_main.join("cpp");
+        if cpp.is_dir() {
+            copy_dir(&cpp, &module_root.join("cpp"))?;
+        }
+        let libs = from.join(dir).join("libs");
+        if libs.is_dir() {
+            copy_dir(&libs, &module_root.join("libs"))?;
+        }
         copy_obfuscation(&from.join(dir), &module_root, cfg, &mut gaps)?;
         write_module_toml(&module_root, cfg)?;
     }
     import_app_scope(&from, &out, &mut gaps)?;
 
+    print_gaps(&gaps);
     println!("  written. next: cd {} && hvolt assemble", out.display());
-    if !gaps.is_empty() {
-        println!(
-            "  review the {} listed gaps above before trusting the build.",
-            gaps.len()
-        );
-    }
     Ok(())
+}
+
+fn print_gaps(gaps: &Gaps) {
+    if gaps.is_empty() {
+        return;
+    }
+    println!("  not expressible in the flat layout ({}):", gaps.len());
+    for g in gaps {
+        println!("    - {}", g);
+    }
 }
 
 fn default_out(from: &Path) -> PathBuf {
@@ -191,6 +207,8 @@ fn read_app_config(from: &Path, gaps: &mut Gaps) -> Result<AppConfig, String> {
     let mut products = vec!["default".to_string()];
     let mut signing = BTreeMap::new();
     let sdk_version = "26.0.0".to_string();
+    let mut compatible_sdk_version = String::new();
+    let mut target_sdk = String::new();
     if bp_path.is_file() {
         let bp = read_json5(&bp_path)?;
         if let Some(app_bp) = bp.get("app") {
@@ -202,24 +220,29 @@ fn read_app_config(from: &Path, gaps: &mut Gaps) -> Result<AppConfig, String> {
                 if !names.is_empty() {
                     products = names;
                 }
-                // hvolt translates for the SDK it targets; an older API level in the source is
-                // reported rather than copied, because build-profile rejects e.g. "5.0.0"
-                // against an API-26 toolchain (00306042).
-                for key in [
-                    "compileSdkVersion",
-                    "targetSdkVersion",
-                    "compatibleSdkVersion",
-                ] {
-                    if let Some(v) = str_at(&list[0], &[key]) {
-                        let source_api = normalise_sdk(&v);
-                        if source_api != sdk_version {
-                            gaps.push(format!(
-                                "source targets SDK {v}; the imported project is pinned to {sdk_version} — install that SDK and adjust sdk_version to build for the original API level"
-                            ));
-                        }
-                        break;
+                // Each key is read on its own: taking the first hit let `targetSdkVersion`
+                // shadow `compatibleSdkVersion`, silently raising the compatibility floor
+                // (a project pinned to API 23 came out pinned to 26).
+                let product = &list[0];
+                let compile = str_at(product, &["compileSdkVersion"]);
+                let target = str_at(product, &["targetSdkVersion"]);
+                let compatible = str_at(product, &["compatibleSdkVersion"]);
+                // targetSdkVersion is its own statement (a project may compile against 26 and
+                // target 24); it is carried verbatim, so it never needs a warning. Only an
+                // explicit compileSdkVersion can genuinely diverge from what hvolt builds with.
+                target_sdk = target.clone().unwrap_or_default();
+                if let Some(explicit_compile) = compile.clone() {
+                    let normalised = normalise_sdk(&explicit_compile);
+                    if normalised != sdk_version {
+                        gaps.push(format!(
+                            "source compiles against {explicit_compile}; hvolt builds with the installed {sdk_version} — install that SDK and set compile_sdk_version to match"
+                        ));
                     }
                 }
+                // compatibleSdkVersion is a device-reachability decision, not a build knob:
+                // it is carried over verbatim (including the "(NN)" suffix hvigor expects
+                // below API 26) instead of being rebased onto the compile SDK.
+                compatible_sdk_version = compatible.clone().unwrap_or_default();
             }
             if let Some(cfgs) = app_bp.get("signingConfigs").and_then(|c| c.as_array()) {
                 for c in cfgs {
@@ -248,6 +271,17 @@ fn read_app_config(from: &Path, gaps: &mut Gaps) -> Result<AppConfig, String> {
                             !(path.is_file() || from.join(p).is_file())
                         })
                         .count();
+                    for (label, pw) in [
+                        ("storePassword", &cfg.store_password),
+                        ("keyPassword", &cfg.key_password),
+                    ] {
+                        if crate::config::SigningConfig::password_looks_encoded(pw) {
+                            gaps.push(format!(
+                                "signing config {conf_name}: {label} looks DevEco-encoded (hex), not plaintext — \
+                                 hap-sign-tool will fail with 'keystore password was incorrect'; set the real password by hand"
+                            ));
+                        }
+                    }
                     if missing > 0 {
                         gaps.push(format!(
                             "signing config {conf_name} dropped: {missing} of its materials are not on this machine"
@@ -297,12 +331,14 @@ fn read_app_config(from: &Path, gaps: &mut Gaps) -> Result<AppConfig, String> {
             bundle,
             name,
             version,
+            version_code: a.get("versionCode").and_then(|v| v.as_u64()).unwrap_or(0) as u32,
             vendor: str_at(&a, &["vendor"]).unwrap_or_else(|| "example".into()),
             icon: str_at(&a, &["icon"]).unwrap_or_else(|| "$media:app_icon".into()),
             sdk_path: None,
             sdk_version: sdk_version.clone(),
-            compile_sdk_version: sdk_version,
-            compatible_sdk_version: String::new(),
+            compile_sdk_version: sdk_version.clone(),
+            target_sdk_version: target_sdk.clone(),
+            compatible_sdk_version,
             bundle_type: str_at(&a, &["bundleType"]).unwrap_or_else(|| "app".into()),
             products,
             runtime_os: "HarmonyOS".into(),
@@ -412,6 +448,8 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
         let mut skills: Vec<Skill> = Vec::new();
         let mut abilities: Vec<AbilityConfig> = Vec::new();
         let mut entry_icon = String::new();
+        let mut entry_label = String::new();
+        let mut entry_description = String::new();
         let mut entry_start_icon = String::new();
         let mut entry_orientation = String::new();
         let mut first = true;
@@ -422,12 +460,15 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
             .unwrap_or_default()
         {
             let file = ability_file(&ab, "entryability");
-            entry_description_gap(&ab, gaps, &dir);
+            // labels/descriptions are carried verbatim now; nothing to report
+
             let ab_skills = parse_skills(&ab);
             if first {
                 entry = file;
                 skills = ab_skills;
                 entry_icon = str_at(&ab, &["icon"]).unwrap_or_default();
+                entry_label = str_at(&ab, &["label"]).unwrap_or_default();
+                entry_description = str_at(&ab, &["description"]).unwrap_or_default();
                 entry_start_icon = str_at(&ab, &["startWindowIcon"]).unwrap_or_default();
                 entry_orientation = str_at(&ab, &["orientation"]).unwrap_or_default();
                 first = false;
@@ -435,6 +476,9 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
                 abilities.push(AbilityConfig {
                     name: str_at(&ab, &["name"]).unwrap_or_default(),
                     entry: file,
+                    dir: ability_dir(&ab),
+                    label: str_at(&ab, &["label"]).unwrap_or_default(),
+                    description: str_at(&ab, &["description"]).unwrap_or_default(),
                     ability_type: String::new(),
                     skills: ab_skills,
                     exported: ab.get("exported").and_then(|e| e.as_bool()),
@@ -450,6 +494,7 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
             .unwrap_or_default()
         {
             let entry_file = ability_file(&ext, "entryformability");
+            let role_dir = ability_dir(&ext);
             let metadata = ext
                 .get("metadata")
                 .and_then(|m| m.as_array())
@@ -467,6 +512,9 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
             let mut ability = AbilityConfig {
                 name: str_at(&ext, &["name"]).unwrap_or_default(),
                 entry: entry_file,
+                dir: role_dir,
+                label: str_at(&ext, &["label"]).unwrap_or_default(),
+                description: str_at(&ext, &["description"]).unwrap_or_default(),
                 ability_type: str_at(&ext, &["type"]).unwrap_or_default(),
                 exported: ext.get("exported").and_then(|e| e.as_bool()),
                 metadata,
@@ -475,10 +523,12 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
             if let Some(cfg) = ext.get("configProfile") {
                 ability.config_profile = Some(cfg.clone());
             }
-            gaps.push(format!(
-                "{dir}: extension ability {} imported; its label/description strings are regenerated",
-                ability.name
-            ));
+            if ability.label.is_empty() && ability.description.is_empty() {
+                gaps.push(format!(
+                    "{dir}: extension ability {} declares no label/description — the generated module.json5 omits them too",
+                    ability.name
+                ));
+            }
             abilities.push(ability);
         }
 
@@ -509,6 +559,7 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
             })
             .unwrap_or_default();
 
+        let (cpp_flags, native_arguments, abi_filters) = read_native_flags(&module_root);
         let cfg = ModuleConfig {
             module: ModuleInfo {
                 name,
@@ -525,6 +576,8 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
                 device_types,
                 permissions,
                 obfuscation: read_obfuscation(&module_root, gaps, &dir),
+                cpp_flags,
+                native_arguments,
                 obfuscation_rules: String::new(),
                 icon: if entry_icon.is_empty() {
                     String::new()
@@ -536,20 +589,31 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
                 } else {
                     entry_start_icon
                 },
-                orientation: if entry_orientation.is_empty() || entry_orientation == "auto_rotation"
-                {
-                    String::new()
-                } else {
-                    entry_orientation
-                },
+                entry_label,
+                entry_description,
+                // Only an absent key stays absent: a project that declares auto_rotation
+                // explicitly means it, and dropping it changes the product.
+                orientation: entry_orientation,
                 delivery_with_install: m.get("deliveryWithInstall").and_then(|v| v.as_bool()),
                 installation_free: m.get("installationFree").and_then(|v| v.as_bool()),
-                abi_filters: vec!["arm64-v8a".to_string()],
+                abi_filters,
             },
         };
         out.push((dir, cfg));
     }
     Ok(out)
+}
+
+/// Role directory from `srcEntry` ("./ets/entrybackupability/X.ets" → "entrybackupability").
+fn ability_dir(ability: &Value) -> String {
+    ability
+        .get("srcEntry")
+        .and_then(|s| s.as_str())
+        .and_then(|s| s.rsplit_once('/'))
+        .and_then(|(dir, _)| dir.rsplit('/').next())
+        .filter(|d| *d != "ets")
+        .map(|d| d.to_string())
+        .unwrap_or_default()
 }
 
 /// Ability source file name from its `srcEntry` ("./ets/entryability/EntryAbility.ets").
@@ -628,14 +692,6 @@ fn parse_skills(ability: &Value) -> Vec<Skill> {
         .unwrap_or_default()
 }
 
-fn entry_description_gap(ability: &Value, gaps: &mut Gaps, dir: &str) {
-    if ability.get("description").is_some() || ability.get("label").is_some() {
-        gaps.push(format!(
-            "{dir}: ability label/description strings are regenerated from the ability name"
-        ));
-    }
-}
-
 fn string_list(v: &Value, key: &str) -> Vec<String> {
     v.get(key)
         .and_then(|x| x.as_array())
@@ -645,6 +701,49 @@ fn string_list(v: &Value, key: &str) -> Vec<String> {
                 .collect()
         })
         .unwrap_or_default()
+}
+
+/// Module-level `buildOption.externalNativeOptions` flags. Dropping them silently rebuilds
+/// the native code with default optimisation (the source set `-O3 -fvisibility=hidden`).
+fn read_native_flags(module_root: &Path) -> (String, String, Vec<String>) {
+    let default_abis = vec!["arm64-v8a".to_string()];
+    let bp = module_root.join("build-profile.json5");
+    if !bp.is_file() {
+        return (String::new(), String::new(), default_abis);
+    }
+    let Ok(v) = read_json5(&bp) else {
+        return (String::new(), String::new(), default_abis);
+    };
+    let Some(opts) = v.pointer("/buildOption/externalNativeOptions") else {
+        return (String::new(), String::new(), default_abis);
+    };
+    let cpp_flags = opts
+        .get("cppFlags")
+        .and_then(|x| x.as_str())
+        .unwrap_or_default()
+        .to_string();
+    let arguments = opts
+        .get("arguments")
+        .and_then(|x| x.as_str())
+        .unwrap_or_default()
+        .to_string();
+    // ABI list decides which devices can run the native code: a narrowed default (arm64-v8a)
+    // silently drops x86_64 and 32-bit targets, so the source list is carried over.
+    let abi_filters: Vec<String> = opts
+        .get("abiFilters")
+        .and_then(|x| x.as_array())
+        .map(|a| {
+            a.iter()
+                .filter_map(|x| x.as_str().map(String::from))
+                .collect()
+        })
+        .unwrap_or_default();
+    let abi_filters = if abi_filters.is_empty() {
+        default_abis
+    } else {
+        abi_filters
+    };
+    (cpp_flags, arguments, abi_filters)
 }
 
 fn read_obfuscation(module_root: &Path, gaps: &mut Gaps, dir: &str) -> bool {
@@ -674,47 +773,106 @@ fn read_obfuscation(module_root: &Path, gaps: &mut Gaps, dir: &str) -> bool {
     enabled
 }
 
-fn copy_ets(ets_src: &Path, module_out: &Path, gaps: &mut Gaps) -> Result<(), String> {
+/// Locate an ability source by file name anywhere below `ets/`.
+fn find_ets(ets_src: &Path, file: &str) -> Result<Option<PathBuf>, String> {
+    for entry in fs::read_dir(ets_src)
+        .map_err(|e| format!("read {}: {}", ets_src.display(), e))?
+        .flatten()
+    {
+        let path = entry.path();
+        if path.is_dir() {
+            if let Some(hit) = find_ets(&path, file)? {
+                return Ok(Some(hit));
+            }
+        } else if entry.file_name().to_string_lossy() == file {
+            return Ok(Some(path));
+        }
+    }
+    Ok(None)
+}
+
+fn copy_ets(
+    ets_src: &Path,
+    module_out: &Path,
+    abilities: &[String],
+    gaps: &mut Gaps,
+) -> Result<(), String> {
     if !ets_src.is_dir() {
         return Ok(());
     }
     fs::create_dir_all(module_out)
         .map_err(|e| format!("create {}: {}", module_out.display(), e))?;
-    for role in ["entryability", "entryformability"] {
-        let dir = ets_src.join(role);
-        if !dir.is_dir() {
-            continue;
-        }
-        for f in fs::read_dir(&dir)
-            .map_err(|e| format!("read {}: {}", dir.display(), e))?
-            .flatten()
-        {
-            let name = f.file_name().to_string_lossy().to_string();
-            if !name.ends_with(".ets") {
-                continue;
+    // Every ability source is hoisted to the module root, which is where `assemble` looks for
+    // it. DevEco puts abilities in role directories of its own choosing — entryability,
+    // entryformability, but also entrybackupability and friends — so the set of names comes
+    // from module.json5, not from a hardcoded list of two directory names.
+    let mut hoisted: Vec<String> = Vec::new();
+    for ability in abilities {
+        match find_ets(ets_src, ability)? {
+            Some(path) => {
+                fs::copy(&path, module_out.join(ability))
+                    .map_err(|e| format!("copy {}: {}", ability, e))?;
+                hoisted.push(ability.clone());
             }
-            // the entry ability keeps its name at the module root; other ability files too
-            fs::copy(f.path(), module_out.join(&name))
-                .map_err(|e| format!("copy {}: {}", name, e))?;
+            None => gaps.push(format!(
+                "ability source {ability} is declared in module.json5 but not found under ets/ — hvigor will reject the generated srcEntry"
+            )),
         }
     }
+
     for sub in fs::read_dir(ets_src)
         .map_err(|e| format!("read {}: {}", ets_src.display(), e))?
         .flatten()
     {
         let name = sub.file_name().to_string_lossy().to_string();
-        if name == "entryability" || name == "entryformability" {
+        if !sub.path().is_dir() {
             continue;
         }
-        if sub.path().is_dir() {
+        let mut keep_dir = false;
+        for f in fs::read_dir(sub.path())
+            .map_err(|e| format!("read {}: {}", sub.path().display(), e))?
+            .flatten()
+        {
+            let file = f.file_name().to_string_lossy().to_string();
+            if !file.ends_with(".ets") || !hoisted.contains(&file) {
+                keep_dir = true;
+            }
+        }
+        if keep_dir {
             copy_dir(&sub.path(), &module_out.join(&name))?;
         }
     }
-    let test_dirs = [ets_src.join("../test"), ets_src.join("../ohosTest")];
-    if test_dirs.iter().any(|d| d.is_dir()) {
-        gaps.push("test/ohosTest sources are not part of the flat layout — left behind".into());
+    let found: Vec<String> = source_test_dirs(ets_src)
+        .into_iter()
+        .filter(|d| d.is_dir())
+        .filter_map(|d| d.file_name().map(|n| n.to_string_lossy().to_string()))
+        .collect();
+    if !found.is_empty() {
+        gaps.push(format!(
+            "{}: test sources ({}) are not part of the flat layout and no ohosTest target is generated — they stay in the source project",
+            found.join("/"),
+            found.join(", ")
+        ));
     }
     Ok(())
+}
+
+/// Source trees beside `src/main/` that the flat layout does not carry.
+///
+/// `<module>/src/main/ets` → the module's `src/` is two levels up; the test trees live at
+/// `src/test`, `src/ohosTest` and `src/mock`.
+fn source_test_dirs(ets_src: &Path) -> Vec<PathBuf> {
+    let module_src = ets_src
+        .parent()
+        .and_then(|p| p.parent())
+        .map(|p| p.to_path_buf());
+    let Some(module_src) = module_src else {
+        return Vec::new();
+    };
+    ["test", "ohosTest", "mock"]
+        .into_iter()
+        .map(|name| module_src.join(name))
+        .collect()
 }
 
 fn copy_resources(src: &Path, dst: &Path) -> Result<(), String> {
@@ -882,5 +1040,60 @@ mod tests {
             serde_json::from_str(r#"{"srcEntry": "./ets/entryformability/EntryFormAbility.ets"}"#)
                 .unwrap();
         assert_eq!(ability_file(&v, "entryformability"), "EntryFormAbility.ets");
+    }
+}
+
+#[cfg(test)]
+mod sdk_and_password_tests {
+    use super::normalise_sdk;
+    use crate::config::SigningConfig;
+
+    /// DevEco writes encoded passwords; a 32+ char hex string is never a real password.
+    #[test]
+    fn encoded_passwords_are_recognised() {
+        assert!(SigningConfig::password_looks_encoded(&"a".repeat(64)));
+        assert!(SigningConfig::password_looks_encoded(
+            "0000001B03B0928F0A1B2C3D4E5F60718293A4B5C6D7E8F9A0B1C2D3E4F5A6B7"
+        ));
+        assert!(!SigningConfig::password_looks_encoded("0000001B03B0928F")); // 16 chars: too short to be the encoded form
+        assert!(!SigningConfig::password_looks_encoded("hunter2"));
+        assert!(!SigningConfig::password_looks_encoded(""));
+    }
+
+    /// The compatible SDK level keeps its "(NN)" suffix: hvigor below API 26 requires it.
+    #[test]
+    fn compatible_sdk_version_is_carried_verbatim() {
+        assert_eq!(normalise_sdk("6.1.0(23)"), "6.1.0");
+    }
+}
+
+#[cfg(test)]
+mod test_dir_resolution_tests {
+    use super::source_test_dirs;
+    use std::path::Path;
+
+    /// `<module>/src/main/ets` → `<module>/src/{test,ohosTest,mock}`: one level short was the
+    /// bug that made the gap unreachable.
+    #[test]
+    fn test_trees_resolve_beside_src_main() {
+        let dirs = source_test_dirs(Path::new("/p/entry/src/main/ets"));
+        let rendered: Vec<String> = dirs
+            .iter()
+            .map(|d| d.to_string_lossy().into_owned())
+            .collect();
+        assert_eq!(
+            rendered,
+            vec![
+                "/p/entry/src/test".to_string(),
+                "/p/entry/src/ohosTest".to_string(),
+                "/p/entry/src/mock".to_string()
+            ]
+        );
+    }
+
+    /// A path with no module level above it yields nothing instead of panicking.
+    #[test]
+    fn shallow_paths_yield_no_candidates() {
+        assert!(source_test_dirs(Path::new("ets")).is_empty());
     }
 }

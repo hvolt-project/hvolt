@@ -84,6 +84,10 @@ pub fn copy_ets_files_skip(
                 || name == "pages"
                 || name == "resources"
                 || name == "native"
+                // module-owned native sources are translated separately; mirroring them into
+                // ets/ would ship .cpp files (and CMakeLists) inside the HAP
+                || name == "cpp"
+                || name == "libs"
                 || skip_dirs.contains(&name)
             {
                 continue;
@@ -276,6 +280,8 @@ pub fn mirror_ets_files_skip(
                 || name == "pages"
                 || name == "resources"
                 || name == "native"
+                || name == "cpp"
+                || name == "libs"
                 || skip_dirs.contains(&name)
             {
                 continue;
@@ -482,5 +488,48 @@ fn merge_flat_resources(src: &Path, resources_dir: &Path) {
         if let Err(e) = fs::write(&target, &merged) {
             eprintln!("✗ merge write failed {}: {}", target.display(), e);
         }
+    }
+}
+
+#[cfg(test)]
+mod ets_mirror_tests {
+    use super::copy_ets_files_skip;
+    use std::fs;
+
+    fn scratch(tag: &str) -> std::path::PathBuf {
+        let p = std::env::temp_dir().join(format!("hvolt-ets-{}-{}", tag, std::process::id()));
+        let _ = fs::remove_dir_all(&p);
+        fs::create_dir_all(&p).unwrap();
+        p
+    }
+
+    /// Native sources belong to the cpp/lib translation, never to ets/: mirroring them used to
+    /// ship .cpp files and CMakeLists.txt inside the HAP.
+    #[test]
+    fn cpp_and_libs_never_reach_ets() {
+        let base = scratch("skip");
+        let root = base.join("module");
+        let ets = base.join("ets-out"); // must live outside the mirrored tree
+        fs::create_dir_all(&root).unwrap();
+        fs::create_dir_all(root.join("cpp")).unwrap();
+        fs::create_dir_all(root.join("libs/arm64-v8a")).unwrap();
+        fs::create_dir_all(root.join("common")).unwrap();
+        fs::write(root.join("cpp/CMakeLists.txt"), "project(x)").unwrap();
+        fs::write(root.join("cpp/napi_init.cpp"), "//").unwrap();
+        fs::write(root.join("libs/arm64-v8a/libx.so"), "x").unwrap();
+        fs::write(root.join("common/a.ets"), "export {}").unwrap();
+
+        copy_ets_files_skip(&root, &ets, &[], &[]);
+
+        assert!(ets.join("common/a.ets").exists());
+        assert!(
+            !ets.join("cpp").exists(),
+            "cpp must not be mirrored into ets"
+        );
+        assert!(
+            !ets.join("libs").exists(),
+            "libs must not be mirrored into ets"
+        );
+        let _ = fs::remove_dir_all(&root);
     }
 }

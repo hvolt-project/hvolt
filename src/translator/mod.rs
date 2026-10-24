@@ -81,6 +81,9 @@ fn is_native_module(raw: &str) -> bool {
 }
 
 /// One module file's parsed form.
+// The ETS variant holds the whole module config (now including native flags); boxing it would
+// only move the allocation, and discovery handles a handful of modules at a time.
+#[allow(clippy::large_enum_variant)]
 enum ModuleKind {
     Ets(ModuleConfig),
     Native(NativeModuleConfig),
@@ -497,7 +500,13 @@ pub fn full_translate(
             let entry_file_name = &ability.entry;
             let src = module_root.join(entry_file_name);
             let subdir = if is_ext {
-                "entryformability"
+                // The role directory is part of the ability's identity in module.json5:
+                // a backup extension belongs under entrybackupability, not entryformability.
+                if ability.dir.is_empty() {
+                    "entryformability"
+                } else {
+                    ability.dir.as_str()
+                }
             } else {
                 "entryability"
             };
@@ -546,6 +555,24 @@ pub fn full_translate(
             &placed,
             &native_skip_dirs,
         );
+
+        // Module-owned native code. DevEco projects put cmake under `src/main/cpp` inside the
+        // module; the flat layout mirrors that as `<member>/cpp` (+ `libs/` for prebuilt
+        // binaries). copy_ets_files_skip already refuses to fold these into ets/ — here they
+        // are placed where hvigor reads them, and `inline_cpp` makes the module's build-profile
+        // declare externalNativeOptions.
+        let inline_cpp = module_root.join("cpp/CMakeLists.txt").is_file();
+        if inline_cpp {
+            // recursive: cmake trees keep headers and sources in subdirectories
+            translator_resources::copy_dir_recursive(
+                &module_root.join("cpp"),
+                &module_src.join("cpp"),
+            );
+        }
+        let module_libs = module_root.join("libs");
+        if module_libs.is_dir() {
+            translator_resources::copy_dir_recursive(&module_libs, &module_src.join("libs"));
+        }
 
         // Copy resources/. Both a project-level `resources/` (app icon, shared elements) and a
         // module-level `<member>/resources/` (locales, dark, rawfile) exist in real projects,
@@ -599,9 +626,9 @@ pub fn full_translate(
         }
 
         // Module build-profile.json5
-        let module_bp = gen
-            .strategy
-            .generate_module_build_profile(&module.module, native_modules);
+        let module_bp =
+            gen.strategy
+                .generate_module_build_profile(&module.module, native_modules, inline_cpp);
         write_file(&module_build.join("build-profile.json5"), &module_bp);
 
         // obfuscation-rules.txt (if enabled)
@@ -711,6 +738,22 @@ fn merge_app_scope_strings(path: &Path, app_name: &str) {
         Vec::new()
     };
 
+    // An application string table that already names the app is user data: rewriting it would
+    // reformat the file (trailing newline, key order) for no reason.
+    let had_app_name = path.is_file()
+        && fs::read_to_string(path)
+            .ok()
+            .and_then(|s| serde_json::from_str::<serde_json::Value>(&s).ok())
+            .and_then(|v| {
+                v.get("string").and_then(|s| s.as_array()).map(|a| {
+                    a.iter()
+                        .any(|e| e.get("name").and_then(|n| n.as_str()) == Some("app_name"))
+                })
+            })
+            .unwrap_or(false);
+    if had_app_name {
+        return;
+    }
     let entries = with_app_name(entries, app_name);
     let doc = serde_json::json!({ "string": entries });
     write_file(
@@ -761,6 +804,8 @@ pub fn inject_form_strings(string_json_path: &Path, module: &ModuleConfig) -> Re
 
     // Entry ability label
     let entry_base = normalize_ets(&module.module.entry);
+    let entry_has_label = !module.module.entry_label.is_empty();
+    let entry_has_desc = !module.module.entry_description.is_empty();
     for base_name in std::iter::once(entry_base.clone()).chain(
         all_abilities
             .iter()
@@ -769,7 +814,8 @@ pub fn inject_form_strings(string_json_path: &Path, module: &ModuleConfig) -> Re
     ) {
         let desc_key = format!("{}_desc", base_name);
         let label_key = format!("{}_label", base_name);
-        if !content.contains(&format!("\"name\": \"{}\"", desc_key)) {
+        let supplied = base_name == entry_base && (entry_has_label || entry_has_desc);
+        if !supplied && !content.contains(&format!("\"name\": \"{}\"", desc_key)) {
             new_entries.push(format!(
                 r#"    {{
       "name": "{}",
@@ -778,7 +824,7 @@ pub fn inject_form_strings(string_json_path: &Path, module: &ModuleConfig) -> Re
                 desc_key, base_name
             ));
         }
-        if !content.contains(&format!("\"name\": \"{}\"", label_key)) {
+        if !supplied && !content.contains(&format!("\"name\": \"{}\"", label_key)) {
             new_entries.push(format!(
                 r#"    {{
       "name": "{}",
@@ -795,6 +841,9 @@ pub fn inject_form_strings(string_json_path: &Path, module: &ModuleConfig) -> Re
         let already_defined = element_dir.join(&config_resource).exists();
         if already_defined {
             continue;
+        }
+        if a.label.is_empty() && a.description.is_empty() {
+            continue; // nothing to generate: module.json5 omits both lines
         }
         let desc_key = format!("{}_desc", a.name);
         let label_key = format!("{}_label", a.name);
@@ -950,12 +999,12 @@ mod app_scope_tests {
     #[test]
     fn project_app_strings_are_kept_verbatim() {
         let entries = vec![
-            serde_json::json!({ "name": "app_name", "value": "Aigis" }),
+            serde_json::json!({ "name": "app_name", "value": "DemoApp" }),
             serde_json::json!({ "name": "app_version", "value": "0.2.5 (2005)" }),
         ];
         let merged = with_app_name(entries, "aigis");
         assert_eq!(merged.len(), 2);
-        assert_eq!(merged[0]["value"], "Aigis");
+        assert_eq!(merged[0]["value"], "DemoApp");
         assert_eq!(merged[1]["name"], "app_version");
     }
 
@@ -1002,5 +1051,28 @@ mod resource_order_tests {
             vec![ResourceSource::Project]
         );
         assert!(resource_source_order(true, false, false).is_empty());
+    }
+}
+
+#[cfg(test)]
+mod app_scope_verbatim_tests {
+    use super::merge_app_scope_strings;
+    use std::fs;
+
+    /// A string table that already names the app must come back byte-identical — reformatting
+    /// it drops the trailing newline and reorders nothing the user wrote.
+    #[test]
+    fn existing_app_strings_are_left_untouched() {
+        let dir = std::env::temp_dir().join(format!("hvolt-appscope-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("string.json");
+        let original = "{\n  \"string\": [\n    {\n      \"name\": \"app_name\",\n      \"value\": \"DemoApp\"\n    }\n  ]\n}\n";
+        fs::write(&path, original).unwrap();
+
+        merge_app_scope_strings(&path, "demo-app");
+
+        assert_eq!(fs::read_to_string(&path).unwrap(), original);
+        let _ = fs::remove_dir_all(&dir);
     }
 }

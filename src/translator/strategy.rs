@@ -58,6 +58,7 @@ pub trait VersionStrategy {
         &self,
         module: &crate::config::ModuleInfo,
         native_modules: &[(String, NativeModuleConfig)],
+        inline_cpp: bool,
     ) -> String;
 }
 
@@ -272,7 +273,11 @@ impl VersionStrategy for V26Strategy {
 
         let all_entries: Vec<String> = entries.into_iter().chain(dep_entries).collect();
 
-        let sv = self.sdk_version_string();
+        let sv = if app.app.target_sdk_version.is_empty() {
+            self.sdk_version_string()
+        } else {
+            app.app.target_sdk_version.clone()
+        };
         let csv = self.compile_sdk_version_string();
         let compat_sdk = if app.app.compatible_sdk_version.is_empty() {
             &app.app.sdk_version
@@ -380,11 +385,8 @@ impl VersionStrategy for V26Strategy {
         } else {
             &m.start_window_icon
         };
-        let orientation = if m.orientation.is_empty() {
-            "auto_rotation"
-        } else {
-            &m.orientation
-        };
+        // Optional upstream: an absent orientation must stay absent, not become auto_rotation.
+        let orientation: &str = m.orientation.as_str();
 
         let abilities_json = if is_entry {
             let mut ui_abilities: Vec<String> = Vec::new();
@@ -399,16 +401,32 @@ impl VersionStrategy for V26Strategy {
             } else {
                 format_skills(&m.skills)
             };
+            // Labels and orientation are optional in DevEco's module.json5; reproducing the
+            // source means emitting them only when the project asked for them.
+            let entry_desc = if m.entry_description.is_empty() {
+                format!("\"$string:{}_desc\"", entry_name)
+            } else {
+                format!("\"{}\"", m.entry_description)
+            };
+            let entry_label = if m.entry_label.is_empty() {
+                format!("\"$string:{}_label\"", entry_name)
+            } else {
+                format!("\"{}\"", m.entry_label)
+            };
+            let entry_orientation = if orientation.is_empty() {
+                String::new()
+            } else {
+                format!("\n        \"orientation\": \"{}\",", orientation)
+            };
             ui_abilities.push(format!(
                 r#"      {{
         "name": "{entry_name}",
         "srcEntry": "{entry_src}",
-        "description": "$string:{entry_name}_desc",
+        "description": {entry_desc},
         "icon": "{ability_icon}",
-        "label": "$string:{entry_name}_label",
+        "label": {entry_label},
         "startWindowIcon": "{start_window_icon}",
-        "startWindowBackground": "$color:start_window_background",
-        "orientation": "{orientation}",
+        "startWindowBackground": "$color:start_window_background",{entry_orientation}
         "exported": true,
         "skills": [
           {{
@@ -435,13 +453,23 @@ impl VersionStrategy for V26Strategy {
                     format!(",\n        \"orientation\": \"{}\"", a.orientation)
                 };
                 let extra = format_ability_extra(a);
+                let extra_desc = if a.description.is_empty() {
+                    format!("\"$string:{}_desc\"", name)
+                } else {
+                    format!("\"{}\"", a.description)
+                };
+                let extra_label = if a.label.is_empty() {
+                    format!("\"$string:{}_label\"", name)
+                } else {
+                    format!("\"{}\"", a.label)
+                };
                 ui_abilities.push(format!(
                     r#"      {{
         "name": "{name}",
         "srcEntry": "{src}",
-        "description": "$string:{name}_desc",
+        "description": {extra_desc},
         "icon": "{icon}",
-        "label": "$string:{name}_label",
+        "label": {extra_label},
         "startWindowIcon": "{icon}",
         "startWindowBackground": "$color:start_window_background",
         "exported": true{orientation_line}{extra},
@@ -473,27 +501,40 @@ impl VersionStrategy for V26Strategy {
                 let items: Vec<String> = exts
                     .iter()
                     .map(|ea| {
-                        let src_path = format!("./ets/entryformability/{}", ea.entry);
+                        // Keep the role directory the ability came from; DevEco uses
+                        // entryformability / entrybackupability / … per extension type.
+                        let role = if ea.dir.is_empty() {
+                            "entryformability"
+                        } else {
+                            &ea.dir
+                        };
+                        let src_path = format!("./ets/{}/{}", role, ea.entry);
                         let exported_line = match ea.exported {
                             Some(v) => format!(",\n        \"exported\": {}", v),
                             None => String::new(),
                         };
                         let metadata_json = extension_metadata(ea);
+                        // Same rule as UIAbility: reproduce what the project declared. A backup
+                        // extension with no label must not gain a generated one.
+                        // Only what the project declared: a backup extension that carried no
+                        // label must not gain a generated one.
+                        let label_line = if ea.label.is_empty() {
+                            String::new()
+                        } else {
+                            format!("\n        \"label\": \"{}\",", ea.label)
+                        };
+                        let desc_line = if ea.description.is_empty() {
+                            String::new()
+                        } else {
+                            format!("\n        \"description\": \"{}\",", ea.description)
+                        };
                         format!(
                             r#"      {{
         "name": "{}",
-        "srcEntry": "{}",
-        "label": "$string:{}_label",
-        "description": "$string:{}_desc",
+        "srcEntry": "{}",{label_line}{desc_line}
         "type": "{}"{}{}
       }}"#,
-                            ea.name,
-                            src_path,
-                            ea.name,
-                            ea.name,
-                            ea.ability_type,
-                            exported_line,
-                            metadata_json
+                            ea.name, src_path, ea.ability_type, exported_line, metadata_json
                         )
                     })
                     .collect();
@@ -516,7 +557,10 @@ impl VersionStrategy for V26Strategy {
                     } else {
                         format!(",\n        \"reason\": \"{}\"", p.reason)
                     };
-                    let used_scene = if p.abilities.is_empty() && p.when.is_empty() {
+                    // A permission that declared nothing stays bare: injecting
+                    // `usedScene:{abilities:[],when:"always"}` states a runtime scene the project
+                    // never asked for.
+                    let used_scene = if p.abilities.is_empty() {
                         String::new()
                     } else {
                         format!(
@@ -592,8 +636,9 @@ impl VersionStrategy for V26Strategy {
         &self,
         module: &crate::config::ModuleInfo,
         native_modules: &[(String, NativeModuleConfig)],
+        inline_cpp: bool,
     ) -> String {
-        let native_options_str = if native_modules.is_empty() {
+        let native_options_str = if native_modules.is_empty() && !inline_cpp {
             String::new()
         } else {
             // ABIs come from the module config so 32-bit or emulator targets can opt in.
@@ -603,16 +648,19 @@ impl VersionStrategy for V26Strategy {
                 .map(|a| format!("\"{}\"", a))
                 .collect::<Vec<_>>()
                 .join(", ");
-            let items: Vec<String> = (0..native_modules.len())
+            let count = if inline_cpp { 1 } else { native_modules.len() };
+            let items: Vec<String> = (0..count)
                 .map(|_| {
                     format!(
                         r#"    "externalNativeOptions": {{
       "path": "./src/main/cpp/CMakeLists.txt",
-      "arguments": "",
-      "cppFlags": "",
+      "arguments": "{arguments}",
+      "cppFlags": "{cpp_flags}",
       "abiFilters": [{}]
     }}"#,
-                        abi_json
+                        abi_json,
+                        arguments = module.native_arguments,
+                        cpp_flags = module.cpp_flags,
                     )
                 })
                 .collect();
@@ -1036,5 +1084,241 @@ mod module_output_tests {
         let cfg = module_named("entry");
         let out = V26Strategy::new(26).generate_module_json5(&cfg, &app);
         assert_eq!(out.matches("\"srcEntry\"").count(), 1, "{}", out);
+    }
+}
+
+#[cfg(test)]
+mod inline_native_tests {
+    use super::*;
+
+    /// A module that ships its own cmake tree must declare externalNativeOptions, otherwise
+    /// hvigor never builds it and the package silently carries no .so.
+    #[test]
+    fn module_owned_cpp_emits_external_native_options() {
+        let module = ModuleConfig::default_entry().module;
+        let out = V26Strategy::new(26).generate_module_build_profile(&module, &[], true);
+        assert!(out.contains("\"externalNativeOptions\""), "{}", out);
+        assert!(out.contains("./src/main/cpp/CMakeLists.txt"), "{}", out);
+        assert!(out.contains("arm64-v8a"), "{}", out);
+    }
+
+    /// No native code, no native block: the empty buildOption must stay empty.
+    #[test]
+    fn plain_module_has_no_native_options() {
+        let module = ModuleConfig::default_entry().module;
+        let out = V26Strategy::new(26).generate_module_build_profile(&module, &[], false);
+        assert!(!out.contains("externalNativeOptions"), "{}", out);
+    }
+}
+
+#[cfg(test)]
+mod extension_dir_tests {
+    use super::*;
+    use crate::config::AbilityConfig;
+
+    /// A backup extension belongs under entrybackupability; writing it into entryformability
+    /// makes module.json5 lie about the ability's home (and collides with a form ability that
+    /// shares the file name).
+    #[test]
+    fn extension_src_entry_keeps_its_role_directory() {
+        let app = AppConfig::default_for("paintboard");
+        let mut cfg = ModuleConfig::default_entry();
+        cfg.module.name = "entry".to_string();
+        cfg.module.device_types = vec!["phone".to_string()];
+        cfg.module.abilities = vec![AbilityConfig {
+            name: "EntryBackupAbility".to_string(),
+            entry: "EntryBackupAbility.ets".to_string(),
+            dir: "entrybackupability".to_string(),
+            ability_type: "backup".to_string(),
+            ..Default::default()
+        }];
+        let out = V26Strategy::new(26).generate_module_json5(&cfg, &app);
+        assert!(
+            out.contains("./ets/entrybackupability/EntryBackupAbility.ets"),
+            "{}",
+            out
+        );
+    }
+
+    /// Without a recorded directory the type default still applies.
+    #[test]
+    fn extension_src_entry_falls_back_to_entryformability() {
+        let app = AppConfig::default_for("app");
+        let mut cfg = ModuleConfig::default_entry();
+        cfg.module.name = "entry".to_string();
+        cfg.module.device_types = vec!["phone".to_string()];
+        cfg.module.abilities = vec![AbilityConfig {
+            name: "EntryFormAbility".to_string(),
+            entry: "EntryFormAbility.ets".to_string(),
+            ability_type: "form".to_string(),
+            ..Default::default()
+        }];
+        let out = V26Strategy::new(26).generate_module_json5(&cfg, &app);
+        assert!(
+            out.contains("./ets/entryformability/EntryFormAbility.ets"),
+            "{}",
+            out
+        );
+    }
+}
+
+#[cfg(test)]
+mod declared_labels_tests {
+    use super::*;
+    use crate::config::AbilityConfig;
+
+    fn app() -> AppConfig {
+        AppConfig::default_for("x")
+    }
+
+    fn module() -> crate::config::ModuleInfo {
+        let mut cfg = ModuleConfig::default_entry();
+        cfg.module.name = "entry".into();
+        cfg.module.device_types = vec!["phone".into()];
+        cfg.module
+    }
+
+    /// A backup extension that declared no label gains none (and no extra string resources).
+    #[test]
+    fn extension_without_label_gets_no_generated_label() {
+        let mut m = module();
+        m.abilities = vec![AbilityConfig {
+            name: "EntryBackupAbility".into(),
+            entry: "EntryBackupAbility.ets".into(),
+            dir: "entrybackupability".into(),
+            ability_type: "backup".into(),
+            ..Default::default()
+        }];
+        let cfg = ModuleConfig { module: m };
+        let out = V26Strategy::new(26).generate_module_json5(&cfg, &app());
+        assert!(!out.contains("EntryBackupAbility_label"), "{}", out);
+    }
+
+    /// A declared label is used verbatim instead of a generated `$string:<name>_label`.
+    #[test]
+    fn declared_label_is_used() {
+        let mut m = module();
+        m.entry_label = "$string:app_title".into();
+        let cfg = ModuleConfig { module: m };
+        let out = V26Strategy::new(26).generate_module_json5(&cfg, &app());
+        assert!(out.contains("\"label\": \"$string:app_title\""), "{}", out);
+    }
+
+    /// Orientation is optional upstream: no value, no key.
+    #[test]
+    fn absent_orientation_emits_no_key() {
+        let cfg = ModuleConfig { module: module() };
+        let out = V26Strategy::new(26).generate_module_json5(&cfg, &app());
+        assert!(!out.contains("\"orientation\""), "{}", out);
+    }
+}
+
+#[cfg(test)]
+mod declared_sdk_tests {
+    use super::*;
+
+    fn app_with(target: &str) -> AppConfig {
+        let mut app = AppConfig::default_for("x");
+        app.app.products = vec!["default".into()];
+        app.app.target_sdk_version = target.to_string();
+        app
+    }
+
+    /// targetSdkVersion is independent from the compile SDK: a project may compile against 26
+    /// and target 24, and that changes runtime behaviour.
+    #[test]
+    fn target_sdk_is_emitted_when_declared() {
+        let cfg = ModuleConfig::default_entry();
+        let out = V26Strategy::new(26).generate_root_build_profile(
+            &[("src".into(), cfg)],
+            &app_with("6.1.1(24)"),
+            &[],
+        );
+        assert!(
+            out.contains("\"targetSdkVersion\": \"6.1.1(24)\""),
+            "{}",
+            out
+        );
+    }
+
+    /// Without a declared target it still falls back to the compile SDK.
+    #[test]
+    fn target_sdk_falls_back_to_compile() {
+        let cfg = ModuleConfig::default_entry();
+        let out = V26Strategy::new(26).generate_root_build_profile(
+            &[("src".into(), cfg)],
+            &app_with(""),
+            &[],
+        );
+        assert!(out.contains("\"targetSdkVersion\": \"26.0.0\""), "{}", out);
+    }
+}
+
+#[cfg(test)]
+mod permission_scene_tests {
+    use super::*;
+    use crate::config::ModulePermission;
+
+    /// A bare `{ "name": ... }` permission must stay bare — injecting
+    /// `usedScene:{abilities:[],when:"always"}` claims a runtime scene the project never set.
+    #[test]
+    fn permission_without_abilities_has_no_used_scene() {
+        let app = AppConfig::default_for("x");
+        let mut cfg = ModuleConfig::default_entry();
+        cfg.module.name = "entry".into();
+        cfg.module.device_types = vec!["phone".into()];
+        cfg.module.permissions = vec![ModulePermission {
+            name: "ohos.permission.INTERNET".into(),
+            reason: String::new(),
+            abilities: vec![],
+            when: String::new(),
+        }];
+        let out = V26Strategy::new(26).generate_module_json5(&cfg, &app);
+        assert!(!out.contains("usedScene"), "{}", out);
+    }
+
+    /// When the project does declare a scene, it is kept.
+    #[test]
+    fn permission_with_abilities_keeps_used_scene() {
+        let app = AppConfig::default_for("x");
+        let mut cfg = ModuleConfig::default_entry();
+        cfg.module.name = "entry".into();
+        cfg.module.device_types = vec!["phone".into()];
+        cfg.module.permissions = vec![ModulePermission {
+            name: "ohos.permission.PRIVACY_WINDOW".into(),
+            reason: String::new(),
+            abilities: vec!["EntryAbility".into()],
+            when: "always".into(),
+        }];
+        let out = V26Strategy::new(26).generate_module_json5(&cfg, &app);
+        assert!(out.contains("\"usedScene\""), "{}", out);
+        assert!(out.contains("EntryAbility"), "{}", out);
+    }
+}
+
+#[cfg(test)]
+mod declared_orientation_tests {
+    use super::*;
+
+    fn module_with(orientation: &str) -> crate::config::ModuleInfo {
+        let mut cfg = ModuleConfig::default_entry();
+        cfg.module.name = "entry".into();
+        cfg.module.device_types = vec!["phone".into()];
+        cfg.module.orientation = orientation.into();
+        cfg.module
+    }
+
+    /// `auto_rotation` is a declarED choice, not "nothing": it must reach module.json5.
+    #[test]
+    fn explicit_auto_rotation_is_emitted() {
+        let cfg = ModuleConfig {
+            module: module_with("auto_rotation"),
+        };
+        let out = V26Strategy::new(26).generate_module_json5(&cfg, &AppConfig::default_for("x"));
+        assert!(
+            out.contains("\"orientation\": \"auto_rotation\""),
+            "{}",
+            out
+        );
     }
 }

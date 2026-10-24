@@ -169,7 +169,11 @@ fn mirror_source_files(
             let ability_src = module_root.join(entry_file_name);
             let is_ext = !ability.ability_type.is_empty();
             let subdir = if is_ext {
-                "entryformability"
+                if ability.dir.is_empty() {
+                    "entryformability"
+                } else {
+                    ability.dir.as_str()
+                }
             } else {
                 "entryability"
             };
