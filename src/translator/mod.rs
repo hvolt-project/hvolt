@@ -669,15 +669,16 @@ pub fn full_translate(
         // Module hvigorfile.ts
         let hvigorfile = match module.module.module_type.as_str() {
             "hsp" | "shared" => HVIGORFILE_HSP,
-            "har" => HVIGORFILE_HSP,
+            // A HAR is a static package: hspTasks cannot build it (00303278).
+            "har" => HVIGORFILE_HAR,
             _ => HVIGORFILE_ENTRY,
         };
         write_file(&module_build.join("hvigorfile.ts"), hvigorfile);
 
         // Module oh-package.json5
-        let oh_pkg =
-            gen.strategy
-                .generate_module_oh_package(&module.module, app_config, native_modules);
+        let oh_pkg = gen
+            .strategy
+            .generate_module_oh_package(module, app_config, native_modules);
         write_file(&module_build.join("oh-package.json5"), &oh_pkg);
     }
 }
@@ -955,6 +956,13 @@ const HVIGORFILE_ENTRY: &str = r#"import { hapTasks } from '@ohos/hvigor-ohos-pl
 
 export default {
   system: hapTasks,
+  plugins: []
+}"#;
+
+const HVIGORFILE_HAR: &str = r#"import { harTasks } from '@ohos/hvigor-ohos-plugin';
+
+export default {
+  system: harTasks,
   plugins: []
 }"#;
 
