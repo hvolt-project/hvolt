@@ -20,6 +20,9 @@ pub struct AppFields {
     /// versionCode. 0 = derive from `version` (semver → NNNN); DevEco tracks it separately.
     #[serde(default, skip_serializing_if = "is_zero")]
     pub version_code: u32,
+    /// app.json5 buildVersion. Empty = "1" (DevEco's default for new projects).
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub build_version: String,
     #[serde(default = "default_vendor")]
     pub vendor: String,
     #[serde(default = "default_icon")]
@@ -383,6 +386,9 @@ pub struct NativeModuleConfig {
     /// versionCode. 0 = derive from `version` (semver → NNNN); DevEco tracks it separately.
     #[serde(default, skip_serializing_if = "is_zero")]
     pub version_code: u32,
+    /// app.json5 buildVersion. Empty = "1" (DevEco's default for new projects).
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub build_version: String,
     #[serde(default = "default_native_description")]
     pub description: String,
 }
@@ -410,6 +416,7 @@ impl AppConfig {
                 name: name.to_string(),
                 version: "1.0.0".to_string(),
                 version_code: 0,
+                build_version: String::new(),
                 vendor: default_vendor(),
                 icon: default_icon(),
                 sdk_path: None,

@@ -332,6 +332,11 @@ fn read_app_config(from: &Path, gaps: &mut Gaps) -> Result<AppConfig, String> {
             name,
             version,
             version_code: a.get("versionCode").and_then(|v| v.as_u64()).unwrap_or(0) as u32,
+            build_version: a
+                .get("buildVersion")
+                .and_then(|v| v.as_str())
+                .unwrap_or_default()
+                .to_string(),
             vendor: str_at(&a, &["vendor"]).unwrap_or_else(|| "example".into()),
             icon: str_at(&a, &["icon"]).unwrap_or_else(|| "$media:app_icon".into()),
             sdk_path: None,

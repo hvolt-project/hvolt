@@ -195,7 +195,7 @@ impl VersionStrategy for V26Strategy {
     "vendor": "{}",
     "versionCode": {},
     "versionName": "{}",
-    "buildVersion": "1",
+    "buildVersion": "{}",
     "icon": "{}",
     "label": "$string:app_name"{}
   }}
@@ -204,6 +204,12 @@ impl VersionStrategy for V26Strategy {
             config.app.vendor,
             config.app.version_code(),
             config.app.version,
+            // buildVersion is a separate counter in DevEco; "1" is only the default for new projects.
+            if config.app.build_version.is_empty() {
+                "1"
+            } else {
+                config.app.build_version.as_str()
+            },
             config.app.icon,
             bundle_type_line,
         )
@@ -1320,5 +1326,27 @@ mod declared_orientation_tests {
             "{}",
             out
         );
+    }
+}
+
+#[cfg(test)]
+mod build_version_tests {
+    use super::*;
+
+    /// buildVersion is DevEco's own counter, not a constant: carry it when declared.
+    #[test]
+    fn declared_build_version_is_emitted() {
+        let mut app = AppConfig::default_for("x");
+        app.app.build_version = "7".into();
+        let out = V26Strategy::new(26).generate_app_json5(&app);
+        assert!(out.contains("\"buildVersion\": \"7\""), "{}", out);
+    }
+
+    /// With nothing declared, the historical default stays.
+    #[test]
+    fn build_version_defaults_to_one() {
+        let app = AppConfig::default_for("x");
+        let out = V26Strategy::new(26).generate_app_json5(&app);
+        assert!(out.contains("\"buildVersion\": \"1\""), "{}", out);
     }
 }
