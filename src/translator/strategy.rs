@@ -603,9 +603,16 @@ impl VersionStrategy for V26Strategy {
             .join(",\n");
 
         // Entry modules declare each ability's srcEntry inside `abilities`; a second module-level
-        // srcEntry is what DevEco projects never have, so it is only emitted for HSP/HAR.
+        // srcEntry is what DevEco projects never have, so it is only emitted for HSP/HAR. Those
+        // keep their entry file at the module root (assemble copies it there), so the path must
+        // not point into entryability/ — hvigor rejects the generated manifest otherwise.
         let src_entry_line = if is_entry {
             String::new()
+        } else if ht == "shared" || ht == "hsp" {
+            format!(
+                ",\n    \"srcEntry\": \"./{}\"",
+                super::with_ets_suffix(&m.entry)
+            )
         } else {
             format!(
                 ",\n    \"srcEntry\": \"./ets/entryability/{}\"",
@@ -725,11 +732,13 @@ impl VersionStrategy for V26Strategy {
         app_config: &AppConfig,
         native_modules: &[(String, NativeModuleConfig)],
     ) -> String {
+        // A shared/HAR module's `main` must name its own entry file; the old hardcoded
+        // "index.ets" pointed at a file the project never had (case included).
         let main_field = if module.module_type == "hsp"
             || module.module_type == "shared"
             || module.module_type == "har"
         {
-            r#""main": "index.ets","#.to_string()
+            format!("\"main\": \"{}\",", super::with_ets_suffix(&module.entry))
         } else {
             r#""main": "","#.to_string()
         };
@@ -1359,5 +1368,60 @@ mod native_options_placement_tests {
         let out = V26Strategy::new(26).generate_module_build_profile(&module, &[], true);
         assert_eq!(out.matches("externalNativeOptions").count(), 1, "{}", out);
         assert!(out.contains("obfuscation"), "{}", out);
+    }
+}
+
+#[cfg(test)]
+mod shared_module_tests {
+    use super::*;
+    use crate::config::ModuleInfo;
+
+    fn shared_module(entry: &str) -> ModuleConfig {
+        ModuleConfig {
+            module: ModuleInfo {
+                name: "shared".into(),
+                routes: vec![],
+                entry: entry.into(),
+                skills: vec![],
+                module_type: "hsp".into(),
+                abilities: vec![],
+                device_types: vec!["phone".into()],
+                permissions: vec![],
+                obfuscation: false,
+                obfuscation_rules: String::new(),
+                icon: String::new(),
+                start_window_icon: String::new(),
+                orientation: String::new(),
+                entry_label: String::new(),
+                entry_description: String::new(),
+                delivery_with_install: None,
+                installation_free: None,
+                abi_filters: vec!["arm64-v8a".into()],
+                cpp_flags: String::new(),
+                native_arguments: String::new(),
+            },
+        }
+    }
+
+    /// A shared module's srcEntry is resolved from src/main/, where assemble puts the entry file,
+    /// not from entryability/.
+    #[test]
+    fn shared_module_src_entry_is_module_relative() {
+        let cfg = shared_module("Index.ets");
+        let out = V26Strategy::new(26).generate_module_json5(&cfg, &AppConfig::default_for("x"));
+        assert!(out.contains("\"srcEntry\": \"./Index.ets\""), "{}", out);
+        assert!(!out.contains("entryability"), "{}", out);
+    }
+
+    /// `main` names the module's own entry file instead of a hardcoded index.ets.
+    #[test]
+    fn shared_module_main_names_its_entry() {
+        let cfg = shared_module("Index.ets");
+        let out = V26Strategy::new(26).generate_module_oh_package(
+            &cfg.module,
+            &AppConfig::default_for("x"),
+            &[],
+        );
+        assert!(out.contains("\"main\": \"Index.ets\""), "{}", out);
     }
 }

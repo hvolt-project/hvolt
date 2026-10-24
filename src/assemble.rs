@@ -156,7 +156,8 @@ fn mirror_source_files(
         let entry_file = translator::with_ets_suffix(&module.module.entry);
         let entry_src = module_root.join(&entry_file);
         if is_hsp {
-            let entry_dest = module_build.join(&entry_file);
+            // src/main/: module.json5 resolves srcEntry from there.
+            let entry_dest = module_build.join("src/main").join(&entry_file);
             translator_resources::hardlink_or_copy(&entry_src, &entry_dest);
         } else {
             let entry_dest = module_ets.join("entryability").join(&entry_file);
@@ -224,7 +225,9 @@ fn mirror_source_files(
         }
 
         // Re-inject form/ability strings after resource mirroring
-        if !module.module.abilities.is_empty() {
+        // Always: the entry ability's generated label/desc strings are referenced by
+        // module.json5 even when the project declares no extra abilities.
+        if true {
             let element_dir = module_res.join("element");
             fs::create_dir_all(&element_dir).expect("create element dir");
             let string_json_path = element_dir.join("string.json");
