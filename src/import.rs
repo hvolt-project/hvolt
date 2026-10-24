@@ -831,6 +831,17 @@ fn copy_ets(
     {
         let name = sub.file_name().to_string_lossy().to_string();
         if !sub.path().is_dir() {
+            // Files sitting directly in ets/ are part of the module (a shared Engine.ets, a
+            // .d.ts bridge). Dropping them makes imports like '../EdgeTAMEngine' fail later,
+            // so they come along unless an ability already claimed the name.
+            let is_source = name.ends_with(".ets")
+                || name.ends_with(".ts")
+                || name.ends_with(".d.ts")
+                || name.ends_with(".json");
+            if is_source && !hoisted.contains(&name) {
+                fs::copy(sub.path(), module_out.join(&name))
+                    .map_err(|e| format!("copy {}: {}", name, e))?;
+            }
             continue;
         }
         let mut keep_dir = false;

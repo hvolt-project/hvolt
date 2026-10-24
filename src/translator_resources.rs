@@ -291,7 +291,10 @@ pub fn mirror_ets_files_skip(
             }
             if entry.path().is_dir() {
                 mirror_dir(&entry.path(), &ets_dest.join(&name));
-            } else if name.ends_with(".ets") {
+            } else if name.ends_with(".ets") || name.ends_with(".ts") {
+                // Recording the name is not enough: the incremental path used to skip the copy
+                // and then delete anything it had not listed, so root-level edits never landed.
+                hardlink_or_copy(&entry.path(), &ets_dest.join(&name));
                 src_files.push(entry.file_name());
             }
         }
@@ -301,7 +304,8 @@ pub fn mirror_ets_files_skip(
     if let Ok(entries) = fs::read_dir(ets_dest) {
         for entry in entries.flatten() {
             let name = entry.file_name();
-            if name.to_string_lossy().ends_with(".ets") && !src_files.contains(&name) {
+            let n = name.to_string_lossy();
+            if (n.ends_with(".ets") || n.ends_with(".ts")) && !src_files.contains(&name) {
                 let _ = fs::remove_file(entry.path());
             }
         }
@@ -531,5 +535,49 @@ mod ets_mirror_tests {
             "libs must not be mirrored into ets"
         );
         let _ = fs::remove_dir_all(&root);
+    }
+}
+
+#[cfg(test)]
+mod incremental_mirror_tests {
+    use super::mirror_ets_files_skip;
+    use std::fs;
+
+    /// The incremental path must actually copy a root-level .ets/.ts file; it used to record
+    /// the name, skip the copy, then delete anything it had not listed.
+    #[test]
+    fn root_sources_are_copied_on_the_mirror_path() {
+        let base = std::env::temp_dir().join(format!("hvolt-mirror-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&base);
+        let src = base.join("module");
+        let dest = base.join("ets-out");
+        fs::create_dir_all(&src).unwrap();
+        fs::write(src.join("Engine.ets"), "export const v = 1;").unwrap();
+        fs::write(src.join("bridge.d.ts"), "declare const x: number;").unwrap();
+
+        mirror_ets_files_skip(&src, &dest, &[], &[]);
+
+        assert_eq!(
+            fs::read_to_string(dest.join("Engine.ets")).unwrap(),
+            "export const v = 1;"
+        );
+        let _ = fs::remove_dir_all(&base);
+    }
+
+    /// A source that disappears must disappear from the translated tree as well.
+    #[test]
+    fn stale_root_sources_are_removed() {
+        let base = std::env::temp_dir().join(format!("hvolt-mirror-stale-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&base);
+        let src = base.join("module");
+        let dest = base.join("ets-out");
+        fs::create_dir_all(&src).unwrap();
+        fs::create_dir_all(&dest).unwrap();
+        fs::write(dest.join("Gone.ets"), "old").unwrap();
+
+        mirror_ets_files_skip(&src, &dest, &[], &[]);
+
+        assert!(!dest.join("Gone.ets").exists());
+        let _ = fs::remove_dir_all(&base);
     }
 }
