@@ -462,9 +462,13 @@ pub fn full_translate(
         let entry_file = &module.module.entry;
         let entry_src = module_root.join(with_ets_suffix(entry_file));
         if is_hsp {
-            // HSP/HAR: index.ets → build/<name>/index.ets
+            // HSP/HAR: the entry file sits beside module.json5 (src/main/), because module.json5's
+            // srcEntry is resolved relative to that directory.
             if entry_src.exists() {
-                let dest = module_build.join(with_ets_suffix(entry_file));
+                if let Err(e) = fs::create_dir_all(&module_src) {
+                    eprintln!("Warning: create {}: {}", module_src.display(), e);
+                }
+                let dest = module_src.join(with_ets_suffix(entry_file));
                 fs::copy(&entry_src, &dest).unwrap_or_else(|e| {
                     eprintln!(
                         "Warning: copy entry {} → {}: {}",
@@ -601,7 +605,9 @@ pub fn full_translate(
         }
 
         // Re-inject ability/form strings after resource mirroring
-        if !module.module.abilities.is_empty() {
+        // Always: the entry ability's generated label/desc strings are referenced by
+        // module.json5 even when the project declares no extra abilities.
+        if true {
             let element_dir = module_res.join("element");
             fs::create_dir_all(&element_dir).expect("create element dir");
             let string_json_path = element_dir.join("string.json");
@@ -784,6 +790,27 @@ fn generate_main_pages(config: &ModuleConfig) -> String {
 }
 
 /// Ensure string.json has {name}_desc and {name}_label for all abilities.
+/// Add `start_window_background` to the module's color table when it is missing.
+fn ensure_start_window_color(element_dir: &Path) {
+    let path = element_dir.join("color.json");
+    let mut entries: Vec<serde_json::Value> = fs::read_to_string(&path)
+        .ok()
+        .and_then(|s| serde_json::from_str::<serde_json::Value>(&s).ok())
+        .and_then(|v| v.get("color").and_then(|c| c.as_array()).cloned())
+        .unwrap_or_default();
+    let has = entries
+        .iter()
+        .any(|e| e.get("name").and_then(|n| n.as_str()) == Some("start_window_background"));
+    if has {
+        return;
+    }
+    entries.push(serde_json::json!({ "name": "start_window_background", "value": "#FFFFFF" }));
+    write_file(
+        &path,
+        &serde_json::to_string_pretty(&serde_json::json!({ "color": entries })).unwrap_or_default(),
+    );
+}
+
 pub fn inject_form_strings(string_json_path: &Path, module: &ModuleConfig) -> Result<(), String> {
     let all_abilities = &module.module.abilities;
 
@@ -867,6 +894,10 @@ pub fn inject_form_strings(string_json_path: &Path, module: &ModuleConfig) -> Re
             ));
         }
     }
+
+    // The generated entry ability also references $color:start_window_background; supply it when
+    // the project has no color table of its own, otherwise hvigor rejects the manifest.
+    ensure_start_window_color(element_dir);
 
     if new_entries.is_empty() {
         return Ok(());
