@@ -1,6 +1,6 @@
 {
   "name": "@hvolt/cli-darwin-arm64",
-  "version": "26.0.0-3",
+  "version": "26.0.0-4",
   "description": "Prebuilt hvolt binary for darwin arm64",
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/hvolt-project/hvolt#readme",
