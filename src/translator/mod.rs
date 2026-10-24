@@ -571,7 +571,8 @@ pub fn full_translate(
         }
         let module_libs = module_root.join("libs");
         if module_libs.is_dir() {
-            translator_resources::copy_dir_recursive(&module_libs, &module_src.join("libs"));
+            // Module-root libs/: hvigor packs from here (src/main/libs/ is ignored).
+            translator_resources::copy_dir_recursive(&module_libs, &module_build.join("libs"));
         }
 
         // Copy resources/. Both a project-level `resources/` (app icon, shared elements) and a
