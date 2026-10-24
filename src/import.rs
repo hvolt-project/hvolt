@@ -565,6 +565,11 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
             .unwrap_or_default();
 
         let (cpp_flags, native_arguments, abi_filters) = read_native_flags(&module_root);
+        for line in out_of_module_cmake_refs(&module_root) {
+            gaps.push(format!(
+                "{dir}: cpp/CMakeLists.txt may reference paths outside the module ({line}) — the flat layout does not preserve them; hvolt does not rewrite CMake files"
+            ));
+        }
         let cfg = ModuleConfig {
             module: ModuleInfo {
                 name,
@@ -710,6 +715,26 @@ fn string_list(v: &Value, key: &str) -> Vec<String> {
 
 /// Module-level `buildOption.externalNativeOptions` flags. Dropping them silently rebuilds
 /// the native code with default optimisation (the source set `-O3 -fvisibility=hidden`).
+/// CMakeLists lines that point outside the module with a relative path.
+///
+/// The flat layout guarantees nothing about paths above `<member>/`, and hvolt does not rewrite
+/// CMake files, so an escaping reference will only surface as a configure error later. Careful
+/// wording: a relative path may legitimately resolve inside the source tree, so this is a
+/// "may", not a verdict.
+fn out_of_module_cmake_refs(module_root: &Path) -> Vec<String> {
+    let cmake = module_root.join("cpp/CMakeLists.txt");
+    let Ok(text) = fs::read_to_string(&cmake) else {
+        return Vec::new();
+    };
+    text.lines()
+        .map(|l| l.trim())
+        .filter(|l| !l.starts_with('#'))
+        .filter(|l| l.contains("../..") || l.contains("${CMAKE_CURRENT_SOURCE_DIR}/../.."))
+        .map(|l| l.chars().take(120).collect::<String>())
+        .take(5)
+        .collect()
+}
+
 fn read_native_flags(module_root: &Path) -> (String, String, Vec<String>) {
     let default_abis = vec!["arm64-v8a".to_string()];
     let bp = module_root.join("build-profile.json5");
@@ -1111,5 +1136,45 @@ mod test_dir_resolution_tests {
     #[test]
     fn shallow_paths_yield_no_candidates() {
         assert!(source_test_dirs(Path::new("ets")).is_empty());
+    }
+}
+
+#[cfg(test)]
+mod cmake_ref_tests {
+    use super::out_of_module_cmake_refs;
+    use std::fs;
+
+    fn scratch(tag: &str) -> std::path::PathBuf {
+        let p = std::env::temp_dir().join(format!("hvolt-cmake-{}-{}", tag, std::process::id()));
+        let _ = fs::remove_dir_all(&p);
+        fs::create_dir_all(p.join("cpp")).unwrap();
+        p
+    }
+
+    /// An escaping relative path is reported (hedged), because the flat layout cannot preserve it.
+    #[test]
+    fn escaping_relative_paths_are_reported() {
+        let root = scratch("escape");
+        fs::write(
+            root.join("cpp/CMakeLists.txt"),
+            "include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../.lycium-repo/usr/include)\n",
+        )
+        .unwrap();
+        let refs = out_of_module_cmake_refs(&root);
+        assert_eq!(refs.len(), 1, "{:?}", refs);
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    /// A self-contained CMakeLists produces no noise.
+    #[test]
+    fn in_module_paths_are_silent() {
+        let root = scratch("inside");
+        fs::write(
+            root.join("cpp/CMakeLists.txt"),
+            "include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)\n",
+        )
+        .unwrap();
+        assert!(out_of_module_cmake_refs(&root).is_empty());
+        let _ = fs::remove_dir_all(&root);
     }
 }
