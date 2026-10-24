@@ -69,7 +69,9 @@ jobs:
   build:
     name: build (${{ matrix.key }})
     needs: guard
-    if: needs.guard.outputs.publish == 'true'
+    # A manual dispatch exists to produce binaries without publishing, so it builds even
+    # when the guard says there is nothing to release.
+    if: needs.guard.outputs.publish == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
