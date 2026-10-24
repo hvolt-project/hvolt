@@ -22,3 +22,6 @@ output/
 oh_modules/
 *.hap
 .hvolt_manifest
+
+# The private AppGallery Connect overlay arrives as a CI secret, never as source.
+/agc-local/

@@ -310,10 +310,15 @@ needs a certificate and provisioning profile issued to a Huawei developer accoun
 
 **Remote signing through AppGallery Connect (not in this tree).** `hvolt sign` without `--local` and
 the `hvolt agc` commands need a backend that talks to AppGallery Connect — the login flow, token
-handling and the certificate / device / provisioning requests that DevEco Studio performs. That
-backend is **not published here**: this repository contains no AGC endpoints, no login flow and no
-request/response handling for those services. The commands stay in the CLI surface and report that
-the backend is absent, so scripts fail loudly instead of silently doing nothing.
+handling and the certificate / device / provisioning requests that humans otherwise perform in
+DevEco Studio. That backend is **not published here**: this repository contains no AGC endpoints, no
+login flow and no request/response handling for those services.
+
+Release binaries do carry it. The overlay sits outside the repository and reaches the release runner
+as a repository secret (`AGC_OVERLAY_B64`); the workflow decodes it next to the crate and builds with
+`--features agc-local`. Without that secret the same workflow produces the public build, whose
+`hvolt agc` commands report that the backend is absent — scripts fail loudly instead of silently
+doing nothing. Source never enters the repository, so a build from a clone has no AGC backend.
 
 If you maintain your own AppGallery Connect integration, it can be compiled in as an overlay: place
 it in `agc-local/` next to the crate and build with `cargo build --features agc-local`. The overlay

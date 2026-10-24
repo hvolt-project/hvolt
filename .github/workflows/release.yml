@@ -97,6 +97,27 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
+      - name: Private overlay (AppGallery Connect backend)
+        # The overlay is not in this repository: it arrives as a secret, is decoded only on the
+        # runner, and is gitignored so it can never be committed back. Without the secret the
+        # build is the public one, which has no AGC backend and says so.
+        shell: bash
+        env:
+          AGC_OVERLAY_B64: ${{ secrets.AGC_OVERLAY_B64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${AGC_OVERLAY_B64:-}" ]; then
+            echo "no overlay secret — public build (no AppGallery Connect backend)"
+            echo "HVOLT_FEATURES=" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          printf '%s' "$AGC_OVERLAY_B64" | base64 -d > "$RUNNER_TEMP/agc-local.tgz"
+          tar -xzf "$RUNNER_TEMP/agc-local.tgz" -C .
+          rm -f "$RUNNER_TEMP/agc-local.tgz"
+          test -f agc-local/mod.rs
+          echo "overlay decoded: $(ls agc-local | wc -l) files"
+          echo "HVOLT_FEATURES=--features agc-local" >> "$GITHUB_ENV"
+
       - name: Gate (fmt, clippy, tests)
         if: matrix.key == 'linux-x64'
         run: |
@@ -105,7 +126,7 @@ jobs:
           cargo test
 
       - name: Build
-        run: cargo build --release --target ${{ matrix.target }}
+        run: cargo build --release --target ${{ matrix.target }} ${{ env.HVOLT_FEATURES }}
 
       - name: Package (tar.gz)
         if: matrix.archive == 'tar.gz'
