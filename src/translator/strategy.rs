@@ -679,37 +679,25 @@ impl VersionStrategy for V26Strategy {
             format!("  \"buildOption\": {{\n{}\n  }}", native_options_str)
         };
 
-        let native_set_options = if native_options_str.is_empty() {
-            String::new()
-        } else {
-            format!(",\n{}", native_options_str)
-        };
-
         let obfuscation = if module.obfuscation {
-            format!(
-                r#"      "name": "release",
-      "arkOptions": {{
-        "obfuscation": {{
-          "ruleOptions": {{
+            r#"      "name": "release",
+      "arkOptions": {
+        "obfuscation": {
+          "ruleOptions": {
             "enable": true,
             "files": ["./obfuscation-rules.txt"]
-          }}
-        }}
-      }}{}"#,
-                native_set_options
-            )
+          }
+        }
+      }"#
         } else {
-            format!(
-                r#"      "name": "release",
-      "arkOptions": {{
-        "obfuscation": {{
-          "ruleOptions": {{
+            r#"      "name": "release",
+      "arkOptions": {
+        "obfuscation": {
+          "ruleOptions": {
             "enable": false
-          }}
-        }}
-      }}{}"#,
-                native_set_options
-            )
+          }
+        }
+      }"#
         };
 
         format!(
@@ -1348,5 +1336,28 @@ mod build_version_tests {
         let app = AppConfig::default_for("x");
         let out = V26Strategy::new(26).generate_app_json5(&app);
         assert!(out.contains("\"buildVersion\": \"1\""), "{}", out);
+    }
+}
+
+#[cfg(test)]
+mod native_options_placement_tests {
+    use super::*;
+
+    /// externalNativeOptions belongs to buildOption only. Emitting it again inside
+    /// buildOptionSet[].release produced a second copy at a schema-invalid position.
+    #[test]
+    fn external_native_options_appear_once() {
+        let module = ModuleConfig::default_entry().module;
+        let out = V26Strategy::new(26).generate_module_build_profile(&module, &[], true);
+        assert_eq!(out.matches("externalNativeOptions").count(), 1, "{}", out);
+    }
+
+    #[test]
+    fn obfuscated_module_still_has_one_native_block() {
+        let mut module = ModuleConfig::default_entry().module;
+        module.obfuscation = true;
+        let out = V26Strategy::new(26).generate_module_build_profile(&module, &[], true);
+        assert_eq!(out.matches("externalNativeOptions").count(), 1, "{}", out);
+        assert!(out.contains("obfuscation"), "{}", out);
     }
 }

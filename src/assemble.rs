@@ -218,7 +218,9 @@ fn mirror_source_files(
         }
         let module_libs = module_root.join("libs");
         if module_libs.is_dir() {
-            translator_resources::mirror_dir(&module_libs, &module_build.join("src/main/libs"));
+            // hvigor's ProcessLibs reads the module-root libs/, not src/main/libs/ — mirroring
+            // there left prebuilt .so out of the package while the build stayed green.
+            translator_resources::mirror_dir(&module_libs, &module_build.join("libs"));
         }
 
         // Re-inject form/ability strings after resource mirroring
