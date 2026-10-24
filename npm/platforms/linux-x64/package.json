@@ -1,6 +1,6 @@
 {
   "name": "@hvolt/cli-linux-x64",
-  "version": "26.0.0-4",
+  "version": "26.0.0-5",
   "description": "Prebuilt hvolt binary for linux x64",
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/hvolt-project/hvolt#readme",
