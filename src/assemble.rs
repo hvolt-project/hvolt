@@ -207,6 +207,20 @@ fn mirror_source_files(
             translator_resources::mirror_resources(&module_res_src, &module_res);
         }
 
+        // Module-owned native code is translated separately from ets/ (never mirrored into it);
+        // the incremental path has to carry it too, or cmake keeps building yesterday's tree.
+        let inline_cpp = module_root.join("cpp/CMakeLists.txt").is_file();
+        if inline_cpp {
+            translator_resources::mirror_dir(
+                &module_root.join("cpp"),
+                &module_build.join("src/main/cpp"),
+            );
+        }
+        let module_libs = module_root.join("libs");
+        if module_libs.is_dir() {
+            translator_resources::mirror_dir(&module_libs, &module_build.join("src/main/libs"));
+        }
+
         // Re-inject form/ability strings after resource mirroring
         if !module.module.abilities.is_empty() {
             let element_dir = module_res.join("element");
