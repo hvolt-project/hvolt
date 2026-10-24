@@ -452,8 +452,7 @@ pub fn full_translate(
         let module_root = project_root.join(dir_name);
         let is_hsp = module.module.module_type == "hsp" || module.module.module_type == "shared";
         // HAR keeps its entry at src/main/ too: oh-package.json5's `main` is resolved from there.
-        let entry_at_src_main =
-            is_hsp || module.module.module_type == "har";
+        let entry_at_src_main = is_hsp || module.module.module_type == "har";
 
         // Copy pages/*.ets → ets/pages/
         translator_resources::copy_dir_contents(
