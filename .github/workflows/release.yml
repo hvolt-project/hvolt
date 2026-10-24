@@ -111,9 +111,9 @@ jobs:
             echo "HVOLT_FEATURES=" >> "$GITHUB_ENV"
             exit 0
           fi
-          printf '%s' "$AGC_OVERLAY_B64" | base64 -d > "$RUNNER_TEMP/agc-local.tgz"
-          tar -xzf "$RUNNER_TEMP/agc-local.tgz" -C .
-          rm -f "$RUNNER_TEMP/agc-local.tgz"
+          # Pipe through stdin: GNU tar on the Windows runner reads "D:" in an archive path as a
+          # remote host and dies with "Cannot connect to D: resolve failed".
+          printf '%s' "$AGC_OVERLAY_B64" | base64 -d | tar -xzf - -C .
           test -f agc-local/mod.rs
           echo "overlay decoded: $(ls agc-local | wc -l) files"
           echo "HVOLT_FEATURES=--features agc-local" >> "$GITHUB_ENV"
