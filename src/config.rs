@@ -145,6 +145,10 @@ pub struct Dependency {
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct ModuleConfig {
     pub module: ModuleInfo,
+    /// Module-scoped `[dependencies]`: what this module itself imports. Declaring them here
+    /// keeps `oh-package.json5` honest for shared modules, which used to inherit nothing.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub dependencies: BTreeMap<String, Dependency>,
 }
 
 /// Skill declares actions, entities, and optional URI filters for an ability.
@@ -521,6 +525,7 @@ fn default_entry_ets() -> String {
 impl ModuleConfig {
     pub fn default_entry() -> Self {
         ModuleConfig {
+            dependencies: BTreeMap::new(),
             module: ModuleInfo {
                 name: "src".to_string(),
                 module_type: String::new(),

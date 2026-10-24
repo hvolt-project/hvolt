@@ -571,6 +571,8 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
             ));
         }
         let cfg = ModuleConfig {
+            // Module-scoped deps come from the source module's own oh-package.json5.
+            dependencies: module_dependencies(&from.join(&dir)),
             module: ModuleInfo {
                 name,
                 routes,
@@ -819,6 +821,33 @@ fn find_ets(ets_src: &Path, file: &str) -> Result<Option<PathBuf>, String> {
         }
     }
     Ok(None)
+}
+
+/// Local `file:` dependencies declared by a module's own oh-package.json5.
+fn module_dependencies(module_dir: &Path) -> BTreeMap<String, Dependency> {
+    let pkg = module_dir.join("oh-package.json5");
+    let mut deps = BTreeMap::new();
+    if !pkg.is_file() {
+        return deps;
+    }
+    let Ok(v) = read_json5(&pkg) else {
+        return deps;
+    };
+    let Some(map) = v.get("dependencies").and_then(|d| d.as_object()) else {
+        return deps;
+    };
+    for (name, spec) in map {
+        if let Some(path) = spec.as_str().and_then(|s| s.strip_prefix("file:")) {
+            deps.insert(
+                name.clone(),
+                Dependency {
+                    path: path.trim_start_matches("./").to_string(),
+                    version: "1.0.0".to_string(),
+                },
+            );
+        }
+    }
+    deps
 }
 
 fn copy_ets(

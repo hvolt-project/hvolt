@@ -451,6 +451,8 @@ pub fn full_translate(
         let module_res = module_src.join("resources/base");
         let module_root = project_root.join(dir_name);
         let is_hsp = module.module.module_type == "hsp" || module.module.module_type == "shared";
+        // HAR keeps its entry at src/main/ too: oh-package.json5's `main` is resolved from there.
+        let entry_at_src_main = is_hsp || module.module.module_type == "har";
 
         // Copy pages/*.ets → ets/pages/
         translator_resources::copy_dir_contents(
@@ -461,9 +463,9 @@ pub fn full_translate(
         // Entry file: entry → ets/entryability/ (entry), or → module root (HSP/HAR)
         let entry_file = &module.module.entry;
         let entry_src = module_root.join(with_ets_suffix(entry_file));
-        if is_hsp {
-            // HSP/HAR: the entry file sits beside module.json5 (src/main/), because module.json5's
-            // srcEntry is resolved relative to that directory.
+        if entry_at_src_main {
+            // Shared packages: the entry file sits beside module.json5 (src/main/), because both
+            // module.json5's srcEntry and oh-package.json5's `main` resolve from there.
             if entry_src.exists() {
                 if let Err(e) = fs::create_dir_all(&module_src) {
                     eprintln!("Warning: create {}: {}", module_src.display(), e);
@@ -669,15 +671,16 @@ pub fn full_translate(
         // Module hvigorfile.ts
         let hvigorfile = match module.module.module_type.as_str() {
             "hsp" | "shared" => HVIGORFILE_HSP,
-            "har" => HVIGORFILE_HSP,
+            // A HAR is a static package: hspTasks cannot build it (00303278).
+            "har" => HVIGORFILE_HAR,
             _ => HVIGORFILE_ENTRY,
         };
         write_file(&module_build.join("hvigorfile.ts"), hvigorfile);
 
         // Module oh-package.json5
-        let oh_pkg =
-            gen.strategy
-                .generate_module_oh_package(&module.module, app_config, native_modules);
+        let oh_pkg = gen
+            .strategy
+            .generate_module_oh_package(module, app_config, native_modules);
         write_file(&module_build.join("oh-package.json5"), &oh_pkg);
     }
 }
@@ -955,6 +958,13 @@ const HVIGORFILE_ENTRY: &str = r#"import { hapTasks } from '@ohos/hvigor-ohos-pl
 
 export default {
   system: hapTasks,
+  plugins: []
+}"#;
+
+const HVIGORFILE_HAR: &str = r#"import { harTasks } from '@ohos/hvigor-ohos-plugin';
+
+export default {
+  system: harTasks,
   plugins: []
 }"#;
 

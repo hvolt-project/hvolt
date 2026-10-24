@@ -49,7 +49,7 @@ pub trait VersionStrategy {
     ) -> String;
     fn generate_module_oh_package(
         &self,
-        module: &crate::config::ModuleInfo,
+        module: &ModuleConfig,
         app_config: &AppConfig,
         native_modules: &[(String, NativeModuleConfig)],
     ) -> String;
@@ -366,10 +366,17 @@ impl VersionStrategy for V26Strategy {
         let default_install_free = is_atomic;
         let with_install = m.delivery_with_install.unwrap_or(default_with_install);
         let install_free = m.installation_free.unwrap_or(default_install_free);
-        let install_section = format!(
-            "    \"deliveryWithInstall\": {},\n    \"installationFree\": {}",
-            with_install, install_free
-        );
+        // A HAR is a static package: its module schema rejects deliveryWithInstall /
+        // installationFree (00303038), so those keys are only emitted for installable modules.
+        let is_har = ht == "har";
+        let install_section = if is_har {
+            String::new()
+        } else {
+            format!(
+                "    \"deliveryWithInstall\": {},\n    \"installationFree\": {}",
+                with_install, install_free
+            )
+        };
 
         let main_element_name = super::normalize_ets(&m.entry);
         let main_element = if is_entry {
@@ -606,7 +613,7 @@ impl VersionStrategy for V26Strategy {
         // srcEntry is what DevEco projects never have, so it is only emitted for HSP/HAR. Those
         // keep their entry file at the module root (assemble copies it there), so the path must
         // not point into entryability/ — hvigor rejects the generated manifest otherwise.
-        let src_entry_line = if is_entry {
+        let src_entry_line = if is_entry || is_har {
             String::new()
         } else if ht == "shared" || ht == "hsp" {
             format!(
@@ -728,10 +735,11 @@ impl VersionStrategy for V26Strategy {
 
     fn generate_module_oh_package(
         &self,
-        module: &crate::config::ModuleInfo,
+        config: &ModuleConfig,
         app_config: &AppConfig,
         native_modules: &[(String, NativeModuleConfig)],
     ) -> String {
+        let module = &config.module;
         // A shared/HAR module's `main` must name its own entry file; the old hardcoded
         // "index.ets" pointed at a file the project never had (case included).
         let main_field = if module.module_type == "hsp"
@@ -743,28 +751,34 @@ impl VersionStrategy for V26Strategy {
             r#""main": "","#.to_string()
         };
 
-        let deps_block = if module.module_type.is_empty() || module.module_type == "entry" {
-            let mut dep_entries: Vec<String> = app_config
-                .dependencies
-                .iter()
-                .filter(|(name, _dep)| !native_module_names(native_modules).contains(name))
-                .map(|(name, dep)| format!("    \"{}\": \"file:./../{}\"", name, dep.path))
-                .collect();
-            // Add native deps with local paths
-            for (name, _cfg) in native_modules {
-                dep_entries.push(format!(
-                    "    \"{}.so\": \"file:./src/main/cpp/types/{}\"",
-                    name, name
-                ));
+        // Module-scoped declarations win; an entry module additionally inherits the app-level
+        // ones, because its own `[dependencies]` block used to be silently ignored.
+        let mut declared: std::collections::BTreeMap<&str, String> = Default::default();
+        if module.module_type.is_empty() || module.module_type == "entry" {
+            for (name, dep) in &app_config.dependencies {
+                if native_module_names(native_modules).contains(name) {
+                    continue;
+                }
+                declared.insert(name.as_str(), format!("file:./../{}", dep.path));
             }
-
-            if dep_entries.is_empty() {
-                r#"  "dependencies": {}"#.to_string()
-            } else {
-                format!("  \"dependencies\": {{\n{}\n  }}", dep_entries.join(",\n"))
-            }
-        } else {
+        }
+        for (name, dep) in &config.dependencies {
+            declared.insert(name.as_str(), format!("file:./../{}", dep.path));
+        }
+        let mut dep_entries: Vec<String> = declared
+            .iter()
+            .map(|(name, path)| format!("    \"{}\": \"{}\"", name, path))
+            .collect();
+        for (name, _cfg) in native_modules {
+            dep_entries.push(format!(
+                "    \"{}.so\": \"file:./src/main/cpp/types/{}\"",
+                name, name
+            ));
+        }
+        let deps_block = if dep_entries.is_empty() {
             r#"  "dependencies": {}"#.to_string()
+        } else {
+            format!("  \"dependencies\": {{\n{}\n  }}", dep_entries.join(",\n"))
         };
 
         format!(
@@ -1192,7 +1206,10 @@ mod declared_labels_tests {
             ability_type: "backup".into(),
             ..Default::default()
         }];
-        let cfg = ModuleConfig { module: m };
+        let cfg = ModuleConfig {
+            module: m,
+            dependencies: Default::default(),
+        };
         let out = V26Strategy::new(26).generate_module_json5(&cfg, &app());
         assert!(!out.contains("EntryBackupAbility_label"), "{}", out);
     }
@@ -1202,7 +1219,10 @@ mod declared_labels_tests {
     fn declared_label_is_used() {
         let mut m = module();
         m.entry_label = "$string:app_title".into();
-        let cfg = ModuleConfig { module: m };
+        let cfg = ModuleConfig {
+            module: m,
+            dependencies: Default::default(),
+        };
         let out = V26Strategy::new(26).generate_module_json5(&cfg, &app());
         assert!(out.contains("\"label\": \"$string:app_title\""), "{}", out);
     }
@@ -1210,7 +1230,10 @@ mod declared_labels_tests {
     /// Orientation is optional upstream: no value, no key.
     #[test]
     fn absent_orientation_emits_no_key() {
-        let cfg = ModuleConfig { module: module() };
+        let cfg = ModuleConfig {
+            module: module(),
+            dependencies: Default::default(),
+        };
         let out = V26Strategy::new(26).generate_module_json5(&cfg, &app());
         assert!(!out.contains("\"orientation\""), "{}", out);
     }
@@ -1316,6 +1339,7 @@ mod declared_orientation_tests {
     fn explicit_auto_rotation_is_emitted() {
         let cfg = ModuleConfig {
             module: module_with("auto_rotation"),
+            dependencies: Default::default(),
         };
         let out = V26Strategy::new(26).generate_module_json5(&cfg, &AppConfig::default_for("x"));
         assert!(
@@ -1378,6 +1402,7 @@ mod shared_module_tests {
 
     fn shared_module(entry: &str) -> ModuleConfig {
         ModuleConfig {
+            dependencies: Default::default(),
             module: ModuleInfo {
                 name: "shared".into(),
                 routes: vec![],
@@ -1418,10 +1443,67 @@ mod shared_module_tests {
     fn shared_module_main_names_its_entry() {
         let cfg = shared_module("Index.ets");
         let out = V26Strategy::new(26).generate_module_oh_package(
-            &cfg.module,
+            &cfg,
             &AppConfig::default_for("x"),
             &[],
         );
         assert!(out.contains("\"main\": \"Index.ets\""), "{}", out);
+    }
+}
+
+#[cfg(test)]
+mod module_dependency_tests {
+    use super::*;
+    use crate::config::{Dependency, ModuleInfo};
+    use std::collections::BTreeMap;
+
+    fn shared_with_deps() -> ModuleConfig {
+        let mut deps = BTreeMap::new();
+        deps.insert(
+            "shared_b".to_string(),
+            Dependency {
+                path: "shared_b".into(),
+                version: "1.0.0".into(),
+            },
+        );
+        ModuleConfig {
+            dependencies: deps,
+            module: ModuleInfo {
+                name: "shared_a".into(),
+                routes: vec![],
+                entry: "Index.ets".into(),
+                skills: vec![],
+                module_type: "hsp".into(),
+                abilities: vec![],
+                device_types: vec!["phone".into()],
+                permissions: vec![],
+                obfuscation: false,
+                obfuscation_rules: String::new(),
+                icon: String::new(),
+                start_window_icon: String::new(),
+                orientation: String::new(),
+                entry_label: String::new(),
+                entry_description: String::new(),
+                delivery_with_install: None,
+                installation_free: None,
+                abi_filters: vec!["arm64-v8a".into()],
+                cpp_flags: String::new(),
+                native_arguments: String::new(),
+            },
+        }
+    }
+
+    /// A shared module's own `[dependencies]` must reach its oh-package.json5; they used to be
+    /// dropped, leaving a module that imports shared_b declaring no dependency on it.
+    #[test]
+    fn module_scope_dependencies_are_emitted() {
+        let cfg = shared_with_deps();
+        let out = V26Strategy::new(26).generate_module_oh_package(
+            &cfg,
+            &AppConfig::default_for("x"),
+            &[],
+        );
+        assert!(out.contains("shared_b"), "{}", out);
+        assert!(out.contains("file:./../shared_b"), "{}", out);
     }
 }
