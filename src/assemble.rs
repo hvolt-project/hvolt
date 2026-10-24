@@ -148,6 +148,9 @@ fn mirror_source_files(
         let module_ets = module_build.join("src/main/ets");
         let module_res = module_build.join("src/main/resources/base");
         let is_hsp = module.module.module_type == "hsp" || module.module.module_type == "shared";
+        // HAR keeps its entry at src/main/ too: oh-package.json5's `main` is resolved from there.
+        let entry_at_src_main =
+            is_hsp || module.module.module_type == "har";
 
         // Mirror pages/ → ets/pages/
         translator_resources::mirror_dir(&module_root.join("pages"), &module_ets.join("pages"));
@@ -155,8 +158,8 @@ fn mirror_source_files(
         // Mirror entry file
         let entry_file = translator::with_ets_suffix(&module.module.entry);
         let entry_src = module_root.join(&entry_file);
-        if is_hsp {
-            // src/main/: module.json5 resolves srcEntry from there.
+        if entry_at_src_main {
+            // src/main/: module.json5 resolves srcEntry (and oh-package `main`) from there.
             let entry_dest = module_build.join("src/main").join(&entry_file);
             translator_resources::hardlink_or_copy(&entry_src, &entry_dest);
         } else {
