@@ -320,12 +320,16 @@ jobs:
             # tag stays draft, and /releases/latest then 404s for the installers.
             gh release edit "$tag" --draft=false --repo "$GITHUB_REPOSITORY"
           else
+            # `--verify-tag` aborts when the tag is absent, which is exactly the case for a
+            # release triggered by a merge to main (measured 2026-10-19: every publish step
+            # succeeded and the job failed at "tag v26.0.0-1 doesn't exist"). The tag is part
+            # of what a release is, so it is created here.
+            #
+            # The comment must live above the command: a `#` inside a backslash-continued
+            # command ends the command, and bash then tries to run `--target` itself
+            # (measured 2026-10-24: "line 19: --target: command not found").
             gh release create "$tag" "${assets[@]}" \
               --title "$tag" \
               --notes-file "CHANGELOG.md" \
-              # `--verify-tag` aborts when the tag is absent, which is exactly the case
-              # for a release triggered by a merge to main (measured 2026-10-19: every
-              # publish step succeeded and the job failed at "tag v26.0.0-1 doesn't
-              # exist"). The tag is part of what a release is, so it is created here.
               --target "$GITHUB_SHA"
           fi
