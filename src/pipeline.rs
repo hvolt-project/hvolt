@@ -49,6 +49,19 @@ pub fn build_and_sign(project_dir: &Path) -> Result<(), String> {
         return Ok(());
     };
 
+    // DevEco encodes the signing passwords in build-profile.json5. Running SignHap with them
+    // fails at the last step with a message about the keystore, which reads like a broken
+    // certificate; the real answer is "these are not plaintext", so say it before signing and
+    // leave the unsigned package in place.
+    if signing.passwords_look_encoded() {
+        println!(
+            "  (signing skipped: store_password/key_password in hvolt.toml look DevEco-encoded, \
+             not plaintext — replace them with the real keystore passwords)"
+        );
+        println!("  unsigned HAP left in build/");
+        return Ok(());
+    }
+
     crate::sign::sign_app(
         &sdk_env,
         project_dir,
@@ -80,6 +93,13 @@ pub fn run(project_dir: &Path, device: Option<&str>) {
         eprintln!("✗ No signing config. Run `hvolt sign` first.");
         std::process::exit(1);
     });
+    if signing.passwords_look_encoded() {
+        eprintln!(
+            "✗ Signing password looks DevEco-encoded (hex), not plaintext — `hvolt run` needs a \
+             signed package. Replace store_password/key_password in hvolt.toml."
+        );
+        std::process::exit(1);
+    }
     if let Err(e) = crate::sign::sign_app(
         &sdk_env,
         project_dir,

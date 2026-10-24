@@ -17,6 +17,9 @@ pub struct AppFields {
     pub bundle: String,
     pub name: String,
     pub version: String,
+    /// versionCode. 0 = derive from `version` (semver → NNNN); DevEco tracks it separately.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub version_code: u32,
     #[serde(default = "default_vendor")]
     pub vendor: String,
     #[serde(default = "default_icon")]
@@ -28,6 +31,10 @@ pub struct AppFields {
     pub sdk_version: String,
     #[serde(default = "default_sdk_version")]
     pub compile_sdk_version: String,
+    /// targetSdkVersion; empty = same as compile_sdk_version. A project may pin the compile
+    /// SDK and declare a lower target (6.1.1(24)), and that decides runtime behaviour.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub target_sdk_version: String,
     /// Minimum compatible SDK version. Empty = same as sdk_version.
     #[serde(default)]
     pub compatible_sdk_version: String,
@@ -74,6 +81,21 @@ where
 }
 
 /// Signing materials for one build mode (debug/release).
+impl SigningConfig {
+    /// DevEco Studio stores signing passwords encoded (long hex), and hap-sign-tool needs the
+    /// plaintext — such a config can never sign, no matter how the build is driven.
+    pub fn passwords_look_encoded(&self) -> bool {
+        [&self.store_password, &self.key_password]
+            .into_iter()
+            .any(|pw| Self::password_looks_encoded(pw))
+    }
+
+    /// One value: 32+ hex characters is DevEco's encoded form, never a real password.
+    pub fn password_looks_encoded(value: &str) -> bool {
+        value.len() >= 32 && value.chars().all(|c| c.is_ascii_hexdigit())
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct SigningConfig {
     pub store_file: String,
@@ -90,6 +112,11 @@ impl AppFields {
     /// Derive versionCode from semantic version string.
     /// "1.0.0" → 1_000_000, "2.3.4" → 2_003_004
     pub fn version_code(&self) -> u32 {
+        // An explicit versionCode wins: DevEco tracks it independently of versionName, and
+        // deriving it from semver only reproduces the source by coincidence.
+        if self.version_code != 0 {
+            return self.version_code;
+        }
         let parts: Vec<&str> = self.version.split('.').collect();
         let major: u32 = parts.first().and_then(|s| s.parse().ok()).unwrap_or(1);
         let minor: u32 = parts.get(1).and_then(|s| s.parse().ok()).unwrap_or(0);
@@ -140,6 +167,17 @@ pub struct AbilityConfig {
     pub name: String,
     /// Source entry file (e.g. "EntryFormAbility.ets").
     pub entry: String,
+    /// Resource reference for the ability label (e.g. "$string:My_label").
+    /// Empty = generated from the ability name.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub label: String,
+    /// Resource reference for the ability description. Empty = generated.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub description: String,
+    /// Directory under `ets/` this ability lives in (e.g. "entrybackupability").
+    /// Empty = the type default (entryability for UIAbility, entryformability for extensions).
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub dir: String,
     /// Ability type: "" (UIAbility) or "form" etc. (ExtensionAbility).
     #[serde(default, skip_serializing_if = "String::is_empty")]
     #[serde(rename = "type")]
@@ -261,6 +299,13 @@ pub struct ModuleInfo {
     /// Enable code obfuscation.
     #[serde(default)]
     pub obfuscation: bool,
+    /// Native compile flags forwarded to `externalNativeOptions.cppFlags`
+    /// (DevEco stores them in the module build-profile).
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub cpp_flags: String,
+    /// CMake `arguments` forwarded to `externalNativeOptions.arguments`.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub native_arguments: String,
     /// Custom obfuscation rules, relative to the module directory.
     /// Defaults to a file named `obfuscation-rules.txt` beside `hvolt.toml` when it exists.
     #[serde(default, skip_serializing_if = "String::is_empty")]
@@ -271,9 +316,15 @@ pub struct ModuleInfo {
     /// Entry ability start-window icon (default: `icon`).
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub start_window_icon: String,
-    /// Entry ability orientation (default: `auto_rotation`).
+    /// Entry ability orientation. Empty = omit the key (DevEco leaves it out too).
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub orientation: String,
+    /// Resource reference for the entry ability label. Empty = generated.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub entry_label: String,
+    /// Resource reference for the entry ability description. Empty = generated.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub entry_description: String,
     /// Override `deliveryWithInstall` (default: derived from `bundle_type`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub delivery_with_install: Option<bool>,
@@ -329,6 +380,9 @@ pub struct NativeModuleConfig {
     /// Path to the Index.d.ts type declaration file, relative to native module directory.
     pub types: String,
     pub version: String,
+    /// versionCode. 0 = derive from `version` (semver → NNNN); DevEco tracks it separately.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub version_code: u32,
     #[serde(default = "default_native_description")]
     pub description: String,
 }
@@ -355,11 +409,13 @@ impl AppConfig {
                 bundle: format!("com.example.{}", name.replace('-', "_")),
                 name: name.to_string(),
                 version: "1.0.0".to_string(),
+                version_code: 0,
                 vendor: default_vendor(),
                 icon: default_icon(),
                 sdk_path: None,
                 sdk_version: default_sdk_version(),
                 compile_sdk_version: default_sdk_version(),
+                target_sdk_version: String::new(),
                 compatible_sdk_version: String::new(),
                 signing: BTreeMap::new(),
                 bundle_type: default_bundle_type(),
@@ -380,6 +436,10 @@ impl AppConfig {
 
 fn default_sdk_version() -> String {
     "26.0.0".to_string()
+}
+
+fn is_zero(v: &u32) -> bool {
+    *v == 0
 }
 
 fn default_vendor() -> String {
@@ -464,10 +524,14 @@ impl ModuleConfig {
                 device_types: vec!["phone".into(), "tablet".into(), "2in1".into(), "car".into()],
                 permissions: vec![],
                 obfuscation: false,
+                cpp_flags: String::new(),
+                native_arguments: String::new(),
                 obfuscation_rules: String::new(),
                 icon: String::new(),
                 start_window_icon: String::new(),
                 orientation: String::new(),
+                entry_label: String::new(),
+                entry_description: String::new(),
                 delivery_with_install: None,
                 installation_free: None,
                 abi_filters: default_abi_filters(),
@@ -521,5 +585,60 @@ mod device_type_tests {
             illegal_device_types(&scaffold_default, "OpenHarmony"),
             vec!["phone".to_string()]
         );
+    }
+}
+
+#[cfg(test)]
+mod signing_password_tests {
+    use super::SigningConfig;
+
+    fn cfg(store: &str, key: &str) -> SigningConfig {
+        SigningConfig {
+            store_file: "a.p12".into(),
+            store_password: store.into(),
+            key_alias: "k".into(),
+            key_password: key.into(),
+            certpath: "a.cer".into(),
+            profile: "a.p7b".into(),
+            sign_alg: "SHA256withECDSA".into(),
+        }
+    }
+
+    /// DevEco writes long hex strings; those can never open the keystore.
+    #[test]
+    fn encoded_passwords_are_detected() {
+        assert!(cfg(&"0".repeat(64), "plain").passwords_look_encoded());
+        assert!(cfg("plain", &"a".repeat(48)).passwords_look_encoded());
+    }
+
+    /// A genuinely short/human password must not be mistaken for an encoded one.
+    #[test]
+    fn plain_passwords_pass_through() {
+        assert!(!cfg("hunter2", "hunter2").passwords_look_encoded());
+        assert!(!cfg("", "").passwords_look_encoded());
+    }
+}
+
+#[cfg(test)]
+mod version_code_tests {
+    use super::AppConfig;
+
+    fn app(version: &str, code: u32) -> AppConfig {
+        let mut app = AppConfig::default_for("x");
+        app.app.version = version.into();
+        app.app.version_code = code;
+        app
+    }
+
+    /// An explicit versionCode is authoritative: DevEco keeps it separate from versionName.
+    #[test]
+    fn explicit_code_wins_over_semver() {
+        assert_eq!(app("1.2.3", 2005).app.version_code(), 2005);
+    }
+
+    /// Without one, the semver derivation still applies.
+    #[test]
+    fn semver_derivation_is_the_fallback() {
+        assert_eq!(app("2.3.4", 0).app.version_code(), 2_003_004);
     }
 }
