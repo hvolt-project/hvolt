@@ -346,7 +346,7 @@ fn read_app_config(from: &Path, gaps: &mut Gaps) -> Result<AppConfig, String> {
             compatible_sdk_version,
             bundle_type: str_at(&a, &["bundleType"]).unwrap_or_else(|| "app".into()),
             products,
-            runtime_os: "HarmonyOS".into(),
+            runtime_os: crate::config::DEFAULT_RUNTIME_OS.into(),
             members,
             signing,
         },

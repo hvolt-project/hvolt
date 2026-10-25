@@ -138,9 +138,9 @@ pub fn install_codelinter(from: Option<&str>) -> Result<(), String> {
     if let Ok(head) = std::fs::read(&native).map(|b| b.iter().take(4).copied().collect::<Vec<u8>>())
     {
         let kind = native_payload_kind(&head);
-        let here = if cfg!(windows) {
+        let here = if crate::platform::is_windows() {
             "pe"
-        } else if cfg!(target_os = "macos") {
+        } else if crate::platform::is_macos() {
             "mach-o"
         } else {
             "elf"
@@ -700,7 +700,7 @@ pub fn find_hvigorw() -> Option<PathBuf> {
 
     // the wrappers: sh (posix) / cmd shim (windows), then the upstream js entry
     let bin = hvigor.join("bin");
-    let order: Vec<std::path::PathBuf> = if cfg!(windows) {
+    let order: Vec<std::path::PathBuf> = if crate::platform::is_windows() {
         vec![
             bin.join("hvigorw.cmd"),
             bin.join("hvigorw"),

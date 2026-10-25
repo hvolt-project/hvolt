@@ -478,7 +478,7 @@ fn default_products() -> Vec<String> {
 }
 
 fn default_runtime_os() -> String {
-    "HarmonyOS".to_string()
+    DEFAULT_RUNTIME_OS.to_string()
 }
 
 /// Official deviceTypes enums, MEASURED from the SDK's own validators
@@ -494,10 +494,17 @@ pub const DEVICE_TYPES_HARMONYOS: &[&str] = &[
     "default", "phone", "tablet", "tv", "wearable", "car", "2in1",
 ];
 
+/// True when this runtimeOS builds against the OpenHarmony SDK channel.
+///
+/// One predicate for the case-insensitive comparison; `doctor` and the enum tables both use it.
+pub fn is_open_harmony(runtime_os: &str) -> bool {
+    runtime_os.eq_ignore_ascii_case("OpenHarmony")
+}
+
 /// The enum that applies to a runtimeOS. Unknown/empty → HarmonyOS, which
 /// matches the platform default (default_runtime_os).
 pub fn device_types_for_runtime(runtime_os: &str) -> &'static [&'static str] {
-    if runtime_os.eq_ignore_ascii_case("openharmony") {
+    if is_open_harmony(runtime_os) {
         DEVICE_TYPES_OPENHARMONY
     } else {
         DEVICE_TYPES_HARMONYOS
@@ -512,6 +519,69 @@ pub fn illegal_device_types(declared: &[String], runtime_os: &str) -> Vec<String
         .filter(|d| !allowed.iter().any(|a| a.eq_ignore_ascii_case(d)))
         .cloned()
         .collect()
+}
+
+/// Why this (bundle_type, runtime_os) combination cannot be built, when it cannot.
+///
+/// Atomic services need the HarmonyOS SDK (`hms` components) with `runtime_os =
+/// "HarmonyOS"`. This toolchain resolves only the OpenHarmony SDK, so the combination is
+/// rejected here — with an explicit message — instead of failing later inside hvigor with
+/// "Atomic service development is not supported for OpenHarmony stage model" or the
+/// opaque "SDK component missing" (measured 2026-10-24 on hvigor 26.0.0).
+pub fn unsupported_bundle_type(bundle_type: &str, runtime_os: &str) -> Option<String> {
+    if !bundle_type.eq_ignore_ascii_case("atomicService") {
+        return None;
+    }
+    Some(format!(
+        "bundle_type = \"atomicService\" is not supported: atomic services require the HarmonyOS \
+         SDK (hms components), and this toolchain ships only the OpenHarmony SDK, so the \
+         project's runtime_os = \"{}\" cannot be satisfied. Build in an environment that provides \
+         the HarmonyOS SDK, or set bundle_type = \"app\" in [app] — that changes the distribution \
+         form (installation-free atomic service becomes a regular app)",
+        runtime_os
+    ))
+}
+
+/// The runtimeOS used when a project leaves `runtime_os` empty.
+pub const DEFAULT_RUNTIME_OS: &str = "HarmonyOS";
+
+/// The runtimeOS a project actually builds for: its declared value, or the default when empty.
+///
+/// Single source of truth. `translator` used to derive this inline, so a change to the default
+/// would have silently drifted between the two copies.
+pub fn effective_runtime_os(declared: &str) -> &str {
+    if declared.is_empty() {
+        DEFAULT_RUNTIME_OS
+    } else {
+        declared
+    }
+}
+
+/// Combination checks that need both the app fields and the loaded module set.
+///
+/// Empty result means the combination is buildable. Kept pure so the rules can be tested
+/// without a filesystem.
+pub fn validate_combination(app: &AppFields, modules: &[(String, ModuleConfig)]) -> Vec<String> {
+    let runtime_os = effective_runtime_os(&app.runtime_os);
+    let mut errors = Vec::new();
+    if let Some(reason) = unsupported_bundle_type(&app.bundle_type, runtime_os) {
+        errors.push(reason);
+    }
+    for (name, cfg) in modules {
+        let illegal = illegal_device_types(&cfg.module.device_types, runtime_os);
+        if !illegal.is_empty() {
+            errors.push(format!(
+                "module '{}' declares device_types {:?} that runtime_os={} does not allow \
+                 (official enum: [{}]) — edit {}/hvolt.toml",
+                name,
+                illegal,
+                runtime_os,
+                device_types_for_runtime(runtime_os).join(", "),
+                name
+            ));
+        }
+    }
+    errors
 }
 
 fn default_permission_when() -> String {
@@ -598,6 +668,29 @@ mod device_type_tests {
             vec!["phone".to_string()]
         );
     }
+
+    #[test]
+    fn atomic_service_is_rejected_with_an_explicit_reason() {
+        // The combination check must fire for an atomic service under either runtimeOS,
+        // because this toolchain cannot resolve the HarmonyOS SDK.
+        for runtime in ["OpenHarmony", "HarmonyOS"] {
+            let reason = unsupported_bundle_type("atomicService", runtime)
+                .expect("atomic service must be rejected");
+            assert!(reason.contains("atomicService"));
+            assert!(reason.contains("HarmonyOS SDK"));
+            assert!(
+                reason.contains(runtime),
+                "reason names the declared runtimeOS"
+            );
+        }
+    }
+
+    #[test]
+    fn plain_apps_pass_the_combination_check() {
+        assert!(unsupported_bundle_type("app", "OpenHarmony").is_none());
+        assert!(unsupported_bundle_type("app", "HarmonyOS").is_none());
+        assert!(unsupported_bundle_type("", "OpenHarmony").is_none());
+    }
 }
 
 #[cfg(test)]
@@ -652,5 +745,96 @@ mod version_code_tests {
     #[test]
     fn semver_derivation_is_the_fallback() {
         assert_eq!(app("2.3.4", 0).app.version_code(), 2_003_004);
+    }
+}
+
+#[cfg(test)]
+mod combination_tests {
+    use super::{
+        effective_runtime_os, validate_combination, AppConfig, ModuleConfig, DEFAULT_RUNTIME_OS,
+    };
+
+    fn module(name: &str, device_types: &[&str]) -> (String, ModuleConfig) {
+        let mut cfg = ModuleConfig::default_entry();
+        cfg.module.name = name.to_string();
+        cfg.module.device_types = device_types.iter().map(|d| d.to_string()).collect();
+        (name.to_string(), cfg)
+    }
+
+    /// An empty runtime_os resolves to the documented default, in exactly one place.
+    #[test]
+    fn empty_runtime_os_resolves_to_the_default() {
+        assert_eq!(effective_runtime_os(""), DEFAULT_RUNTIME_OS);
+        assert_eq!(effective_runtime_os("OpenHarmony"), "OpenHarmony");
+        assert_eq!(effective_runtime_os("HarmonyOS"), "HarmonyOS");
+    }
+
+    /// An atomic service cannot be built here, under either runtimeOS.
+    #[test]
+    fn atomic_service_fails_the_combination() {
+        for runtime in ["", "OpenHarmony", "HarmonyOS"] {
+            let mut app = AppConfig::default_for("x");
+            app.app.bundle_type = "atomicService".to_string();
+            app.app.runtime_os = runtime.to_string();
+            let errors = validate_combination(&app.app, &[]);
+            assert_eq!(errors.len(), 1, "runtime_os={runtime:?}");
+            assert!(errors[0].contains("atomicService"));
+            assert!(errors[0].contains("HarmonyOS SDK"));
+        }
+    }
+
+    /// phone is legal for HarmonyOS and illegal for OpenHarmony: the enum follows runtimeOS.
+    #[test]
+    fn device_types_follow_the_runtime_os() {
+        let modules = vec![module("entry", &["phone"])];
+
+        let mut harmony = AppConfig::default_for("x");
+        harmony.app.runtime_os = "HarmonyOS".to_string();
+        assert!(validate_combination(&harmony.app, &modules).is_empty());
+
+        let mut open_harmony = AppConfig::default_for("x");
+        open_harmony.app.runtime_os = "OpenHarmony".to_string();
+        let errors = validate_combination(&open_harmony.app, &modules);
+        assert_eq!(errors.len(), 1);
+        assert!(errors[0].contains("phone"));
+        assert!(errors[0].contains("entry/hvolt.toml"));
+    }
+
+    /// A plain app with legal device types passes: the checker must not fire on healthy input.
+    #[test]
+    fn a_buildable_combination_has_no_errors() {
+        let modules = vec![module("entry", &["default"])];
+        let mut app = AppConfig::default_for("x");
+        app.app.runtime_os = "OpenHarmony".to_string();
+        assert!(validate_combination(&app.app, &modules).is_empty());
+    }
+}
+
+#[cfg(test)]
+mod runtime_predicate_tests {
+    use super::{device_types_for_runtime, is_open_harmony};
+
+    /// The comparison is case-insensitive, matching how DevEco writes the field.
+    #[test]
+    fn open_harmony_is_matched_case_insensitively() {
+        assert!(is_open_harmony("OpenHarmony"));
+        assert!(is_open_harmony("openharmony"));
+        assert!(is_open_harmony("OPENHARMONY"));
+        assert!(!is_open_harmony("HarmonyOS"));
+        assert!(!is_open_harmony(""));
+    }
+
+    /// Unknown/empty values fall back to the HarmonyOS enum, as before.
+    #[test]
+    fn enum_follows_the_predicate() {
+        assert_eq!(
+            device_types_for_runtime("openharmony"),
+            super::DEVICE_TYPES_OPENHARMONY
+        );
+        assert_eq!(device_types_for_runtime(""), super::DEVICE_TYPES_HARMONYOS);
+        assert_eq!(
+            device_types_for_runtime("HarmonyOS"),
+            super::DEVICE_TYPES_HARMONYOS
+        );
     }
 }

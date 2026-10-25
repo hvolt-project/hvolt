@@ -27,7 +27,7 @@ pub fn find_emulator_bin(env: Option<&crate::sdk::SdkEnv>) -> Option<PathBuf> {
         .iter()
         .map(PathBuf::from)
         .collect()
-    } else if cfg!(target_os = "macos") {
+    } else if crate::platform::is_macos() {
         vec![
             PathBuf::from("/Applications/DevEco-Studio.app/Contents/tools/emulator/Emulator"),
             PathBuf::from("/Applications/DevEco Studio.app/Contents/tools/emulator/Emulator"),
