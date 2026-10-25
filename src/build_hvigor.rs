@@ -6,41 +6,67 @@ use std::process::Command;
 
 use crate::sdk::SdkEnv;
 
+/// Replace the `signingConfigs` array with `[]`, string-aware.
+///
+/// Returns `None` when there is nothing to strip (or the array is unbalanced, in which case
+/// the file is left alone rather than corrupted). Kept pure so the two cases most likely to be
+/// wrong — nested brackets and brackets inside string literals — are testable without files.
+pub(crate) fn strip_signing_configs(content: &str) -> Option<String> {
+    let start = content.find("\"signingConfigs\"")?;
+    let bracket_start = content[start..].find('[')?;
+    let abs_start = start + bracket_start;
+    let mut depth: i32 = 0;
+    let mut in_string = false;
+    let mut escaped = false;
+    let mut end = abs_start;
+    for (i, ch) in content[abs_start..].char_indices() {
+        if in_string {
+            if escaped {
+                escaped = false;
+            } else if ch == '\\' {
+                escaped = true;
+            } else if ch == '"' {
+                in_string = false;
+            }
+            continue;
+        }
+        match ch {
+            '"' => in_string = true,
+            '[' => depth += 1,
+            ']' => {
+                depth -= 1;
+                if depth == 0 {
+                    end = abs_start + i + 1;
+                    break;
+                }
+            }
+            _ => {}
+        }
+    }
+    if depth != 0 {
+        return None;
+    }
+    Some(format!(
+        "{}\"signingConfigs\": []{}",
+        &content[..start],
+        &content[end..]
+    ))
+}
+
 /// Remove signingConfigs from build-profile.json5 so hvigor skips SignHap.
 pub fn strip_signing_config(project_dir: &Path) {
     let bp = project_dir.join("build/build-profile.json5");
     if !bp.exists() {
         return;
     }
-    if let Ok(content) = fs::read_to_string(&bp) {
-        if let Some(start) = content.find("\"signingConfigs\"") {
-            if let Some(bracket_start) = content[start..].find('[') {
-                let abs_start = start + bracket_start;
-                let mut depth = 0;
-                let mut end = abs_start;
-                for (i, ch) in content[abs_start..].char_indices() {
-                    match ch {
-                        '[' => depth += 1,
-                        ']' => {
-                            depth -= 1;
-                            if depth == 0 {
-                                end = abs_start + i + 1;
-                                break;
-                            }
-                        }
-                        _ => {}
-                    }
-                }
-                let fixed = format!(
-                    "{}\"signingConfigs\": []{}",
-                    &content[..start],
-                    &content[end..]
-                );
-                if let Err(e) = fs::write(&bp, &fixed) {
-                    eprintln!("Warning: strip signingConfigs failed: {}", e);
-                }
-            }
-        }
+    let Ok(content) = fs::read_to_string(&bp) else {
+        return;
+    };
+    let Some(fixed) = strip_signing_configs(&content) else {
+        return;
+    };
+    if let Err(e) = fs::write(&bp, &fixed) {
+        eprintln!("Warning: strip signingConfigs failed: {}", e);
     }
 }
 
@@ -92,7 +118,7 @@ fn apply_cache_home(cmd: &mut Command) {
     }
     // ohpm/hvigor/npm all derive their cache path from the home directory.
     cmd.env("HOME", &dir);
-    if cfg!(windows) {
+    if crate::platform::is_windows() {
         cmd.env("USERPROFILE", &dir);
     }
 }
@@ -273,5 +299,49 @@ pub fn run_assemble(sdk: &SdkEnv, project_dir: &Path) -> Result<(), String> {
         Ok(())
     } else {
         Err(format!("hvigorw exit: {}", status.code().unwrap_or(-1)))
+    }
+}
+
+#[cfg(test)]
+mod strip_tests {
+    use super::strip_signing_configs;
+
+    /// The normal shape: a populated array becomes an empty one, the rest survives.
+    #[test]
+    fn array_is_emptied_and_rest_preserved() {
+        let src = r#"{"app": {"signingConfigs": [{"name": "default"}]}, "x": 1}"#;
+        let out = strip_signing_configs(src).expect("should strip");
+        assert_eq!(out, r#"{"app": {"signingConfigs": []}, "x": 1}"#);
+    }
+
+    /// Nested arrays inside a config must not terminate the scan early.
+    #[test]
+    fn nested_brackets_are_balanced() {
+        let src = r#"{"signingConfigs": [{"a": [1, 2]}], "tail": true}"#;
+        let out = strip_signing_configs(src).unwrap();
+        assert_eq!(out, r#"{"signingConfigs": [], "tail": true}"#);
+    }
+
+    /// A `]` inside a string literal must not close the array.
+    #[test]
+    fn bracket_inside_a_string_is_ignored() {
+        let src = r#"{"signingConfigs": [{"pwd": "a]b"}], "tail": 1}"#;
+        let out = strip_signing_configs(src).unwrap();
+        assert_eq!(out, r#"{"signingConfigs": [], "tail": 1}"#);
+    }
+
+    /// An escaped quote does not end the literal, so a later `]` stays inside it.
+    #[test]
+    fn escaped_quote_does_not_end_the_string() {
+        let src = r#"{"signingConfigs": [{"pwd": "a\"]b"}], "tail": 1}"#;
+        let out = strip_signing_configs(src).unwrap();
+        assert_eq!(out, r#"{"signingConfigs": [], "tail": 1}"#);
+    }
+
+    /// Nothing to strip, or an unbalanced array: leave the caller's file untouched.
+    #[test]
+    fn missing_key_or_unbalanced_array_is_left_alone() {
+        assert!(strip_signing_configs(r#"{"app": {}}"#).is_none());
+        assert!(strip_signing_configs(r#"{"signingConfigs": [1, 2"#).is_none());
     }
 }
