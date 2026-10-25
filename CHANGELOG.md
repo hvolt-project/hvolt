@@ -7,6 +7,14 @@ versions may change the CLI surface.
 
 ## [Unreleased]
 
+## [26.0.0-6] — 2026-10-25
+
+### Changed
+
+- The hvigor pin follows upstream within the same major version (6.26.1 → 6.26.8).
+  Upstream patch releases are compatible by their own policy, so no behaviour change is
+  claimed beyond the pin. This entry was written by the refresh workflow.
+
 ## [26.0.0-1] — 2026-10-19
 
 ### Added
