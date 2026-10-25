@@ -206,7 +206,7 @@ fn read_app_config(from: &Path, gaps: &mut Gaps) -> Result<AppConfig, String> {
     let bp_path = from.join("build-profile.json5");
     let mut products = vec!["default".to_string()];
     let mut signing = BTreeMap::new();
-    let sdk_version = "26.0.0".to_string();
+    let sdk_version = crate::config::SDK_PLATFORM_VERSION.to_string();
     let mut compatible_sdk_version = String::new();
     let mut target_sdk = String::new();
     if bp_path.is_file() {
@@ -387,7 +387,7 @@ fn normalise_sdk(raw: &str) -> String {
         .take_while(|c| c.is_ascii_digit() || *c == '.')
         .collect();
     if numeric.is_empty() {
-        "26.0.0".to_string()
+        crate::config::SDK_PLATFORM_VERSION.to_string()
     } else {
         numeric
     }

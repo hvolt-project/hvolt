@@ -2,6 +2,10 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
+// `concat!` accepts literals only, so the SDK stamp below cannot reference
+// `config::SDK_PLATFORM_VERSION`; `version_stamp_matches_the_config_constant` reads this file
+// and fails the suite when the two drift.
+
 #[derive(Parser)]
 #[command(
     name = "hvolt",
@@ -544,4 +548,22 @@ pub enum ImagesAction {
         #[arg(long, default_value = "phone", value_parser = ["phone","tablet","2in1","2in1 Foldable","foldable","widefold","triplefold","tv","wearable","wearablekid"])]
         r#type: String,
     },
+}
+
+#[cfg(test)]
+mod version_stamp_tests {
+    /// `concat!` forces a literal in this file, so the guard reads the source and fails when
+    /// the stamp drifts from the single source in `config.rs`.
+    #[test]
+    fn version_stamp_matches_the_config_constant() {
+        let src = include_str!("cli.rs");
+        let expected = format!(
+            "\" (SDK \", \"{}\", \")\"",
+            crate::config::SDK_PLATFORM_VERSION
+        );
+        assert!(
+            src.contains(&expected),
+            "cli.rs --version stamp drifted from config::SDK_PLATFORM_VERSION"
+        );
+    }
 }
