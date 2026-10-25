@@ -40,8 +40,11 @@ pub fn assemble(project_dir: &Path) {
 
     // 4. Check manifest
     let manifest_path = build_dir.join(".hvolt_manifest");
-    let needs_full =
-        !manifest_path.exists() || read_manifest_hash(&manifest_path) != Some(current_hash);
+    let needs_full = needs_full_rebuild(
+        manifest_path.exists(),
+        read_manifest_hash(&manifest_path),
+        current_hash,
+    );
 
     if needs_full {
         // Full rebuild
@@ -93,6 +96,16 @@ fn compute_toml_hash(
     }
 
     hasher.finish()
+}
+
+/// Full vs incremental: a missing manifest, an unreadable one, or a different toml hash all
+/// force a full translate. Pure so the incremental contract is testable without a filesystem.
+pub(crate) fn needs_full_rebuild(
+    manifest_exists: bool,
+    manifest_hash: Option<u64>,
+    current_hash: u64,
+) -> bool {
+    !manifest_exists || manifest_hash != Some(current_hash)
 }
 
 fn read_manifest_hash(path: &Path) -> Option<u64> {
@@ -264,5 +277,34 @@ fn mirror_source_files(
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod rebuild_tests {
+    use super::needs_full_rebuild;
+
+    /// First run: no manifest, full translate.
+    #[test]
+    fn missing_manifest_forces_full() {
+        assert!(needs_full_rebuild(false, None, 42));
+    }
+
+    /// Same toml hash: mirror only.
+    #[test]
+    fn matching_hash_mirrors_only() {
+        assert!(!needs_full_rebuild(true, Some(42), 42));
+    }
+
+    /// Edited hvolt.toml changes the hash and must force a full translate.
+    #[test]
+    fn changed_hash_forces_full() {
+        assert!(needs_full_rebuild(true, Some(41), 42));
+    }
+
+    /// A manifest that exists but cannot be parsed is not trusted.
+    #[test]
+    fn unreadable_manifest_forces_full() {
+        assert!(needs_full_rebuild(true, None, 42));
     }
 }

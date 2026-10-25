@@ -96,21 +96,38 @@ pub fn apply(project_dir: &Path, device: Option<&str>) -> Result<(), String> {
             &["bm", "quickfix", "-a", "-f", remote],
         )?
     };
-    if !ao.contains("apply quickfix succeed") {
-        return Err(format!("bm quickfix: {}", ao.trim()));
-    }
+    patch_applied(&ao)?;
     // 5. verify from the device itself
     let (_t, qo) = crate::devtools::hdc_exec(
         device,
         &["shell", "bm", "quickfix", "-q", "-b", &cfg.app.bundle],
     )?;
-    let pvc = qo
+    let pvc = patch_version_line(&qo);
+    println!("✓ quickfix applied — {}", pvc);
+    Ok(())
+}
+
+/// `bm quickfix -q -b <bundle>` prints the applied patch version; extract that line.
+///
+/// Falls back to a placeholder rather than failing: the query is informational only.
+pub(crate) fn patch_version_line(output: &str) -> String {
+    output
         .lines()
         .find(|l| l.contains("patch version code"))
         .map(|l| l.trim().to_string())
-        .unwrap_or_else(|| "patch version code: ?".into());
-    println!("✓ quickfix applied — {}", pvc);
-    Ok(())
+        .unwrap_or_else(|| "patch version code: ?".into())
+}
+
+/// `bm quickfix -a` must acknowledge the apply; anything else is the device's own error text.
+///
+/// Kept as a named predicate so the accepted wording is pinned by a test instead of an
+/// inline `contains` in the middle of the deploy path.
+pub(crate) fn patch_applied(output: &str) -> Result<(), String> {
+    if output.contains("apply quickfix succeed") {
+        Ok(())
+    } else {
+        Err(format!("bm quickfix: {}", output.trim()))
+    }
 }
 
 fn find_hqf(build_dir: &Path) -> Result<std::path::PathBuf, String> {
@@ -131,4 +148,31 @@ fn find_hqf(build_dir: &Path) -> Result<std::path::PathBuf, String> {
     }
     found.sort();
     found.pop().ok_or("no unsigned hqf produced".to_string())
+}
+
+#[cfg(test)]
+mod patch_output_tests {
+    use super::{patch_applied, patch_version_line};
+
+    /// The apply must be acknowledged; otherwise the device's own text is surfaced.
+    #[test]
+    fn apply_requires_an_acknowledgement() {
+        assert!(patch_applied("apply quickfix succeed\n").is_ok());
+        let err = patch_applied("Deploy hqf failed").unwrap_err();
+        assert!(err.contains("Deploy hqf failed"));
+    }
+
+    /// The version line is pulled out of multi-line output and trimmed.
+    #[test]
+    fn version_line_is_extracted_and_trimmed() {
+        let out = "begin\n  patch version code: 3000001  \nend";
+        assert_eq!(patch_version_line(out), "patch version code: 3000001");
+    }
+
+    /// No version line degrades to a placeholder rather than an empty string.
+    #[test]
+    fn missing_version_line_degrades_to_placeholder() {
+        assert_eq!(patch_version_line(""), "patch version code: ?");
+        assert_eq!(patch_version_line("other text"), "patch version code: ?");
+    }
 }

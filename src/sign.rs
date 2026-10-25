@@ -7,6 +7,61 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+/// One `hap-sign-tool sign-app -mode localSign` invocation.
+///
+/// `sign_app` and `sign_package` pass the same flags (measured against the SDK 26 tool);
+/// describing them once keeps the two call sites from drifting apart, and the contract
+/// becomes testable without running java.
+pub(crate) struct SignRequest<'a> {
+    pub jar: &'a Path,
+    pub in_path: &'a Path,
+    pub out_path: &'a Path,
+    pub key_alias: &'a str,
+    pub key_password: &'a str,
+    pub store_file: &'a str,
+    pub store_password: &'a str,
+    pub certpath: &'a str,
+    pub profile: &'a str,
+    pub sign_alg: &'a str,
+    /// `sign_app` passes `-profileSigned 1`; `sign_package` historically does not.
+    pub profile_signed: bool,
+}
+
+impl SignRequest<'_> {
+    pub(crate) fn to_args(&self) -> Vec<String> {
+        let mut args: Vec<String> = vec![
+            "-jar".into(),
+            self.jar.to_string_lossy().into_owned(),
+            "sign-app".into(),
+            "-mode".into(),
+            "localSign".into(),
+            "-keyAlias".into(),
+            self.key_alias.into(),
+            "-keyPwd".into(),
+            self.key_password.into(),
+            "-keystoreFile".into(),
+            self.store_file.into(),
+            "-keystorePwd".into(),
+            self.store_password.into(),
+            "-appCertFile".into(),
+            self.certpath.into(),
+            "-profileFile".into(),
+            self.profile.into(),
+            "-signAlg".into(),
+            self.sign_alg.into(),
+            "-inFile".into(),
+            self.in_path.to_string_lossy().into_owned(),
+            "-outFile".into(),
+            self.out_path.to_string_lossy().into_owned(),
+        ];
+        if self.profile_signed {
+            args.push("-profileSigned".into());
+            args.push("1".into());
+        }
+        args
+    }
+}
+
 /// Sign the unsigned HAP using hap-sign-tool.jar (local signing).
 #[allow(clippy::too_many_arguments)] // mirrors the signing CLI surface 1:1
 pub fn sign_app(
@@ -57,32 +112,21 @@ pub fn sign_app(
     }
 
     println!("  Signing HAP...");
+    let request = SignRequest {
+        jar: &hap_sign_tool,
+        in_path: &unsigned,
+        out_path: &hap_path,
+        key_alias,
+        key_password,
+        store_file,
+        store_password,
+        certpath,
+        profile,
+        sign_alg,
+        profile_signed: true,
+    };
     let output = Command::new(&java)
-        .arg("-jar")
-        .arg(&hap_sign_tool)
-        .arg("sign-app")
-        .arg("-mode")
-        .arg("localSign")
-        .arg("-keyAlias")
-        .arg(key_alias)
-        .arg("-keyPwd")
-        .arg(key_password)
-        .arg("-appCertFile")
-        .arg(certpath)
-        .arg("-profileFile")
-        .arg(profile)
-        .arg("-profileSigned")
-        .arg("1")
-        .arg("-inFile")
-        .arg(&unsigned)
-        .arg("-outFile")
-        .arg(&hap_path)
-        .arg("-signAlg")
-        .arg(sign_alg)
-        .arg("-keystoreFile")
-        .arg(store_file)
-        .arg("-keystorePwd")
-        .arg(store_password)
+        .args(request.to_args())
         .current_dir(project_dir)
         .output()
         .map_err(|e| format!("hap-sign-tool: {}", e))?;
@@ -128,32 +172,21 @@ pub fn sign_package(
 ) -> Result<(), String> {
     let java = find_java(sdk);
     let tool = find_hap_sign_tool(sdk)?;
+    let request = SignRequest {
+        jar: &tool,
+        in_path,
+        out_path,
+        key_alias,
+        key_password,
+        store_file,
+        store_password,
+        certpath,
+        profile,
+        sign_alg,
+        profile_signed: false,
+    };
     let out = Command::new(&java)
-        .args([
-            "-jar",
-            &tool.to_string_lossy(),
-            "sign-app",
-            "-mode",
-            "localSign",
-            "-keyAlias",
-            key_alias,
-            "-keyPwd",
-            key_password,
-            "-keystoreFile",
-            store_file,
-            "-keystorePwd",
-            store_password,
-            "-appCertFile",
-            certpath,
-            "-profileFile",
-            profile,
-            "-signAlg",
-            sign_alg,
-            "-inFile",
-            &in_path.to_string_lossy(),
-            "-outFile",
-            &out_path.to_string_lossy(),
-        ])
+        .args(request.to_args())
         .output()
         .map_err(|e| format!("hap-sign-tool: {}", e))?;
     let so = String::from_utf8_lossy(&out.stdout);
@@ -260,5 +293,71 @@ pub(crate) fn check_cert_expired(certpath: &Path) -> Result<Option<bool>, String
             // openssl not on PATH — skip check
             Ok(None)
         }
+    }
+}
+
+#[cfg(test)]
+mod request_tests {
+    use super::SignRequest;
+    use std::path::Path;
+
+    fn req(profile_signed: bool) -> SignRequest<'static> {
+        SignRequest {
+            jar: Path::new("/sdk/hap-sign-tool.jar"),
+            in_path: Path::new("/p/output/entry-unsigned.hap"),
+            out_path: Path::new("/p/output/entry-signed.hap"),
+            key_alias: "debugKey",
+            key_password: "kp",
+            store_file: "/p/signing/debug/debug.p12",
+            store_password: "sp",
+            certpath: "/p/signing/debug/debug.cer",
+            profile: "/p/signing/debug/debug.p7b",
+            sign_alg: "SHA256withECDSA",
+            profile_signed,
+        }
+    }
+
+    /// The flags measured against SDK 26's hap-sign-tool must not drift.
+    #[test]
+    fn args_carry_the_measured_sign_app_contract() {
+        let args = req(true).to_args();
+        let got: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
+        assert_eq!(
+            got[..5],
+            [
+                "-jar",
+                "/sdk/hap-sign-tool.jar",
+                "sign-app",
+                "-mode",
+                "localSign"
+            ]
+        );
+        for (flag, value) in [
+            ("-keyAlias", "debugKey"),
+            ("-keyPwd", "kp"),
+            ("-keystoreFile", "/p/signing/debug/debug.p12"),
+            ("-keystorePwd", "sp"),
+            ("-appCertFile", "/p/signing/debug/debug.cer"),
+            ("-profileFile", "/p/signing/debug/debug.p7b"),
+            ("-signAlg", "SHA256withECDSA"),
+            ("-inFile", "/p/output/entry-unsigned.hap"),
+            ("-outFile", "/p/output/entry-signed.hap"),
+        ] {
+            let i = got
+                .iter()
+                .position(|a| *a == flag)
+                .unwrap_or_else(|| panic!("missing {flag}"));
+            assert_eq!(got[i + 1], value, "value of {flag}");
+        }
+    }
+
+    /// `-profileSigned 1` is what the two call sites differ on, so it must stay opt-in.
+    #[test]
+    fn profile_signed_is_opt_in() {
+        let with = req(true).to_args();
+        let without = req(false).to_args();
+        assert!(with.iter().any(|a| a == "-profileSigned"));
+        assert!(!without.iter().any(|a| a == "-profileSigned"));
+        assert_eq!(with.len(), without.len() + 2);
     }
 }
