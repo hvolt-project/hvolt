@@ -142,3 +142,29 @@ pub fn token_state() -> TokenState {
         TokenState::NotBuilt
     }
 }
+
+#[cfg(all(test, not(feature = "agc-local")))]
+mod no_backend_tests {
+    use super::{
+        delete_cert, list_certs, list_devices, login, sign_remote, token_state, TokenState,
+        NO_BACKEND,
+    };
+    use std::path::Path;
+
+    /// Without the overlay, every entry point degrades to the same explicit message — a
+    /// public build must never look like it has AGC support.
+    #[test]
+    fn every_entry_point_reports_the_missing_backend() {
+        assert_eq!(sign_remote(Path::new(".")).unwrap_err(), NO_BACKEND);
+        assert_eq!(login().unwrap_err(), NO_BACKEND);
+        assert_eq!(list_certs().unwrap_err(), NO_BACKEND);
+        assert_eq!(delete_cert("1").unwrap_err(), NO_BACKEND);
+        assert_eq!(list_devices().unwrap_err(), NO_BACKEND);
+    }
+
+    /// `hvolt doctor` must read "not built", not "expired": the advice differs.
+    #[test]
+    fn token_state_is_not_built() {
+        assert!(matches!(token_state(), TokenState::NotBuilt));
+    }
+}

@@ -25,3 +25,9 @@ oh_modules/
 
 # The private AppGallery Connect overlay arrives as a CI secret, never as source.
 /agc-local/
+
+# Local verification artifacts: flat project copies, signing-material copies, tarballs,
+# and the local issue tracker. These hold plaintext keystore passwords and private keys —
+# a blanket `git add -A` must never reach them.
+.cache/
+.scratch/

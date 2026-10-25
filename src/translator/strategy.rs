@@ -290,11 +290,9 @@ impl VersionStrategy for V26Strategy {
         } else {
             &app.app.compatible_sdk_version
         };
-        let runtime_os = if app.app.runtime_os.is_empty() {
-            "HarmonyOS"
-        } else {
-            app.app.runtime_os.as_str()
-        };
+        let runtime_os = crate::config::effective_runtime_os(&app.app.runtime_os);
+        // signingConfigs entries carry a fixed "type": "HarmonyOS" (signing profile kind),
+        // unrelated to the project runtimeOS resolved above from config.rs.
         let signing = signing_json(app);
 
         let products: Vec<String> = app
