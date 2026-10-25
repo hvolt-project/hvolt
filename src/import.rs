@@ -572,7 +572,7 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
         }
         let cfg = ModuleConfig {
             // Module-scoped deps come from the source module's own oh-package.json5.
-            dependencies: module_dependencies(&from.join(&dir)),
+            dependencies: module_dependencies(&dir, &from.join(&dir)),
             module: ModuleInfo {
                 name,
                 routes,
@@ -824,7 +824,12 @@ fn find_ets(ets_src: &Path, file: &str) -> Result<Option<PathBuf>, String> {
 }
 
 /// Local `file:` dependencies declared by a module's own oh-package.json5.
-fn module_dependencies(module_dir: &Path) -> BTreeMap<String, Dependency> {
+///
+/// The recorded path must be relative to the assembled build tree, not to the module: assemble
+/// writes each module dependency as `file:./../<path>` from inside `build/<member>/`, so a bare
+/// `src/main/cpp/types/<name>` would land at `build/src/main/...` instead of
+/// `build/<member>/src/main/...`. Paths that already escape the module (`../x`) stay as they are.
+fn module_dependencies(member: &str, module_dir: &Path) -> BTreeMap<String, Dependency> {
     let pkg = module_dir.join("oh-package.json5");
     let mut deps = BTreeMap::new();
     if !pkg.is_file() {
@@ -838,10 +843,16 @@ fn module_dependencies(module_dir: &Path) -> BTreeMap<String, Dependency> {
     };
     for (name, spec) in map {
         if let Some(path) = spec.as_str().and_then(|s| s.strip_prefix("file:")) {
+            let cleaned = path.trim_start_matches("./");
+            let recorded = if cleaned.starts_with("..") {
+                cleaned.to_string()
+            } else {
+                format!("{}/{}", member, cleaned)
+            };
             deps.insert(
                 name.clone(),
                 Dependency {
-                    path: path.trim_start_matches("./").to_string(),
+                    path: recorded,
                     version: "1.0.0".to_string(),
                 },
             );
@@ -1205,5 +1216,48 @@ mod cmake_ref_tests {
         .unwrap();
         assert!(out_of_module_cmake_refs(&root).is_empty());
         let _ = fs::remove_dir_all(&root);
+    }
+}
+
+#[cfg(test)]
+mod module_dependency_path_tests {
+    use super::module_dependencies;
+    use std::fs;
+
+    fn module_with_dep(tag: &str, spec: &str) -> std::path::PathBuf {
+        let dir = std::env::temp_dir().join(format!("hvolt-moddep-{}-{}", tag, std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&dir).unwrap();
+        fs::write(
+            dir.join("oh-package.json5"),
+            format!(
+                "{{\n  \"dependencies\": {{ \"libentry.so\": \"file:{}\" }}\n}}\n",
+                spec
+            ),
+        )
+        .unwrap();
+        dir
+    }
+
+    /// A module-local cpp dependency is recorded against the build tree, so assemble's
+    /// `file:./../<path>` lands inside `build/<member>/` rather than beside it.
+    #[test]
+    fn module_local_path_gets_the_member_prefix() {
+        let dir = module_with_dep("local", "./src/main/cpp/types/libentry");
+        let deps = module_dependencies("entry", &dir);
+        assert_eq!(
+            deps["libentry.so"].path,
+            "entry/src/main/cpp/types/libentry"
+        );
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    /// Paths that already leave the module keep their meaning.
+    #[test]
+    fn escaping_path_is_left_alone() {
+        let dir = module_with_dep("escape", "../shared");
+        let deps = module_dependencies("entry", &dir);
+        assert_eq!(deps["libentry.so"].path, "../shared");
+        let _ = fs::remove_dir_all(&dir);
     }
 }
