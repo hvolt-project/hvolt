@@ -445,8 +445,15 @@ impl AppConfig {
     }
 }
 
+/// SDK platform version written into generated projects (`compileSdkVersion` / `sdkVersion`).
+///
+/// The full build id (e.g. 26.0.0.38) is the downloadable artifact; the platform version is
+/// what build-profile carries. Single source: cli's `--version` stamp and `import`'s defaults
+/// both derive from this value, and a test pins the stamp against it.
+pub const SDK_PLATFORM_VERSION: &str = "26.0.0";
+
 fn default_sdk_version() -> String {
-    "26.0.0".to_string()
+    SDK_PLATFORM_VERSION.to_string()
 }
 
 fn is_zero(v: &u32) -> bool {
