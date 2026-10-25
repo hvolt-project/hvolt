@@ -9,6 +9,11 @@ pub fn is_windows() -> bool {
     cfg!(windows)
 }
 
+/// True on macOS. Symmetric with [`is_windows`] so callers never spell out `cfg!` themselves.
+pub fn is_macos() -> bool {
+    cfg!(target_os = "macos")
+}
+
 /// Locate an executable on PATH without shelling out to `which`/`where`
 /// (native Windows shells have neither as an external binary hvolt can exec).
 pub fn on_path(name: &str) -> Option<PathBuf> {
@@ -327,5 +332,19 @@ mod tests {
     #[test]
     fn home_dir_nonempty() {
         assert!(!home_dir().to_string_lossy().is_empty());
+    }
+}
+
+#[cfg(test)]
+mod os_predicates {
+    use super::{is_macos, is_windows};
+
+    /// The helpers must agree with the compile target — on Linux both are false, so this
+    /// stays valid on every CI host.
+    #[test]
+    fn predicates_match_the_compile_target() {
+        assert_eq!(is_windows(), cfg!(windows));
+        assert_eq!(is_macos(), cfg!(target_os = "macos"));
+        assert!(!(is_windows() && is_macos()));
     }
 }

@@ -111,6 +111,7 @@ pub(crate) fn profile_json(
         "validity": { "not-before": now_epoch, "not-after": now_epoch + days_years3 },
         "type": match kind { ProfileKind::Debug => "debug", ProfileKind::Release => "release" },
         "bundle-info": {
+            // Fixed profile field, not the project runtimeOS (config.rs owns that).
             "developer-id": "OpenHarmony",
             (match kind { ProfileKind::Debug => "development-certificate",
                            ProfileKind::Release => "distribution-certificate" }): cert_pem,

@@ -679,7 +679,8 @@ fn check_project(rep: &Report, toml_path: &Path, sdk_root: Option<&Path>) {
 
     // runtimeOS vs installed components
     let has_hms = default_link.join("hms").exists();
-    if app.app.runtime_os == "HarmonyOS" && !has_hms {
+    let effective_runtime = crate::config::effective_runtime_os(&app.app.runtime_os);
+    if effective_runtime == crate::config::DEFAULT_RUNTIME_OS && !has_hms {
         rep.line(false, false, "project", "runtime_os",
             "runtimeOS=HarmonyOS but installed SDK has no hms/ — hvigor will fail 'SDK component missing'",
             "set runtime_os = \"OpenHarmony\" in [app] (see hvolt doctor [sdk] hms line)");
@@ -689,7 +690,7 @@ fn check_project(rep: &Report, toml_path: &Path, sdk_root: Option<&Path>) {
             false,
             "project",
             "runtime_os",
-            &format!("{} matches installed SDK", app.app.runtime_os),
+            &format!("{} matches installed SDK", effective_runtime),
             "",
         );
     }
@@ -698,12 +699,8 @@ fn check_project(rep: &Report, toml_path: &Path, sdk_root: Option<&Path>) {
     // The two toolchains carry DIFFERENT enums (openharmony has no "phone",
     // hms does) — reading the openharmony one while runtimeOS=HarmonyOS made
     // doctor report a false ✗ for the default scaffold.
-    let rt = if app.app.runtime_os.is_empty() {
-        "HarmonyOS"
-    } else {
-        app.app.runtime_os.as_str()
-    };
-    let toolchain = if rt.eq_ignore_ascii_case("OpenHarmony") {
+    let rt = crate::config::effective_runtime_os(&app.app.runtime_os);
+    let toolchain = if crate::config::is_open_harmony(rt) {
         "openharmony"
     } else {
         "hms"

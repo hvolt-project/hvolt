@@ -223,27 +223,12 @@ pub fn discover_modules(root: &Path, app_config: &AppConfig) -> Result<ModuleSet
         }
     }
 
-    // device_types must be legal for the chosen runtimeOS:
-    // an OpenHarmony build must not declare "phone".
-    let runtime_os = if app_config.app.runtime_os.is_empty() {
-        "HarmonyOS"
-    } else {
-        app_config.app.runtime_os.as_str()
-    };
-    for (name, cfg) in &modules {
-        let illegal = crate::config::illegal_device_types(&cfg.module.device_types, runtime_os);
-        if !illegal.is_empty() {
-            errors.push(format!(
-                "module '{}' declares device_types {:?} that runtime_os={} does not allow \
-                 (official enum: [{}]) — edit {}/hvolt.toml",
-                name,
-                illegal,
-                runtime_os,
-                crate::config::device_types_for_runtime(runtime_os).join(", "),
-                name
-            ));
-        }
-    }
+    // Combination rules (runtimeOS default, bundle_type, device_types enums) live in
+    // config.rs as pure functions; the translator only applies them.
+    errors.extend(crate::config::validate_combination(
+        &app_config.app,
+        &modules,
+    ));
 
     if !errors.is_empty() {
         return Err(errors.join("\n  "));

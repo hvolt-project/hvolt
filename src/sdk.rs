@@ -455,7 +455,7 @@ fn find_ohos_sdk(toml_override: &str) -> Result<PathBuf, String> {
     // 5. DevEco Studio, only when it actually carries components: an uninstalled
     //    IDE leaves an empty skeleton behind, and that skeleton used to win over
     //    the managed store (measured on Windows, 2026-10-18).
-    let deveco = Path::new(if cfg!(windows) {
+    let deveco = Path::new(if crate::platform::is_windows() {
         "C:/Program Files/Huawei/DevEco Studio"
     } else {
         "/Applications/DevEco-Studio.app/Contents"
@@ -773,7 +773,7 @@ pub(crate) fn sdk_root() -> Option<PathBuf> {
     // 3. Auto-detect from DevEco Studio (mac bundle or windows install)
     let mut deveco_roots: Vec<std::path::PathBuf> =
         vec![PathBuf::from("/Applications/DevEco-Studio.app/Contents")];
-    if cfg!(windows) {
+    if crate::platform::is_windows() {
         deveco_roots.push(PathBuf::from("C:/Program Files/Huawei/DevEco Studio"));
         if let Some(l) = std::env::var_os("LOCALAPPDATA") {
             deveco_roots.push(std::path::Path::new(&l).join("Huawei/DevEcoStudio"));
