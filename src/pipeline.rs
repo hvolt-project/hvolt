@@ -8,41 +8,33 @@ use crate::config::AppConfig;
 use crate::sdk::SdkEnv;
 
 /// Shared: assemble → detect SDK → strip signing → hvigorw.
-fn assemble_and_build(project_dir: &Path) -> (AppConfig, SdkEnv) {
+///
+/// Returns the failure instead of exiting: a library-shaped pipeline stays composable and its
+/// error paths stay assertable. Callers decide the exit code.
+fn assemble_and_build(project_dir: &Path) -> Result<(AppConfig, SdkEnv), String> {
     assemble::assemble(project_dir);
 
     let root_toml = project_dir.join("hvolt.toml");
-    let app_config = AppConfig::from_file(&root_toml).unwrap_or_else(|e| {
-        eprintln!("Error: {}", e);
-        std::process::exit(1);
-    });
+    let app_config = AppConfig::from_file(&root_toml)?;
 
     let sdk_env = crate::sdk::detect(app_config.app.sdk_path.as_deref().unwrap_or(""))
-        .unwrap_or_else(|e| {
-            eprintln!("  SDK not available: {}", e);
-            std::process::exit(1);
-        });
+        .map_err(|e| format!("SDK not available: {}", e))?;
 
     println!("  SDK detected: {}", sdk_env.ohos_sdk.display());
     build_hvigor::strip_signing_config(project_dir);
     let build_dir = project_dir.join("build");
-    build_hvigor::run_ohpm_install(&sdk_env, &build_dir).unwrap_or_else(|e| {
-        eprintln!("✗ ohpm install failed: {}", e);
-        std::process::exit(1);
-    });
-    build_hvigor::run_assemble(&sdk_env, &build_dir).unwrap_or_else(|e| {
-        eprintln!("✗ Build failed: {}", e);
-        std::process::exit(1);
-    });
+    build_hvigor::run_ohpm_install(&sdk_env, &build_dir)
+        .map_err(|e| format!("ohpm install failed: {}", e))?;
+    build_hvigor::run_assemble(&sdk_env, &build_dir).map_err(|e| format!("Build failed: {}", e))?;
     println!("✓ Build succeeded");
 
-    (app_config, sdk_env)
+    Ok((app_config, sdk_env))
 }
 
 /// Build + sign only (no push). Used by `hvolt build`.
 /// Err is returned (caller must propagate exit code) — signing failure is a failure.
 pub fn build_and_sign(project_dir: &Path) -> Result<(), String> {
-    let (app_config, sdk_env) = assemble_and_build(project_dir);
+    let (app_config, sdk_env) = assemble_and_build(project_dir)?;
 
     let Some(signing) = app_config.app.signing_for("default") else {
         println!("  (no signing config, skipping sign)");
@@ -87,7 +79,10 @@ pub(crate) fn report_push_failure(e: String) -> ! {
 }
 
 pub fn run(project_dir: &Path, device: Option<&str>) {
-    let (app_config, sdk_env) = assemble_and_build(project_dir);
+    let (app_config, sdk_env) = assemble_and_build(project_dir).unwrap_or_else(|e| {
+        eprintln!("✗ {}", e);
+        std::process::exit(1);
+    });
 
     let signing = app_config.app.signing_for("default").unwrap_or_else(|| {
         eprintln!("✗ No signing config. Run `hvolt sign` first.");
@@ -123,7 +118,7 @@ pub fn run(project_dir: &Path, device: Option<&str>) {
 }
 
 /// Map known hdc install error codes to readable hints.
-fn explain_install_error(output: &str) -> String {
+pub(crate) fn explain_install_error(output: &str) -> String {
     // Extract the [Fail] line(s) — they contain the actual error
     let fail_lines: Vec<&str> = output.lines().filter(|l| l.contains("[Fail]")).collect();
 
@@ -312,4 +307,53 @@ pub fn find_signed_hap(project_dir: &std::path::Path) -> Result<std::path::PathB
         .into_iter()
         .next()
         .ok_or_else(|| "No *-signed.hap in output/ — run `hvolt build` first".to_string())
+}
+
+#[cfg(test)]
+mod install_error_tests {
+    use super::explain_install_error;
+
+    /// Signature problems must point at the command that fixes them.
+    #[test]
+    fn signature_errors_point_at_signing() {
+        assert!(
+            explain_install_error("error: INSTALL_FAILED_SIGNATURE_ERROR").contains("hvolt sign")
+        );
+        assert!(explain_install_error("error: INSTALL_FAILED_NO_SIGNATURE").contains("not signed"));
+    }
+
+    /// A downgrade is fixed by bumping versionCode, so the hint must name it.
+    #[test]
+    fn version_downgrade_names_version_code() {
+        let msg = explain_install_error("error: INSTALL_FAILED_VERSION_DOWNGRADE");
+        assert!(msg.contains("versionCode"));
+    }
+
+    /// [Fail] lines carry the real reason and are kept; unrelated progress noise is dropped.
+    #[test]
+    fn fail_lines_are_preserved_and_noise_dropped() {
+        let out = "[Fail]Error: failed to install bundle\nprogress: 40%\nerror: INSTALL_FAILED_INVALID_APK";
+        let msg = explain_install_error(out);
+        assert!(msg.contains("[Fail]Error: failed to install bundle"));
+        assert!(msg.contains("hvolt build"));
+        assert!(!msg.contains("progress: 40%"));
+    }
+
+    /// An unknown code is surfaced, but no hint is invented for it.
+    #[test]
+    fn unknown_codes_surface_without_a_hint() {
+        let msg = explain_install_error("error: INSTALL_SOMETHING_NEW");
+        assert!(msg.contains("INSTALL_SOMETHING_NEW"));
+        assert!(!msg.contains("Hint:"));
+    }
+
+    /// No code, no [Fail] line: pass the trimmed output through and never panic.
+    #[test]
+    fn unrecognised_output_is_passed_through() {
+        assert_eq!(
+            explain_install_error("  plain failure text  \n"),
+            "plain failure text"
+        );
+        assert_eq!(explain_install_error(""), "");
+    }
 }
