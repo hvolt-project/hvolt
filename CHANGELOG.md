@@ -7,6 +7,35 @@ versions may change the CLI surface.
 
 ## [Unreleased]
 
+## [26.0.0-6] — 2026-10-26
+
+### Fixed
+
+- Building a project with several native modules no longer drops all but the last one: their C++
+  sources were flat-copied into a single `src/main/cpp/`, so same-named files (`napi_init.cpp`,
+  `CMakeLists.txt`) overwrote each other and only the last module compiled. Each native module now
+  mirrors into its own `src/main/cpp/<module>/` subdirectory, wired together by a generated
+  top-level `CMakeLists.txt` (`add_subdirectory` in declaration order; an existing module-owned
+  file is left untouched).
+- Headers (`.h`/`.hpp`) are now carried into the build tree with the C++ sources; they were
+  skipped entirely, so any native module split across `.h`/`.cpp` failed to compile.
+- `hvolt build` no longer fails with hvigor 00303208 "Unable to find 'sdk.dir'" when the SDK is
+  only set via `DEVECO_SDK_HOME`: `run_assemble` writes `local.properties` (`sdk.dir=`), as DevEco
+  Studio does.
+- The hvigor wrapper no longer fails resolving `@ohos/hvigor-ohos-plugin` (`ERR_PNPM_FETCH_404`
+  — the plugin is not on the public registry): the declared dependency is rebound to the vendored
+  copy shipped with hvolt (a `file:` dependency, forward-slash paths on Windows too).
+- Shared/HSP/HAR `oh-package.json5` `main` now resolves from `src/main/`, where the entry file is
+  actually mirrored; the old bare `Index.ets` pointed at a file that never existed.
+
+### Changed
+
+- `module.json5` for entry modules now emits `isolationMode: isolationFirst`.
+- The SDK platform version and the hvigor plugin version each have a single source of truth in the
+  code, with a drift-guard test (`hvolt --version` stamps the same platform version the config
+  defaults to; the generated hvigor-config declares the plugin version the tool is built against).
+- Internal seams (signingConfigs scan, config defaults) extracted for testability — no CLI change.
+
 ## [26.0.0-1] — 2026-10-19
 
 ### Added
