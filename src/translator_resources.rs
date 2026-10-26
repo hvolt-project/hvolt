@@ -9,6 +9,33 @@ use std::path::Path;
 use crate::translator::with_ets_suffix;
 use serde_json::Value;
 
+/// Which files count as a native module's sources when mirroring into a project.
+///
+/// Headers used to be skipped entirely, so any module split across .h/.cpp silently
+/// failed to compile after translation; CMakeLists.txt must travel with the sources.
+pub fn is_native_source_file(name: &str) -> bool {
+    name.ends_with(".cpp")
+        || name.ends_with(".c")
+        || name.ends_with(".cc")
+        || name.ends_with(".h")
+        || name.ends_with(".hpp")
+        || name == "CMakeLists.txt"
+}
+
+/// Top-level CMakeLists.txt that wires each native module subdirectory in.
+///
+/// Every native module gets its own `src/main/cpp/<module>/` directory (a flat copy made
+/// same-named files like `napi_init.cpp` or `CMakeLists.txt` overwrite each other), so the
+/// module root needs a CMakeLists that `add_subdirectory`s them in order.
+pub fn native_cmake_lists(native_names: &[&str]) -> String {
+    let mut body =
+        String::from("cmake_minimum_required(VERSION 3.5.0)\nproject(emustack_native)\n\n");
+    for n in native_names {
+        body.push_str(&format!("add_subdirectory({})\n", n));
+    }
+    body
+}
+
 /// Copy all files in src/ to dest/ (non-recursive).
 pub fn copy_dir_contents(src: &Path, dest: &Path) {
     if !src.exists() {
@@ -579,5 +606,74 @@ mod incremental_mirror_tests {
 
         assert!(!dest.join("Gone.ets").exists());
         let _ = fs::remove_dir_all(&base);
+    }
+}
+
+#[cfg(test)]
+mod native_source_tests {
+    use super::{is_native_source_file, native_cmake_lists};
+
+    /// The mirror must carry every extension a native module actually compiles: headers used
+    /// to be skipped, so any module split across .h/.cpp silently failed to build.
+    #[test]
+    fn headers_and_sources_are_native_files() {
+        for name in [
+            "napi_init.cpp",
+            "native.c",
+            "bridge.cc",
+            "header.h",
+            "header.hpp",
+            "CMakeLists.txt",
+        ] {
+            assert!(is_native_source_file(name), "{} should be mirrored", name);
+        }
+    }
+
+    /// Non-source artifacts (build outputs, docs, stray files) must not land in the cpp dir.
+    #[test]
+    fn non_sources_are_not_native_files() {
+        for name in [
+            "README.md",
+            "libfoo.so",
+            "foo.o",
+            "build.ninja",
+            "something.txt",
+            "CMakeLists.txt.bak",
+        ] {
+            assert!(
+                !is_native_source_file(name),
+                "{} should not be mirrored",
+                name
+            );
+        }
+    }
+
+    /// Each native module gets its own subdirectory; the top-level CMakeLists must wire every
+    /// one of them in, in declaration order.
+    #[test]
+    fn top_level_cmake_lists_wires_every_module() {
+        let out = native_cmake_lists(&["box64", "terminal", "gom"]);
+        assert!(
+            out.starts_with("cmake_minimum_required(VERSION 3.5.0)\nproject(emustack_native)\n\n")
+        );
+        assert!(out.contains("add_subdirectory(box64)\n"), "{}", out);
+        assert!(out.contains("add_subdirectory(terminal)\n"), "{}", out);
+        assert!(out.contains("add_subdirectory(gom)\n"), "{}", out);
+        // The old flat copy wrote a single CMakeLists per module; the aggregator must not
+        // reference itself or repeat a subdirectory.
+        assert!(
+            !out.contains("add_subdirectory(emustack_native)"),
+            "{}",
+            out
+        );
+        assert_eq!(out.matches("add_subdirectory(").count(), 3, "{}", out);
+    }
+
+    /// An empty native set produces no aggregator (callers skip the write entirely then).
+    #[test]
+    fn empty_native_set_yields_just_the_header() {
+        let out = native_cmake_lists(&[]);
+        assert!(out.contains("project(emustack_native)"), "{}", out);
+        assert!(!out.contains("add_subdirectory"), "{}", out);
     }
 }

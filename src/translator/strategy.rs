@@ -137,7 +137,9 @@ impl VersionStrategy for V26Strategy {
     fn hvigor_config(&self) -> &str {
         r#"{
   "modelVersion": "26.0.0",
-  "dependencies": {},
+  "dependencies": {
+    "@ohos/hvigor-ohos-plugin": "6.26.1"
+  },
   "execution": {},
   "logging": {},
   "debugging": {},
@@ -374,6 +376,14 @@ impl VersionStrategy for V26Strategy {
                 "    \"deliveryWithInstall\": {},\n    \"installationFree\": {}",
                 with_install, install_free
             )
+        };
+
+        // isolationMode only applies to HAPs; emit for entry modules so the
+        // probe can test whether native child processes become available.
+        let isolation_section = if is_entry {
+            "    \"isolationMode\": \"isolationFirst\",\n".to_string()
+        } else {
+            String::new()
         };
 
         let main_element_name = super::normalize_ets(&m.entry);
@@ -634,7 +644,7 @@ impl VersionStrategy for V26Strategy {
     "deviceTypes": [
 {}
     ],
-{}{}{}{}
+{}{}{}{}{}
   }}
 }}"#,
             m.name,
@@ -643,6 +653,7 @@ impl VersionStrategy for V26Strategy {
             pages_section,
             src_entry_line,
             device_types_json,
+            isolation_section,
             install_section,
             abilities_json,
             extension_json,
@@ -744,7 +755,10 @@ impl VersionStrategy for V26Strategy {
             || module.module_type == "shared"
             || module.module_type == "har"
         {
-            format!("\"main\": \"{}\",", super::with_ets_suffix(&module.entry))
+            format!(
+                "\"main\": \"src/main/{}\",",
+                super::with_ets_suffix(&module.entry)
+            )
         } else {
             r#""main": "","#.to_string()
         };
@@ -1100,6 +1114,47 @@ mod module_output_tests {
         let out = V26Strategy::new(26).generate_module_json5(&cfg, &app);
         assert_eq!(out.matches("\"srcEntry\"").count(), 1, "{}", out);
     }
+
+    /// Entry (HAP) modules run in isolation mode so the probe can verify native child
+    /// processes; the flag is only legal on HAPs, not on shared/HSP/HAR packages.
+    #[test]
+    fn entry_module_declares_isolation_mode() {
+        let app = AppConfig::default_for("aigis");
+        let cfg = module_named("entry");
+        let out = V26Strategy::new(26).generate_module_json5(&cfg, &app);
+        assert!(
+            out.contains("\"isolationMode\": \"isolationFirst\""),
+            "{}",
+            out
+        );
+    }
+
+    /// Shared packages must not carry isolationMode, no matter which variant.
+    #[test]
+    fn shared_variants_omit_isolation_mode() {
+        for mtype in ["shared", "har", "hsp"] {
+            let mut cfg = module_named("entry");
+            cfg.module.module_type = mtype.to_string();
+            cfg.module.entry = "Index.ets".to_string();
+            let out =
+                V26Strategy::new(26).generate_module_json5(&cfg, &AppConfig::default_for("x"));
+            assert!(!out.contains("isolationMode"), "{} {}", mtype, out);
+        }
+    }
+
+    /// The generated hvigor-config declares the exact plugin version the tool is built
+    /// against; a drift here breaks every build from scratch (pnpm 404 on the public
+    /// registry is why run_assemble rebinds it to the vendored copy).
+    #[test]
+    fn hvigor_config_declares_the_bundled_plugin_version() {
+        let strategy = V26Strategy::new(26);
+        let out = strategy.hvigor_config();
+        assert!(
+            out.contains(r#""@ohos/hvigor-ohos-plugin": "6.26.1""#),
+            "{}",
+            out
+        );
+    }
 }
 
 #[cfg(test)]
@@ -1437,6 +1492,10 @@ mod shared_module_tests {
     }
 
     /// `main` names the module's own entry file instead of a hardcoded index.ets.
+    ///
+    /// The entry lives at `src/main/` (assemble mirrors it there, beside module.json5), so
+    /// the field carries the `src/main/` prefix; a bare `Index.ets` resolved from the module
+    /// root pointed at a file that never existed (case included, for uppercase-named entries).
     #[test]
     fn shared_module_main_names_its_entry() {
         let cfg = shared_module("Index.ets");
@@ -1445,7 +1504,41 @@ mod shared_module_tests {
             &AppConfig::default_for("x"),
             &[],
         );
-        assert!(out.contains("\"main\": \"Index.ets\""), "{}", out);
+        assert!(out.contains("\"main\": \"src/main/Index.ets\""), "{}", out);
+    }
+
+    /// The `main` prefix applies to every shared-flavoured module type, not just hsp.
+    #[test]
+    fn shared_variants_main_resolves_from_src_main() {
+        for mtype in ["shared", "har", "hsp"] {
+            let mut cfg = shared_module("Main.ets");
+            cfg.module.module_type = mtype.to_string();
+            let out = V26Strategy::new(26).generate_module_oh_package(
+                &cfg,
+                &AppConfig::default_for("x"),
+                &[],
+            );
+            assert!(
+                out.contains("\"main\": \"src/main/Main.ets\""),
+                "{} {}",
+                mtype,
+                out
+            );
+        }
+    }
+
+    /// An entry module is not a shared package; its `main` stays empty (DevEco omits a
+    /// meaningful main for HAPs — the entry ability is reached via abilities[].srcEntry).
+    #[test]
+    fn entry_module_has_no_main() {
+        let cfg = ModuleConfig::default_entry();
+        let out = V26Strategy::new(26).generate_module_oh_package(
+            &cfg,
+            &AppConfig::default_for("x"),
+            &[],
+        );
+        assert!(out.contains("\"main\": \"\""), "{}", out);
+        assert!(!out.contains("\"main\": \"src/"), "{}", out);
     }
 }
 
