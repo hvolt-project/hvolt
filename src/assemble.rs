@@ -252,29 +252,51 @@ fn mirror_source_files(
             }
         }
     }
-    // Mirror native module C++ sources into each module's src/main/cpp/
+    // Mirror native module C++ sources into src/main/cpp/<module>/ (one dir per module).
+    // Kept in sync with the full-translate path in translator::mod.
     for (dir_name, _cfg) in native_modules {
         if let Some(dep) = _app_config.dependencies.get(dir_name) {
             let native_src = root.join(&dep.path);
-            let cpp_dest = build_dir.join("src/main/cpp");
             if native_src.exists() {
-                fs::create_dir_all(&cpp_dest).expect("create cpp dir");
-                if let Ok(entries) = fs::read_dir(&native_src) {
-                    for entry in entries.flatten() {
-                        let path = entry.path();
-                        if path.is_file() {
-                            let name = entry.file_name();
-                            let name_str = name.to_string_lossy();
-                            if name_str.ends_with(".cpp")
-                                || name_str.ends_with(".c")
-                                || name_str.ends_with(".cc")
-                                || name_str == "CMakeLists.txt"
-                            {
-                                translator_resources::hardlink_or_copy(&path, &cpp_dest.join(name));
+                for (dir_name_m, _module) in modules {
+                    let cpp_dest = build_dir
+                        .join(dir_name_m)
+                        .join("src/main/cpp")
+                        .join(dir_name);
+                    fs::create_dir_all(&cpp_dest).expect("create cpp dir");
+                    if let Ok(entries) = fs::read_dir(&native_src) {
+                        for entry in entries.flatten() {
+                            let path = entry.path();
+                            if path.is_file() {
+                                let name = entry.file_name();
+                                let name_str = name.to_string_lossy();
+                                if translator_resources::is_native_source_file(&name_str) {
+                                    translator_resources::hardlink_or_copy(
+                                        &path,
+                                        &cpp_dest.join(name),
+                                    );
+                                }
                             }
                         }
                     }
                 }
+            }
+        }
+    }
+
+    // Top-level CMakeLists per module, wiring the native subdirectories together.
+    for (dir_name_m, _module) in modules {
+        let cpp_root = build_dir.join(dir_name_m).join("src/main/cpp");
+        let native_names: Vec<&str> = native_modules.iter().map(|(n, _)| n.as_str()).collect();
+        if native_names.is_empty() {
+            continue;
+        }
+        fs::create_dir_all(&cpp_root).expect("create cpp root");
+        let body = translator_resources::native_cmake_lists(&native_names);
+        let top = cpp_root.join("CMakeLists.txt");
+        if !top.exists() {
+            if let Err(e) = fs::write(&top, body) {
+                eprintln!("Warning: write top-level CMakeLists.txt: {}", e);
             }
         }
     }
@@ -306,5 +328,134 @@ mod rebuild_tests {
     #[test]
     fn unreadable_manifest_forces_full() {
         assert!(needs_full_rebuild(true, None, 42));
+    }
+}
+
+#[cfg(test)]
+mod native_mirror_tests {
+    use super::mirror_source_files;
+    use crate::config::{AppConfig, Dependency, ModuleConfig, NativeModuleConfig};
+    use std::collections::BTreeMap;
+    use std::fs;
+
+    fn native(name: &str) -> (String, NativeModuleConfig) {
+        (
+            name.to_string(),
+            NativeModuleConfig {
+                name: name.to_string(),
+                module_type: "native".to_string(),
+                types: "Index.d.ts".to_string(),
+                version: "1.0.0".to_string(),
+                version_code: 0,
+                build_version: String::new(),
+                description: String::new(),
+            },
+        )
+    }
+
+    /// Two native modules with the same source filenames must land in separate
+    /// src/main/cpp/<module>/ directories. The old flat copy made napi_init.cpp and
+    /// CMakeLists.txt overwrite each other, so only the last module compiled.
+    #[test]
+    fn same_named_sources_do_not_overwrite_across_modules() {
+        let base = std::env::temp_dir().join(format!("hvolt-native-same-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&base);
+        let root = base.join("root");
+        let build = base.join("build");
+
+        // Two native sources, each with a same-named napi_init.cpp plus a header.
+        for name in ["box64", "gom"] {
+            let src = root.join("native").join(name);
+            fs::create_dir_all(&src).unwrap();
+            fs::write(src.join("napi_init.cpp"), format!("// {} impl", name)).unwrap();
+            fs::write(src.join("bridge.h"), format!("// {} header", name)).unwrap();
+            fs::write(src.join("README.md"), "not a source").unwrap();
+        }
+
+        let mut deps = BTreeMap::new();
+        deps.insert(
+            "box64".to_string(),
+            Dependency {
+                path: "native/box64".to_string(),
+                version: "1.0.0".to_string(),
+            },
+        );
+        deps.insert(
+            "gom".to_string(),
+            Dependency {
+                path: "native/gom".to_string(),
+                version: "1.0.0".to_string(),
+            },
+        );
+        let app = AppConfig {
+            app: AppConfig::default_for("x").app,
+            dependencies: deps,
+        };
+        let modules = vec![("entry".to_string(), ModuleConfig::default_entry())];
+        let native_modules = vec![native("box64"), native("gom")];
+
+        mirror_source_files(&root, &build, &app, &modules, &native_modules);
+
+        let cpp_root = build.join("entry/src/main/cpp");
+        // Both modules survive: the file that used to be overwritten exists in both dirs
+        // with each module's own content.
+        assert_eq!(
+            fs::read_to_string(cpp_root.join("box64/napi_init.cpp")).unwrap(),
+            "// box64 impl"
+        );
+        assert_eq!(
+            fs::read_to_string(cpp_root.join("gom/napi_init.cpp")).unwrap(),
+            "// gom impl"
+        );
+        // Headers travel with their module; non-sources are not mirrored.
+        assert!(cpp_root.join("box64/bridge.h").exists());
+        assert!(cpp_root.join("gom/bridge.h").exists());
+        assert!(!cpp_root.join("box64/README.md").exists());
+        // Top-level CMakeLists wires both subdirectories.
+        let top = fs::read_to_string(cpp_root.join("CMakeLists.txt")).unwrap();
+        assert!(top.contains("add_subdirectory(box64)"), "{}", top);
+        assert!(top.contains("add_subdirectory(gom)"), "{}", top);
+
+        let _ = fs::remove_dir_all(&base);
+    }
+
+    /// An existing top-level CMakeLists (module-owned native tree) is left alone.
+    #[test]
+    fn existing_top_cmake_lists_is_not_overwritten() {
+        let base = std::env::temp_dir().join(format!("hvolt-native-owned-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&base);
+        let root = base.join("root");
+        let build = base.join("build");
+        let src = root.join("native").join("box64");
+        fs::create_dir_all(&src).unwrap();
+        fs::write(src.join("napi_init.cpp"), "// x").unwrap();
+
+        let mut deps = BTreeMap::new();
+        deps.insert(
+            "box64".to_string(),
+            Dependency {
+                path: "native/box64".to_string(),
+                version: "1.0.0".to_string(),
+            },
+        );
+        let app = AppConfig {
+            app: AppConfig::default_for("x").app,
+            dependencies: deps,
+        };
+        let modules = vec![("entry".to_string(), ModuleConfig::default_entry())];
+
+        // A module-owned cpp/ tree already declares its own aggregator.
+        let cpp_root = build.join("entry/src/main/cpp");
+        fs::create_dir_all(&cpp_root).unwrap();
+        fs::write(cpp_root.join("CMakeLists.txt"), "project(owned)\n").unwrap();
+
+        mirror_source_files(&root, &build, &app, &modules, &[native("box64")]);
+
+        assert_eq!(
+            fs::read_to_string(cpp_root.join("CMakeLists.txt")).unwrap(),
+            "project(owned)\n"
+        );
+
+        let _ = fs::remove_dir_all(&base);
     }
 }

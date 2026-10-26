@@ -253,8 +253,60 @@ pub fn first_module(build_dir: &Path) -> Result<String, String> {
     Ok(seg[vs..vs + ve].to_string())
 }
 
+/// Content for `local.properties` (sdk.dir). hvigor resolves the SDK from this file as well
+/// as DEVECO_SDK_HOME; when only the env var is set the module tasks abort with
+/// 00303208 "Unable to find 'sdk.dir'". DevEco Studio writes the same file.
+pub(crate) fn local_properties_content(sdk_dir: &str) -> String {
+    format!("sdk.dir={}\n", sdk_dir)
+}
+
+/// hvigor-config.json5 that binds the declared plugin dependency to the vendored copy.
+///
+/// The hvigor wrapper resolves plugin dependencies through pnpm; @ohos/hvigor-ohos-plugin
+/// is not on the public registry (ERR_PNPM_FETCH_404), so the declared dependency in
+/// `strategy::hvigor_config` gets rebound to `file:<vendored>` here at build time.
+pub(crate) fn vendored_plugin_config(dep: &str) -> String {
+    // pnpm file: deps need forward slashes even on Windows; a raw `C:\...` path would be
+    // parsed as an escape sequence (or left verbatim and fail to resolve).
+    let dep = dep.replace('\\', "/");
+    format!(
+        r#"{{
+  "modelVersion": "26.0.0",
+  "dependencies": {{
+    "@ohos/hvigor-ohos-plugin": "file:{dep}"
+  }},
+  "execution": {{}},
+  "logging": {{}},
+  "debugging": {{}},
+  "nodeOptions": {{}}
+}}
+"#
+    )
+}
+
 pub fn run_assemble(sdk: &SdkEnv, project_dir: &Path) -> Result<(), String> {
     link_hvigor_node_modules(project_dir)?;
+
+    // hvigor resolves the SDK from local.properties (sdk.dir) as well as
+    // DEVECO_SDK_HOME; when only the env var is set the module tasks abort
+    // with 00303208 "Unable to find 'sdk.dir'". DevEco writes this file too.
+    let local_props = project_dir.join("local.properties");
+    let sdk_dir_disp = sdk.ohos_sdk.display().to_string();
+    if let Err(e) = std::fs::write(&local_props, local_properties_content(&sdk_dir_disp)) {
+        eprintln!("Warning: write {} failed: {}", local_props.display(), e);
+    }
+
+    // The wrapper resolves plugin dependencies through pnpm. @ohos/hvigor-ohos-plugin
+    // is not on the public registry (ERR_PNPM_FETCH_404), so bind the declared
+    // dependency to the vendored copy that ships with hvolt instead.
+    let vendored = crate::tools::hvigor_dir().join("node_modules/@ohos/hvigor-ohos-plugin");
+    if vendored.exists() {
+        let cfg = vendored_plugin_config(&vendored.display().to_string());
+        let cfg_path = project_dir.join("hvigor/hvigor-config.json5");
+        if let Err(e) = std::fs::write(&cfg_path, cfg) {
+            eprintln!("Warning: write {} failed: {}", cfg_path.display(), e);
+        }
+    }
 
     let mut cmd = Command::new(&sdk.hvigorw);
     cmd.arg("assembleApp")
@@ -343,5 +395,48 @@ mod strip_tests {
     fn missing_key_or_unbalanced_array_is_left_alone() {
         assert!(strip_signing_configs(r#"{"app": {}}"#).is_none());
         assert!(strip_signing_configs(r#"{"signingConfigs": [1, 2"#).is_none());
+    }
+}
+
+#[cfg(test)]
+mod assemble_env_tests {
+    use super::{local_properties_content, vendored_plugin_config};
+
+    /// hvigor wants a plain `sdk.dir=` line; the trailing newline is conventional.
+    #[test]
+    fn local_properties_sets_sdk_dir() {
+        assert_eq!(
+            local_properties_content("/opt/harmony/sdk/26.0.0.38"),
+            "sdk.dir=/opt/harmony/sdk/26.0.0.38\n"
+        );
+    }
+
+    /// The vendored rebind must keep the declared modelVersion and target exactly the
+    /// hvolt-shipped copy, with a forward-slash path (pnpm file: deps on Windows too).
+    #[test]
+    fn vendored_config_rebinds_the_plugin_dependency() {
+        let out =
+            vendored_plugin_config("/home/u/.hvolt/tools/node_modules/@ohos/hvigor-ohos-plugin");
+        assert!(out.contains(r#""modelVersion": "26.0.0""#), "{}", out);
+        assert!(
+            out.contains(
+                r#""@ohos/hvigor-ohos-plugin": "file:/home/u/.hvolt/tools/node_modules/@ohos/hvigor-ohos-plugin""#
+            ),
+            "{}",
+            out
+        );
+    }
+
+    /// A backslash path (Windows) must be normalised to forward slashes before interpolation.
+    #[test]
+    fn vendored_config_normalises_windows_paths() {
+        let out = vendored_plugin_config(
+            r"C:\Users\u\.hvolt\tools\node_modules\@ohos\hvigor-ohos-plugin",
+        );
+        assert!(
+            out.contains("file:C:/Users/u/.hvolt/tools/node_modules/@ohos/hvigor-ohos-plugin"),
+            "{}",
+            out
+        );
     }
 }

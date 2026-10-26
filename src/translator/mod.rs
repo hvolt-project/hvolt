@@ -341,37 +341,29 @@ pub fn full_translate(
         }
     }
 
-    // Handle native deps: copy C++ sources to src/main/cpp/ + generate types bridge
+    // Handle native deps: copy C++ sources to src/main/cpp/<native>/ + generate types bridge
+    //
+    // Each native module gets its OWN subdirectory. Flat-copying every module into one
+    // src/main/cpp/ made same-named files (napi_init.cpp, CMakeLists.txt) overwrite each
+    // other, so only the last module survived and the rest silently never compiled.
     for (dir_name, native_cfg) in native_modules {
         let dep_path = dep_path_by_name(app_config, dir_name);
         let native_src_dir = project_root.join(&dep_path);
 
-        // Copy C++ source files into each module's src/main/cpp/
         for (dir_name_m, _module) in modules {
-            let cpp_dir = build_dir.join(dir_name_m).join("src/main/cpp");
+            let cpp_root = build_dir.join(dir_name_m).join("src/main/cpp");
+            let cpp_dir = cpp_root.join(dir_name);
             if !cpp_dir.exists() {
                 fs::create_dir_all(&cpp_dir).expect("create cpp dir");
             }
-            // Copy CMakeLists.txt
-            let cmake_src = native_src_dir.join("CMakeLists.txt");
-            let cmake_dst = cpp_dir.join("CMakeLists.txt");
-            if cmake_src.exists() && !cmake_dst.exists() {
-                if let Err(e) = fs::copy(&cmake_src, &cmake_dst) {
-                    eprintln!(
-                        "Warning: copy CMakeLists.txt {} → {}: {}",
-                        cmake_src.display(),
-                        cmake_dst.display(),
-                        e
-                    );
-                }
-            }
-            // Copy all .cpp, .c, .cc files
+            // Copy sources + headers. Headers were previously skipped entirely, so any
+            // module split across .h/.cpp failed to compile.
             if let Ok(entries) = fs::read_dir(&native_src_dir) {
                 for entry in entries.flatten() {
                     let path = entry.path();
                     if path.is_file() {
                         let name = path.file_name().unwrap().to_string_lossy().to_string();
-                        if name.ends_with(".cpp") || name.ends_with(".c") || name.ends_with(".cc") {
+                        if crate::translator_resources::is_native_source_file(&name) {
                             let dst = cpp_dir.join(&name);
                             if !dst.exists() {
                                 let _ = fs::copy(&path, &dst);
@@ -381,7 +373,6 @@ pub fn full_translate(
                 }
             }
         }
-
         // Generate types/ bridge at src/main/cpp/types/<dir_name>/
         for (dir_name_m, _module) in modules {
             let types_dir = build_dir
@@ -417,6 +408,26 @@ pub fn full_translate(
             }
         }
     }
+
+    // Top-level CMakeLists per module: wires the subdirectories together, so each native
+    // module keeps its own add_library and never collides.
+    for (dir_name_m, _module) in modules {
+        let cpp_root = build_dir.join(dir_name_m).join("src/main/cpp");
+        let native_names: Vec<&str> = native_modules.iter().map(|(n, _)| n.as_str()).collect();
+        if native_names.is_empty() {
+            continue;
+        }
+        fs::create_dir_all(&cpp_root).expect("create cpp root");
+        let body = crate::translator_resources::native_cmake_lists(&native_names);
+        let top = cpp_root.join("CMakeLists.txt");
+        // Only write when absent: a module-owned cpp/ tree (inline_cpp) owns this file.
+        if !top.exists() {
+            if let Err(e) = fs::write(&top, body) {
+                eprintln!("Warning: write top-level CMakeLists.txt: {}", e);
+            }
+        }
+    }
+
     // Collect native module directory names to skip during ETS file copy
     let native_skip_dirs: Vec<String> = native_modules
         .iter()
