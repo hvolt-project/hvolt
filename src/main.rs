@@ -21,6 +21,7 @@ mod scaffold;
 mod sdk;
 mod sign;
 mod sign_local;
+mod skill;
 mod target;
 mod tools;
 mod translator;
@@ -489,6 +490,24 @@ fn main() {
                     eprintln!("✗ {}", e);
                     std::process::exit(1);
                 });
+            }
+        },
+        cli::Command::Skill { action } => match action {
+            cli::SkillAction::List { plain, json } => {
+                if plain {
+                    skill::print_list_plain();
+                } else if json {
+                    skill::print_list_json();
+                } else {
+                    skill::print_list();
+                }
+            }
+            cli::SkillAction::Show { name } => {
+                if !skill::print_skill(&name) {
+                    eprintln!("✗ unknown skill: {}", name);
+                    eprintln!("  available: {}", skill::ids().join(", "));
+                    std::process::exit(1);
+                }
             }
         },
     }
