@@ -7,6 +7,27 @@ versions may change the CLI surface.
 
 ## [Unreleased]
 
+## [26.0.0-7] — 2026-10-27
+
+### Added
+
+- `hvolt skill` — the binary embeds its own documentation (usage/architecture guide, code
+  conventions, cross-host device flow) so any machine with hvolt has the docs without a clone
+  or network. `hvolt skill list` (with `--plain` / `--json`), `hvolt skill show <id>`, a content
+  hash so the same version with different docs is distinguishable, and SIGPIPE-safe output for
+  agent consumers. The embedded docs are a community-sanitised set: no private hosts, IPs, user
+  names or device identifiers (enforced by a leak-scan test).
+
+### Fixed
+
+- Incremental rebuild (`hvolt assemble` mirror path) now propagates native source changes into
+  the build tree. Previously the mirror skipped files that already existed: edited `.cpp`/`.h`
+  never reached `src/main/cpp/<module>/`, `Index.d.ts` edits never reached the types bridge,
+  and deleted sources stayed in the build tree — so "rebuild" silently produced yesterday's
+  package until `build/` was wiped. The mirror and full-translate paths now share the native
+  copy, types-bridge and stale-prune helpers; the top-level CMakeLists aggregator also rewrites
+  itself when the native module list changes (module-owned inline_cpp trees stay untouched).
+
 ## [26.0.0-6] — 2026-10-26
 
 ### Fixed

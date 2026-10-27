@@ -1,6 +1,6 @@
 [package]
 name = "hvolt"
-version = "26.0.0-6"
+version = "26.0.0-7"
 edition = "2021"
 rust-version = "1.85"
 description = "HarmonyOS community build tool — flat project structure, minimal config"
