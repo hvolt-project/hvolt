@@ -57,7 +57,14 @@ pub fn resolve(cli_device: Option<&str>) -> Result<(String, PathBuf), String> {
             match lines.len() {
                 0 => Err("no install target: connect a device or run `hvolt device connect <ip:port>`".into()),
                 1 => Ok((lines.into_iter().next().unwrap(), hdc)),
-                n => Err(format!("{} devices connected — pick one with `hvolt device connect <serial>` or pass the address", n)),
+                n => Err(format!(
+                    "{} devices connected — refusing ambiguous target.\n\
+                     \x20 Pick one explicitly:  hvolt device connect <serial>   (persistent)\n\
+                     \x20 or pass a device per command:  hvolt push -d <serial>  /  hvolt run -d <serial>\n\
+                     \x20 connected: {}",
+                    n,
+                    lines.join(", ")
+                )),
             }
         }
     }
