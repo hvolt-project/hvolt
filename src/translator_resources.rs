@@ -72,6 +72,78 @@ pub fn write_native_types_bridge(
     }
 }
 
+/// Mirror a module's `libs/` into the build tree, warning about files hvigor will drop.
+///
+/// hvigor's ProcessLibs only packs `*.so` from the module-root `libs/`. Everything else –
+/// scripts, firmware blobs, probe binaries without the `.so` extension – is silently left
+/// out of the HAP while the build still reports success. That silence is the trap: a build
+/// that "worked" ships a package without the file. This function copies the whole tree
+/// (callers may need non-.so inputs for their own steps) and prints which files will not
+/// reach the package, so the mismatch is visible in the normal build output instead of
+/// buried in `.hvigor/report/`.
+///
+/// Returns `(packed_so_count, dropped_file_names)` for tests and callers.
+pub fn mirror_libs_with_warning(src: &Path, dest: &Path, member: &str) -> (usize, Vec<String>) {
+    if !src.is_dir() {
+        return (0, Vec::new());
+    }
+    println!(
+        "  libs: {} → {}/libs (packed: *.so only; else dropped by hvigor)",
+        src.display(),
+        member
+    );
+    // Walk recursively: libs/ trees are usually abi dirs (arm64-v8a/, x86_64/).
+    let mut dropped: Vec<String> = Vec::new();
+    let mut packed: usize = 0;
+    walk_libs(src, dest, &mut dropped, &mut packed);
+    if !dropped.is_empty() {
+        for f in &dropped {
+            eprintln!(
+                "  ⚠ libs/{}: not *.so — hvigor ProcessLibs will NOT pack it (build succeeds anyway)",
+                f
+            );
+        }
+        eprintln!(
+            "  ⚠ {} file(s) in libs/ will be missing from the HAP; rename to *.so if they must ship",
+            dropped.len()
+        );
+    }
+    if packed == 0 && !dropped.is_empty() {
+        eprintln!("  ⚠ libs/ has no *.so at all — the package will contain nothing from libs/");
+    }
+    (packed, dropped)
+}
+
+/// Recursively copy `src` into `dest`, classifying files as packed (*.so) or dropped.
+/// Mirrors directory structure for both.
+fn walk_libs(src: &Path, dest: &Path, dropped: &mut Vec<String>, packed: &mut usize) {
+    if fs::create_dir_all(dest).is_err() {
+        return;
+    }
+    let Ok(entries) = fs::read_dir(src) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        let name = entry.file_name().to_string_lossy().to_string();
+        if path.is_dir() {
+            walk_libs(&path, &dest.join(&name), dropped, packed);
+            continue;
+        }
+        if !path.is_file() {
+            continue;
+        }
+        // Copy regardless of extension: caller may consume non-.so inputs locally; only the
+        // package step filters. Record what hvigor will drop so the build is honest about it.
+        hardlink_or_copy(&path, &dest.join(&name));
+        if name.ends_with(".so") {
+            *packed += 1;
+        } else {
+            dropped.push(name);
+        }
+    }
+}
+
 /// Remove destination native-source files whose source no longer exists.
 ///
 /// The mirror path used to only add/copy files; a source file deleted from the module left
@@ -741,5 +813,73 @@ mod native_source_tests {
         let out = native_cmake_lists(&[]);
         assert!(out.contains("project(emustack_native)"), "{}", out);
         assert!(!out.contains("add_subdirectory"), "{}", out);
+    }
+}
+
+#[cfg(test)]
+mod libs_warning_tests {
+    use super::mirror_libs_with_warning;
+    use std::fs;
+
+    /// Non-.so files are copied (so callers can consume them) but reported as dropped:
+    /// hvigor's ProcessLibs only packs *.so, and the old silent success hid missing content.
+    #[test]
+    fn non_so_files_are_reported_as_dropped() {
+        let base = std::env::temp_dir().join(format!("hvolt-libs-mix-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&base);
+        let src = base.join("src/libs");
+        fs::create_dir_all(src.join("arm64-v8a")).unwrap();
+        fs::write(src.join("arm64-v8a/libreal.so"), "so").unwrap();
+        fs::write(src.join("arm64-v8a/pt_probe.bin"), "probe").unwrap();
+        fs::write(src.join("arm64-v8a/fw.img"), "img").unwrap();
+        let dest = base.join("build/libs");
+
+        let (packed, dropped) = mirror_libs_with_warning(&src, &dest, "entry");
+
+        assert_eq!(packed, 1, "libreal.so should count as packed");
+        assert_eq!(dropped.len(), 2, "non-.so files should be reported");
+        assert!(
+            dropped.contains(&"pt_probe.bin".to_string()),
+            "{:?}",
+            dropped
+        );
+        assert!(dropped.contains(&"fw.img".to_string()), "{:?}", dropped);
+        // Files themselves are still mirrored (sub-abi dir structure preserved).
+        assert!(dest.join("arm64-v8a/libreal.so").exists());
+        assert!(dest.join("arm64-v8a/pt_probe.bin").exists());
+
+        let _ = fs::remove_dir_all(&base);
+    }
+
+    /// No *.so at all must surface prominently instead of a silent successful build.
+    #[test]
+    fn empty_so_set_still_mirrors_everything() {
+        let base = std::env::temp_dir().join(format!("hvolt-libs-empty-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&base);
+        let src = base.join("src/libs");
+        fs::create_dir_all(&src).unwrap();
+        fs::write(src.join("data.bin"), "x").unwrap();
+        let dest = base.join("build/libs");
+
+        let (packed, dropped) = mirror_libs_with_warning(&src, &dest, "entry");
+
+        assert_eq!(packed, 0);
+        assert_eq!(dropped, vec!["data.bin".to_string()]);
+        assert!(dest.join("data.bin").exists());
+
+        let _ = fs::remove_dir_all(&base);
+    }
+
+    /// Missing source dir is a no-op (no warning noise for modules without libs/).
+    #[test]
+    fn missing_libs_dir_is_a_noop() {
+        let base = std::env::temp_dir().join(format!("hvolt-libs-noop-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&base);
+        let src = base.join("src/libs"); // never created
+        let dest = base.join("build/libs");
+        let (packed, dropped) = mirror_libs_with_warning(&src, &dest, "entry");
+        assert_eq!(packed, 0);
+        assert!(dropped.is_empty());
+        let _ = fs::remove_dir_all(&base);
     }
 }
