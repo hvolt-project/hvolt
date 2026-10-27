@@ -254,7 +254,7 @@ fn mirror_source_files(
     }
     // Mirror native module C++ sources into src/main/cpp/<module>/ (one dir per module).
     // Kept in sync with the full-translate path in translator::mod.
-    for (dir_name, _cfg) in native_modules {
+    for (dir_name, native_cfg) in native_modules {
         if let Some(dep) = _app_config.dependencies.get(dir_name) {
             let native_src = root.join(&dep.path);
             if native_src.exists() {
@@ -264,6 +264,9 @@ fn mirror_source_files(
                         .join("src/main/cpp")
                         .join(dir_name);
                     fs::create_dir_all(&cpp_dest).expect("create cpp dir");
+                    // Sources that vanished from the module must vanish from the build tree
+                    // too — otherwise CMake keeps compiling a deleted .cpp until build/ is wiped.
+                    translator_resources::purge_stale_native_files(&native_src, &cpp_dest);
                     if let Ok(entries) = fs::read_dir(&native_src) {
                         for entry in entries.flatten() {
                             let path = entry.path();
@@ -279,6 +282,19 @@ fn mirror_source_files(
                             }
                         }
                     }
+                    // Types bridge: the incremental path used to skip it entirely, so edits
+                    // to a native module's Index.d.ts never reached the build tree.
+                    let types_dir = build_dir
+                        .join(dir_name_m)
+                        .join("src/main/cpp/types")
+                        .join(dir_name);
+                    translator_resources::write_native_types_bridge(
+                        &types_dir,
+                        &format!("{}.so", native_cfg.name),
+                        &native_cfg.version,
+                        &native_cfg.description,
+                        &native_src.join(&native_cfg.types),
+                    );
                 }
             }
         }
@@ -291,12 +307,22 @@ fn mirror_source_files(
         if native_names.is_empty() {
             continue;
         }
+        // A module-owned cpp/ tree (inline_cpp) writes its own CMakeLists.txt to this exact
+        // path — the aggregator must never clobber it.
+        if root.join(dir_name_m).join("cpp/CMakeLists.txt").is_file() {
+            continue;
+        }
         fs::create_dir_all(&cpp_root).expect("create cpp root");
         let body = translator_resources::native_cmake_lists(&native_names);
         let top = cpp_root.join("CMakeLists.txt");
-        if !top.exists() {
-            if let Err(e) = fs::write(&top, body) {
-                eprintln!("Warning: write top-level CMakeLists.txt: {}", e);
+        // Content-aware: rewrite when the existing file is stale (e.g. a native module was
+        // added since the last mirror), but never clobber a module-owned cpp/ tree (inline_cpp).
+        match fs::read_to_string(&top) {
+            Ok(existing) if existing == body => {}
+            _ => {
+                if let Err(e) = fs::write(&top, body) {
+                    eprintln!("Warning: write top-level CMakeLists.txt: {}", e);
+                }
             }
         }
     }
@@ -419,7 +445,8 @@ mod native_mirror_tests {
         let _ = fs::remove_dir_all(&base);
     }
 
-    /// An existing top-level CMakeLists (module-owned native tree) is left alone.
+    /// A module-owned cpp/ tree (inline_cpp) has its own CMakeLists.txt mirrored into place;
+    /// the generated aggregator must never clobber it.
     #[test]
     fn existing_top_cmake_lists_is_not_overwritten() {
         let base = std::env::temp_dir().join(format!("hvolt-native-owned-{}", std::process::id()));
@@ -429,6 +456,12 @@ mod native_mirror_tests {
         let src = root.join("native").join("box64");
         fs::create_dir_all(&src).unwrap();
         fs::write(src.join("napi_init.cpp"), "// x").unwrap();
+
+        // Module-owned cpp/ tree: the module's own CMakeLists.txt exists at source,
+        // so the aggregator (which would otherwise wire native subdirs) is skipped.
+        let inline_cpp = root.join("entry/cpp/CMakeLists.txt");
+        fs::create_dir_all(inline_cpp.parent().unwrap()).unwrap();
+        fs::write(&inline_cpp, "project(owned)\n").unwrap();
 
         let mut deps = BTreeMap::new();
         deps.insert(
@@ -444,17 +477,183 @@ mod native_mirror_tests {
         };
         let modules = vec![("entry".to_string(), ModuleConfig::default_entry())];
 
-        // A module-owned cpp/ tree already declares its own aggregator.
-        let cpp_root = build.join("entry/src/main/cpp");
-        fs::create_dir_all(&cpp_root).unwrap();
-        fs::write(cpp_root.join("CMakeLists.txt"), "project(owned)\n").unwrap();
-
         mirror_source_files(&root, &build, &app, &modules, &[native("box64")]);
 
+        let cpp_root = build.join("entry/src/main/cpp");
         assert_eq!(
             fs::read_to_string(cpp_root.join("CMakeLists.txt")).unwrap(),
             "project(owned)\n"
         );
+
+        let _ = fs::remove_dir_all(&base);
+    }
+
+    /// A native module's types bridge must reach the build tree on the incremental path too:
+    /// with the old mirror, edits to Index.d.ts never showed up until build/ was wiped.
+    #[test]
+    fn types_bridge_is_mirrored_with_the_sources() {
+        let base = std::env::temp_dir().join(format!("hvolt-native-types-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&base);
+        let root = base.join("root");
+        let build = base.join("build");
+        let src = root.join("native").join("box64");
+        fs::create_dir_all(&src).unwrap();
+        fs::write(src.join("napi_init.cpp"), "// box64 impl").unwrap();
+        fs::write(
+            src.join("Index.d.ts"),
+            "export declare function add(a: number, b: number): number;\n",
+        )
+        .unwrap();
+
+        let mut deps = BTreeMap::new();
+        deps.insert(
+            "box64".to_string(),
+            Dependency {
+                path: "native/box64".to_string(),
+                version: "1.0.0".to_string(),
+            },
+        );
+        let app = AppConfig {
+            app: AppConfig::default_for("x").app,
+            dependencies: deps,
+        };
+        let modules = vec![("entry".to_string(), ModuleConfig::default_entry())];
+        let mut cfg = native("box64");
+        cfg.1.types = "Index.d.ts".to_string();
+
+        mirror_source_files(&root, &build, &app, &modules, &[cfg]);
+
+        let types_dir = build.join("entry/src/main/cpp/types/box64");
+        assert!(
+            types_dir.join("oh-package.json5").exists(),
+            "types oh-package.json5 not mirrored"
+        );
+        let dts = fs::read_to_string(types_dir.join("Index.d.ts")).unwrap();
+        assert!(dts.contains("export declare function add"), "{}", dts);
+
+        // Edit the declaration; a second mirror must pick it up (the old path never touched
+        // the build tree once the file existed).
+        fs::write(
+            src.join("Index.d.ts"),
+            "export declare function sub(a: number, b: number): number;\n",
+        )
+        .unwrap();
+        let mut cfg2 = native("box64");
+        cfg2.1.types = "Index.d.ts".to_string();
+        mirror_source_files(&root, &build, &app, &modules, &[cfg2]);
+        let dts2 = fs::read_to_string(types_dir.join("Index.d.ts")).unwrap();
+        assert!(dts2.contains("export declare function sub"), "{}", dts2);
+
+        let _ = fs::remove_dir_all(&base);
+    }
+
+    /// A source deleted from the native module must disappear from the build tree — the old
+    /// mirror only added files, so CMake kept compiling a removed .cpp until build/ was wiped.
+    #[test]
+    fn deleted_native_source_is_pruned_from_the_build_tree() {
+        let base = std::env::temp_dir().join(format!("hvolt-native-del-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&base);
+        let root = base.join("root");
+        let build = base.join("build");
+        let src = root.join("native").join("box64");
+        fs::create_dir_all(&src).unwrap();
+        fs::write(src.join("napi_init.cpp"), "// box64 impl").unwrap();
+        fs::write(src.join("gone.cpp"), "// to be removed").unwrap();
+        fs::write(src.join("keep.h"), "// header").unwrap();
+
+        let mut deps = BTreeMap::new();
+        deps.insert(
+            "box64".to_string(),
+            Dependency {
+                path: "native/box64".to_string(),
+                version: "1.0.0".to_string(),
+            },
+        );
+        let app = AppConfig {
+            app: AppConfig::default_for("x").app,
+            dependencies: deps,
+        };
+        let modules = vec![("entry".to_string(), ModuleConfig::default_entry())];
+
+        mirror_source_files(&root, &build, &app, &modules, &[native("box64")]);
+
+        let cpp_dest = build.join("entry/src/main/cpp/box64");
+        assert!(cpp_dest.join("gone.cpp").exists());
+
+        // Delete the source, mirror again: gone.cpp must vanish, keep.h must survive.
+        fs::remove_file(src.join("gone.cpp")).unwrap();
+        mirror_source_files(&root, &build, &app, &modules, &[native("box64")]);
+
+        assert!(!cpp_dest.join("gone.cpp").exists(), "stale source survived");
+        assert!(cpp_dest.join("keep.h").exists());
+
+        let _ = fs::remove_dir_all(&base);
+    }
+
+    /// A stale top-level aggregator is rewritten when the native module list changes: the
+    /// old `if !top.exists()` left a CMakeLists that kept omitting newly added modules.
+    #[test]
+    fn stale_top_cmake_lists_gets_the_new_module_list() {
+        let base = std::env::temp_dir().join(format!("hvolt-native-cmake-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&base);
+        let root = base.join("root");
+        let build = base.join("build");
+        // Two modules mirror in first; the aggregator lists both.
+        for name in ["box64", "gom"] {
+            let src = root.join("native").join(name);
+            fs::create_dir_all(&src).unwrap();
+            fs::write(src.join("napi_init.cpp"), format!("// {} impl", name)).unwrap();
+        }
+        let mut deps = BTreeMap::new();
+        deps.insert(
+            "box64".to_string(),
+            Dependency {
+                path: "native/box64".to_string(),
+                version: "1.0.0".to_string(),
+            },
+        );
+        deps.insert(
+            "gom".to_string(),
+            Dependency {
+                path: "native/gom".to_string(),
+                version: "1.0.0".to_string(),
+            },
+        );
+        let app = AppConfig {
+            app: AppConfig::default_for("x").app,
+            dependencies: deps.clone(),
+        };
+        let modules = vec![("entry".to_string(), ModuleConfig::default_entry())];
+        let nms = vec![native("box64"), native("gom")];
+        mirror_source_files(&root, &build, &app, &modules, &nms);
+
+        let cpp_root = build.join("entry/src/main/cpp");
+        let top = fs::read_to_string(cpp_root.join("CMakeLists.txt")).unwrap();
+        assert!(top.contains("add_subdirectory(box64)"), "{}", top);
+        assert!(top.contains("add_subdirectory(gom)"), "{}", top);
+
+        // A third module appears; the existing aggregator content is now stale.
+        let src3 = root.join("native").join("emu");
+        fs::create_dir_all(&src3).unwrap();
+        fs::write(src3.join("napi_init.cpp"), "// emu impl").unwrap();
+        let mut deps3 = deps.clone();
+        deps3.insert(
+            "emu".to_string(),
+            Dependency {
+                path: "native/emu".to_string(),
+                version: "1.0.0".to_string(),
+            },
+        );
+        let app3 = AppConfig {
+            app: AppConfig::default_for("x").app,
+            dependencies: deps3,
+        };
+        let nms3 = vec![native("box64"), native("gom"), native("emu")];
+        mirror_source_files(&root, &build, &app3, &modules, &nms3);
+
+        let top2 = fs::read_to_string(cpp_root.join("CMakeLists.txt")).unwrap();
+        assert!(top2.contains("add_subdirectory(emu)"), "{}", top2);
+        assert_eq!(top2.matches("add_subdirectory(").count(), 3, "{}", top2);
 
         let _ = fs::remove_dir_all(&base);
     }

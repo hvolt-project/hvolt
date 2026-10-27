@@ -135,7 +135,7 @@ impl AppFields {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct Dependency {
     pub path: String,
     pub version: String,

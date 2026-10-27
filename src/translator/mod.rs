@@ -356,6 +356,8 @@ pub fn full_translate(
             if !cpp_dir.exists() {
                 fs::create_dir_all(&cpp_dir).expect("create cpp dir");
             }
+            // Prune sources that vanished from the module (same contract as the mirror path).
+            crate::translator_resources::purge_stale_native_files(&native_src_dir, &cpp_dir);
             // Copy sources + headers. Headers were previously skipped entirely, so any
             // module split across .h/.cpp failed to compile.
             if let Ok(entries) = fs::read_dir(&native_src_dir) {
@@ -365,9 +367,9 @@ pub fn full_translate(
                         let name = path.file_name().unwrap().to_string_lossy().to_string();
                         if crate::translator_resources::is_native_source_file(&name) {
                             let dst = cpp_dir.join(&name);
-                            if !dst.exists() {
-                                let _ = fs::copy(&path, &dst);
-                            }
+                            // Rewrite unconditionally: a stale copy must not survive
+                            // (the old `if !dst.exists()` skipped updates entirely).
+                            crate::translator_resources::hardlink_or_copy(&path, &dst);
                         }
                     }
                 }
@@ -379,33 +381,13 @@ pub fn full_translate(
                 .join(dir_name_m)
                 .join("src/main/cpp/types")
                 .join(dir_name);
-            fs::create_dir_all(&types_dir).expect("create native types dir");
-
-            let pkg_name = format!("{}.so", native_cfg.name);
-            let oh_pkg = format!(
-                r#"{{
-  "name": "{}",
-  "types": "./Index.d.ts",
-  "version": "{}",
-  "description": "{}"
-}}"#,
-                pkg_name, native_cfg.version, native_cfg.description
+            crate::translator_resources::write_native_types_bridge(
+                &types_dir,
+                &format!("{}.so", native_cfg.name),
+                &native_cfg.version,
+                &native_cfg.description,
+                &native_src_dir.join(&native_cfg.types),
             );
-            write_file(&types_dir.join("oh-package.json5"), &oh_pkg);
-
-            // Copy Index.d.ts from native module source root
-            let dts_src = native_src_dir.join(&native_cfg.types);
-            let dts_dst = types_dir.join("Index.d.ts");
-            if dts_src.exists() {
-                if let Err(e) = fs::copy(&dts_src, &dts_dst) {
-                    eprintln!(
-                        "Warning: copy {} → {}: {}",
-                        dts_src.display(),
-                        dts_dst.display(),
-                        e
-                    );
-                }
-            }
         }
     }
 
@@ -417,13 +399,26 @@ pub fn full_translate(
         if native_names.is_empty() {
             continue;
         }
+        // A module-owned cpp/ tree (inline_cpp) writes its own CMakeLists.txt to this exact
+        // path — the aggregator must never clobber it.
+        if project_root
+            .join(dir_name_m)
+            .join("cpp/CMakeLists.txt")
+            .is_file()
+        {
+            continue;
+        }
         fs::create_dir_all(&cpp_root).expect("create cpp root");
         let body = crate::translator_resources::native_cmake_lists(&native_names);
         let top = cpp_root.join("CMakeLists.txt");
-        // Only write when absent: a module-owned cpp/ tree (inline_cpp) owns this file.
-        if !top.exists() {
-            if let Err(e) = fs::write(&top, body) {
-                eprintln!("Warning: write top-level CMakeLists.txt: {}", e);
+        // Content-aware: rewrite when the existing file is stale (e.g. a native module was
+        // added since the last translate); never clobber a module-owned cpp/ tree (inline_cpp).
+        match fs::read_to_string(&top) {
+            Ok(existing) if existing == body => {}
+            _ => {
+                if let Err(e) = fs::write(&top, body) {
+                    eprintln!("Warning: write top-level CMakeLists.txt: {}", e);
+                }
             }
         }
     }
