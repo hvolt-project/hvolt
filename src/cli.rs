@@ -266,6 +266,30 @@ pub enum Command {
         #[command(subcommand)]
         action: ConfigAction,
     },
+    /// Show documentation embedded in the binary (hvolt-skill, clean-code, harmony-device-flow)
+    Skill {
+        #[command(subcommand)]
+        action: SkillAction,
+    },
+}
+
+/// `hvolt skill` subcommands.
+#[derive(Subcommand)]
+pub enum SkillAction {
+    /// List embedded documents
+    List {
+        /// One id per line — nothing else (agent-friendly)
+        #[arg(long)]
+        plain: bool,
+        /// JSON array of {id, description}
+        #[arg(long)]
+        json: bool,
+    },
+    /// Print one embedded document
+    Show {
+        /// Document id (see `hvolt skill list`)
+        name: String,
+    },
 }
 
 #[derive(Subcommand)]
