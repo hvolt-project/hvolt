@@ -22,7 +22,7 @@ use std::process::Command;
 // ─── Tool registry ────────────────────────────────────────────────
 
 /// Known tool versions
-pub const HVIGOR_VERSION: &str = "6.26.1";
+pub const HVIGOR_VERSION: &str = "6.26.8";
 pub const OHPM_VERSION: &str = "5.0.2";
 
 /// npm registry for @ohos scoped packages
