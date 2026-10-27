@@ -36,6 +36,72 @@ pub fn native_cmake_lists(native_names: &[&str]) -> String {
     body
 }
 
+/// Write a native module's types bridge (`oh-package.json5` + `Index.d.ts`) into the build
+/// tree. Both the full-translate and the incremental-mirror paths call this, so edits to a
+/// native module's `.d.ts` always reach the build tree — the mirror path used to skip types
+/// entirely, which is why "rebuild" never picked up new declarations without wiping build/.
+pub fn write_native_types_bridge(
+    types_dir: &Path,
+    pkg_name: &str,
+    version: &str,
+    description: &str,
+    dts_src: &Path,
+) {
+    if fs::create_dir_all(types_dir).is_err() {
+        eprintln!("Warning: mkdir {} failed", types_dir.display());
+        return;
+    }
+    let oh_pkg = format!(
+        r#"{{
+  "name": "{}",
+  "types": "./Index.d.ts",
+  "version": "{}",
+  "description": "{}"
+}}"#,
+        pkg_name, version, description
+    );
+    if let Err(e) = fs::write(types_dir.join("oh-package.json5"), oh_pkg) {
+        eprintln!(
+            "Warning: write {} failed: {}",
+            types_dir.join("oh-package.json5").display(),
+            e
+        );
+    }
+    if dts_src.exists() {
+        hardlink_or_copy(dts_src, &types_dir.join("Index.d.ts"));
+    }
+}
+
+/// Remove destination native-source files whose source no longer exists.
+///
+/// The mirror path used to only add/copy files; a source file deleted from the module left
+/// a stale copy in `src/main/cpp/<module>/`, so CMake kept compiling yesterday's code until
+/// the build tree was wiped. `dest` must be the module's cpp mirror directory (files only —
+/// subdirectories such as `types/` are left alone).
+pub fn purge_stale_native_files(src: &Path, dest: &Path) {
+    let Ok(entries) = fs::read_dir(dest) else {
+        return;
+    };
+    let mut src_names: Vec<String> = Vec::new();
+    if let Ok(src_entries) = fs::read_dir(src) {
+        for entry in src_entries.flatten() {
+            if entry.path().is_file() {
+                src_names.push(entry.file_name().to_string_lossy().to_string());
+            }
+        }
+    }
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if !path.is_file() {
+            continue;
+        }
+        let name = entry.file_name().to_string_lossy().to_string();
+        if !src_names.contains(&name) && is_native_source_file(&name) {
+            let _ = fs::remove_file(&path);
+        }
+    }
+}
+
 /// Copy all files in src/ to dest/ (non-recursive).
 pub fn copy_dir_contents(src: &Path, dest: &Path) {
     if !src.exists() {
