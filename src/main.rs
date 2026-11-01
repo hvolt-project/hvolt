@@ -67,6 +67,33 @@ fn warn_if_conflict(pos: Option<String>, flag: Option<String>, cmd: &str) -> Opt
     }
 }
 
+/// Sign one named package with materials given on the command line.
+///
+/// Three files are needed because a signature is only meaningful with all of them; a partial
+/// set is a mistake at the call site, not something to guess around.
+fn sign_with_materials(
+    package: &std::path::Path,
+    p12: std::path::PathBuf,
+    profile: std::path::PathBuf,
+    cert: std::path::PathBuf,
+    key_alias: &str,
+    p12_password: &str,
+    key_password: &str,
+) -> Result<(), String> {
+    let env = sdk::detect("").map_err(|e| format!("SDK env: {}", e))?;
+    let materials = sign::Materials {
+        store_file: &p12,
+        store_password: p12_password,
+        key_alias,
+        key_password,
+        certpath: &cert,
+        profile: &profile,
+        sign_alg: sign::DEFAULT_SIGN_ALG,
+    };
+    sign::sign_file(&env, package, &materials)?;
+    Ok(())
+}
+
 fn main() {
     #[cfg(unix)]
     reset_sigpipe();
@@ -108,19 +135,60 @@ fn main() {
                 std::process::exit(1);
             });
         }
-        cli::Command::Sign { local, apl, flavor } => {
-            if local {
-                let kind = match flavor.as_str() {
-                    "debug" => sign_local::ProfileKind::Debug,
-                    _ => sign_local::ProfileKind::Release,
+        cli::Command::Sign {
+            hap,
+            local,
+            apl,
+            flavor,
+            p12,
+            profile,
+            cert,
+            key_alias,
+            p12_password,
+            key_password,
+            bundle,
+        } => {
+            let kind = match flavor.as_str() {
+                "debug" => sign_local::ProfileKind::Debug,
+                _ => sign_local::ProfileKind::Release,
+            };
+            let project = std::path::Path::new(".");
+            // A package named on the command line is signed where it lies; the project flow
+            // below resolves its own unsigned HAP under build/ and writes into output/.
+            if let Some(package) = hap {
+                let result = match (p12, profile, cert) {
+                    (Some(p12), Some(profile), Some(cert)) => sign_with_materials(
+                        &package,
+                        p12,
+                        profile,
+                        cert,
+                        &key_alias,
+                        &p12_password,
+                        &key_password,
+                    ),
+                    (None, None, None) => {
+                        sign_local::sign_external(&package, &apl, kind, bundle.as_deref())
+                    }
+                    _ => Err(
+                        "--p12, --profile and --cert must be given together (or none of them, to \
+                         use the localSign test chain)"
+                            .to_string(),
+                    ),
                 };
-                if let Err(e) = sign_local::sign(std::path::Path::new("."), &apl, kind) {
+                if let Err(e) = result {
                     eprintln!("✗ {}", e);
                     std::process::exit(1);
                 }
                 return;
             }
-            if let Err(e) = backend::sign_remote(std::path::Path::new(".")) {
+            if local {
+                if let Err(e) = sign_local::sign(project, &apl, kind) {
+                    eprintln!("✗ {}", e);
+                    std::process::exit(1);
+                }
+                return;
+            }
+            if let Err(e) = backend::sign_remote(project) {
                 eprintln!("✗ {}", e);
                 std::process::exit(1);
             }
@@ -134,11 +202,14 @@ fn main() {
         cli::Command::Push {
             device,
             device_flag,
+            hap,
         } => {
             let device = warn_if_conflict(device, device_flag, "push");
-            pipeline::push_app(std::path::Path::new("."), device.as_deref()).unwrap_or_else(|e| {
-                pipeline::report_push_failure(e);
-            });
+            let result = match hap {
+                Some(package) => pipeline::push_package(&package, device.as_deref()),
+                None => pipeline::push_app(std::path::Path::new("."), device.as_deref()),
+            };
+            result.unwrap_or_else(|e| pipeline::report_push_failure(e));
         }
         cli::Command::Run {
             device,

@@ -178,9 +178,32 @@ pub(crate) fn explain_install_error(output: &str) -> String {
 
 /// Push signed HAP to device via hdc (local) or scp+remote hdc (cross-machine).
 pub fn push_app(project_dir: &Path, device: Option<&str>) -> Result<(), String> {
+    let hap = find_signed_hap(project_dir)?;
+    install_package(&hap, device)
+}
+
+/// Install the package the caller points at: a bare `.hap` that lives outside any project
+/// `output/`, so nothing is resolved relative to the working directory.
+///
+/// An unsigned package fails here rather than at hdc: the device would only report a signature
+/// error, which says nothing about the fix (`hvolt sign <HAP>`).
+pub fn push_package(hap: &Path, device: Option<&str>) -> Result<(), String> {
+    if !hap.exists() {
+        return Err(format!("{} not found", hap.display()));
+    }
+    if !crate::hap::is_signed(hap)? {
+        return Err(format!(
+            "{} is not signed — run `hvolt sign {}` first",
+            hap.display(),
+            hap.display()
+        ));
+    }
+    install_package(hap, device)
+}
+
+fn install_package(hap: &Path, device: Option<&str>) -> Result<(), String> {
     let cfg = crate::sdk::load_global_config();
     if !cfg.device_host.is_empty() {
-        let hap = find_signed_hap(project_dir)?;
         println!(
             "  remote install: {} via {}",
             cfg.device_target, cfg.device_host
@@ -189,7 +212,7 @@ pub fn push_app(project_dir: &Path, device: Option<&str>) -> Result<(), String> 
             &cfg.device_host,
             &cfg.device_hdc,
             &cfg.device_target,
-            &hap,
+            hap,
         )?;
         for line in out.lines() {
             if !line.trim().is_empty() {
@@ -201,8 +224,7 @@ pub fn push_app(project_dir: &Path, device: Option<&str>) -> Result<(), String> 
     }
     let (target, mut cmd) = crate::target::hdc_targeted_command(device)?;
     println!("  push target: {}", target);
-    let signed = find_signed_hap(project_dir)?;
-    cmd.arg("install").arg(&signed);
+    cmd.arg("install").arg(hap);
     let output = cmd.output().map_err(|e| format!("hdc install: {}", e))?;
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);

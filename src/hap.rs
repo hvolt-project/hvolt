@@ -128,7 +128,10 @@ pub fn parse_package_stat(json_str: &str) -> Result<PackageStat, String> {
 /// Read the module.json embedded in a (signed or unsigned) HAP and print
 /// identity facts straight from the package — the acceptance discipline
 /// says trust the package, not build logs.
-pub fn hap_info(hap_path: &Path) -> Result<String, String> {
+/// The manifest a package carries: `module.json`, or `bundle-info` in the older layout.
+///
+/// Both readers below need it, so the archive walk lives here once.
+fn read_manifest(hap_path: &Path) -> Result<(serde_json::Value, usize), String> {
     let file = fs::File::open(hap_path).map_err(|e| {
         if hap_path.exists() {
             format!("open {}: {}", hap_path.display(), e)
@@ -151,6 +154,47 @@ pub fn hap_info(hap_path: &Path) -> Result<String, String> {
     entry.read_to_string(&mut raw).map_err(|e| e.to_string())?;
     let j: serde_json::Value =
         serde_json::from_str(&raw).map_err(|e| format!("module.json: {}", e))?;
+    Ok((j, n_entries))
+}
+
+/// bundleName as the package itself declares it.
+///
+/// Read from the package rather than from a project file: a package that came from elsewhere
+/// must have its profile bound to its own identity, and there is no other source for it.
+pub fn bundle_name(hap_path: &Path) -> Result<String, String> {
+    let (j, _) = read_manifest(hap_path)?;
+    let bundle = j["app"]["bundleName"]
+        .as_str()
+        .or_else(|| j["bundleName"].as_str())
+        .or_else(|| j["bundle"]["name"].as_str())
+        .ok_or_else(|| "bundleName not found in module.json".to_string())?;
+    Ok(bundle.to_string())
+}
+
+/// Whether the package already carries a signature block.
+///
+/// Judged from the archive, not from the file name: an unsigned package may well be named
+/// `app-signed.hap`, and refusing to sign it on the strength of its name would be wrong.
+pub fn is_signed(hap_path: &Path) -> Result<bool, String> {
+    let file =
+        fs::File::open(hap_path).map_err(|e| format!("open {}: {}", hap_path.display(), e))?;
+    let mut archive = zip::ZipArchive::new(file).map_err(|e| format!("zip: {}", e))?;
+    for index in 0..archive.len() {
+        let Ok(entry) = archive.by_index(index) else {
+            continue;
+        };
+        let name = entry.name().to_ascii_lowercase();
+        if name.starts_with("meta-inf/")
+            && (name.ends_with(".sig") || name.ends_with(".rsa") || name.ends_with(".ec"))
+        {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+pub fn hap_info(hap_path: &Path) -> Result<String, String> {
+    let (j, n_entries) = read_manifest(hap_path)?;
     Ok(render_hap_info(&j, n_entries))
 }
 
@@ -327,5 +371,52 @@ mod src_entry_fallback_tests {
             out
         );
         assert!(!out.contains("srcEntry: ?"), "{}", out);
+    }
+
+    /// Build a throwaway .hap-shaped archive so the signature reader can be exercised without
+    /// an SDK: only the entry names matter to it.
+    fn write_archive(name: &str, entries: &[(&str, &[u8])]) -> std::path::PathBuf {
+        use std::io::Write;
+        let dir = std::env::temp_dir().join(format!("hvolt-issigned-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join(name);
+        let file = std::fs::File::create(&path).unwrap();
+        let mut writer = zip::ZipWriter::new(file);
+        let options = zip::write::SimpleFileOptions::default();
+        for (entry, body) in entries {
+            writer.start_file(*entry, options).unwrap();
+            writer.write_all(body).unwrap();
+        }
+        writer.finish().unwrap();
+        path
+    }
+
+    /// A package with no signature block is unsigned no matter what it is called, which is the
+    /// whole point of reading the archive instead of the file name.
+    #[test]
+    fn unsigned_archive_is_not_reported_as_signed() {
+        let path = write_archive("app-signed.hap", &[("module.json", b"{}")]);
+        assert!(!crate::hap::is_signed(&path).unwrap());
+    }
+
+    /// The signature block lives under META-INF with a `.sig` suffix; its presence is what marks
+    /// a package signed.
+    #[test]
+    fn signature_block_marks_a_package_signed() {
+        let path = write_archive(
+            "app.hap",
+            &[("module.json", b"{}"), ("META-INF/APP.sig", b"x")],
+        );
+        assert!(crate::hap::is_signed(&path).unwrap());
+    }
+
+    /// An unrelated META-INF entry must not be mistaken for a signature.
+    #[test]
+    fn meta_inf_without_signature_is_not_signed() {
+        let path = write_archive(
+            "app-plain.hap",
+            &[("module.json", b"{}"), ("META-INF/MANIFEST.MF", b"x")],
+        );
+        assert!(!crate::hap::is_signed(&path).unwrap());
     }
 }

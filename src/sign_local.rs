@@ -263,24 +263,30 @@ pub(crate) fn profile_cache_valid(p7b: &Path, inputs: &[&Path]) -> bool {
     }) && !inputs.iter().any(|i| !i.exists())
 }
 
-/// Full localSign flow for the project at `project_dir`.
-pub fn sign(project_dir: &Path, apl: &str, kind: ProfileKind) -> Result<(), String> {
-    use crate::config::AppConfig;
+/// Test-chain materials for one bundle: what `sign_app` and `sign_package` both need.
+pub(crate) struct TestChain {
+    pub env: crate::sdk::SdkEnv,
+    pub p12: PathBuf,
+    pub app_pem: PathBuf,
+    pub p7b: PathBuf,
+    pub alias: &'static str,
+}
+
+fn flavor_label(kind: ProfileKind) -> &'static str {
+    match kind {
+        ProfileKind::Debug => "debug",
+        ProfileKind::Release => "release",
+    }
+}
+
+/// Produce (or reuse) the test chain for `bundle`.
+///
+/// Bound to the bundle rather than to the working directory on purpose: the profile pins the
+/// identity, so a package from elsewhere signs under its own bundle name.
+pub(crate) fn test_chain(bundle: &str, apl: &str, kind: ProfileKind) -> Result<TestChain, String> {
     use std::process::Command;
 
-    let app_cfg = AppConfig::from_file(&project_dir.join("hvolt.toml"))?;
-    let bundle = app_cfg.app.bundle.clone();
     let env = sdk::detect("").map_err(|e| format!("SDK env: {}", e))?;
-
-    println!(
-        "OpenHarmony localSign ({}, apl={}): {}",
-        match kind {
-            ProfileKind::Debug => "debug",
-            ProfileKind::Release => "release",
-        },
-        apl,
-        bundle
-    );
     let dir = ensure_materials()?;
     let p12 = dir.join("OpenHarmony.p12");
     let app_pem = dir.join("OpenHarmonyApplication.pem");
@@ -290,38 +296,30 @@ pub fn sign(project_dir: &Path, apl: &str, kind: ProfileKind) -> Result<(), Stri
     };
     let cert_pem = fs::read_to_string(&app_pem).map_err(|e| format!("read app cert: {}", e))?;
 
-    // unsgned profile for THIS project (fresh validity, pinned bundle)
+    // unsgned profile for THIS bundle (fresh validity, pinned identity)
     let now = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.as_secs())
         .unwrap_or(1_760_000_000);
     // anchor validity at the existing profile when it still has >90d life
-    let anchor = existing_valid_not_before(&dir, &bundle, flavor_name, apl, kind, now);
-    let pj = profile_json(&bundle, apl, kind, anchor, &cert_pem)?;
+    let anchor = existing_valid_not_before(&dir, bundle, flavor_name, apl, kind, now);
+    let pj = profile_json(bundle, apl, kind, anchor, &cert_pem)?;
     let unsgned = dir.join(format!("{}-{}.profile.json", bundle, flavor_name));
     let rendered = serde_json::to_string_pretty(&pj).map_err(|e| e.to_string())?;
     // write only on content change: unconditional writes refresh mtime and
-    // defeat the mtime-based p7b cache below
-    let same = fs::read_to_string(&unsgned)
+    // defeat the mtime-based p7b cache below. The rendered text already anchors validity
+    // (existing_valid_not_before), so staying equal to it means identity AND window are good.
+    let unchanged = fs::read_to_string(&unsgned)
         .map(|old| old == rendered)
         .unwrap_or(false);
-    if !same {
+    if !unchanged {
         fs::write(&unsgned, &rendered).map_err(|e| format!("write profile json: {}", e))?;
     }
 
     // p7b (cached; inputs = profile json + p12 + profile cert)
     let p7b = dir.join(format!("{}-{}.p7b", bundle, flavor_name));
-    // rendered already anchors validity (existing_valid_not_before): equality
-    // against the cached file means identity AND window are still good.
-    let reuse = fs::read_to_string(&unsgned)
-        .map(|old| old == rendered)
-        .unwrap_or(false);
-    if !reuse {
-        fs::write(&unsgned, &rendered).map_err(|e| format!("write profile json: {}", e))?;
-    }
     if !profile_cache_valid(&p7b, &[&unsgned, &p12, &profile_pem]) {
-        let (app_alias, profile_alias) = aliases(kind);
-        let _ = app_alias;
+        let (_, profile_alias) = aliases(kind);
         let tool = crate::sign::find_hap_sign_tool(&env)?;
         let java = crate::sign::find_java(&env);
         let out = Command::new(&java)
@@ -364,34 +362,92 @@ pub fn sign(project_dir: &Path, apl: &str, kind: ProfileKind) -> Result<(), Stri
         println!("  ✓ profile p7b cache valid");
     }
 
-    // sign the unsigned hap with the test chain
     let (app_alias, _) = aliases(kind);
+    Ok(TestChain {
+        env,
+        p12,
+        app_pem,
+        p7b,
+        alias: app_alias,
+    })
+}
+
+/// Full localSign flow for the project at `project_dir`.
+pub fn sign(project_dir: &Path, apl: &str, kind: ProfileKind) -> Result<(), String> {
+    use crate::config::AppConfig;
+
+    let app_cfg = AppConfig::from_file(&project_dir.join("hvolt.toml"))?;
+    let bundle = app_cfg.app.bundle.clone();
+
+    println!(
+        "OpenHarmony localSign ({}, apl={}): {}",
+        flavor_label(kind),
+        apl,
+        bundle
+    );
+
+    let chain = test_chain(&bundle, apl, kind)?;
     crate::sign::sign_app(
-        &env,
+        &chain.env,
         project_dir,
-        &p12.to_string_lossy(),
+        &chain.p12.to_string_lossy(),
         TEST_P12_PWD,
-        app_alias,
+        chain.alias,
         TEST_P12_PWD,
-        &app_pem.to_string_lossy(),
-        &p7b.to_string_lossy(),
+        &chain.app_pem.to_string_lossy(),
+        &chain.p7b.to_string_lossy(),
         "SHA256withECDSA",
     )?;
 
     // acceptance: verify the FINAL package, not the logs (skill discipline)
-    verify_signed(&env, project_dir)?;
-    Ok(())
+    let signed = crate::pipeline::find_signed_hap(project_dir)?;
+    verify_package(&chain.env, &signed)
 }
 
-fn verify_signed(env: &crate::sdk::SdkEnv, project_dir: &Path) -> Result<(), String> {
+/// localSign a package the caller points at, bound to that package's own bundle.
+///
+/// The output sits beside the input (`<name>-signed.hap`); `output/` and the project's own
+/// unsigned package are not involved, so a bare package can be signed without a build.
+pub fn sign_external(
+    hap: &Path,
+    apl: &str,
+    kind: ProfileKind,
+    bundle_override: Option<&str>,
+) -> Result<(), String> {
+    if !hap.exists() {
+        return Err(format!("{} not found", hap.display()));
+    }
+    // The package's own identity wins; the flag is only for a package that does not carry one.
+    let bundle = match bundle_override {
+        Some(bundle) => bundle.to_string(),
+        None => crate::hap::bundle_name(hap)?,
+    };
+    println!(
+        "OpenHarmony localSign ({}, apl={}): {} ← {}",
+        flavor_label(kind),
+        apl,
+        bundle,
+        hap.display()
+    );
+
+    let chain = test_chain(&bundle, apl, kind)?;
+    let materials = crate::sign::Materials {
+        store_file: &chain.p12,
+        store_password: TEST_P12_PWD,
+        key_alias: chain.alias,
+        key_password: TEST_P12_PWD,
+        certpath: &chain.app_pem,
+        profile: &chain.p7b,
+        sign_alg: crate::sign::DEFAULT_SIGN_ALG,
+    };
+    let out = crate::sign::sign_file(&chain.env, hap, &materials)?;
+
+    verify_package(&chain.env, &out)
+}
+
+/// Verify the package that was just written, not the logs that announced it.
+fn verify_package(env: &crate::sdk::SdkEnv, hap: &Path) -> Result<(), String> {
     use std::process::Command;
-    let signed = project_dir.join("output");
-    let hap = fs::read_dir(&signed)
-        .map_err(|e| format!("output/: {}", e))?
-        .filter_map(|e| e.ok())
-        .map(|e| e.path())
-        .find(|p| p.to_string_lossy().ends_with("-signed.hap"))
-        .ok_or("no signed hap in output/".to_string())?;
     let tool = crate::sign::find_hap_sign_tool(env)?;
     let java = crate::sign::find_java(env);
     let tmp = std::env::temp_dir().join(format!("hvolt-verify-{}", std::process::id()));
@@ -441,7 +497,7 @@ fn verify_signed(env: &crate::sdk::SdkEnv, project_dir: &Path) -> Result<(), Str
     if r["verifiedPassed"] != serde_json::Value::Bool(true) {
         return Err(format!("signed HAP failed its own verification: {}", r));
     }
-    let sha = sdk::sha256_file(&hap)?;
+    let sha = sdk::sha256_file(hap)?;
     let bundle_in = r["content"]["bundle-info"]["bundle-name"]
         .as_str()
         .unwrap_or("?");

@@ -200,6 +200,111 @@ pub fn sign_package(
     Ok(())
 }
 
+/// The signature algorithm the SDK tool is invoked with for every package hvolt signs.
+pub const DEFAULT_SIGN_ALG: &str = "SHA256withECDSA";
+
+/// Signing materials, one field per `hvolt.toml` `[app.signing]` entry.
+///
+/// Passed in rather than read from a project file: a bare package handed over on the command
+/// line is signed with whatever the caller named, and no project needs to exist.
+pub struct Materials<'a> {
+    pub store_file: &'a Path,
+    pub store_password: &'a str,
+    pub key_alias: &'a str,
+    pub key_password: &'a str,
+    pub certpath: &'a Path,
+    pub profile: &'a Path,
+    pub sign_alg: &'a str,
+}
+
+/// Sign a package the caller points at with the materials the caller named.
+///
+/// The result stays in the package's own directory as `<name>-signed.hap`. A package that is
+/// already signed is refused; one that merely carries the signed *name* is not, which is why
+/// the check reads the archive instead of the file name.
+pub fn sign_file(
+    sdk: &crate::sdk::SdkEnv,
+    in_path: &Path,
+    m: &Materials,
+) -> Result<PathBuf, String> {
+    if !in_path.exists() {
+        return Err(format!("{} not found", in_path.display()));
+    }
+    if crate::hap::is_signed(in_path)? {
+        return Err(format!(
+            "{} is already signed — refusing to sign it twice",
+            in_path.display()
+        ));
+    }
+    if m.certpath.exists() {
+        if let Some(false) = check_cert_expired(m.certpath)? {
+            return Err(format!(
+                "Certificate is expired: {}\n  Run `hvolt sign` to renew.",
+                m.certpath.display()
+            ));
+        }
+    }
+    let out_path = signed_sibling(in_path);
+    // Input and output are the same file when the package already carries the signed name.
+    // Signing straight into it would truncate the input before the tool could read it, so the
+    // result goes to a sibling temp file and replaces the input only after it is complete.
+    let same_path = in_path == out_path;
+    let write_to = if same_path {
+        in_path.with_file_name(format!(
+            "{}.hvolt-tmp.hap",
+            in_path.file_stem().unwrap_or_default().to_string_lossy()
+        ))
+    } else {
+        out_path.clone()
+    };
+    if write_to.exists() {
+        std::fs::remove_file(&write_to)
+            .map_err(|e| format!("remove stale {}: {}", write_to.display(), e))?;
+    }
+    println!("  Signing {}...", in_path.display());
+    let result = sign_package(
+        sdk,
+        in_path,
+        &write_to,
+        &m.store_file.to_string_lossy(),
+        m.store_password,
+        m.key_alias,
+        m.key_password,
+        &m.certpath.to_string_lossy(),
+        &m.profile.to_string_lossy(),
+        m.sign_alg,
+    );
+    if let Err(e) = result {
+        let _ = std::fs::remove_file(&write_to);
+        return Err(e);
+    }
+    if same_path {
+        std::fs::rename(&write_to, &out_path)
+            .map_err(|e| format!("replace {}: {}", out_path.display(), e))?;
+    }
+    println!("✓ Signed: {}", out_path.display());
+    Ok(out_path)
+}
+
+/// `<dir>/<name>-unsigned.hap` → `<dir>/<name>-signed.hap`; any other name gains `-signed`.
+///
+/// One rule for every input: drop an existing `-unsigned`/`-signed` marker, then emit the
+/// signed name. An input that already carries the signed name therefore maps onto itself; the
+/// caller writes through a temp file in that case, so the input is never truncated.
+pub fn signed_sibling(in_path: &Path) -> PathBuf {
+    let name = in_path
+        .file_name()
+        .unwrap_or_default()
+        .to_string_lossy()
+        .to_string();
+    let stem = name.strip_suffix(".hap").unwrap_or(&name);
+    let stem = stem
+        .strip_suffix("-unsigned")
+        .or_else(|| stem.strip_suffix("-signed"))
+        .unwrap_or(stem);
+    in_path.with_file_name(format!("{}-signed.hap", stem))
+}
+
 pub(crate) fn find_java(sdk: &crate::sdk::SdkEnv) -> PathBuf {
     let candidates = [
         crate::platform::find_in_dirs(
@@ -298,7 +403,7 @@ pub(crate) fn check_cert_expired(certpath: &Path) -> Result<Option<bool>, String
 
 #[cfg(test)]
 mod request_tests {
-    use super::SignRequest;
+    use super::{signed_sibling, SignRequest};
     use std::path::Path;
 
     fn req(profile_signed: bool) -> SignRequest<'static> {
@@ -359,5 +464,28 @@ mod request_tests {
         assert!(with.iter().any(|a| a == "-profileSigned"));
         assert!(!without.iter().any(|a| a == "-profileSigned"));
         assert_eq!(with.len(), without.len() + 2);
+    }
+
+    /// A bare package is signed beside itself: the directory is kept and `-unsigned` becomes
+    /// `-signed`, which is the name every downstream reader looks for.
+    #[test]
+    fn signed_sibling_replaces_the_unsigned_suffix() {
+        let out = signed_sibling(Path::new("/tmp/app-unsigned.hap"));
+        assert_eq!(out, Path::new("/tmp/app-signed.hap"));
+    }
+
+    /// An input already carrying the signed name maps onto itself, so the writer has to route
+    /// through a temp file; the name rule itself never invents a second suffix.
+    #[test]
+    fn signed_sibling_of_a_signed_package_maps_onto_itself() {
+        let out = signed_sibling(Path::new("/tmp/app-signed.hap"));
+        assert_eq!(out, Path::new("/tmp/app-signed.hap"));
+    }
+
+    /// A package carrying neither suffix gains one, in the same directory as the input.
+    #[test]
+    fn signed_sibling_marks_a_plain_package() {
+        let out = signed_sibling(Path::new("/tmp/app.hap"));
+        assert_eq!(out, Path::new("/tmp/app-signed.hap"));
     }
 }

@@ -251,15 +251,15 @@ sources to `src/main/cpp/`, generates `types/<dependency>/`, and adds
 
 | Command | Description |
 |---|---|
-| `hvolt sign` | Remote signing via AppGallery Connect — needs the optional backend (see [Signing and AGC](#signing-and-agc)) |
-| `hvolt sign --local [--apl normal\|system_basic\|system_core] [--flavor debug\|release]` | OpenHarmony localSign with the official public test chain (dev boards / emulators / source-built ROMs; **not** retail devices) |
+| `hvolt sign [HAP]` | Remote signing via AppGallery Connect — needs the optional backend (see [Signing and AGC](#signing-and-agc)). With `HAP`, signs that bare package with the localSign test chain and writes `<name>-signed.hap` in the package's own directory (an input ending in `-unsigned` becomes `-signed`); an already-signed package is refused. Pass `--p12/--profile/--cert` to sign it with your own materials instead |
+| `hvolt sign --local [HAP] [--apl normal\|system_basic\|system_core] [--flavor debug\|release]` | OpenHarmony localSign with the official public test chain (dev boards / emulators / source-built ROMs; **not** retail devices). With `HAP`, binds the profile to that package's own bundleName |
 | `hvolt agc login\|whoami\|certs [delete <id> --yes]\|devices` | AppGallery Connect resources — needs the optional backend; cert delete is irreversible |
 
 ### Deploy and inspect on the device
 
 | Command | Description |
 |---|---|
-| `hvolt push [device] [-d <device>]` | Push the newest `output/*-signed.hap` to the device |
+| `hvolt push [device] [-d <device>] [--hap <FILE>]` | Push the newest `output/*-signed.hap` to the device; `--hap` installs the package at that path instead and refuses an unsigned one |
 | `hvolt apply [-d <device>]` | Quickfix (hqf) incremental patch — no reinstall; the same app identity must already be installed |
 | `hvolt uninstall [bundle] [-d <device>]` | Uninstall an app (default bundle: from `hvolt.toml`) |
 | `hvolt log [-T tag] [-D domain] [-k keyword] [--level D,I,W,E,F] [--bundle <b>] [--crash] [-f] [--tail <n>]` | Stream or dump hilog with filters |

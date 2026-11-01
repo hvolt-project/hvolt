@@ -59,6 +59,33 @@ pub enum Command {
         that the backend is missing."
     )]
     Sign {
+        /// Sign this package file instead of the package the project build produced.
+        /// The result stays in the package's own directory as `<name>-signed.hap`
+        /// (an input ending in `-unsigned` becomes `-signed`).
+        #[arg(value_name = "HAP")]
+        hap: Option<PathBuf>,
+        /// Signing key store (p12). Giving materials switches from the localSign test
+        /// chain to these files; omit them all to sign with the test chain.
+        #[arg(long, value_name = "FILE")]
+        p12: Option<PathBuf>,
+        /// Provisioning profile (p7b).
+        #[arg(long, value_name = "FILE")]
+        profile: Option<PathBuf>,
+        /// Signing certificate chain (pem).
+        #[arg(long, value_name = "FILE")]
+        cert: Option<PathBuf>,
+        /// Key alias inside the p12.
+        #[arg(long, value_name = "ALIAS", default_value = "hvolt")]
+        key_alias: String,
+        /// Password of the p12.
+        #[arg(long, value_name = "PASSWORD", default_value = "")]
+        p12_password: String,
+        /// Password of the key entry.
+        #[arg(long, value_name = "PASSWORD", default_value = "")]
+        key_password: String,
+        /// bundleName to bind the profile to when the package does not declare one.
+        #[arg(long, value_name = "BUNDLE")]
+        bundle: Option<String>,
         /// OpenHarmony localSign with the official public test chain
         /// (dev boards / emulators / source-built ROMs; NOT retail devices)
         #[arg(long)]
@@ -84,6 +111,9 @@ pub enum Command {
         /// Target device (same as positional; for flag-style muscle memory)
         #[arg(short = 'd', long = "device", value_name = "DEVICE")]
         device_flag: Option<String>,
+        /// Install this package file instead of output/*-signed.hap
+        #[arg(long, value_name = "FILE")]
+        hap: Option<PathBuf>,
     },
     /// Build + sign + push + launch in one shot
     Run {
