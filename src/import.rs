@@ -508,7 +508,16 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
                         .filter_map(|x| {
                             Some(MetadataItem {
                                 name: x.get("name")?.as_str()?.to_string(),
-                                resource: x.get("resource")?.as_str()?.to_string(),
+                                resource: x
+                                    .get("resource")
+                                    .and_then(|r| r.as_str())
+                                    .unwrap_or("")
+                                    .to_string(),
+                                value: x
+                                    .get("value")
+                                    .and_then(|v| v.as_str())
+                                    .unwrap_or("")
+                                    .to_string(),
                             })
                         })
                         .collect()
@@ -578,6 +587,7 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
                 routes,
                 entry,
                 skills,
+                metadata: Vec::new(),
                 // a single HAP module is the entry module; hsp/shared would need multi-module support
                 module_type: if module_type == "entry" {
                     String::new()
