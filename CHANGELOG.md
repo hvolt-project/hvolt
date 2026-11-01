@@ -7,6 +7,37 @@ versions may change the CLI surface.
 
 ## [Unreleased]
 
+## [26.0.0-8] — 2026-11-01
+
+### Added
+
+- `hvolt sign <HAP>` signs a bare unsigned package where it lies, with no project and no
+  build: the result stays in the package's own directory as `<name>-signed.hap` (an input
+  ending in `-unsigned` becomes `-signed`). Without `--p12/--profile/--cert` the package is
+  signed with the localSign test chain, bound to the `bundleName` it declares (`--bundle`
+  covers a package that declares none); giving all three materials signs with those instead.
+  The result is verified with `hap-sign-tool verify-app` before the command reports success.
+- `hvolt push --hap <FILE>` installs a package at an arbitrary path. An unsigned package is
+  refused before reaching `hdc`, which would otherwise only report a signature error.
+
+### Fixed
+
+- Signedness is now read from the archive (`META-INF/*.sig|.rsa|.ec`) instead of the file
+  name, so a package named `*-signed.hap` whose contents carry no signature is still signed,
+  and one that really is signed is refused rather than overwritten.
+- Module-level `metadata` is no longer dropped from the generated `module.json5`. `resource`
+  and `value` are emitted as the mutually exclusive fields they are, and the list no longer
+  assumes a preceding section — a non-entry module used to produce a closing bracket followed
+  by a comma, which `hvigor` rejects as invalid JSON.
+- A dependency declared with parent components now resolves to its mirrored copy under
+  `build/<basename>/` instead of overshooting one level above `build/` into the source tree;
+  `.har` file dependencies keep their declared path verbatim, and a dependency with no local
+  path is emitted as its version rather than a `file:` path to a directory that does not exist.
+- `libs/` content that `hvigor` will drop (anything but `*.so`) is announced at assemble time
+  with the source-to-destination mapping, instead of being silently left out of the package.
+- Multi-device ambiguity errors list the connected devices and both remedies (`hvolt device
+  connect <serial>`, or `-d <serial>` per command).
+
 ## [26.0.0-7] — 2026-10-27
 
 ### Added

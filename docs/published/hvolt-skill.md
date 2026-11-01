@@ -270,10 +270,10 @@ cargo test
 
 | 命令 | 说明 |
 |---|---|
-| `hvolt sign` | AGC 签名：CSR→证书→登记设备→profile（需先 `hvolt agc login`） |
-| `hvolt sign --local` | 官方公开测试链本地签名（**仅开发板/模拟器**；零售机装不上） |
+| `hvolt sign [HAP]` | AGC 签名：CSR→证书→登记设备→profile（需先 `hvolt agc login`）。给了 `HAP` 时签那个裸包：默认走 localSign 测试链，profile 绑**包内 bundleName**（缺失时 `--bundle` 补），结果留在包所在目录的 `<name>-signed.hap`（输入以 `-unsigned` 结尾则换成 `-signed`），签完用 `hap-sign-tool verify-app` 自校验；`--p12/--profile/--cert` 三项同时给出时改用这些材料签 |
+| `hvolt sign --local [HAP]` | 官方公开测试链本地签名（**仅开发板/模拟器**；零售机装不上）。给了 `HAP` 时签该裸包，行为同上；**已带签名的包会被拒绝**（按包内 `META-INF` 判，不看文件名） |
 | `hvolt apply` | hqf 增量补丁部署（要求已装同身份包） |
-| `hvolt push [-d serial]` | 推送 newest `output/*-signed.hap` 并安装 |
+| `hvolt push [-d serial] [--hap FILE]` | 推送 newest `output/*-signed.hap` 并安装；`--hap` 指定任意位置的包文件，**未签名的包直接报错**而不是丢给 hdc |
 | `hvolt screenshot -o x.jpeg [-d serial]` | 设备截图（设备侧输出 jpeg） |
 | `hvolt ui dump` | ArkUI 布局树 dump（uitest dumpLayout） |
 | `hvolt device list \| connect <host:port> \| remote` | 设备列表 / TCP 连接（tconn）/ 登记跨机安装目标 |
