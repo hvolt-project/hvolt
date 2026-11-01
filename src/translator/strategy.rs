@@ -5,6 +5,29 @@
 
 use crate::config::{AppConfig, ModuleConfig, NativeModuleConfig};
 
+/// Member directory path as it must appear in a module's `oh-package.json5`.
+///
+/// A module's `file:` entries resolve from `build/<member>/`, so the emitted prefix is
+/// `./../` — one level up, to the build root, where assemble mirrors every member as
+/// `build/<basename>/`. A declared path that already carries parent components
+/// (`../xmax_sdk`) stacks with that prefix and lands one level above build/, back in the
+/// source tree. Reducing it to the basename keeps the entry on the mirrored copy.
+///
+/// Only member directories take this route. A `.har` file dependency keeps its declared
+/// path (see the caller): it is not mirrored under `build/<basename>`.
+fn oh_package_dep_path(path: &str) -> String {
+    let candidate = std::path::Path::new(path);
+    let has_parent_component = candidate
+        .components()
+        .any(|component| matches!(component, std::path::Component::ParentDir));
+    if has_parent_component {
+        if let Some(name) = candidate.file_name() {
+            return name.to_string_lossy().to_string();
+        }
+    }
+    path.to_string()
+}
+
 /// API version → HarmonyOS version string mapping.
 /// API 12–24 use "X.Y.Z(N)" format; API 26+ use plain version number.
 pub fn api_to_version(api: u32) -> String {
@@ -621,6 +644,51 @@ impl VersionStrategy for V26Strategy {
         // srcEntry is what DevEco projects never have, so it is only emitted for HSP/HAR. Those
         // keep their entry file at the module root (assemble copies it there), so the path must
         // not point into entryability/ — hvigor rejects the generated manifest otherwise.
+        // Module-level metadata: inline `value` entries (e.g. ohos.arkui.UIMaterial.state=enable)
+        // and `resource` entries both live here, beside the module object. The two fields are
+        // mutually exclusive in module.json5, and an entry carrying neither is not emittable —
+        // dropping it beats writing `"resource": ""`.
+        let metadata_items: Vec<String> = m
+            .metadata
+            .iter()
+            .filter_map(|item| {
+                if !item.value.is_empty() {
+                    Some(format!(
+                        "      {{ \"name\": \"{}\", \"value\": \"{}\" }}",
+                        item.name, item.value
+                    ))
+                } else if !item.resource.is_empty() {
+                    Some(format!(
+                        "      {{ \"name\": \"{}\", \"resource\": \"{}\" }}",
+                        item.name, item.resource
+                    ))
+                } else {
+                    None
+                }
+            })
+            .collect();
+        // Every section before this one opens with its own comma, and the `deviceTypes` line is
+        // already closed by one. A non-entry module can have none of them, so this list cannot
+        // assume a predecessor: emitting a comma there produces `],\n,` and invalid JSON.
+        let metadata_has_predecessor = !isolation_section.is_empty()
+            || !install_section.is_empty()
+            || !abilities_json.is_empty()
+            || !extension_json.is_empty()
+            || !permissions_json.is_empty();
+        let module_metadata_line: String = if metadata_items.is_empty() {
+            String::new()
+        } else if metadata_has_predecessor {
+            format!(
+                ",\n    \"metadata\": [\n{}\n    ]",
+                metadata_items.join(",\n")
+            )
+        } else {
+            format!(
+                "\n    \"metadata\": [\n{}\n    ]",
+                metadata_items.join(",\n")
+            )
+        };
+
         let src_entry_line = if is_entry || is_har {
             String::new()
         } else if ht == "shared" || ht == "hsp" {
@@ -644,7 +712,7 @@ impl VersionStrategy for V26Strategy {
     "deviceTypes": [
 {}
     ],
-{}{}{}{}{}
+{}{}{}{}{}{}
   }}
 }}"#,
             m.name,
@@ -657,7 +725,8 @@ impl VersionStrategy for V26Strategy {
             install_section,
             abilities_json,
             extension_json,
-            permissions_json
+            permissions_json,
+            module_metadata_line
         )
     }
 
@@ -763,6 +832,23 @@ impl VersionStrategy for V26Strategy {
             r#""main": "","#.to_string()
         };
 
+        // A dependency without a local path is a registry package: ohpm resolves it by version,
+        // not through a `file:` link. Rewriting it to `file:./../<name>` pointed at a directory
+        // that does not exist and emptied the module's dependency block.
+        //
+        // A `.har` file is already declared relative to the module directory and is copied into
+        // `build/<member>/libs/`, so it keeps its declared path verbatim: reducing it to a
+        // basename would drop the `libs/` segment and point at a file that is not there.
+        let dep_spec = |dep: &crate::config::Dependency| -> String {
+            if dep.path.is_empty() {
+                dep.version.clone()
+            } else if dep.path.ends_with(".har") {
+                format!("file:./../{}", dep.path)
+            } else {
+                format!("file:./../{}", oh_package_dep_path(&dep.path))
+            }
+        };
+
         // Module-scoped declarations win; an entry module additionally inherits the app-level
         // ones, because its own `[dependencies]` block used to be silently ignored.
         let mut declared: std::collections::BTreeMap<&str, String> = Default::default();
@@ -771,11 +857,11 @@ impl VersionStrategy for V26Strategy {
                 if native_module_names(native_modules).contains(name) {
                     continue;
                 }
-                declared.insert(name.as_str(), format!("file:./../{}", dep.path));
+                declared.insert(name.as_str(), dep_spec(dep));
             }
         }
         for (name, dep) in &config.dependencies {
-            declared.insert(name.as_str(), format!("file:./../{}", dep.path));
+            declared.insert(name.as_str(), dep_spec(dep));
         }
         let mut dep_entries: Vec<String> = declared
             .iter()
@@ -1451,7 +1537,7 @@ mod native_options_placement_tests {
 #[cfg(test)]
 mod shared_module_tests {
     use super::*;
-    use crate::config::ModuleInfo;
+    use crate::config::{MetadataItem, ModuleInfo};
 
     fn shared_module(entry: &str) -> ModuleConfig {
         ModuleConfig {
@@ -1461,6 +1547,7 @@ mod shared_module_tests {
                 routes: vec![],
                 entry: entry.into(),
                 skills: vec![],
+                metadata: Vec::new(),
                 module_type: "hsp".into(),
                 abilities: vec![],
                 device_types: vec!["phone".into()],
@@ -1479,6 +1566,37 @@ mod shared_module_tests {
                 native_arguments: String::new(),
             },
         }
+    }
+
+    /// A non-entry module has no abilities, extensions or permissions, so the metadata list is
+    /// the first section after `deviceTypes` and must not open with its own comma.
+    #[test]
+    fn shared_module_metadata_without_predecessor_stays_valid_json() {
+        let mut cfg = shared_module("Index.ets");
+        cfg.module.metadata = vec![MetadataItem {
+            name: "ohos.arkui.UIMaterial.state".into(),
+            resource: String::new(),
+            value: "enable".into(),
+        }];
+        let out = V26Strategy::new(26).generate_module_json5(&cfg, &AppConfig::default_for("x"));
+        assert!(!out.contains("],\n,"), "{}", out);
+        let parsed: Result<serde_json::Value, _> = serde_json::from_str(&out);
+        assert!(parsed.is_ok(), "{}", out);
+    }
+
+    /// `resource` and `value` are mutually exclusive; an entry carrying neither cannot be
+    /// emitted, and an empty `"resource": ""` in its place is what the filter prevents.
+    #[test]
+    fn metadata_entry_without_resource_or_value_is_dropped() {
+        let mut cfg = shared_module("Index.ets");
+        cfg.module.metadata = vec![MetadataItem {
+            name: "empty".into(),
+            resource: String::new(),
+            value: String::new(),
+        }];
+        let out = V26Strategy::new(26).generate_module_json5(&cfg, &AppConfig::default_for("x"));
+        assert!(!out.contains("metadata"), "{}", out);
+        assert!(!out.contains("empty"), "{}", out);
     }
 
     /// A shared module's srcEntry is resolved from src/main/, where assemble puts the entry file,
@@ -1564,6 +1682,7 @@ mod module_dependency_tests {
                 routes: vec![],
                 entry: "Index.ets".into(),
                 skills: vec![],
+                metadata: Vec::new(),
                 module_type: "hsp".into(),
                 abilities: vec![],
                 device_types: vec!["phone".into()],
@@ -1596,5 +1715,82 @@ mod module_dependency_tests {
         );
         assert!(out.contains("shared_b"), "{}", out);
         assert!(out.contains("file:./../shared_b"), "{}", out);
+    }
+
+    /// A member declared with parent components must resolve to its mirrored copy under build/,
+    /// not overshoot the build root back into the source tree.
+    #[test]
+    fn outside_project_dependency_uses_mirrored_basename() {
+        let mut cfg = shared_with_deps();
+        cfg.dependencies.insert(
+            "@xmax/sdk".to_string(),
+            Dependency {
+                path: "../xmax_sdk".into(),
+                version: "1.0.0".into(),
+            },
+        );
+        let out = V26Strategy::new(26).generate_module_oh_package(
+            &cfg,
+            &AppConfig::default_for("x"),
+            &[],
+        );
+        assert!(
+            out.contains("\"@xmax/sdk\": \"file:./../xmax_sdk\""),
+            "{}",
+            out
+        );
+    }
+
+    /// A `.har` file is copied into `build/<member>/libs/` and is declared relative to the
+    /// module directory already, so the emitted entry keeps the path the project wrote.
+    #[test]
+    fn har_dependency_keeps_its_declared_path() {
+        let mut cfg = shared_with_deps();
+        cfg.dependencies.insert(
+            "@bytertc/volcenginertc".to_string(),
+            Dependency {
+                path: "entry/libs/VolcEngineRTCToB-Release.har".into(),
+                version: "3.60.151950".into(),
+            },
+        );
+        let out = V26Strategy::new(26).generate_module_oh_package(
+            &cfg,
+            &AppConfig::default_for("x"),
+            &[],
+        );
+        assert!(
+            out.contains(
+                "\"@bytertc/volcenginertc\": \"file:./../entry/libs/VolcEngineRTCToB-Release.har\""
+            ),
+            "{}",
+            out
+        );
+    }
+
+    /// Reducing a `.har` path to its basename would drop the `libs/` segment and point at a
+    /// `build/<name>.har` that assemble never creates.
+    ///
+    /// `build/<member>/` is a sibling of the module directory, so the emitted `./../` cancels
+    /// the walk into build/ and the declared `../../` keeps pointing where the project meant.
+    #[test]
+    fn har_dependency_with_parent_components_keeps_declared_path() {
+        let mut cfg = shared_with_deps();
+        cfg.dependencies.insert(
+            "@bytertc/volcenginertc".to_string(),
+            Dependency {
+                path: "../../.har-cache/VolcEngineRTCToB-Release.har".into(),
+                version: "3.60.151950".into(),
+            },
+        );
+        let out = V26Strategy::new(26).generate_module_oh_package(
+            &cfg,
+            &AppConfig::default_for("x"),
+            &[],
+        );
+        assert!(
+            out.contains("file:./../../../.har-cache/VolcEngineRTCToB-Release.har"),
+            "{}",
+            out
+        );
     }
 }

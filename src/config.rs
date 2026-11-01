@@ -291,6 +291,9 @@ pub struct ModuleInfo {
     /// Skills for the entry ability. Empty = default home skill added automatically.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub skills: Vec<Skill>,
+    /// Module-level metadata, e.g. ohos.arkui.UIMaterial.state = enable.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub metadata: Vec<MetadataItem>,
     /// Module type: "hsp" / "shared" for non-entry modules. Entry modules omit this.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     #[serde(rename = "type")]
@@ -374,7 +377,12 @@ pub struct UriScheme {
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct MetadataItem {
     pub name: String,
+    /// `resource` and `value` are mutually exclusive in module.json5: `resource` points at a
+    /// profile, `value` carries an inline string (e.g. ohos.arkui.UIMaterial.state = enable).
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub resource: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub value: String,
 }
 
 /// Native module hvolt.toml (e.g. libxxx/hvolt.toml)
@@ -606,6 +614,7 @@ impl ModuleConfig {
             module: ModuleInfo {
                 name: "src".to_string(),
                 module_type: String::new(),
+                metadata: Vec::new(),
                 entry: "EntryAbility.ets".to_string(),
                 routes: vec!["pages/Index.ets".to_string()],
                 skills: vec![],
