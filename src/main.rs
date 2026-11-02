@@ -558,6 +558,12 @@ fn main() {
                 agc_failed(backend::delete_cert(&id))
             }
             cli::AgcAction::Devices => agc_failed(backend::list_devices()),
+            cli::AgcAction::Device { action } => match action {
+                cli::AgcDeviceAction::Add { udid, name } => {
+                    agc_failed(backend::add_device(&udid, name.as_deref()))
+                }
+                cli::AgcDeviceAction::Delete { id } => agc_failed(backend::delete_device(&id)),
+            },
             cli::AgcAction::Whoami => agc_failed(backend::whoami()),
         },
         cli::Command::Tools { action } => match action {

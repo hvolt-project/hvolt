@@ -352,8 +352,31 @@ pub enum AgcAction {
     },
     /// List registered devices
     Devices,
+    /// Register a device by UDID
+    Device {
+        #[command(subcommand)]
+        action: AgcDeviceAction,
+    },
     /// Show current login user info
     Whoami,
+}
+
+/// `hvolt agc device` subcommands.
+#[derive(Subcommand)]
+pub enum AgcDeviceAction {
+    /// Register a device UDID (no-op if already registered)
+    Add {
+        /// Device UDID (hdc shell bm get --udid)
+        udid: String,
+        /// Display name in AGC (default: hvolt-device-<last 6 of udid>)
+        #[arg(long)]
+        name: Option<String>,
+    },
+    /// Delete a device record by its AGC id (see `hvolt agc devices`)
+    Delete {
+        /// Service-side device id, not the UDID
+        id: String,
+    },
 }
 
 #[derive(Subcommand)]
