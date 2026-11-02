@@ -91,6 +91,31 @@ pub(crate) fn apl_pair(apl: &str) -> Result<(String, String), String> {
     Ok((p.0.into(), p.1.into()))
 }
 
+/// The leaf certificate of a PEM chain.
+///
+/// The official test chain is ordered root → CA → leaf (measured 2026-11-03:
+/// `OpenHarmony Application Root CA`, `OpenHarmony Application CA`,
+/// `OpenHarmony Application Release`), and `bundle-info.distribution-certificate`
+/// names the certificate that signed the app — the leaf. A signer reads that field
+/// as exactly one certificate, so the whole chain must not be pasted in.
+pub(crate) fn leaf_certificate(chain_pem: &str) -> Result<String, String> {
+    const BEGIN: &str = "-----BEGIN CERTIFICATE-----";
+    const END: &str = "-----END CERTIFICATE-----";
+    let mut blocks = Vec::new();
+    let mut rest = chain_pem;
+    while let Some(start) = rest.find(BEGIN) {
+        let tail = &rest[start..];
+        let end = tail
+            .find(END)
+            .ok_or_else(|| "unterminated PEM certificate block".to_string())?;
+        blocks.push(tail[..end + END.len()].to_string());
+        rest = &tail[end + END.len()..];
+    }
+    blocks
+        .pop()
+        .ok_or_else(|| "no certificate found in the application chain".to_string())
+}
+
 /// Build the unsgned profile JSON for this project. The official template's
 /// STATIC validity (expired 2023-07) is deliberately recomputed — a copied
 /// template would sign an expired identity, which hap-sign-tool happily does.
@@ -284,8 +309,6 @@ fn flavor_label(kind: ProfileKind) -> &'static str {
 /// Bound to the bundle rather than to the working directory on purpose: the profile pins the
 /// identity, so a package from elsewhere signs under its own bundle name.
 pub(crate) fn test_chain(bundle: &str, apl: &str, kind: ProfileKind) -> Result<TestChain, String> {
-    use std::process::Command;
-
     let env = sdk::detect("").map_err(|e| format!("SDK env: {}", e))?;
     let dir = ensure_materials()?;
     let p12 = dir.join("OpenHarmony.p12");
@@ -294,13 +317,12 @@ pub(crate) fn test_chain(bundle: &str, apl: &str, kind: ProfileKind) -> Result<T
         ProfileKind::Debug => (dir.join("OpenHarmonyProfileDebug.pem"), "debug"),
         ProfileKind::Release => (dir.join("OpenHarmonyProfileRelease.pem"), "release"),
     };
-    let cert_pem = fs::read_to_string(&app_pem).map_err(|e| format!("read app cert: {}", e))?;
+    let chain_pem = fs::read_to_string(&app_pem).map_err(|e| format!("read app cert: {}", e))?;
+    // The profile names the signing certificate, not the chain it hangs off.
+    let cert_pem = leaf_certificate(&chain_pem)?;
 
     // unsgned profile for THIS bundle (fresh validity, pinned identity)
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|d| d.as_secs())
-        .unwrap_or(1_760_000_000);
+    let now = now_epoch();
     // anchor validity at the existing profile when it still has >90d life
     let anchor = existing_valid_not_before(&dir, bundle, flavor_name, apl, kind, now);
     let pj = profile_json(bundle, apl, kind, anchor, &cert_pem)?;
@@ -320,42 +342,22 @@ pub(crate) fn test_chain(bundle: &str, apl: &str, kind: ProfileKind) -> Result<T
     let p7b = dir.join(format!("{}-{}.p7b", bundle, flavor_name));
     if !profile_cache_valid(&p7b, &[&unsgned, &p12, &profile_pem]) {
         let (_, profile_alias) = aliases(kind);
-        let tool = crate::sign::find_hap_sign_tool(&env)?;
-        let java = crate::sign::find_java(&env);
-        let out = Command::new(&java)
-            .args([
-                "-jar",
-                &tool.to_string_lossy(),
-                "sign-profile",
-                "-mode",
-                "localSign",
-                "-keyAlias",
-                profile_alias,
-                "-keyPwd",
-                TEST_P12_PWD,
-                "-keystoreFile",
-                &p12.to_string_lossy(),
-                "-keystorePwd",
-                TEST_P12_PWD,
-                "-signAlg",
-                "SHA256withECDSA",
-                "-profileCertFile",
-                &profile_pem.to_string_lossy(),
-                "-inFile",
-                &unsgned.to_string_lossy(),
-                "-outFile",
-                &p7b.to_string_lossy(),
-            ])
-            .output()
-            .map_err(|e| format!("sign-profile: {}", e))?;
-        let so = String::from_utf8_lossy(&out.stdout).to_string();
-        if !out.status.success() || so.contains("[Fail]") {
+        let signed = crate::native_sign::sign_profile(
+            &crate::native_sign::ProfileSign {
+                store_file: &p12,
+                store_password: TEST_P12_PWD,
+                key_alias: profile_alias,
+                key_password: TEST_P12_PWD,
+                profile_cert: &profile_pem,
+                sign_alg: crate::sign::DEFAULT_SIGN_ALG,
+            },
+            &unsgned,
+            &p7b,
+        );
+        if let Err(e) = signed {
+            // A half-written p7b must not pass the cache check next run.
             let _ = fs::remove_file(&p7b);
-            return Err(format!(
-                "sign-profile failed:\n{}{}",
-                so.trim(),
-                String::from_utf8_lossy(&out.stderr).trim()
-            ));
+            return Err(format!("sign-profile failed: {e}"));
         }
         println!("  ✓ profile p7b generated");
     } else {
@@ -446,69 +448,47 @@ pub fn sign_external(
 }
 
 /// Verify the package that was just written, not the logs that announced it.
-fn verify_package(env: &crate::sdk::SdkEnv, hap: &Path) -> Result<(), String> {
-    use std::process::Command;
-    let tool = crate::sign::find_hap_sign_tool(env)?;
-    let java = crate::sign::find_java(env);
-    let tmp = std::env::temp_dir().join(format!("hvolt-verify-{}", std::process::id()));
-    fs::create_dir_all(&tmp).ok();
-    let out = Command::new(&java)
-        .args([
-            "-jar",
-            &tool.to_string_lossy(),
-            "verify-app",
-            "-inFile",
-            &hap.to_string_lossy(),
-            "-outCertChain",
-            &tmp.join("chain.cer").to_string_lossy(),
-            "-outProfile",
-            &tmp.join("profile.p7b").to_string_lossy(),
-        ])
-        .output()
-        .map_err(|e| format!("verify-app: {}", e))?;
-    if !out.status.success() {
+///
+/// Same acceptance as `verify-app` + `verify-profile`: the signing block and the
+/// profile's CMS signature must check out, and the profile must still cover now.
+fn verify_package(_env: &crate::sdk::SdkEnv, hap: &Path) -> Result<(), String> {
+    let verified = crate::native_sign::verify_application(hap)?;
+    let now = now_epoch();
+    if !profile_is_current(&verified.profile, now) {
         return Err(format!(
-            "verify-app failed: {}",
-            String::from_utf8_lossy(&out.stdout).trim()
+            "signed profile does not cover now ({now}): {}",
+            verified.profile["validity"]
         ));
-    }
-    let out = Command::new(&java)
-        .args([
-            "-jar",
-            &tool.to_string_lossy(),
-            "verify-profile",
-            "-inFile",
-            &tmp.join("profile.p7b").to_string_lossy(),
-            "-outFile",
-            &tmp.join("result.json").to_string_lossy(),
-        ])
-        .output()
-        .map_err(|e| format!("verify-profile: {}", e))?;
-    if !out.status.success() {
-        return Err(format!(
-            "verify-profile failed: {}",
-            String::from_utf8_lossy(&out.stdout).trim()
-        ));
-    }
-    let r: serde_json::Value = serde_json::from_str(
-        &fs::read_to_string(tmp.join("result.json")).map_err(|e| e.to_string())?,
-    )
-    .map_err(|e| format!("parse verify result: {}", e))?;
-    if r["verifiedPassed"] != serde_json::Value::Bool(true) {
-        return Err(format!("signed HAP failed its own verification: {}", r));
     }
     let sha = sdk::sha256_file(hap)?;
-    let bundle_in = r["content"]["bundle-info"]["bundle-name"]
-        .as_str()
-        .unwrap_or("?");
     println!(
         "✓ verified final package: {} (bundle {})",
         hap.file_name().unwrap().to_string_lossy(),
-        bundle_in
+        verified.bundle
     );
     println!("  SHA-256 {}", sha);
-    let _ = fs::remove_dir_all(&tmp);
     Ok(())
+}
+
+/// Seconds since the epoch, with a fixed fallback for a clock before 1970.
+fn now_epoch() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(1_760_000_000)
+}
+
+/// Whether the profile's validity window covers `now`.
+///
+/// `verify-profile` reported this as part of `verifiedPassed`; with the check in
+/// process it is stated explicitly, so an expired profile cannot pass as signed.
+fn profile_is_current(profile: &serde_json::Value, now: u64) -> bool {
+    let not_before = profile["validity"]["not-before"].as_u64();
+    let not_after = profile["validity"]["not-after"].as_u64();
+    match (not_before, not_after) {
+        (Some(nb), Some(na)) => nb <= now && now <= na,
+        _ => false,
+    }
 }
 
 #[cfg(test)]
@@ -530,6 +510,21 @@ mod tests {
             ("system_core".into(), "hos_system_app".into())
         );
         assert!(apl_pair("highest").is_err());
+    }
+
+    #[test]
+    fn leaf_certificate_takes_the_last_block_of_a_chain() {
+        let chain = "-----BEGIN CERTIFICATE-----\nROOT\n-----END CERTIFICATE-----\n\
+                     -----BEGIN CERTIFICATE-----\nLEAF\n-----END CERTIFICATE-----";
+        let leaf = leaf_certificate(chain).unwrap();
+        assert!(leaf.starts_with("-----BEGIN CERTIFICATE-----"));
+        assert!(leaf.contains("LEAF"));
+        assert!(!leaf.contains("ROOT"));
+    }
+
+    #[test]
+    fn leaf_certificate_rejects_a_chain_without_certificates() {
+        assert!(leaf_certificate("not a certificate").is_err());
     }
 
     #[test]
@@ -687,5 +682,20 @@ mod tests {
         assert!(!sha256_matches(&f, "deadbeef"));
         assert!(!sha256_matches(&dir.join("nope"), &real));
         let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn validity_window_is_enforced_at_both_ends() {
+        let now = 1_760_000_000u64;
+        let window = |nb: u64, na: u64| serde_json::json!({ "validity": { "not-before": nb, "not-after": na } });
+        assert!(profile_is_current(&window(now - 10, now + 10), now));
+        assert!(profile_is_current(&window(now, now), now));
+        assert!(!profile_is_current(&window(now + 1, now + 10), now));
+        assert!(!profile_is_current(&window(now - 10, now - 1), now));
+    }
+
+    #[test]
+    fn a_profile_without_a_validity_window_is_not_current() {
+        assert!(!profile_is_current(&serde_json::json!({}), 1_760_000_000));
     }
 }

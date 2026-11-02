@@ -39,6 +39,7 @@ rand = "0.8"
 rsa = { version = "0.9", features = ["sha2", "pem"] }
 zip = { version = "2", default-features = false, features = ["deflate"] }
 regex-lite = "0.1"
+hapsigner = { version = "0.2.0", default-features = false }
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"

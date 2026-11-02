@@ -10,12 +10,14 @@ mod devtools;
 mod doctor;
 mod emulator;
 mod hap;
+mod hap_pack;
 mod hdc;
 mod hdc_proto;
 mod http;
 mod import;
 mod lint;
 mod lsp;
+mod native_sign;
 mod pipeline;
 mod platform;
 mod scaffold;
@@ -211,6 +213,16 @@ fn main() {
                 None => pipeline::push_app(std::path::Path::new("."), device.as_deref()),
             };
             result.unwrap_or_else(|e| pipeline::report_push_failure(e));
+        }
+        cli::Command::PackHap { module_build, out } => {
+            let inputs = hap_pack::inputs_from_module_build(&module_build);
+            match hap_pack::pack(&inputs, &out) {
+                Ok(()) => println!("✓ packed {}", out.display()),
+                Err(e) => {
+                    eprintln!("✗ {}", e);
+                    std::process::exit(1);
+                }
+            }
         }
         cli::Command::HdcProbe {
             addr,

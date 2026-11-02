@@ -115,6 +115,14 @@ pub enum Command {
         #[arg(long, value_name = "FILE")]
         hap: Option<PathBuf>,
     },
+    /// Pack a HAP from hvigor intermediates without java (experimental)
+    #[command(hide = true)]
+    PackHap {
+        /// Module build directory (…/build/default)
+        module_build: std::path::PathBuf,
+        /// Output .hap path
+        out: std::path::PathBuf,
+    },
     /// Probe a device's hdc daemon over the wire protocol (experimental)
     ///
     /// Speaks the native frame format directly instead of spawning `hdc`: one handshake is sent
@@ -145,7 +153,7 @@ pub enum Command {
         #[arg(long, value_name = "DIR")]
         cache_dir: Option<PathBuf>,
     },
-    /// Package-side quality gate (official app_check_tool engine)
+    /// Package-side quality gate: duplicate files, oversized files, per-suffix totals
     Check {
         /// also flag files over this size (bytes, or 50K / 2M / 1G, case-insensitive)
         #[arg(long, value_parser = parse_size)]
