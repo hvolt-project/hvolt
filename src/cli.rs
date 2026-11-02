@@ -115,6 +115,25 @@ pub enum Command {
         #[arg(long, value_name = "FILE")]
         hap: Option<PathBuf>,
     },
+    /// Probe a device's hdc daemon over the wire protocol (experimental)
+    ///
+    /// Speaks the native frame format directly instead of spawning `hdc`: one handshake is sent
+    /// and the device's auth state and version are reported. Hidden until the protocol work is
+    /// complete.
+    #[command(hide = true)]
+    HdcProbe {
+        /// `<host>:<port>` of the device's hdcd, e.g. 192.168.1.3:8710
+        addr: String,
+        /// Run one shell command over the authenticated connection and print its output
+        #[arg(long, value_name = "COMMAND")]
+        shell: Option<String>,
+        /// Copy a local file to the device: `--put <local> <remote>`
+        #[arg(long, num_args = 2, value_names = ["LOCAL", "REMOTE"])]
+        put: Option<Vec<String>>,
+        /// Install a package on the device
+        #[arg(long, value_name = "HAP")]
+        install: Option<std::path::PathBuf>,
+    },
     /// Build + sign + push + launch in one shot
     Run {
         /// Device address (e.g. 192.168.1.100:38565 or serial number)

@@ -11,6 +11,7 @@ mod doctor;
 mod emulator;
 mod hap;
 mod hdc;
+mod hdc_proto;
 mod http;
 mod import;
 mod lint;
@@ -210,6 +211,46 @@ fn main() {
                 None => pipeline::push_app(std::path::Path::new("."), device.as_deref()),
             };
             result.unwrap_or_else(|e| pipeline::report_push_failure(e));
+        }
+        cli::Command::HdcProbe {
+            addr,
+            shell,
+            put,
+            install,
+        } => {
+            let timeout = std::time::Duration::from_secs(60);
+            let identity = hdc_proto::HostIdentity::load_from_home().unwrap_or_else(|e| {
+                eprintln!("✗ {}", e);
+                std::process::exit(1);
+            });
+            let result = match (shell, put) {
+                (_, Some(paths)) => {
+                    let local = std::path::PathBuf::from(&paths[0]);
+                    hdc_proto::send_file(&addr, "Ver: 3.2.0", &identity, &local, &paths[1], timeout)
+                        .map(|()| println!("✓ sent {} -> {}", paths[0], paths[1]))
+                }
+                (Some(command), None) => {
+                    hdc_proto::shell(&addr, "Ver: 3.2.0", &identity, &command, timeout).map(|out| {
+                        print!("{}", out);
+                    })
+                }
+                (None, None) if install.is_some() => {
+                    let package = install.expect("checked above");
+                    hdc_proto::install(&addr, "Ver: 3.2.0", &identity, &package, timeout)
+                        .map(|text| println!("{}", text))
+                }
+                (None, None) => hdc_proto::authenticate(&addr, "Ver: 3.2.0", &identity, timeout)
+                    .map(|report| {
+                        println!("host      : {}", report.hostname);
+                        println!("device    : {}", report.device_name);
+                        println!("auth      : {}", report.auth_status);
+                        println!("message   : {}", report.device_message);
+                    }),
+            };
+            if let Err(e) = result {
+                eprintln!("✗ {}", e);
+                std::process::exit(1);
+            }
         }
         cli::Command::Run {
             device,
