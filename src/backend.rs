@@ -52,6 +52,34 @@ pub fn sign_remote(project_dir: &Path) -> Result<(), String> {
     }
 }
 
+/// Register one device UDID against AppGallery Connect.
+pub fn add_device(udid: &str, name: Option<&str>) -> Result<(), String> {
+    #[cfg(feature = "agc-local")]
+    {
+        imp::agc::add_device_cli(udid, name);
+        Ok(())
+    }
+    #[cfg(not(feature = "agc-local"))]
+    {
+        let _ = (udid, name);
+        Err(NO_BACKEND.to_string())
+    }
+}
+
+/// Delete one AGC device record by its service-side id.
+pub fn delete_device(id: &str) -> Result<(), String> {
+    #[cfg(feature = "agc-local")]
+    {
+        imp::agc::delete_device_cli(id);
+        Ok(())
+    }
+    #[cfg(not(feature = "agc-local"))]
+    {
+        let _ = id;
+        Err(NO_BACKEND.to_string())
+    }
+}
+
 /// Interactive login (opens a browser).
 pub fn login() -> Result<(), String> {
     #[cfg(feature = "agc-local")]

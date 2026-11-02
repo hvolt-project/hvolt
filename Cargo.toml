@@ -35,6 +35,8 @@ ureq = { version = "2", default-features = false, features = ["tls", "gzip", "js
 sha2 = "0.10"
 base64 = "0.22"
 rand = "0.8"
+# hdc wire protocol: RSA-3072 challenge-response, PKCS#1 v1.5 over SHA-256.
+rsa = { version = "0.9", features = ["sha2", "pem"] }
 zip = { version = "2", default-features = false, features = ["deflate"] }
 regex-lite = "0.1"
 
