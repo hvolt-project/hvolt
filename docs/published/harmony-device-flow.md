@@ -9,21 +9,20 @@ several.
 
 | Role | What it needs | Responsibility |
 |---|---|---|
-| Build host | Rust toolchain, SDK, hvigor/ohpm/node/jdk | `hvolt build` (produces the unsigned HAP) |
+| Build host | Rust toolchain, SDK compilers | `hvolt build` (produces the signed HAP) |
 | Sign host | AppGallery Connect login state (see below) | `hvolt sign` (exchanges CSR for cert + profile) |
-| Device host | hdc + the physical device (USB or wireless) | `hvolt push` / `hdc install` / `hdc shell` |
+| Device host | the physical device (USB or wireless) | `hvolt push` / shell over the device link |
 
 The two constraints that usually force a split:
 
 - **Signing must reach AppGallery Connect.** Any host with a valid AGC login can sign.
-- **Installing must reach the device.** Only the host that can see the device (hdc `list
+- **Installing must reach the device.** Only the host that can reach the device (`hvolt device
   targets`) can push.
 
 Nothing in hvolt requires the same host to do both. When the device is not attached to the
 signing host, hand the UDID over explicitly:
 
 ```bash
-UDID=$(hdc shell bm get --udid | tail -1)     # on the device host
 HVOLT_DEVICE_UDID=$UDID hvolt sign            # on the sign host
 ```
 
@@ -70,11 +69,11 @@ hvolt build                 # ← this one produces the signed HAP
   The AGC generator now uses a non-hex alphabet (since 26.0.0-3). Workaround if you hit an old
   password: repackage the keystore with `keytool -importkeystore` using a non-hex password and
   update `hvolt.toml` to match.
-- **Wireless debugging drops.** When `hdc list targets` only shows `COM*` entries and install
-  reports `need connect-key`, reconnect first: `hdc tconn <ip:port>`.
+- **Wireless debugging drops.** When `hvolt device list` shows no target, reconnect first:
+  `hvolt device connect <ip:port>`.
 - **`hvolt sign` reports `No device UDID found`** when no device is visible — pass
   `HVOLT_DEVICE_UDID` as shown above.
-- **`local.properties` (sdk.dir)**: hvolt writes it during `run_assemble` because hvigor
+- **`local.properties` (sdk.dir)**: hvolt no longer needs it: the native chain reads the SDK path from config
   resolves the SDK from that file as well as `DEVECO_SDK_HOME`; without it, module tasks abort
   with `00303208 Unable to find 'sdk.dir'`. DevEco Studio writes the same file.
 - **Verify the release build you actually ship.** `hvolt agc whoami` returning an account means

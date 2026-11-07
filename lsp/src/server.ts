@@ -2,7 +2,7 @@
 //
 // Semantics come from the TypeScript fork inside the user's SDK (it parses .ets and
 // ArkUI structs); diagnostics deliberately do not — the fork mis-reports legal
-// ArkUI block-chains, so diagnostics are left to hvigor, codelinter and
+// ArkUI block-chains, so diagnostics come from the build and the linter
 // app_check_tool. See lsp/DESIGN.md.
 import {
   createConnection,
@@ -16,7 +16,7 @@ import {
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { execFile } from "node:child_process";
 import { collectSources } from "./project.js";
-import { type Diagnostic, fromLint, parseHvigor, rangeOf } from "./diagnostics.js";
+import { type Diagnostic, fromLint, parseBuildError, rangeOf } from "./diagnostics.js";
 import { COMMANDS, type CommandRequest, commandSpec } from "./commands.js";
 import { completeKeys, declaredRoutes, inRouterCall } from "./hvolttoml.js";
 import { dependencyAt, dependencyTarget, validateToml } from "./tomlcheck.js";
@@ -1278,7 +1278,7 @@ interface RunResult {
 
 function run(binary: string, args: string[], cwd: string): Promise<RunResult> {
   return new Promise((resolve) => {
-    // Both streams matter: hvigor writes progress to stdout and the diagnostics to
+    // Both streams matter: progress goes to stdout and the diagnostics to
     // stderr, so the two are concatenated rather than picking one. The exit code is
     // the only reliable success signal — grepping the text misses messages such as
     // "SDK not available".
@@ -1519,7 +1519,7 @@ connection.onExecuteCommand(async ({ command, arguments: args }) => {
 
   if (command === "hvolt.buildDiagnostics") {
     const { output } = await run(binaryPath(), ["build"], cwd);
-    const parsed = parseHvigor(output, root);
+    const parsed = parseBuildError(output, root);
     if (process.env.HVOLT_LSP_DEBUG) {
       process.stderr.write(`hvolt-lsp: build in ${cwd} → ${output.length} bytes, ${parsed.length} diagnostics\n`);
     }
@@ -1538,7 +1538,7 @@ connection.onExecuteCommand(async ({ command, arguments: args }) => {
 
   // A build's failures belong on the file that caused them.
   if (spec.args[0] === "build" || spec.args[0] === "assemble") {
-    publish("build", parseHvigor(output, root));
+    publish("build", parseBuildError(output, root));
   }
   const failed = code !== 0;
   const summary = `hvolt ${spec.args.join(" ")} → ${failed ? "failed" : "ok"} (${seconds}s)`;

@@ -1,0 +1,48 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "demo"
+    },
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "demo"
+    },
+    {
+      "name": "Test_Delay",
+      "value": "Test delay"
+    },
+    {
+      "name": "Collect_Tip",
+      "value": "Collected"
+    },
+    {
+      "name": "favorite_proxy_no",
+      "value": "Favorites are full"
+    },
+    {
+      "name": "uncollected_tip",
+      "value": "Removed from favorites"
+    },
+    {
+      "name": "Speed_Delay",
+      "value": "Speed and delay"
+    },
+    {
+      "name": "Speed_Delay_Content",
+      "value": "Speed and delay are different measures"
+    },
+    {
+      "name": "Sure",
+      "value": "OK"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "extractInsightIntents": [
+    {
+      "decoratorFile": "@normalized:N&&&entry/src/main/ets/pages/Index&",
+      "decoratorClass": "V2Card",
+      "bundleName": "com.example.demo",
+      "moduleName": "entry",
+      "decoratorType": "@Provider"
+    },
+    {
+      "decoratorFile": "@normalized:N&&&entry/src/main/ets/pages/Index&",
+      "decoratorClass": "V2Card",
+      "bundleName": "com.example.demo",
+      "moduleName": "entry",
+      "decoratorType": "@Monitor"
+    },
+    {
+      "decoratorFile": "@normalized:N&&&entry/src/main/ets/pages/Index&",
+      "decoratorClass": "V1Badge",
+      "bundleName": "com.example.demo",
+      "moduleName": "entry",
+      "decoratorType": "@Consumer"
+    }
+  ]
+}

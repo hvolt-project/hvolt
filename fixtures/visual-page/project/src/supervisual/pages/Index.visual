@@ -1,0 +1,12 @@
+{
+  "document": {"VisualVersion": "12", "type": "ETS", "path": "", "custom": false},
+  "visualModel": {
+    "id": "wrapper",
+    "type": "div",
+    "property": {"dataType": "Map", "value": {"flex-direction": "column"}},
+    "children": [
+      {"id": "t1", "type": "text", "property": {"dataType": "Map", "value": {"content": "from visual"}}, "children": []}
+    ]
+  },
+  "formData": {}
+}

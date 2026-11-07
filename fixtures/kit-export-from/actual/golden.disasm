@@ -1,0 +1,1042 @@
+# source binary: modules.abc
+
+# ====================
+# LITERALS
+
+0 0xdb5 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+1 0xd51 { 22 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@0>#initialRender, method_affiliate:0, string:"rerender", method:#~@0>#rerender, method_affiliate:0, string:"getEntryName", method:#~@0<#getEntryName, method_affiliate:0, i32:6, ]}
+10 0x3b3 
+3 0xdf5 { 3 [ i32:1, string:"Index", i32:0, ]}
+4 0x720 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+7 0x6c9 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+8 0xb35 { 2 [ string:"Index", string:"initialRender", ]}
+9 0x67b { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+2 0xb43 { 81 [
+	MODULE_REQUEST_ARRAY: {
+		0 : @native:ohos.curves,
+		1 : @ohos:ability.ability,
+		2 : @ohos:ability.errorCode,
+		3 : @ohos:ability.featureAbility,
+		4 : @ohos:ability.particleAbility,
+		5 : @ohos:abilityAccessCtrl,
+		6 : @ohos:app.ability.Ability,
+		7 : @ohos:app.ability.AbilityConstant,
+		8 : @ohos:app.ability.AbilityLifecycleCallback,
+		9 : @ohos:app.ability.abilityManager,
+		10 : @ohos:app.ability.AbilityStage,
+		11 : @ohos:app.ability.ActionExtensionAbility,
+		12 : @ohos:app.ability.ApplicationStateChangeCallback,
+		13 : @ohos:app.ability.appManager,
+		14 : @ohos:app.ability.appRecovery,
+		15 : @ohos:app.ability.autoFillManager,
+		16 : @ohos:app.ability.autoStartupManager,
+		17 : @ohos:app.ability.ChildProcess,
+		18 : @ohos:app.ability.childProcessManager,
+		19 : @ohos:app.ability.ChildProcessArgs,
+		20 : @ohos:app.ability.ChildProcessOptions,
+		21 : @ohos:app.ability.common,
+		22 : @ohos:app.ability.Configuration,
+		23 : @ohos:app.ability.ConfigurationConstant,
+		24 : @ohos:app.ability.contextConstant,
+		25 : @ohos:app.ability.dataUriUtils,
+		26 : @ohos:app.ability.dialogRequest,
+		27 : @ohos:app.ability.EnvironmentCallback,
+		28 : @ohos:app.ability.errorManager,
+		29 : @ohos:app.ability.ExtensionAbility,
+		30 : @ohos:app.ability.insightIntent,
+		31 : @ohos:app.ability.InsightIntentContext,
+		32 : @ohos:app.ability.insightIntentProvider,
+		33 : @ohos:app.ability.InsightIntentExecutor,
+		34 : @ohos:app.ability.InsightIntentDecorator,
+		35 : @ohos:app.ability.InsightIntentEntryExecutor,
+		36 : @ohos:app.ability.OpenLinkOptions,
+		37 : @ohos:app.ability.ShareExtensionAbility,
+		38 : @ohos:app.ability.StartOptions,
+		39 : @ohos:app.ability.UIAbility,
+		40 : @ohos:app.ability.UIExtensionAbility,
+		41 : @ohos:app.ability.UIExtensionContentSession,
+		42 : @ohos:app.ability.Want,
+		43 : @ohos:app.ability.wantConstant,
+		44 : @ohos:app.ability.wantAgent,
+		45 : @ohos:application.uriPermissionManager,
+		46 : @ohos:bundle.bundleManager,
+		47 : @ohos:bundle,
+		48 : @ohos:bundle.defaultAppManager,
+		49 : @ohos:bundle.launcherBundleManager,
+		50 : @ohos:bundle.overlay,
+		51 : @ohos:continuation.continuationManager,
+		52 : @ohos:app.ability.continueManager,
+		53 : @ohos:package,
+		54 : @ohos:privacyManager,
+		55 : @ohos:app.ability.EmbeddedUIExtensionAbility,
+		56 : @ohos:app.appstartup.StartupConfig,
+		57 : @ohos:app.appstartup.StartupConfigEntry,
+		58 : @ohos:app.appstartup.StartupListener,
+		59 : @ohos:app.appstartup.StartupTask,
+		60 : @ohos:app.appstartup.startupManager,
+		61 : @ohos:app.ability.sendableContextManager,
+		62 : @ohos:ability.screenLockFileManager,
+		63 : @ohos:app.ability.AtomicServiceOptions,
+		64 : @ohos:app.ability.EmbeddableUIAbility,
+		65 : @ohos:app.ability.PhotoEditorExtensionAbility,
+		66 : @ohos:bundle.shortcutManager,
+		67 : @ohos:bundle.skillManager,
+		68 : @ohos:app.ability.scriptManager,
+		69 : @ohos:app.ability.application,
+		70 : @ohos:app.ability.CompletionHandler,
+		71 : @ohos:app.ability.AppServiceExtensionAbility,
+		72 : @ohos:app.ability.kioskManager,
+		73 : @ohos:app.ability.CompletionHandlerForAtomicService,
+		74 : @ohos:app.ability.CompletionHandlerForAbilityStartCallback,
+		75 : @ohos:app.ability.systemConfiguration,
+		76 : @ohos:app.agent.AgentExtensionAbility,
+		77 : @ohos:app.agent.AgentUIExtensionAbility,
+		78 : @ohos:app.agent.agentConstant,
+		79 : @ohos:app.ability.hyperSnapManager,
+	};
+	ModuleTag: REGULAR_IMPORT, local_name: curves, import_name: default, module_request: @native:ohos.curves;
+	ModuleTag: INDIRECT_EXPORT, export_name: curves, import_name: default, module_request: @native:ohos.curves;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:ability.ability;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:ability.errorCode;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:ability.featureAbility;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:ability.particleAbility;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:abilityAccessCtrl;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.Ability;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.AbilityConstant;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.AbilityLifecycleCallback;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.abilityManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.AbilityStage;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.ActionExtensionAbility;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.ApplicationStateChangeCallback;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.appManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.appRecovery;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.autoFillManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.autoStartupManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.ChildProcess;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.childProcessManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.ChildProcessArgs;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.ChildProcessOptions;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.common;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.Configuration;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.ConfigurationConstant;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.contextConstant;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.dataUriUtils;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.dialogRequest;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.EnvironmentCallback;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.errorManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.ExtensionAbility;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.insightIntent;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.InsightIntentContext;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.insightIntentProvider;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.InsightIntentExecutor;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.InsightIntentDecorator;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.InsightIntentEntryExecutor;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.OpenLinkOptions;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.ShareExtensionAbility;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.StartOptions;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.UIAbility;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.UIExtensionAbility;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.UIExtensionContentSession;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.Want;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.wantConstant;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.wantAgent;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:application.uriPermissionManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:bundle.bundleManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:bundle;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:bundle.defaultAppManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:bundle.launcherBundleManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:bundle.overlay;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:continuation.continuationManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.continueManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:package;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:privacyManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.EmbeddedUIExtensionAbility;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.appstartup.StartupConfig;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.appstartup.StartupConfigEntry;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.appstartup.StartupListener;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.appstartup.StartupTask;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.appstartup.startupManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.sendableContextManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:ability.screenLockFileManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.AtomicServiceOptions;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.EmbeddableUIAbility;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.PhotoEditorExtensionAbility;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:bundle.shortcutManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:bundle.skillManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.scriptManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.application;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.CompletionHandler;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.AppServiceExtensionAbility;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.kioskManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.CompletionHandlerForAtomicService;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.CompletionHandlerForAbilityStartCallback;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.systemConfiguration;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.agent.AgentExtensionAbility;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.agent.AgentUIExtensionAbility;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.agent.agentConstant;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.hyperSnapManager;
+]}
+5 0x689 { 3 [
+	MODULE_REQUEST_ARRAY: {
+		0 : @ohos:app.ability.UIAbility,
+		1 : @ohos:hilog,
+	};
+	ModuleTag: REGULAR_IMPORT, local_name: UIAbility, import_name: default, module_request: @ohos:app.ability.UIAbility;
+	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
+	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
+]}
+6 0x3b7 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+
+# ====================
+# RECORDS
+
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x3b3
+	u32 moduleRecordIdx = 0x3b7
+}
+
+.language ArkTS
+.record &entry.src.main.ets.entryability.EntryAbility& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x67b
+	u32 moduleRecordIdx = 0x689
+}
+
+.language ArkTS
+.record &entry.src.main.ets.pages.Index& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0xb35
+	u32 moduleRecordIdx = 0xb43
+}
+
+.language ECMAScript
+.record @ohos.app {
+	u8 @native.ohos.app = 0x0
+}
+
+.language ECMAScript
+.record @ohos.curves {
+	u8 @native.ohos.curves = 0x0
+}
+
+.language ECMAScript
+.record @ohos.matrix4 {
+	u8 @native.ohos.matrix4 = 0x0
+}
+
+.language ECMAScript
+.record @system.app {
+	u8 @native.system.app = 0x0
+}
+
+.language ECMAScript
+.record @system.curves {
+	u8 @native.system.curves = 0x0
+}
+
+.language ECMAScript
+.record @system.matrix4 {
+	u8 @native.system.matrix4 = 0x0
+}
+
+.language ECMAScript
+.record @system.router {
+	u8 @native.system.router = 0x0
+}
+
+.language ECMAScript
+.record _ESConcurrentModuleRequestsAnnotation {
+}
+
+.language ECMAScript
+.record _ESSlotNumberAnnotation {
+}
+
+# ====================
+# METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda.str "use strict"
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x2 }
+.language ArkTS
+.function any &entry.src.main.ets.entryability.EntryAbility&.#~@0=#EntryAbility(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	copyrestargs 0x0
+	sta v3
+	lda v3
+	sta v5
+	lda v0
+	supercallspread 0x0, v5
+	sta v5
+	lda v2
+	throw.ifsupernotcorrectcall 0x1
+	lda v5
+	sta v2
+	lda v2
+try_begin_label_0:
+	throw.ifsupernotcorrectcall 0x0
+try_end_label_0:
+	return
+handler_begin_label_0_0:
+	throw
+:
+
+.catchall try_begin_label_0, try_end_label_0, handler_begin_label_0_0, handler_end_label_0_0
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x4 }
+.language ArkTS
+.function any &entry.src.main.ets.entryability.EntryAbility&.#~@0>#onBackground(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldexternalmodulevar 0x1
+	throw.undefinedifholewithname "hilog"
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "info"
+	sta v4
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "DOMAIN"
+	sta v6
+	lda.str "testTag"
+	sta v7
+	lda.str "%{public}s"
+	sta v8
+	lda.str "Ability onBackground"
+	sta v9
+	lda v4
+	callthisrange 0x2, 0x4, v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x4 }
+.language ArkTS
+.function any &entry.src.main.ets.entryability.EntryAbility&.#~@0>#onCreate(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	ldexternalmodulevar 0x1
+	throw.undefinedifholewithname "hilog"
+	sta v7
+	lda v7
+	ldobjbyname 0x0, "info"
+	sta v6
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "DOMAIN"
+	sta v8
+	lda.str "testTag"
+	sta v9
+	lda.str "%{public}s"
+	sta v10
+	lda.str "Ability onCreate"
+	sta v11
+	lda v6
+	callthisrange 0x2, 0x4, v7
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x4 }
+.language ArkTS
+.function any &entry.src.main.ets.entryability.EntryAbility&.#~@0>#onDestroy(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldexternalmodulevar 0x1
+	throw.undefinedifholewithname "hilog"
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "info"
+	sta v4
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "DOMAIN"
+	sta v6
+	lda.str "testTag"
+	sta v7
+	lda.str "%{public}s"
+	sta v8
+	lda.str "Ability onDestroy"
+	sta v9
+	lda v4
+	callthisrange 0x2, 0x4, v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x4 }
+.language ArkTS
+.function any &entry.src.main.ets.entryability.EntryAbility&.#~@0>#onForeground(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldexternalmodulevar 0x1
+	throw.undefinedifholewithname "hilog"
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "info"
+	sta v4
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "DOMAIN"
+	sta v6
+	lda.str "testTag"
+	sta v7
+	lda.str "%{public}s"
+	sta v8
+	lda.str "Ability onForeground"
+	sta v9
+	lda v4
+	callthisrange 0x2, 0x4, v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x9 }
+.language ArkTS
+.function any &entry.src.main.ets.entryability.EntryAbility&.#~@0>#onWindowStageCreate(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	ldexternalmodulevar 0x1
+	throw.undefinedifholewithname "hilog"
+	sta v6
+	lda v6
+	ldobjbyname 0x0, "info"
+	sta v5
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "DOMAIN"
+	sta v7
+	lda.str "testTag"
+	sta v8
+	lda.str "%{public}s"
+	sta v9
+	lda.str "Ability onWindowStageCreate"
+	sta v10
+	lda v5
+	callthisrange 0x2, 0x4, v6
+	lda v3
+	sta v6
+	lda v6
+	ldobjbyname 0x4, "loadContent"
+	sta v5
+	lda.str "pages/Index"
+	sta v7
+	definefunc 0x6, &entry.src.main.ets.entryability.EntryAbility&.#~@0>@1*#:(any,any,any,any), 0x1
+	sta v8
+	lda v5
+	callthis2 0x7, v6, v7, v8
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x4 }
+.language ArkTS
+.function any &entry.src.main.ets.entryability.EntryAbility&.#~@0>#onWindowStageDestroy(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldexternalmodulevar 0x1
+	throw.undefinedifholewithname "hilog"
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "info"
+	sta v4
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "DOMAIN"
+	sta v6
+	lda.str "testTag"
+	sta v7
+	lda.str "%{public}s"
+	sta v8
+	lda.str "Ability onWindowStageDestroy"
+	sta v9
+	lda v4
+	callthisrange 0x2, 0x4, v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x10 }
+.language ArkTS
+.function any &entry.src.main.ets.entryability.EntryAbility&.#~@0>@1*#(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v3
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "code"
+	callruntime.isfalse 0x2
+	jnez jump_label_0
+	ldexternalmodulevar 0x1
+	throw.undefinedifholewithname "hilog"
+	sta v6
+	lda v6
+	ldobjbyname 0x3, "error"
+	sta v5
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "DOMAIN"
+	sta v7
+	lda.str "testTag"
+	sta v8
+	lda.str "Failed to load the content. Cause: %{public}s"
+	sta v9
+	tryldglobalbyname 0x5, "JSON"
+	sta v11
+	lda v11
+	ldobjbyname 0x6, "stringify"
+	sta v10
+	lda v3
+	sta v12
+	lda v10
+	callthis1 0x8, v11, v12
+	sta v10
+	lda v5
+	callthisrange 0xa, 0x4, v6
+	ldundefined
+	ldundefined
+	returnundefined
+jump_label_0:
+	ldexternalmodulevar 0x1
+	throw.undefinedifholewithname "hilog"
+	sta v6
+	lda v6
+	ldobjbyname 0xc, "info"
+	sta v5
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "DOMAIN"
+	sta v7
+	lda.str "testTag"
+	sta v8
+	lda.str "Succeeded in loading the content."
+	sta v9
+	lda v5
+	callthis3 0xe, v6, v7, v8, v9
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x3 }
+.language ArkTS
+.function any &entry.src.main.ets.entryability.EntryAbility&.func_main_0(any a0, any a1, any a2) <static> {
+	newlexenvwithname 0x1, { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldai 0x0
+	sta v4
+	lda v4
+	stlexvar 0x0, 0x0
+	ldexternalmodulevar 0x0
+	throw.undefinedifholewithname "UIAbility"
+	sta v6
+	defineclasswithbuffer 0x0, &entry.src.main.ets.entryability.EntryAbility&.#~@0=#EntryAbility:(any,any,any,any), { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}, 0x0, v6
+	sta v4
+	sta v5
+	lda v4
+	ldobjbyname 0x1, "prototype"
+	sta v7
+	lda v4
+	stmodulevar 0x0
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#*#(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x2 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#*#^1(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "Index"
+	sta v4
+	ldundefined
+	sta v5
+	createemptyobject
+	sta v6
+	newobjrange 0x0, 0x3, v4
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0<#getEntryName(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda.str "Index"
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x12 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0=#Index(any a0, any a1, any a2, any a3, any a4, any a5, any a6, any a7, any a8) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	mov v5, a5
+	mov v6, a6
+	mov v7, a7
+	mov v8, a8
+	lda v6
+	sta v10
+	ldundefined
+	stricteq 0x0, v10
+	jeqz jump_label_4
+	ldai 0x1
+	sta v10
+	lda v10
+	neg 0x1
+	sta v6
+jump_label_4:
+	lda v7
+	sta v10
+	ldundefined
+	stricteq 0x2, v10
+	jeqz jump_label_5
+	ldundefined
+	sta v7
+jump_label_5:
+	lda v3
+	sta v10
+	lda v5
+	sta v11
+	lda v6
+	sta v12
+	lda v8
+	sta v13
+	supercallthisrange 0x3, 0x4, v10
+	sta v10
+	lda v2
+	throw.ifsupernotcorrectcall 0x1
+	lda v10
+	sta v2
+	lda v7
+	typeof 0x5
+	sta v10
+	lda.str "function"
+	stricteq 0x7, v10
+	jeqz jump_label_6
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v10
+	lda v7
+	stobjbyname 0x8, "paramsGenerator_", v10
+jump_label_6:
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v11
+	lda v11
+	ldobjbyname 0xa, "setInitiallyProvidedValue"
+	sta v10
+	lda v4
+	sta v12
+	lda v10
+	callthis1 0xc, v11, v12
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v11
+	lda v11
+	ldobjbyname 0xe, "finalizeConstruction"
+	sta v10
+	lda v10
+	callthis0 0x10, v11
+	lda v2
+try_begin_label_0:
+	throw.ifsupernotcorrectcall 0x0
+try_end_label_0:
+	return
+handler_begin_label_0_0:
+	throw
+:
+
+.catchall try_begin_label_0, try_end_label_0, handler_begin_label_0_0, handler_end_label_0_0
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x11 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>#aboutToBeDeleted(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	tryldglobalbyname 0x0, "SubscriberManager"
+	sta v7
+	lda v7
+	ldobjbyname 0x1, "Get"
+	sta v6
+	lda v6
+	callthis0 0x3, v7
+	sta v5
+	lda v5
+	ldobjbyname 0x5, "delete"
+	sta v4
+	lda v2
+	sta v7
+	lda v7
+	ldobjbyname 0x7, "id__"
+	sta v6
+	lda v6
+	callthis0 0x9, v7
+	sta v6
+	lda v4
+	callthis1 0xb, v5, v6
+	lda v2
+	sta v5
+	lda v5
+	ldobjbyname 0xd, "aboutToBeDeletedInternal"
+	sta v4
+	lda v4
+	callthis0 0xf, v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x16 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>#initialRender(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda v2
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "observeComponentCreation2"
+	sta v4
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@0>@1*#:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0x3, "Column"
+	sta v7
+	lda v4
+	callthis2 0x4, v5, v6, v7
+	lda v2
+	sta v5
+	lda v5
+	ldobjbyname 0x6, "observeComponentCreation2"
+	sta v4
+	definefunc 0x8, &entry.src.main.ets.pages.Index&.#~@0>@1*#^1:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0x9, "Text"
+	sta v7
+	lda v4
+	callthis2 0xa, v5, v6, v7
+	tryldglobalbyname 0xc, "Text"
+	sta v5
+	lda v5
+	ldobjbyname 0xd, "pop"
+	sta v4
+	lda v4
+	callthis0 0xf, v5
+	tryldglobalbyname 0x11, "Column"
+	sta v5
+	lda v5
+	ldobjbyname 0x12, "pop"
+	sta v4
+	lda v4
+	callthis0 0x14, v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>#purgeVariableDependenciesOnElmtId(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x4 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>#rerender(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda v2
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "updateDirtyElements"
+	sta v4
+	lda v4
+	callthis0 0x2, v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>#setInitiallyProvidedValue(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>#updateStateVars(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x5 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>@1*#(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "Column"
+	sta v7
+	lda v7
+	ldobjbyname 0x1, "create"
+	sta v6
+	lda v6
+	callthis0 0x3, v7
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0xf }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>@1*#^1(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "Text"
+	sta v7
+	lda v7
+	ldobjbyname 0x1, "create"
+	sta v6
+	lda.str ""
+	sta v8
+	ldexternalmodulevar 0x0
+	throw.undefinedifholewithname "curves"
+	sta v12
+	lda v12
+	ldobjbyname 0x3, "cubicBezierCurve"
+	sta v11
+	fldai 1.000000e-01
+	sta v13
+	fldai 2.000000e-01
+	sta v14
+	fldai 3.000000e-01
+	sta v15
+	fldai 4.000000e-01
+	sta v16
+	lda v11
+	callthisrange 0x5, 0x4, v12
+	sta v10
+	lda v10
+	ldobjbyname 0x7, "interpolate"
+	sta v9
+	fldai 5.000000e-01
+	sta v11
+	lda v9
+	callthis1 0x9, v10, v11
+	add2 0xb, v8
+	sta v8
+	lda.str ""
+	add2 0xc, v8
+	sta v8
+	lda v6
+	callthis1 0xd, v7, v8
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x18 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.func_main_0(any a0, any a1, any a2) <static> {
+	newlexenvwithname 0x1, { 3 [ i32:1, string:"Index", i32:0, ]}
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda.str "finalizeConstruction"
+	sta v5
+	tryldglobalbyname 0x0, "ViewPU"
+	sta v6
+	lda v6
+	ldobjbyname 0x1, "prototype"
+	isin 0x3, v5
+	callruntime.istrue 0x4
+	jnez jump_label_0
+	ldtrue
+	jmp jump_label_1
+jump_label_0:
+	ldfalse
+jump_label_1:
+	callruntime.isfalse 0x5
+	jnez jump_label_2
+	tryldglobalbyname 0x6, "Reflect"
+	sta v6
+	lda v6
+	ldobjbyname 0x7, "set"
+	sta v5
+	tryldglobalbyname 0x9, "ViewPU"
+	sta v7
+	lda v7
+	ldobjbyname 0xa, "prototype"
+	sta v7
+	lda.str "finalizeConstruction"
+	sta v8
+	definefunc 0xc, &entry.src.main.ets.pages.Index&.#*#:(any,any,any), 0x0
+	sta v9
+	lda v5
+	callthis3 0xd, v6, v7, v8, v9
+jump_label_2:
+	tryldglobalbyname 0xf, "ViewPU"
+	sta v7
+	defineclasswithbuffer 0x10, &entry.src.main.ets.pages.Index&.#~@0=#Index:(any,any,any,any,any,any,any,any,any), { 22 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@0>#initialRender, method_affiliate:0, string:"rerender", method:#~@0>#rerender, method_affiliate:0, string:"getEntryName", method:#~@0<#getEntryName, method_affiliate:0, i32:6, ]}, 0x3, v7
+	sta v5
+	sta v6
+	lda v5
+	ldobjbyname 0x11, "prototype"
+	sta v8
+	lda v5
+	sta v5
+	lda v5
+	stlexvar 0x0, 0x0
+	tryldglobalbyname 0x13, "registerNamedRoute"
+	sta v5
+	definefunc 0x14, &entry.src.main.ets.pages.Index&.#*#^1:(any,any,any), 0x0
+	sta v6
+	lda.str ""
+	sta v7
+	createobjectwithbuffer 0x15, { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+	sta v8
+	lda v8
+	sta v8
+	lda v5
+	callargs3 0x16, v6, v7, v8
+	ldundefined
+	returnundefined
+}
+
+# ====================
+# STRING
+
+[offset:0x772, name_value:UIAbility]
+[offset:0x786, name_value:hilog]
+[offset:0x7d4, name_value:DOMAIN]
+[offset:0xb2e, name_value:Index]
+[offset:0x18f4, name_value:curves]
+[offset:0x18fc, name_value:setInitiallyProvidedValue]
+[offset:0x19b0, name_value:pages/Index]
+[offset:0x1bc1, name_value:use strict]
+[offset:0x1bd9, name_value:info]
+[offset:0x1bdf, name_value:testTag]
+[offset:0x1be8, name_value:%{public}s]
+[offset:0x1bf4, name_value:Ability onBackground]
+[offset:0x1c0a, name_value:Ability onCreate]
+[offset:0x1c1c, name_value:Ability onDestroy]
+[offset:0x1c2f, name_value:Ability onForeground]
+[offset:0x1c45, name_value:Ability onWindowStageCreate]
+[offset:0x1c62, name_value:loadContent]
+[offset:0x1c6f, name_value:Ability onWindowStageDestroy]
+[offset:0x1c8d, name_value:code]
+[offset:0x1c93, name_value:error]
+[offset:0x1c9a, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x1cc9, name_value:JSON]
+[offset:0x1ccf, name_value:stringify]
+[offset:0x1cda, name_value:Succeeded in loading the content.]
+[offset:0x1cfd, name_value:prototype]
+[offset:0x1d08, name_value:function]
+[offset:0x1d12, name_value:paramsGenerator_]
+[offset:0x1d24, name_value:finalizeConstruction]
+[offset:0x1d3a, name_value:SubscriberManager]
+[offset:0x1d4d, name_value:Get]
+[offset:0x1d52, name_value:delete]
+[offset:0x1d5a, name_value:id__]
+[offset:0x1d60, name_value:aboutToBeDeletedInternal]
+[offset:0x1d7a, name_value:observeComponentCreation2]
+[offset:0x1d95, name_value:Column]
+[offset:0x1d9d, name_value:Text]
+[offset:0x1da3, name_value:pop]
+[offset:0x1da8, name_value:updateDirtyElements]
+[offset:0x1dbd, name_value:create]
+[offset:0x1dc5, name_value:]
+[offset:0x1dc7, name_value:cubicBezierCurve]
+[offset:0x1dd9, name_value:interpolate]
+[offset:0x1de6, name_value:ViewPU]
+[offset:0x1dee, name_value:Reflect]
+[offset:0x1df7, name_value:set]
+[offset:0x1dfc, name_value:registerNamedRoute]

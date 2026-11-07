@@ -11,7 +11,7 @@ are pinned in `Cargo.lock`; the license families are:
 | License | Crates (selection) |
 |---|---|
 | MIT OR Apache-2.0 | clap, serde, serde_json, toml, ureq, sha2, base64, rand, flate2, indexmap, url, idna, log, once_cell, syn, quote, proc-macro2, libc, regex-lite, … (the large majority) |
-| MIT | generic-array, simd-adler32, strsim, synstructure, winnow, zip, zmij |
+| MIT | generic-array, hapsigner, simd-adler32, strsim, synstructure, winnow, zip, zmij |
 | Apache-2.0 AND ISC | ring |
 | Apache-2.0 OR ISC OR MIT | rustls |
 | ISC | rustls-webpki, untrusted |

@@ -1,0 +1,7 @@
+{
+  "name": "@demo/kinds",
+  "version": "1.0.0",
+  "main": "Index.d.ets",
+  "types": "Index.d.ets",
+  "dependencies": {}
+}

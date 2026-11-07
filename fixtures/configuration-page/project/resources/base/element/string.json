@@ -1,0 +1,120 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "demo"
+    },
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "demo"
+    },
+    {
+      "name": "Cancel",
+      "value": "Cancel"
+    },
+    {
+      "name": "Collect",
+      "value": "Collect"
+    },
+    {
+      "name": "Collect_Tip",
+      "value": "Collect_Tip"
+    },
+    {
+      "name": "Configuration",
+      "value": "Configuration"
+    },
+    {
+      "name": "Edit",
+      "value": "Edit"
+    },
+    {
+      "name": "click_error_prompt",
+      "value": "click_error_prompt"
+    },
+    {
+      "name": "configuration_deleted",
+      "value": "configuration_deleted"
+    },
+    {
+      "name": "configuration_shared",
+      "value": "configuration_shared"
+    },
+    {
+      "name": "create_copy",
+      "value": "create_copy"
+    },
+    {
+      "name": "delete",
+      "value": "delete"
+    },
+    {
+      "name": "delete_current_configuration",
+      "value": "delete_current_configuration"
+    },
+    {
+      "name": "export_config_file",
+      "value": "export_config_file"
+    },
+    {
+      "name": "export_config_file_success",
+      "value": "export_config_file_success"
+    },
+    {
+      "name": "failed_load_config",
+      "value": "failed_load_config"
+    },
+    {
+      "name": "favorite_config_no",
+      "value": "favorite_config_no"
+    },
+    {
+      "name": "generate_QR_code",
+      "value": "generate_QR_code"
+    },
+    {
+      "name": "qrcode_share",
+      "value": "qrcode_share"
+    },
+    {
+      "name": "share",
+      "value": "share"
+    },
+    {
+      "name": "sort",
+      "value": "sort"
+    },
+    {
+      "name": "uncollected",
+      "value": "uncollected"
+    },
+    {
+      "name": "uncollected_tip",
+      "value": "uncollected_tip"
+    },
+    {
+      "name": "update",
+      "value": "update"
+    },
+    {
+      "name": "update_by",
+      "value": "update_by"
+    },
+    {
+      "name": "updated_success_config",
+      "value": "updated_success_config"
+    },
+    {
+      "name": "updating_config",
+      "value": "updating_config"
+    }
+  ]
+}

@@ -7,6 +7,23 @@ versions may change the CLI surface.
 
 ## [Unreleased]
 
+### Changed
+
+- Signing, packing and package checking no longer run the SDK's Java tools. `hvolt sign` uses
+  `hapsigner` in process for localSign, for signing the provisioning profile, and for the
+  acceptance checks; `hvolt check` computes duplicate / oversized / per-suffix statistics from
+  the archive directory instead of parsing the tool's `stat.json`; the hidden `hvolt pack-hap`
+  assembles a HAP from hvigor intermediates.
+
+### Fixed
+
+- `hvolt check --size-limit` compares bytes. The SDK tool's `--stat-file-size` is in KB, so the
+  previous pass-through made every threshold 1024x larger than requested.
+- The provisioning profile carries the leaf certificate only. The whole chain used to be written
+  into `bundle-info.distribution-certificate`, which the SDK tool silently truncated.
+- Key aliases resolve case-insensitively against the p12 store: the official test store holds
+  them lower-case while callers name them as the SDK documents them.
+
 ## [26.0.0-8] — 2026-11-01
 
 ### Added
@@ -18,7 +35,7 @@ versions may change the CLI surface.
   covers a package that declares none); giving all three materials signs with those instead.
   The result is verified with `hap-sign-tool verify-app` before the command reports success.
 - `hvolt push --hap <FILE>` installs a package at an arbitrary path. An unsigned package is
-  refused before reaching `hdc`, which would otherwise only report a signature error.
+  refused before reaching the device transport, which would otherwise only report a signature error.
 
 ### Fixed
 

@@ -5,10 +5,10 @@
 [![release](https://img.shields.io/github/v/release/hvolt-project/hvolt.svg)](https://github.com/hvolt-project/hvolt/releases/latest)
 
 **H**arm**O**S **V**olt. hvolt defines its own project layout — one `hvolt.toml` per module over a
-flat source tree — and generates the standard HarmonyOS project that hvigorw builds, so no
-`build-profile.json5`, `module.json5`, `oh-package.json5` or `build/` tree is written by hand.
-hvolt also downloads the SDK, installs hvigor and ohpm, signs (AGC or local), and pushes to a
-device.
+flat source tree — and builds it with its own toolchain: ArkTS compilation, HAP packing, signing
+and the device protocol are all implemented in this repository. No
+`build-profile.json5`, `module.json5`, `oh-package.json5` or `build/` tree is written by hand, and
+no external build tool, package manager, JDK, or device binary is invoked.
 
 ## Contents
 
@@ -28,21 +28,20 @@ device.
 
 ## Features
 
-- **Flat project layout** — one `hvolt.toml` per module over `src/` and `resources/`, which `hvolt assemble` compiles into the standard HarmonyOS project; no hand-written build files
-- **Build chain** — translate → hvigorw → sign → push → launch, all from one CLI
+- **Flat project layout** — one `hvolt.toml` per module over `src/` and `resources/`; no hand-written build files, no generated standard project
+- **Build chain** — compile ArkTS → pack HAP → sign → install → launch, all from one CLI
 - **SDK management** — list remote versions, download, import, switch, remove
 - **Native (C++/NAPI)** — declare a native module as a dependency; CMake and the types bridge are wired automatically
-- **Code scan** — `hvolt lint` drives DevEco's own codelinter engine over the translated tree
-- **Package gate and introspection** — `hvolt check` (official app_check_tool), `hvolt hap info` (reads the package itself)
+- **Package gate and introspection** — `hvolt check` (reads the archive itself), `hvolt hap info` (reads the package itself)
 - **Signing** — OpenHarmony localSign (public test chain) in this tree; AppGallery Connect remote signing through an optional backend that is not published here
-- **Devices** — hdc, cross-machine install targets, hilog, screenshot, UI tree dump, file transfer, uninstall
+- **Devices** — native device protocol (USB + TCP), cross-machine install targets, hilog, screenshot, UI tree dump, file transfer both ways, uninstall
 - **Emulator** — list / start / stop / create / delete / images / license
 - **Editor support** — `hvolt lsp --stdio` serves ArkTS completion, hover, signature help,
   definition, references, outline, rename, semantic highlighting, inlay hints and call hierarchy
   out of the TypeScript build inside the installed SDK, rewrites ArkUI blocks so the service has
-  scope inside `build()`, and publishes diagnostics from codelinter and from type checking,
+  scope inside `build()`, and publishes diagnostics from type checking,
   unsaved buffers included (see [lsp/DESIGN.md](lsp/DESIGN.md))
-- **Few dependencies** — Rust to build; JDK 17+, Node.js, hvigorw and ohpm at runtime (hvolt installs the latter two)
+- **Few dependencies** — Rust to build; the SDK compilers (`es2abc`, `restool`) at runtime. No JDK, no external build tool, no package manager, no device binary
 
 ## Editors
 
@@ -57,7 +56,7 @@ hvolt lsp --stdio --log-file /tmp/lsp.log   # record the protocol traffic
 What it provides: ArkTS syntax highlighting (TypeScript grammar + ArkTS rules), completion, hover,
 signature help, definition, references, outline, rename, semantic highlighting, inlay hints,
 call hierarchy, folding, workspace symbols and quick fixes from the SDK's own TypeScript build
-(ArkUI blocks are rewritten first, so `build()` has scope); diagnostics from codelinter and from
+(ArkUI blocks are rewritten first, so `build()` has scope); diagnostics from
 type checking, unsaved buffers included, mapped onto the flat sources;
 `hvolt.toml` key completion, route completion, validation and dependency navigation; commands for
 build, sign, install, screenshot and log. Design and measurements: [lsp/DESIGN.md](lsp/DESIGN.md).
@@ -114,10 +113,8 @@ cd my-app
 
 # Provide an SDK and the build tools once
 hvolt sdk download 26.0.0.38      # or: hvolt sdk set /path/to/an/existing/sdk
-hvolt tools install hvigor
-hvolt tools install ohpm
 
-# Translate, build, sign, push, launch
+# Build, sign, push, launch
 hvolt run
 ```
 
@@ -154,9 +151,9 @@ my-app/
     └── Index.d.ts
 ```
 
-`hvolt assemble` translates that tree into a standard HarmonyOS project under `build/`
-(`build-profile.json5`, `module.json5`, `oh-package.json5`, `AppScope/`, `hvigor/`), which is what
-hvigorw compiles. The flat tree is the source of truth; `build/` is generated output.
+`hvolt build` compiles that tree directly: the ArkTS sources are transpiled and turned into
+`modules.abc`, the resources are compiled by the SDK's `restool`, and the parts are packed into a
+HAP under `build/hvolt-out`. The flat tree is the source of truth; `build/` is generated output.
 
 ### Application config (`hvolt.toml`)
 
@@ -199,9 +196,9 @@ device_types = ["phone", "tablet", "2in1", "car"]
 A native module is a directory with its own `hvolt.toml` (`type = "native"`), a `CMakeLists.txt`,
 C++ sources and an `Index.d.ts` type declaration. It is declared **only** in `[dependencies]` —
 never in `members`. The module `name` fixes the artifact: `name = "hello"` → `libhello.so`, which is
-also what the CMake target, `nm_modname` and the ArkTS `import` must say. `assemble` copies the
-sources to `src/main/cpp/`, generates `types/<dependency>/`, and adds
-`"<dependency>.so": "file:./src/main/cpp/types/<dependency>"` to the module's `oh-package.json5`.
+also what the CMake target, `nm_modname` and the ArkTS `import` must say. The build compiles the
+sources with the SDK toolchain, generates `types/<dependency>/`, and wires the resulting `.so`
+into the packed package.
 
 ## Commands
 
@@ -210,8 +207,7 @@ sources to `src/main/cpp/`, generates `types/<dependency>/`, and adds
 | Command | Description |
 |---|---|
 | `hvolt init <name>` | Scaffold a new project (this layout) |
-| `hvolt assemble` | Translate the flat tree into a standard HarmonyOS project under `build/` (no hvigorw) |
-| `hvolt build` | Assemble + hvigorw build + sign |
+| `hvolt build` | Compile ArkTS, pack the HAP and sign it (own toolchain) |
 | `hvolt run [device] [-d <device>]` | Build + sign + push + launch in one shot |
 | `hvolt clean` | Remove build artifacts |
 
@@ -220,7 +216,7 @@ sources to `src/main/cpp/`, generates `types/<dependency>/`, and adds
 | Command | Description |
 |---|---|
 | `hvolt lint [paths…]` | Official Code Linter over the translated tree. `--all-rules` (broad rule sets), `--json`, `--fail-on <1..3>`, `--max-defects <N>`, `--fix <paths>` (in place, explicit paths only), `--config <file>` |
-| `hvolt check [--size-limit 50K]` | Package quality gate (official app_check_tool: duplicates, big files, suffix sizes) |
+| `hvolt check [--size-limit 50K]` | Package quality gate (duplicates, big files, suffix sizes, read from the archive) |
 | `hvolt hap info [path]` | bundle / version / abilities / permissions, read from the package itself |
 
 ### SDK
@@ -236,15 +232,12 @@ sources to `src/main/cpp/`, generates `types/<dependency>/`, and adds
 | `hvolt sdk remove <version> --yes` | Remove an installed version (irreversible; `--yes` required) |
 | `hvolt sdk set <path> [--global]` | Use the SDK at `<path>` for this project (or for all projects) |
 
-### Tools and configuration
+### Configuration
 
 | Command | Description |
 |---|---|
-| `hvolt tools list` | Installed tools (hvigor, ohpm, codelinter) |
-| `hvolt tools list-remote` | Remotely available tool versions (npm registry + mirror) |
-| `hvolt tools install <hvigor\|ohpm\|codelinter> [--version <v>] [--from <dir>] [--yes]` | Install a build tool |
 | `hvolt config get` | Show all configuration values |
-| `hvolt config set <key> <value>` | Keys: `sdk_path`, `node_home`, `java_home`, `ohpm_path`, `sdk_support_version`, `device_target`, `device_host`, `device_hdc` |
+| `hvolt config set <key> <value>` | Keys: `sdk_path`, `node_home`, `sdk_support_version`, `device_target`, `device_host` |
 | `hvolt config unset <key>` | Remove a configuration value |
 
 ### Signing
@@ -273,7 +266,7 @@ sources to `src/main/cpp/`, generates `types/<dependency>/`, and adds
 |---|---|
 | `hvolt device list` | List connected devices |
 | `hvolt device connect <addr>` | Connect to a device over TCP |
-| `hvolt device remote <host> <serial> [hdc]` | Register a device attached to another host (cross-machine install) |
+| `hvolt device remote <host> <serial>` | Register a device attached to another host (cross-machine install) |
 
 ### Emulator
 
@@ -295,10 +288,7 @@ sources to `src/main/cpp/`, generates `types/<dependency>/`, and adds
 | Dependency | Version | Notes |
 |---|---|---|
 | Rust | 1.85+ | Build-time only (clap 4.6 MSRV) |
-| JDK | 17+ | Required by hvigorw |
-| Node.js | 20+ | Required by hvigorw and ohpm |
-| hvigorw | — | `hvolt tools install hvigor` |
-| ohpm | — | `hvolt tools install ohpm` |
+| Node.js | 20+ | Only for `hvolt lsp` and the emulator wrapper |
 | HarmonyOS SDK | 26.x recommended | `hvolt sdk download <version>`; the remote list covers API 10–26, and anything below 26 is flagged as deprecated |
 
 ## Signing and AGC
@@ -332,18 +322,16 @@ signing material you generate stays under `~/.hvolt/` and in your project direct
 
 ## DevEco Studio (optional — except two commands)
 
-hvolt downloads its own SDK and build tools, so **no DevEco Studio install is needed** for
-`init`, `assemble`, `build`, `sign`, `push`, `run`, `check`, `hap`, `log`, `screenshot`, `ui`,
-`file`, `uninstall`, `device`, `sdk`, `tools`, `config`, `doctor` or `agc`.
-Two features are the exception:
+hvolt downloads its own SDK, so **no DevEco Studio install is needed** for any command:
+`init`, `build`, `sign`, `push`, `run`, `check`, `hap`, `log`, `screenshot`, `ui`,
+`file`, `uninstall`, `device`, `sdk`, `config`, `doctor` or `agc`.
+From the SDK it only takes the official compilers (`es2abc`, `restool`).
 
-| Command | What it needs from DevEco Studio | After that |
+The one exception is the emulator:
+
+| Command | What it needs | After that |
 |---|---|---|
-| `hvolt lint` | the `plugins/codelinter` payload (~200 MB). Huawei publishes it only inside DevEco Studio — npm has no `@ohos/codelinter` (404) and the SDK component list carries only ets/js/native/previewer/toolchains (both measured) | copy it once from a machine that has DevEco: `hvolt tools install codelinter --from <DevEco>/plugins/codelinter` — `hvolt lint` then runs on a DevEco-free machine (measured on Windows and Linux) |
 | `hvolt emulator ...` | the emulator binary and system images, which ship only with DevEco Studio on Windows/macOS | install DevEco there, or use a physical device — Linux has no official emulator binary at all |
-
-Where DevEco *is* installed, hvolt also uses its SDK or `hdc` as a fallback, but never requires
-them: `hvolt sdk download` and the SDK's own `toolchains/hdc` are the primary path.
 
 ## Development
 

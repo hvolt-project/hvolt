@@ -1,0 +1,11 @@
+{
+  "extractInsightIntents": [
+    {
+      "decoratorFile": "@normalized:N&&&entry/src/main/ets/pages/Index&",
+      "decoratorClass": "StateChild",
+      "bundleName": "com.example.demo",
+      "moduleName": "entry",
+      "decoratorType": "@Provide"
+    }
+  ]
+}

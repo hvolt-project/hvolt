@@ -1,0 +1,2521 @@
+{
+  "compile_plugin.js": [
+    "initInteropConfig"
+  ],
+  "lib/fast_build/common/init_config.js": [
+    "initConfig"
+  ],
+  "main.js": [
+    "addSDKBuildDependencies",
+    "checkAppResourcePath",
+    "getCleanConfig",
+    "getPackageJsonEntryPath",
+    "initBuildInfo",
+    "loadEntryObj",
+    "loadModuleInfo",
+    "loadWorker",
+    "readAppResource",
+    "readPatchConfig",
+    "readWorkerFile",
+    "resetGlobalProgram",
+    "resetMain",
+    "resetProjectConfig",
+    "setEntryArrayForObf",
+    "setIntentEntryPages",
+    "setStartupPagesForObf"
+  ],
+  "lib/utils.js": [
+    "CompilationTimeStatistics",
+    "CurrentProcessFile",
+    "EntryOptionValue",
+    "ProcessFileInfo",
+    "addLog",
+    "buildErrorInfoFromLogInfo",
+    "circularFile",
+    "createApiVersionCheck",
+    "createGetShared",
+    "createGetSharedForVariable",
+    "differenceResourcesRawfile",
+    "emitLogInfo",
+    "findNonNullType",
+    "genLoaderOutPathOfHar",
+    "genTemporaryPath",
+    "generateSourceFilesInHar",
+    "getAllComponentsOrModules",
+    "getBelongModuleInfo",
+    "getExtensionIfUnfullySpecifiedFilepath",
+    "getHotReloadFiles",
+    "getMessage",
+    "getOriginPropertyType",
+    "getPossibleBuilderTypeParameter",
+    "getProjectRootPath",
+    "getResolveModules",
+    "getRollupCache",
+    "getRollupCommonCache",
+    "getStoredFileInfo",
+    "getTransformLog",
+    "hasDecorator",
+    "hspRawfileResources",
+    "isFileInProject",
+    "isHarmonyOs",
+    "isHvigorLogInfo",
+    "isIdentifierConst",
+    "isIdentifierEnum",
+    "isLinux",
+    "isMac",
+    "isPackageModulesFile",
+    "isString",
+    "isTypeAliasBySymbol",
+    "isWindows",
+    "judgeUseSharedStorageForExpresion",
+    "maxFilePathLength",
+    "mkDir",
+    "mkdirsSync",
+    "nodeLargeOrEqualTargetVersion",
+    "parseErrorMessage",
+    "readFile",
+    "removeDecorator",
+    "removeDir",
+    "resetUtils",
+    "resourcesRawfile",
+    "setChecker",
+    "setRollupCache",
+    "setRollupCommonCache",
+    "shouldWriteChangedList",
+    "startTimeStatisticsLocation",
+    "stopTimeStatisticsLocation",
+    "toHashData",
+    "toUnixPath",
+    "tryToLowerCasePath",
+    "unlinkSync",
+    "validateFilePathLength",
+    "validateFilePathLengths",
+    "writeCollectionFile",
+    "writeFileSync",
+    "writeUseOSFiles"
+  ],
+  "lib/file_info_cache.js": [
+    "FileInfoCache"
+  ],
+  "lib/hvigor_error_code/hvigor_error_info.js": [
+    "HvigorErrorInfo"
+  ],
+  "lib/gen_aot.js": [
+    "checkAotConfig",
+    "generateAot"
+  ],
+  "lib/ark_utils.js": [
+    "buildCachePath",
+    "cleanUpUtilsObjects",
+    "collectObfuscationFileContent",
+    "compileToolIsRollUp",
+    "genAbcFileName",
+    "genBuildPath",
+    "genMergeProtoFileName",
+    "genProtoFileName",
+    "genSourceMapFileName",
+    "generateSourceFilesToTemporary",
+    "getArkBuildDir",
+    "getBuildBinDir",
+    "getBuildModeInLowerCase",
+    "getNormalizedOhmUrlByAliasName",
+    "getNormalizedOhmUrlByFilepath",
+    "getNormalizedOhmUrlByModuleRequest",
+    "getOhmUrlByByteCodeHar",
+    "getOhmUrlByExternalPackage",
+    "getOhmUrlByFilepath",
+    "getOhmUrlBySystemApiOrLibRequest",
+    "getPackageInfo",
+    "getPkgInfo",
+    "getPreviousStageSourceMap",
+    "isEs2Abc",
+    "isOhModules",
+    "isTs2Abc",
+    "mangleDeclarationFileName",
+    "removeDuplicateInfo",
+    "transformModuleSpecifier",
+    "transformOhmurlToPkgName",
+    "transformOhmurlToRecordName",
+    "tryMangleFileName",
+    "writeArkguardObfuscatedSourceCode",
+    "writeDeclarationFiles",
+    "writeFileSyncByString",
+    "writeFileSyncCaseAware",
+    "writeMinimizedSourceCode",
+    "writeObfuscatedSourceCode"
+  ],
+  "node_modules/terser/dist/bundle.min.js": [
+    "_default_options",
+    "_run_cli",
+    "minify",
+    "minify_sync"
+  ],
+  "node_modules/arkguard/lib/ArkObfuscator.js": [
+    "ArkObfuscator",
+    "clearGlobalCaches"
+  ],
+  "node_modules/arkguard/lib/utils/FileUtils.js": [
+    "FileUtils"
+  ],
+  "node_modules/arkguard/lib/transformers/TransformerManager.js": [
+    "TransformerManager"
+  ],
+  "node_modules/arkguard/lib/utils/SourceMapUtil.js": [
+    "getSourceMapGenerator"
+  ],
+  "node_modules/arkguard/lib/utils/SourceMapMergingUtil.js": [
+    "Source",
+    "SourceMapLink",
+    "decodeSourcemap",
+    "mergeSourceMap"
+  ],
+  "node_modules/arkguard/lib/utils/NameCacheUtil.js": [
+    "UpdateMemberMethodName",
+    "deleteLineInfoForNameString",
+    "getMapFromJson",
+    "readCache",
+    "writeCache"
+  ],
+  "node_modules/arkguard/lib/common/ApiReader.js": [
+    "initPlugin",
+    "initScanProjectConfig",
+    "initScanProjectConfigByMergeConfig",
+    "isEnabledPropertyObfuscation",
+    "needReadApiInfo",
+    "readProjectPropertiesByCollectedPaths",
+    "resetScanProjectConfig"
+  ],
+  "node_modules/arkguard/lib/utils/OhsUtil.js": [
+    "addExportPropertyName",
+    "collectPropertyNamesAndStrings",
+    "collectReservedStruct",
+    "getClassProperties",
+    "getElementAccessExpressionProperties",
+    "getEnumProperties",
+    "getIndexedAccessTypeProperties",
+    "getInterfaceProperties",
+    "getObjectExportNames",
+    "getObjectProperties",
+    "getStructProperties",
+    "getTypeAliasProperties",
+    "getViewPUClassProperties",
+    "isParameterPropertyModifier",
+    "isViewPUBasedClass",
+    "visitEnumInitializer"
+  ],
+  "node_modules/arkguard/lib/utils/ProjectCollections.js": [
+    "FileContentManager",
+    "FilePathManager",
+    "ProjectWhiteListManager",
+    "addToSet",
+    "areSetsEqual",
+    "arrayToSet",
+    "clearProjectWhiteListManager",
+    "initProjectWhiteListManager",
+    "setToArray"
+  ],
+  "node_modules/arkguard/lib/utils/NodeUtils.js": [
+    "NodeUtils",
+    "collectReservedNameForObf",
+    "hasExportModifier"
+  ],
+  "node_modules/arkguard/lib/utils/PrinterUtils.js": [
+    "TimeSumPrinter",
+    "TimeTracker",
+    "blockPrinter",
+    "endFilesEvent",
+    "endSingleFileEvent",
+    "initPerformancePrinter",
+    "printTimeSumData",
+    "printTimeSumInfo",
+    "startFilesEvent",
+    "startSingleFileEvent"
+  ],
+  "node_modules/arkguard/lib/utils/PrinterTimeAndMemUtils.js": [
+    "TimeAndMemTimeTracker",
+    "blockTimeAndMemPrinter",
+    "clearTimeAndMemPrinterData",
+    "configurePerformancePrinter",
+    "disablePrinterTimeAndMemConfig",
+    "enableTimeAndMemoryPrint",
+    "endSingleFileForMoreTimeEvent",
+    "getMemoryPerformanceData",
+    "getObfuscationCacheDir",
+    "getTimePerformanceData",
+    "initPerformanceTimeAndMemPrinter",
+    "initPrinterTimeAndMemConfig",
+    "printMemoryPerformanceData",
+    "printTimeAndMemory",
+    "printTimePerformanceData",
+    "startSingleFileForMoreTimeEvent",
+    "writeTimeAndMemoryPerformanceData"
+  ],
+  "node_modules/arkguard/lib/initialization/Initializer.js": [
+    "clearHistoryUnobfuscatedMap",
+    "initObfuscationConfig"
+  ],
+  "node_modules/arkguard/lib/initialization/ConfigResolver.js": [
+    "MergedConfig",
+    "ObConfigResolver",
+    "ObOptionsForTest",
+    "clearNameCache",
+    "collectResevedFileNameInIDEConfig",
+    "enableObfuscateFileName",
+    "enableObfuscatedFilePathConfig",
+    "fillNameCache",
+    "generateConsumerObConfigFile",
+    "generateobfLoggerPrinter",
+    "getArkguardNameCache",
+    "getRelativeSourcePath",
+    "handleObfuscatedFilePath",
+    "handleUniversalPathInObf",
+    "handleUniversalUncompactPathInObf",
+    "mangleFilePath",
+    "printUnobfuscationReasons",
+    "printWhitelist",
+    "readNameCache",
+    "writeObfuscationNameCache",
+    "writeUnobfuscationContent"
+  ],
+  "node_modules/arkguard/lib/initialization/utils.js": [
+    "convertSetToArray",
+    "isDebug",
+    "isFileExist",
+    "mergeSet",
+    "sortAndDeduplicateStringArr"
+  ],
+  "node_modules/arkguard/lib/initialization/CommonObject.js": [
+    "clearUnobfuscationNamesObj"
+  ],
+  "node_modules/arkguard/lib/utils/MemoryUtils.js": [
+    "MemoryUtils"
+  ],
+  "node_modules/arkguard/lib/utils/TypeUtils.js": [
+    "TypeUtils"
+  ],
+  "node_modules/arkguard/lib/utils/TransformUtil.js": [
+    "collectExistNames",
+    "containWildcards",
+    "handleReservedConfig",
+    "isInLocalWhitelist",
+    "isInPropertyWhitelist",
+    "isInTopLevelWhitelist",
+    "isMatchWildcard",
+    "isReservedLocalVariable",
+    "isReservedProperty",
+    "isReservedTopLevel",
+    "needToBeReserved",
+    "needToRecordProperty",
+    "recordHistoryUnobfuscatedNames",
+    "separateUniversalReservedItem",
+    "wildcardTransformer"
+  ],
+  "node_modules/arkguard/lib/generator/NameFactory.js": [
+    "getNameGenerator"
+  ],
+  "node_modules/arkguard/lib/generator/OrderedNameGenerator.js": [
+    "OrderedNameGenerator"
+  ],
+  "node_modules/arkguard/lib/utils/KeepParameterUtils.js": [
+    "shouldKeepCurFileParamerters",
+    "shouldKeepParameter"
+  ],
+  "lib/fast_build/ark_compiler/common/ob_config_resolver.js": [
+    "collectSourcesWhiteList",
+    "getNameCacheByPath",
+    "getUpdatedFiles",
+    "handleKeepFilesAndGetDependencies",
+    "handlePostObfuscationTasks",
+    "initObfLogger",
+    "obfuscationPreprocess",
+    "printObfLogger",
+    "reObfuscate",
+    "readProjectCaches",
+    "removeRedundantFiles",
+    "resetObfuscation",
+    "setNewNameCache",
+    "setUnobfuscationNames",
+    "updateIncrementalCaches",
+    "writeObfuscatedFile",
+    "writeObfuscationCaches"
+  ],
+  "lib/ets_checker.js": [
+    "addLocalPackageSet",
+    "areEqualArrays",
+    "collectAllFiles",
+    "collectFileToIgnoreDiagnostics",
+    "collectTscFiles",
+    "createLanguageService",
+    "createWatchCompilerHost",
+    "emitBuildInfo",
+    "etsStandaloneChecker",
+    "getArkTSLinterMode",
+    "getFileContentWithHash",
+    "getMaxFlowDepth",
+    "getResolveModule",
+    "incrementWatchFile",
+    "instanceInsteadThis",
+    "isOhExport",
+    "isStandardMode",
+    "mergeRollUpFiles",
+    "printDiagnostic",
+    "readDeaclareFiles",
+    "resetEtsCheck",
+    "resetEtsCheckTypeScript",
+    "resolveModuleNames",
+    "resolveTypeReferenceDirectives",
+    "runArkTSLinter",
+    "serviceChecker",
+    "traverseProgramSourceFiles",
+    "watchChecker"
+  ],
+  "lib/validate_ui_syntax.js": [
+    "ComponentCollection",
+    "IComponentSet",
+    "checkAllNode",
+    "checkEnvDecoratorExp",
+    "checkEnvType",
+    "collectImportNames",
+    "getComponentSet",
+    "getLocalStorageCollection",
+    "getObservedPropertyCollection",
+    "getSymbolIfAliased",
+    "isCustomDialogClass",
+    "isObservedClass",
+    "isSendableClassDeclaration",
+    "methodDecoratorCollect",
+    "preprocessExtend",
+    "preprocessNewExtend",
+    "processSystemApi",
+    "resetComponentCollection",
+    "resetValidateUiSyntax",
+    "sourceReplace",
+    "validateEnvDecoratorExp",
+    "validateEnvType",
+    "validateStmgmtKeywords",
+    "validateUISyntax"
+  ],
+  "lib/component_map.js": [
+    "resetComponentMap",
+    "resetExtContent"
+  ],
+  "lib/external_component_map.js": [
+    "concatenateEtsOptions",
+    "getExternalComponentPaths",
+    "readExternalComponents"
+  ],
+  "lib/process_ui_syntax.js": [
+    "collectExtend",
+    "createStartGetAccessRecording",
+    "getGetCurrentBundleName",
+    "globalBuilderParamAssignment",
+    "initializeMYIDS",
+    "isAnimateToOrImmediately",
+    "isDynamic",
+    "isExtendFunction",
+    "isOriginalExtend",
+    "isResource",
+    "parseStylesNode",
+    "processAnimateToOrImmediately",
+    "processResourceData",
+    "processUISyntax",
+    "resetLog",
+    "resetProcessUiSyntax",
+    "validatorCard"
+  ],
+  "lib/process_module_files.js": [
+    "writeFileSyncByNode"
+  ],
+  "lib/fast_build/ark_compiler/generate_sourcemap.js": [
+    "SourceMapGenerator"
+  ],
+  "lib/fast_build/ark_compiler/utils.js": [
+    "changeFileExtension",
+    "cleanUpFilesList",
+    "genCachePath",
+    "genTemporaryModuleCacheDirectoryForBundle",
+    "getEs2abcFileThreadNumber",
+    "hasArkDecorator",
+    "isAotMode",
+    "isBranchElimination",
+    "isCommonJsPluginVirtualFile",
+    "isCurrentProjectFiles",
+    "isDebug",
+    "isJsSourceFile",
+    "isJsonSourceFile",
+    "isMasterOrPrimary",
+    "isSpecifiedExt",
+    "isTsOrEtsSourceFile",
+    "needAotCompiler",
+    "removeCacheFile",
+    "shouldETSOrTSFileTransformToJS",
+    "shouldETSOrTSFileTransformToJSWithoutRemove",
+    "updateSourceMap",
+    "writeFileContentToTempDir"
+  ],
+  "node_modules/source-map/lib/source-map-generator.js": [
+    "SourceMapGenerator"
+  ],
+  "node_modules/source-map/lib/util.js": [
+    "compareByGeneratedPositionsDeflated",
+    "compareByGeneratedPositionsInflated",
+    "compareByOriginalPositions",
+    "computeSourceURL",
+    "getArg",
+    "join",
+    "parseSourceMapInput",
+    "relative",
+    "urlGenerate",
+    "urlParse"
+  ],
+  "node_modules/source-map/lib/array-set.js": [
+    "ArraySet"
+  ],
+  "node_modules/source-map/lib/mapping-list.js": [
+    "MappingList"
+  ],
+  "node_modules/source-map/lib/source-map-consumer.js": [
+    "BasicSourceMapConsumer",
+    "IndexedSourceMapConsumer",
+    "SourceMapConsumer"
+  ],
+  "node_modules/source-map/lib/source-node.js": [
+    "SourceNode"
+  ],
+  "lib/performance.js": [
+    "cleanUpAsyncEvents",
+    "createAndStartEvent",
+    "getHookEventFactory",
+    "isNeedPerformanceDotting",
+    "processExternalEvents",
+    "stopEvent"
+  ],
+  "lib/fast_build/meomry_monitor/rollup-plugin-memory-monitor.js": [
+    "MemoryMonitor",
+    "memoryMonitor"
+  ],
+  "lib/fast_build/meomry_monitor/memory_report.js": [
+    "getMemoryReport"
+  ],
+  "lib/fast_build/ark_compiler/logger.js": [
+    "CommonLogger",
+    "LogData",
+    "LogDataFactory"
+  ],
+  "lib/fast_build/ark_compiler/bytecode_obfuscator.js": [
+    "BytecodeObfuscationConfig",
+    "BytecodeObfuscator"
+  ],
+  "lib/fast_build/ark_compiler/common/process_ark_config.js": [
+    "initArkConfig",
+    "initArkProjectConfig",
+    "readProjectAndLibsSource"
+  ],
+  "lib/fast_build/ark_compiler/bytecode_obfuscator_invoke.js": [
+    "executeDynamicObfuscatorFromHvigor",
+    "executeObfuscator",
+    "existObfuscatorData",
+    "getObfuscatorDataPath",
+    "initObfuscatorDataStatus",
+    "readObfuscatorData",
+    "writeObfuscatorData"
+  ],
+  "lib/process_component_class.js": [
+    "addRerenderFunc",
+    "checkContextStack",
+    "checkFinalizeConstruction",
+    "contextStackPushOrPop",
+    "createParentParameter",
+    "createReference",
+    "decoratorAssignParams",
+    "decoratorAssignParamsForReusable",
+    "decoratorComponentParamForReusable",
+    "getEntryNameFunction",
+    "isBuilderOrLocalBuilder",
+    "isProperty",
+    "isRegularProperty",
+    "isReusableComponent",
+    "processBuildMember",
+    "processComponentClass",
+    "processComponentMethod",
+    "processComponentReusePool",
+    "updateHeritageClauses",
+    "validateBuildMethodCount"
+  ],
+  "lib/process_component_constructor.js": [
+    "addConstructor",
+    "getInitConstructor",
+    "updateConstructor"
+  ],
+  "lib/process_component_member.js": [
+    "PropMapManager",
+    "UpdateResult",
+    "createCustomComponentNewExpression",
+    "createResetStateVarsOnReuseForV1",
+    "createViewCreate",
+    "findDecoratorIndex",
+    "isBasicType",
+    "isLocalStorageParameter",
+    "isObservedV2",
+    "isSimpleType",
+    "isSingleKey",
+    "judgeBuilderParamAssignedByBuilder",
+    "processMemberVariableDecorators",
+    "resetProcessComponentMember"
+  ],
+  "lib/process_component_build.js": [
+    "bindComponentAttr",
+    "createCollectElmtIdNode",
+    "createComponentCreationStatement",
+    "createFunction",
+    "createViewStackProcessorStatement",
+    "getName",
+    "getRealNodePos",
+    "ifRetakeId",
+    "isAttributeNode",
+    "isMutableBuilder",
+    "isWrappedBuilder",
+    "parentConditionalExpression",
+    "parseGlobalBuilderParams",
+    "processComponentBlock",
+    "processComponentBuild",
+    "processComponentChild",
+    "processObjectPropertyBuilder",
+    "transferBuilderCall",
+    "transferMutableBuilderCall",
+    "validateStateStyleSyntax"
+  ],
+  "lib/process_custom_component.js": [
+    "assignComponentParams",
+    "assignmentFunction",
+    "createConditionParent",
+    "isAllowedTypeForBasic",
+    "isAllowedTypeToComponentV2",
+    "isCompatibleVersionOverTarget",
+    "isFunctionType",
+    "isRecycle",
+    "isReuseInV2",
+    "processCustomComponent"
+  ],
+  "lib/process_struct_componentV2.js": [
+    "ParamDecoratorInfo",
+    "StructInfo",
+    "getDecoratorName"
+  ],
+  "lib/process_import.js": [
+    "default",
+    "processImportModule"
+  ],
+  "lib/fast_build/system_api/api_check_utils.js": [
+    "checkAtomicserviceValue",
+    "checkCrossplatformValue",
+    "checkFaModelOnlyValue",
+    "checkFileHasAvailableByFileName",
+    "checkFormValue",
+    "checkFormatResult",
+    "checkIntegerMoreVersion",
+    "checkMSFVersionMajor",
+    "checkMSFVersionMajorError",
+    "checkPermissionValue",
+    "checkStageModuleValue",
+    "checkSyscapAbility",
+    "checkSystemApiValue",
+    "checkTestValue",
+    "checkTypeReference",
+    "comparePointVersion",
+    "compareVersions",
+    "configurePermission",
+    "configureSyscapInfo",
+    "defaultFormatChecker",
+    "defaultFormatCheckerCompatibileIntegerAndMSF",
+    "defaultValueChecker",
+    "extractMinApiFromDecorator",
+    "getFormatChecker",
+    "getJsDocNodeCheckConfig",
+    "getJsDocNodeConditionCheckResult",
+    "getRealModulePath",
+    "getValidDecoratorFromNode",
+    "getValueChecker",
+    "getVersionByValueChecker",
+    "initComparisonFunctions",
+    "initFormatChecker",
+    "initValueChecker",
+    "isApiAvailableGetTypeOfNodeStatement",
+    "isApiAvailableStatement",
+    "isApiAvailableVersionSpecifications",
+    "isCardFile",
+    "isCheckDistributionOSVersion",
+    "isOpenHarmonyRuntime",
+    "isSourceRetentionAnnotationContentValid",
+    "isSourceRetentionDeclarationValid",
+    "moduleRequestCallback",
+    "parseVersionString",
+    "processProp",
+    "sdkBuildErrorInfoFromDiagnostic",
+    "validateModuleSpecifier"
+  ],
+  "lib/fast_build/system_api/api_check_define.js": [
+    "BuildDiagnosticInfo",
+    "SdkHvigorErrorInfo"
+  ],
+  "lib/fast_build/system_api/api_check_permission.js": [
+    "JsDocCheckService"
+  ],
+  "lib/fast_build/system_api/api_checker/since_version_checker.js": [
+    "SinceJSDocChecker"
+  ],
+  "lib/fast_build/system_api/api_checker/base_version_checker.js": [
+    "BaseVersionChecker"
+  ],
+  "lib/fast_build/system_api/api_checker/available_version_checker.js": [
+    "AvailableAnnotationChecker"
+  ],
+  "lib/fast_build/system_api/api_validator/since_warning_suppressor.js": [
+    "SinceWarningSuppressor"
+  ],
+  "lib/fast_build/system_api/api_validator/base_warning_suppressor.js": [
+    "BaseWarningSuppressor"
+  ],
+  "lib/fast_build/system_api/api_validator/api_validate_node.js": [
+    "AnnotateSuppressWarningsValidator",
+    "AvailableComparisonValidator",
+    "CanIUseValidator",
+    "CommentSuppressWarningsValidator",
+    "CompositeValidator",
+    "SdkComparisonValidator",
+    "TryCatchValidator",
+    "UndefinedCheckValidator",
+    "WhiteListValidator"
+  ],
+  "lib/fast_build/system_api/api_validator/api_validate_utils.js": [
+    "SdkComparisonHelper"
+  ],
+  "lib/fast_build/system_api/api_validator/available_warning_suppressor.js": [
+    "AvailableWarningSuppressor"
+  ],
+  "lib/fast_build/system_api/api_validator/syscap_warning_suppressor.js": [
+    "SyscapWarningSuppressor"
+  ],
+  "lib/fast_build/system_api/api_validator/permission_warning_suppressor.js": [
+    "PermissionWarningSuppressor"
+  ],
+  "lib/fast_build/ark_compiler/process_decorator.js": [
+    "processDecorator"
+  ],
+  "lib/fast_build/ark_compiler/process_mock.js": [
+    "disableMockDecorator",
+    "isMockDecorator"
+  ],
+  "lib/process_sendable.js": [
+    "processSendableClass",
+    "processSendableFunction",
+    "processSendableType"
+  ],
+  "lib/process_module_package.js": [
+    "integratedHspType",
+    "routerBundleOrModule",
+    "routerModuleType",
+    "routerOrNavPathWrite"
+  ],
+  "lib/userIntents_parser/intentType.js": [
+    "ParamChecker"
+  ],
+  "node_modules/ajv/dist/ajv.js": [
+    "Ajv",
+    "default"
+  ],
+  "node_modules/ajv/dist/core.js": [
+    "default"
+  ],
+  "node_modules/ajv/dist/compile/validate/index.js": [
+    "KeywordCxt",
+    "getData",
+    "validateFunctionCode"
+  ],
+  "node_modules/ajv/dist/compile/validate/boolSchema.js": [
+    "boolOrEmptySchema",
+    "topBoolOrEmptySchema"
+  ],
+  "node_modules/ajv/dist/compile/errors.js": [
+    "extendErrors",
+    "reportError",
+    "reportExtraError",
+    "resetErrorsCount"
+  ],
+  "node_modules/ajv/dist/compile/codegen/index.js": [
+    "CodeGen",
+    "and",
+    "not",
+    "or"
+  ],
+  "node_modules/ajv/dist/compile/codegen/code.js": [
+    "Name",
+    "_",
+    "_Code",
+    "_CodeOrName",
+    "addCodeArg",
+    "getEsmExportName",
+    "getProperty",
+    "regexpCode",
+    "safeStringify",
+    "str",
+    "strConcat",
+    "stringify"
+  ],
+  "node_modules/ajv/dist/compile/codegen/scope.js": [
+    "Scope",
+    "ValueScope",
+    "ValueScopeName"
+  ],
+  "node_modules/ajv/dist/compile/util.js": [
+    "alwaysValidSchema",
+    "checkStrictMode",
+    "checkUnknownRules",
+    "eachItem",
+    "escapeFragment",
+    "escapeJsonPointer",
+    "evaluatedPropsToName",
+    "getErrorPath",
+    "schemaHasRules",
+    "schemaHasRulesButRef",
+    "schemaRefOrVal",
+    "setEvaluated",
+    "toHash",
+    "unescapeFragment",
+    "unescapeJsonPointer",
+    "useFunc"
+  ],
+  "node_modules/ajv/dist/compile/validate/dataType.js": [
+    "checkDataType",
+    "checkDataTypes",
+    "coerceAndCheckDataType",
+    "getJSONTypes",
+    "getSchemaTypes",
+    "reportTypeError"
+  ],
+  "node_modules/ajv/dist/compile/rules.js": [
+    "getRules",
+    "isJSONType"
+  ],
+  "node_modules/ajv/dist/compile/validate/applicability.js": [
+    "schemaHasRulesForType",
+    "shouldUseGroup",
+    "shouldUseRule"
+  ],
+  "node_modules/ajv/dist/compile/validate/defaults.js": [
+    "assignDefaults"
+  ],
+  "node_modules/ajv/dist/compile/validate/keyword.js": [
+    "funcKeywordCode",
+    "macroKeywordCode",
+    "validSchemaType",
+    "validateKeywordUsage"
+  ],
+  "node_modules/ajv/dist/vocabularies/code.js": [
+    "allSchemaProperties",
+    "callValidateCode",
+    "checkMissingProp",
+    "checkReportMissingProp",
+    "hasPropFunc",
+    "isOwnProperty",
+    "noPropertyInData",
+    "propertyInData",
+    "reportMissingProp",
+    "schemaProperties",
+    "usePattern",
+    "validateArray",
+    "validateUnion"
+  ],
+  "node_modules/ajv/dist/compile/validate/subschema.js": [
+    "extendSubschemaData",
+    "extendSubschemaMode",
+    "getSubschema"
+  ],
+  "node_modules/ajv/dist/compile/resolve.js": [
+    "_getFullPath",
+    "getFullPath",
+    "getSchemaRefs",
+    "inlineRef",
+    "normalizeId",
+    "resolveUrl"
+  ],
+  "node_modules/ajv/dist/runtime/validation_error.js": [
+    "default"
+  ],
+  "node_modules/ajv/dist/compile/ref_error.js": [
+    "default"
+  ],
+  "node_modules/ajv/dist/compile/index.js": [
+    "SchemaEnv",
+    "compileSchema",
+    "getCompilingSchema",
+    "resolveRef",
+    "resolveSchema"
+  ],
+  "node_modules/ajv/dist/vocabularies/core/ref.js": [
+    "callRef",
+    "getValidate"
+  ],
+  "node_modules/ajv/dist/runtime/ucs2length.js": [
+    "default"
+  ],
+  "node_modules/ajv/dist/vocabularies/applicator/index.js": [
+    "default"
+  ],
+  "node_modules/ajv/dist/vocabularies/applicator/additionalItems.js": [
+    "validateAdditionalItems"
+  ],
+  "node_modules/ajv/dist/vocabularies/applicator/items.js": [
+    "validateTuple"
+  ],
+  "node_modules/ajv/dist/vocabularies/applicator/dependencies.js": [
+    "validatePropertyDeps",
+    "validateSchemaDeps"
+  ],
+  "lib/userIntents_parser/intentLogger.js": [
+    "IntentLogger",
+    "LogDataFactory"
+  ],
+  "node_modules/debug/src/node.js": [
+    "formatArgs",
+    "init",
+    "load",
+    "log",
+    "save",
+    "useColors"
+  ],
+  "node_modules/date-format/lib/index.js": [
+    "asString",
+    "now",
+    "parse"
+  ],
+  "node_modules/log4js/lib/appenders/index.js": [
+    "init"
+  ],
+  "node_modules/flatted/cjs/index.js": [
+    "fromJSON",
+    "parse",
+    "stringify",
+    "toJSON"
+  ],
+  "node_modules/log4js/lib/appenders/console.js": [
+    "configure"
+  ],
+  "node_modules/log4js/lib/appenders/stdout.js": [
+    "configure"
+  ],
+  "node_modules/log4js/lib/appenders/stderr.js": [
+    "configure"
+  ],
+  "node_modules/log4js/lib/appenders/logLevelFilter.js": [
+    "configure"
+  ],
+  "node_modules/log4js/lib/appenders/categoryFilter.js": [
+    "configure"
+  ],
+  "node_modules/log4js/lib/appenders/noLogFilter.js": [
+    "configure"
+  ],
+  "node_modules/log4js/lib/appenders/file.js": [
+    "configure"
+  ],
+  "node_modules/log4js/lib/appenders/dateFile.js": [
+    "configure"
+  ],
+  "node_modules/log4js/lib/appenders/fileSync.js": [
+    "configure"
+  ],
+  "node_modules/log4js/lib/appenders/tcp.js": [
+    "configure"
+  ],
+  "lib/process_available_statement.js": [
+    "isPointVersion",
+    "processAvailableStatement"
+  ],
+  "lib/fast_build/ark_compiler/check_shared_module.js": [
+    "cleanSharedModuleSet",
+    "collectSharedModule"
+  ],
+  "lib/compile_info.js": [
+    "ResultStates"
+  ],
+  "node_modules/webpack/lib/CacheFacade.js": [
+    "ItemCacheFacade",
+    "MultiItemCache"
+  ],
+  "node_modules/webpack/lib/util/comparators.js": [
+    "compareChunkGroupsByIndex",
+    "compareIds",
+    "compareIterables",
+    "compareNumbers",
+    "compareSelect",
+    "compareStrings",
+    "compareStringsNumeric",
+    "concatComparators"
+  ],
+  "node_modules/webpack/lib/util/runtime.js": [
+    "RuntimeSpecMap",
+    "RuntimeSpecSet",
+    "getRuntimeKey",
+    "keyToRuntime",
+    "mergeRuntime",
+    "mergeRuntimeOwned",
+    "runtimeEqual",
+    "runtimeToString",
+    "subtractRuntime"
+  ],
+  "node_modules/webpack/lib/ModuleGraphConnection.js": [
+    "addConnectionStates"
+  ],
+  "node_modules/webpack/lib/util/SetHelpers.js": [
+    "combine",
+    "find",
+    "first",
+    "intersect",
+    "isSubset"
+  ],
+  "node_modules/webpack/lib/util/deprecation.js": [
+    "deprecateAllProperties"
+  ],
+  "node_modules/webpack/lib/FileSystemInfo.js": [
+    "Snapshot"
+  ],
+  "node_modules/webpack/lib/HookWebpackError.js": [
+    "makeWebpackError",
+    "makeWebpackErrorCallback",
+    "tryRunOrWebpackError"
+  ],
+  "node_modules/webpack/lib/util/fs.js": [
+    "dirname",
+    "join",
+    "lstatReadlinkAbsolute",
+    "mkdirp",
+    "mkdirpSync",
+    "readJson",
+    "relative"
+  ],
+  "node_modules/webpack/lib/GraphHelpers.js": [
+    "connectChunkGroupAndChunk",
+    "connectChunkGroupParentAndChild"
+  ],
+  "node_modules/webpack/lib/ExportsInfo.js": [
+    "ExportInfo"
+  ],
+  "node_modules/webpack/lib/logging/Logger.js": [
+    "Logger"
+  ],
+  "node_modules/webpack/lib/util/cleverMerge.js": [
+    "cachedCleverMerge",
+    "cachedSetProperty",
+    "cleverMerge",
+    "removeOperations",
+    "resolveByProperty"
+  ],
+  "node_modules/webpack/lib/util/source.js": [
+    "isSourceEqual"
+  ],
+  "node_modules/webpack/lib/javascript/JavascriptModulesPlugin.js": [
+    "chunkHasJs"
+  ],
+  "node_modules/webpack/lib/util/IterableHelpers.js": [
+    "countIterable",
+    "last",
+    "someInIterable"
+  ],
+  "node_modules/webpack-sources/lib/ReplaceSource.js": [
+    "Replacement"
+  ],
+  "node_modules/acorn/dist/acorn.js": [
+    "Node",
+    "Parser",
+    "Position",
+    "SourceLocation",
+    "TokContext",
+    "Token",
+    "TokenType",
+    "getLineInfo",
+    "isIdentifierChar",
+    "isIdentifierStart",
+    "isNewLine",
+    "parse",
+    "parseExpressionAt",
+    "tokenizer"
+  ],
+  "node_modules/acorn-import-assertions/lib/index.js": [
+    "importAssertions"
+  ],
+  "lib/process_visual.js": [
+    "findVisualFile",
+    "parseVisual",
+    "visualTransform"
+  ],
+  "lib/fast_build/ets_ui/rollup-plugin-ets-checker.js": [
+    "etsChecker"
+  ],
+  "lib/do_arkTS_linter.js": [
+    "doArkTSLinter",
+    "transfromErrorCode"
+  ],
+  "lib/hvigor_error_code/utils.js": [
+    "buildErrorInfoFromDiagnostic"
+  ],
+  "lib/fast_build/ark_compiler/module/module_source_file.js": [
+    "ModuleSourceFile"
+  ],
+  "lib/fast_build/ark_compiler/check_import_module.js": [
+    "checkIfJsImportingArkts"
+  ],
+  "lib/fast_build/ark_compiler/module/module_preload_file_utils.js": [
+    "PreloadFileModules"
+  ],
+  "lib/fast_build/common/process_project_config.js": [
+    "getEntryObj",
+    "setCopyPluginConfig"
+  ],
+  "lib/fast_build/ets_ui/rollup-plugin-ets-typescript.js": [
+    "etsTransform",
+    "getCompilerHost",
+    "shouldEmitJsFlagById"
+  ],
+  "node_modules/@rollup/pluginutils/dist/cjs/index.js": [
+    "addExtension",
+    "attachScopes",
+    "createFilter",
+    "dataToEsm",
+    "exactRegex",
+    "extractAssignedNames",
+    "makeLegalIdentifier",
+    "normalizePath",
+    "prefixRegex",
+    "suffixRegex"
+  ],
+  "node_modules/estree-walker/dist/umd/estree-walker.js": [
+    "asyncWalk",
+    "walk"
+  ],
+  "lib/process_kit_import.js": [
+    "KitInfo",
+    "checkHasKeepTs",
+    "cleanUpKitImportObjects",
+    "processKitImport",
+    "resetKitImportLog"
+  ],
+  "lib/fast_build/system_api/rollup-plugin-system-api.js": [
+    "apiTransform",
+    "collectKitModules"
+  ],
+  "lib/process_lazy_import.js": [
+    "lazyImportReExportCheck",
+    "processJsCodeLazyImport",
+    "resetReExportCheckLog",
+    "transformLazyImport"
+  ],
+  "lib/fast_build/ets_ui/arkoala-plugin.js": [
+    "default"
+  ],
+  "lib/import_path_expand.js": [
+    "expandAllImportPaths"
+  ],
+  "lib/fast_build/ark_compiler/rollup-plugin-gen-abc.js": [
+    "genAbc"
+  ],
+  "lib/fast_build/ark_compiler/generate_bundle_abc.js": [
+    "generateBundleAbc"
+  ],
+  "lib/fast_build/ark_compiler/bundle/bundle_preview_mode.js": [
+    "BundlePreviewMode"
+  ],
+  "lib/fast_build/ark_compiler/bundle/bundle_mode.js": [
+    "BundleMode"
+  ],
+  "lib/fast_build/ark_compiler/common/common_mode.js": [
+    "CommonMode"
+  ],
+  "lib/fast_build/ark_compiler/bundle/bundle_build_mode.js": [
+    "BundleBuildMode"
+  ],
+  "lib/fast_build/ark_compiler/generate_module_abc.js": [
+    "cleanModuleMode",
+    "generateModuleAbc"
+  ],
+  "lib/fast_build/ark_compiler/module/module_build_mode.js": [
+    "ModuleBuildMode"
+  ],
+  "lib/fast_build/ark_compiler/module/module_mode.js": [
+    "ModuleInfo",
+    "ModuleMode",
+    "PackageEntryInfo"
+  ],
+  "lib/fast_build/ark_compiler/module/module_coldreload_mode.js": [
+    "ModuleColdreloadMode"
+  ],
+  "lib/fast_build/ark_compiler/module/module_hotfix_mode.js": [
+    "ModuleHotfixMode"
+  ],
+  "lib/fast_build/ark_compiler/module/module_hotreload_mode.js": [
+    "ModuleHotreloadMode"
+  ],
+  "lib/fast_build/ark_compiler/module/module_preview_mode.js": [
+    "ModulePreviewMode"
+  ],
+  "lib/fast_build/ark_compiler/transform.js": [
+    "transformForModule"
+  ],
+  "lib/fast_build/ark_compiler/cache.js": [
+    "checkArkCompilerCacheInfo",
+    "shouldInvalidCache"
+  ],
+  "lib/fast_build/common/rollup-plugin-watch-change.js": [
+    "watchChangeFiles"
+  ],
+  "lib/fast_build/visual/rollup-plugin-visual.js": [
+    "visualTransform"
+  ],
+  "lib/fast_build/ark_compiler/terser-plugin.js": [
+    "terserPlugin"
+  ],
+  "node_modules/@rollup/plugin-terser/dist/cjs/index.js": [
+    "default"
+  ],
+  "node_modules/smob/dist/index.cjs.js": [
+    "baseMerger",
+    "buildOptions",
+    "createMerger",
+    "hasOwnProperty",
+    "isObject",
+    "isSafeKey",
+    "isSafeObject",
+    "mergeArrays"
+  ],
+  "node_modules/@rollup/plugin-babel/dist/cjs/index.js": [
+    "createBabelInputPluginFactory",
+    "createBabelOutputPluginFactory"
+  ],
+  "node_modules/@babel/core/lib/index.js": [
+    "OptionManager",
+    "Plugin"
+  ],
+  "node_modules/@babel/core/lib/transformation/file/file.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/validators/buildMatchMemberExpression.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/validators/matchesPattern.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/validators/generated/index.js": [
+    "isAccessor",
+    "isAnyTypeAnnotation",
+    "isArgumentPlaceholder",
+    "isArrayExpression",
+    "isArrayPattern",
+    "isArrayTypeAnnotation",
+    "isArrowFunctionExpression",
+    "isAssignmentExpression",
+    "isAssignmentPattern",
+    "isAwaitExpression",
+    "isBigIntLiteral",
+    "isBinary",
+    "isBinaryExpression",
+    "isBindExpression",
+    "isBlock",
+    "isBlockParent",
+    "isBlockStatement",
+    "isBooleanLiteral",
+    "isBooleanLiteralTypeAnnotation",
+    "isBooleanTypeAnnotation",
+    "isBreakStatement",
+    "isCallExpression",
+    "isCatchClause",
+    "isClass",
+    "isClassAccessorProperty",
+    "isClassBody",
+    "isClassDeclaration",
+    "isClassExpression",
+    "isClassImplements",
+    "isClassMethod",
+    "isClassPrivateMethod",
+    "isClassPrivateProperty",
+    "isClassProperty",
+    "isCompletionStatement",
+    "isConditional",
+    "isConditionalExpression",
+    "isContinueStatement",
+    "isDebuggerStatement",
+    "isDecimalLiteral",
+    "isDeclaration",
+    "isDeclareClass",
+    "isDeclareExportAllDeclaration",
+    "isDeclareExportDeclaration",
+    "isDeclareFunction",
+    "isDeclareInterface",
+    "isDeclareModule",
+    "isDeclareModuleExports",
+    "isDeclareOpaqueType",
+    "isDeclareTypeAlias",
+    "isDeclareVariable",
+    "isDeclaredPredicate",
+    "isDecorator",
+    "isDirective",
+    "isDirectiveLiteral",
+    "isDoExpression",
+    "isDoWhileStatement",
+    "isEmptyStatement",
+    "isEmptyTypeAnnotation",
+    "isEnumBody",
+    "isEnumBooleanBody",
+    "isEnumBooleanMember",
+    "isEnumDeclaration",
+    "isEnumDefaultedMember",
+    "isEnumMember",
+    "isEnumNumberBody",
+    "isEnumNumberMember",
+    "isEnumStringBody",
+    "isEnumStringMember",
+    "isEnumSymbolBody",
+    "isExistsTypeAnnotation",
+    "isExportAllDeclaration",
+    "isExportDeclaration",
+    "isExportDefaultDeclaration",
+    "isExportDefaultSpecifier",
+    "isExportNamedDeclaration",
+    "isExportNamespaceSpecifier",
+    "isExportSpecifier",
+    "isExpression",
+    "isExpressionStatement",
+    "isExpressionWrapper",
+    "isFile",
+    "isFlow",
+    "isFlowBaseAnnotation",
+    "isFlowDeclaration",
+    "isFlowPredicate",
+    "isFlowType",
+    "isFor",
+    "isForInStatement",
+    "isForOfStatement",
+    "isForStatement",
+    "isForXStatement",
+    "isFunction",
+    "isFunctionDeclaration",
+    "isFunctionExpression",
+    "isFunctionParameter",
+    "isFunctionParent",
+    "isFunctionTypeAnnotation",
+    "isFunctionTypeParam",
+    "isGenericTypeAnnotation",
+    "isIdentifier",
+    "isIfStatement",
+    "isImmutable",
+    "isImport",
+    "isImportAttribute",
+    "isImportDeclaration",
+    "isImportDefaultSpecifier",
+    "isImportExpression",
+    "isImportNamespaceSpecifier",
+    "isImportOrExportDeclaration",
+    "isImportSpecifier",
+    "isIndexedAccessType",
+    "isInferredPredicate",
+    "isInterfaceDeclaration",
+    "isInterfaceExtends",
+    "isInterfaceTypeAnnotation",
+    "isInterpreterDirective",
+    "isIntersectionTypeAnnotation",
+    "isJSX",
+    "isJSXAttribute",
+    "isJSXClosingElement",
+    "isJSXClosingFragment",
+    "isJSXElement",
+    "isJSXEmptyExpression",
+    "isJSXExpressionContainer",
+    "isJSXFragment",
+    "isJSXIdentifier",
+    "isJSXMemberExpression",
+    "isJSXNamespacedName",
+    "isJSXOpeningElement",
+    "isJSXOpeningFragment",
+    "isJSXSpreadAttribute",
+    "isJSXSpreadChild",
+    "isJSXText",
+    "isLVal",
+    "isLabeledStatement",
+    "isLiteral",
+    "isLogicalExpression",
+    "isLoop",
+    "isMemberExpression",
+    "isMetaProperty",
+    "isMethod",
+    "isMiscellaneous",
+    "isMixedTypeAnnotation",
+    "isModuleDeclaration",
+    "isModuleExpression",
+    "isModuleSpecifier",
+    "isNewExpression",
+    "isNoop",
+    "isNullLiteral",
+    "isNullLiteralTypeAnnotation",
+    "isNullableTypeAnnotation",
+    "isNumberLiteral",
+    "isNumberLiteralTypeAnnotation",
+    "isNumberTypeAnnotation",
+    "isNumericLiteral",
+    "isObjectExpression",
+    "isObjectMember",
+    "isObjectMethod",
+    "isObjectPattern",
+    "isObjectProperty",
+    "isObjectTypeAnnotation",
+    "isObjectTypeCallProperty",
+    "isObjectTypeIndexer",
+    "isObjectTypeInternalSlot",
+    "isObjectTypeProperty",
+    "isObjectTypeSpreadProperty",
+    "isOpaqueType",
+    "isOptionalCallExpression",
+    "isOptionalIndexedAccessType",
+    "isOptionalMemberExpression",
+    "isParenthesizedExpression",
+    "isPattern",
+    "isPatternLike",
+    "isPipelineBareFunction",
+    "isPipelinePrimaryTopicReference",
+    "isPipelineTopicExpression",
+    "isPlaceholder",
+    "isPrivate",
+    "isPrivateName",
+    "isProgram",
+    "isProperty",
+    "isPureish",
+    "isQualifiedTypeIdentifier",
+    "isRecordExpression",
+    "isRegExpLiteral",
+    "isRegexLiteral",
+    "isRestElement",
+    "isRestProperty",
+    "isReturnStatement",
+    "isScopable",
+    "isSequenceExpression",
+    "isSpreadElement",
+    "isSpreadProperty",
+    "isStandardized",
+    "isStatement",
+    "isStaticBlock",
+    "isStringLiteral",
+    "isStringLiteralTypeAnnotation",
+    "isStringTypeAnnotation",
+    "isSuper",
+    "isSwitchCase",
+    "isSwitchStatement",
+    "isSymbolTypeAnnotation",
+    "isTSAnyKeyword",
+    "isTSArrayType",
+    "isTSAsExpression",
+    "isTSBaseType",
+    "isTSBigIntKeyword",
+    "isTSBooleanKeyword",
+    "isTSCallSignatureDeclaration",
+    "isTSConditionalType",
+    "isTSConstructSignatureDeclaration",
+    "isTSConstructorType",
+    "isTSDeclareFunction",
+    "isTSDeclareMethod",
+    "isTSEntityName",
+    "isTSEnumBody",
+    "isTSEnumDeclaration",
+    "isTSEnumMember",
+    "isTSExportAssignment",
+    "isTSExpressionWithTypeArguments",
+    "isTSExternalModuleReference",
+    "isTSFunctionType",
+    "isTSImportEqualsDeclaration",
+    "isTSImportType",
+    "isTSIndexSignature",
+    "isTSIndexedAccessType",
+    "isTSInferType",
+    "isTSInstantiationExpression",
+    "isTSInterfaceBody",
+    "isTSInterfaceDeclaration",
+    "isTSIntersectionType",
+    "isTSIntrinsicKeyword",
+    "isTSLiteralType",
+    "isTSMappedType",
+    "isTSMethodSignature",
+    "isTSModuleBlock",
+    "isTSModuleDeclaration",
+    "isTSNamedTupleMember",
+    "isTSNamespaceExportDeclaration",
+    "isTSNeverKeyword",
+    "isTSNonNullExpression",
+    "isTSNullKeyword",
+    "isTSNumberKeyword",
+    "isTSObjectKeyword",
+    "isTSOptionalType",
+    "isTSParameterProperty",
+    "isTSParenthesizedType",
+    "isTSPropertySignature",
+    "isTSQualifiedName",
+    "isTSRestType",
+    "isTSSatisfiesExpression",
+    "isTSStringKeyword",
+    "isTSSymbolKeyword",
+    "isTSTemplateLiteralType",
+    "isTSThisType",
+    "isTSTupleType",
+    "isTSType",
+    "isTSTypeAliasDeclaration",
+    "isTSTypeAnnotation",
+    "isTSTypeAssertion",
+    "isTSTypeElement",
+    "isTSTypeLiteral",
+    "isTSTypeOperator",
+    "isTSTypeParameter",
+    "isTSTypeParameterDeclaration",
+    "isTSTypeParameterInstantiation",
+    "isTSTypePredicate",
+    "isTSTypeQuery",
+    "isTSTypeReference",
+    "isTSUndefinedKeyword",
+    "isTSUnionType",
+    "isTSUnknownKeyword",
+    "isTSVoidKeyword",
+    "isTaggedTemplateExpression",
+    "isTemplateElement",
+    "isTemplateLiteral",
+    "isTerminatorless",
+    "isThisExpression",
+    "isThisTypeAnnotation",
+    "isThrowStatement",
+    "isTopicReference",
+    "isTryStatement",
+    "isTupleExpression",
+    "isTupleTypeAnnotation",
+    "isTypeAlias",
+    "isTypeAnnotation",
+    "isTypeCastExpression",
+    "isTypeParameter",
+    "isTypeParameterDeclaration",
+    "isTypeParameterInstantiation",
+    "isTypeScript",
+    "isTypeofTypeAnnotation",
+    "isUnaryExpression",
+    "isUnaryLike",
+    "isUnionTypeAnnotation",
+    "isUpdateExpression",
+    "isUserWhitespacable",
+    "isV8IntrinsicIdentifier",
+    "isVariableDeclaration",
+    "isVariableDeclarator",
+    "isVariance",
+    "isVoidPattern",
+    "isVoidTypeAnnotation",
+    "isWhile",
+    "isWhileStatement",
+    "isWithStatement",
+    "isYieldExpression"
+  ],
+  "node_modules/@babel/types/lib/utils/shallowEqual.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/utils/deprecationWarning.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/validators/react/isCompatTag.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/builders/react/buildChildren.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/utils/react/cleanJSXElementLiteralChild.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/builders/generated/lowercase.js": [
+    "anyTypeAnnotation",
+    "argumentPlaceholder",
+    "arrayExpression",
+    "arrayPattern",
+    "arrayTypeAnnotation",
+    "arrowFunctionExpression",
+    "assignmentExpression",
+    "assignmentPattern",
+    "awaitExpression",
+    "bigIntLiteral",
+    "binaryExpression",
+    "bindExpression",
+    "blockStatement",
+    "booleanLiteral",
+    "booleanLiteralTypeAnnotation",
+    "booleanTypeAnnotation",
+    "breakStatement",
+    "callExpression",
+    "catchClause",
+    "classAccessorProperty",
+    "classBody",
+    "classDeclaration",
+    "classExpression",
+    "classImplements",
+    "classMethod",
+    "classPrivateMethod",
+    "classPrivateProperty",
+    "classProperty",
+    "conditionalExpression",
+    "continueStatement",
+    "debuggerStatement",
+    "decimalLiteral",
+    "declareClass",
+    "declareExportAllDeclaration",
+    "declareExportDeclaration",
+    "declareFunction",
+    "declareInterface",
+    "declareModule",
+    "declareModuleExports",
+    "declareOpaqueType",
+    "declareTypeAlias",
+    "declareVariable",
+    "declaredPredicate",
+    "decorator",
+    "directive",
+    "directiveLiteral",
+    "doExpression",
+    "doWhileStatement",
+    "emptyStatement",
+    "emptyTypeAnnotation",
+    "enumBooleanBody",
+    "enumBooleanMember",
+    "enumDeclaration",
+    "enumDefaultedMember",
+    "enumNumberBody",
+    "enumNumberMember",
+    "enumStringBody",
+    "enumStringMember",
+    "enumSymbolBody",
+    "existsTypeAnnotation",
+    "exportAllDeclaration",
+    "exportDefaultDeclaration",
+    "exportDefaultSpecifier",
+    "exportNamedDeclaration",
+    "exportNamespaceSpecifier",
+    "exportSpecifier",
+    "expressionStatement",
+    "file",
+    "forInStatement",
+    "forOfStatement",
+    "forStatement",
+    "functionDeclaration",
+    "functionExpression",
+    "functionTypeAnnotation",
+    "functionTypeParam",
+    "genericTypeAnnotation",
+    "identifier",
+    "ifStatement",
+    "import",
+    "importAttribute",
+    "importDeclaration",
+    "importDefaultSpecifier",
+    "importExpression",
+    "importNamespaceSpecifier",
+    "importSpecifier",
+    "indexedAccessType",
+    "inferredPredicate",
+    "interfaceDeclaration",
+    "interfaceExtends",
+    "interfaceTypeAnnotation",
+    "interpreterDirective",
+    "intersectionTypeAnnotation",
+    "jsxAttribute",
+    "jsxClosingElement",
+    "jsxClosingFragment",
+    "jsxElement",
+    "jsxEmptyExpression",
+    "jsxExpressionContainer",
+    "jsxFragment",
+    "jsxIdentifier",
+    "jsxMemberExpression",
+    "jsxNamespacedName",
+    "jsxOpeningElement",
+    "jsxOpeningFragment",
+    "jsxSpreadAttribute",
+    "jsxSpreadChild",
+    "jsxText",
+    "labeledStatement",
+    "logicalExpression",
+    "memberExpression",
+    "metaProperty",
+    "mixedTypeAnnotation",
+    "moduleExpression",
+    "newExpression",
+    "noop",
+    "nullLiteral",
+    "nullLiteralTypeAnnotation",
+    "nullableTypeAnnotation",
+    "numberLiteral",
+    "numberLiteralTypeAnnotation",
+    "numberTypeAnnotation",
+    "numericLiteral",
+    "objectExpression",
+    "objectMethod",
+    "objectPattern",
+    "objectProperty",
+    "objectTypeAnnotation",
+    "objectTypeCallProperty",
+    "objectTypeIndexer",
+    "objectTypeInternalSlot",
+    "objectTypeProperty",
+    "objectTypeSpreadProperty",
+    "opaqueType",
+    "optionalCallExpression",
+    "optionalIndexedAccessType",
+    "optionalMemberExpression",
+    "parenthesizedExpression",
+    "pipelineBareFunction",
+    "pipelinePrimaryTopicReference",
+    "pipelineTopicExpression",
+    "placeholder",
+    "privateName",
+    "program",
+    "qualifiedTypeIdentifier",
+    "recordExpression",
+    "regExpLiteral",
+    "regexLiteral",
+    "restElement",
+    "restProperty",
+    "returnStatement",
+    "sequenceExpression",
+    "spreadElement",
+    "spreadProperty",
+    "staticBlock",
+    "stringLiteral",
+    "stringLiteralTypeAnnotation",
+    "stringTypeAnnotation",
+    "super",
+    "switchCase",
+    "switchStatement",
+    "symbolTypeAnnotation",
+    "taggedTemplateExpression",
+    "templateElement",
+    "templateLiteral",
+    "thisExpression",
+    "thisTypeAnnotation",
+    "throwStatement",
+    "topicReference",
+    "tryStatement",
+    "tsAnyKeyword",
+    "tsArrayType",
+    "tsAsExpression",
+    "tsBigIntKeyword",
+    "tsBooleanKeyword",
+    "tsCallSignatureDeclaration",
+    "tsConditionalType",
+    "tsConstructSignatureDeclaration",
+    "tsConstructorType",
+    "tsDeclareFunction",
+    "tsDeclareMethod",
+    "tsEnumBody",
+    "tsEnumDeclaration",
+    "tsEnumMember",
+    "tsExportAssignment",
+    "tsExpressionWithTypeArguments",
+    "tsExternalModuleReference",
+    "tsFunctionType",
+    "tsImportEqualsDeclaration",
+    "tsImportType",
+    "tsIndexSignature",
+    "tsIndexedAccessType",
+    "tsInferType",
+    "tsInstantiationExpression",
+    "tsInterfaceBody",
+    "tsInterfaceDeclaration",
+    "tsIntersectionType",
+    "tsIntrinsicKeyword",
+    "tsLiteralType",
+    "tsMappedType",
+    "tsMethodSignature",
+    "tsModuleBlock",
+    "tsModuleDeclaration",
+    "tsNamedTupleMember",
+    "tsNamespaceExportDeclaration",
+    "tsNeverKeyword",
+    "tsNonNullExpression",
+    "tsNullKeyword",
+    "tsNumberKeyword",
+    "tsObjectKeyword",
+    "tsOptionalType",
+    "tsParameterProperty",
+    "tsParenthesizedType",
+    "tsPropertySignature",
+    "tsQualifiedName",
+    "tsRestType",
+    "tsSatisfiesExpression",
+    "tsStringKeyword",
+    "tsSymbolKeyword",
+    "tsTemplateLiteralType",
+    "tsThisType",
+    "tsTupleType",
+    "tsTypeAliasDeclaration",
+    "tsTypeAnnotation",
+    "tsTypeAssertion",
+    "tsTypeLiteral",
+    "tsTypeOperator",
+    "tsTypeParameter",
+    "tsTypeParameterDeclaration",
+    "tsTypeParameterInstantiation",
+    "tsTypePredicate",
+    "tsTypeQuery",
+    "tsTypeReference",
+    "tsUndefinedKeyword",
+    "tsUnionType",
+    "tsUnknownKeyword",
+    "tsVoidKeyword",
+    "tupleExpression",
+    "tupleTypeAnnotation",
+    "typeAlias",
+    "typeAnnotation",
+    "typeCastExpression",
+    "typeParameter",
+    "typeParameterDeclaration",
+    "typeParameterInstantiation",
+    "typeofTypeAnnotation",
+    "unaryExpression",
+    "unionTypeAnnotation",
+    "updateExpression",
+    "v8IntrinsicIdentifier",
+    "variableDeclaration",
+    "variableDeclarator",
+    "variance",
+    "voidPattern",
+    "voidTypeAnnotation",
+    "whileStatement",
+    "withStatement",
+    "yieldExpression"
+  ],
+  "node_modules/@babel/types/lib/validators/validate.js": [
+    "default",
+    "validateChild",
+    "validateField",
+    "validateInternal"
+  ],
+  "node_modules/@babel/types/lib/definitions/core.js": [
+    "classMethodOrDeclareMethodCommon",
+    "classMethodOrPropertyCommon",
+    "functionCommon",
+    "functionDeclarationCommon",
+    "functionTypeAnnotationCommon",
+    "patternLikeCommon"
+  ],
+  "node_modules/@babel/types/lib/validators/is.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/validators/isType.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/validators/isPlaceholderType.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/validators/isValidIdentifier.js": [
+    "default"
+  ],
+  "node_modules/@babel/helper-validator-identifier/lib/identifier.js": [
+    "isIdentifierChar",
+    "isIdentifierName",
+    "isIdentifierStart"
+  ],
+  "node_modules/@babel/helper-validator-identifier/lib/keyword.js": [
+    "isKeyword",
+    "isReservedWord",
+    "isStrictBindOnlyReservedWord",
+    "isStrictBindReservedWord",
+    "isStrictReservedWord"
+  ],
+  "node_modules/@babel/helper-string-parser/lib/index.js": [
+    "readCodePoint",
+    "readInt",
+    "readStringContents"
+  ],
+  "node_modules/@babel/types/lib/definitions/utils.js": [
+    "arrayOf",
+    "arrayOfType",
+    "assertEach",
+    "assertNodeOrValueType",
+    "assertNodeType",
+    "assertOneOf",
+    "assertOptionalChainStart",
+    "assertShape",
+    "assertValueType",
+    "chain",
+    "default",
+    "defineAliasedType",
+    "validate",
+    "validateArrayOfType",
+    "validateOptional",
+    "validateOptionalType",
+    "validateType"
+  ],
+  "node_modules/@babel/types/lib/asserts/assertNode.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/validators/isNode.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/asserts/generated/index.js": [
+    "assertAccessor",
+    "assertAnyTypeAnnotation",
+    "assertArgumentPlaceholder",
+    "assertArrayExpression",
+    "assertArrayPattern",
+    "assertArrayTypeAnnotation",
+    "assertArrowFunctionExpression",
+    "assertAssignmentExpression",
+    "assertAssignmentPattern",
+    "assertAwaitExpression",
+    "assertBigIntLiteral",
+    "assertBinary",
+    "assertBinaryExpression",
+    "assertBindExpression",
+    "assertBlock",
+    "assertBlockParent",
+    "assertBlockStatement",
+    "assertBooleanLiteral",
+    "assertBooleanLiteralTypeAnnotation",
+    "assertBooleanTypeAnnotation",
+    "assertBreakStatement",
+    "assertCallExpression",
+    "assertCatchClause",
+    "assertClass",
+    "assertClassAccessorProperty",
+    "assertClassBody",
+    "assertClassDeclaration",
+    "assertClassExpression",
+    "assertClassImplements",
+    "assertClassMethod",
+    "assertClassPrivateMethod",
+    "assertClassPrivateProperty",
+    "assertClassProperty",
+    "assertCompletionStatement",
+    "assertConditional",
+    "assertConditionalExpression",
+    "assertContinueStatement",
+    "assertDebuggerStatement",
+    "assertDecimalLiteral",
+    "assertDeclaration",
+    "assertDeclareClass",
+    "assertDeclareExportAllDeclaration",
+    "assertDeclareExportDeclaration",
+    "assertDeclareFunction",
+    "assertDeclareInterface",
+    "assertDeclareModule",
+    "assertDeclareModuleExports",
+    "assertDeclareOpaqueType",
+    "assertDeclareTypeAlias",
+    "assertDeclareVariable",
+    "assertDeclaredPredicate",
+    "assertDecorator",
+    "assertDirective",
+    "assertDirectiveLiteral",
+    "assertDoExpression",
+    "assertDoWhileStatement",
+    "assertEmptyStatement",
+    "assertEmptyTypeAnnotation",
+    "assertEnumBody",
+    "assertEnumBooleanBody",
+    "assertEnumBooleanMember",
+    "assertEnumDeclaration",
+    "assertEnumDefaultedMember",
+    "assertEnumMember",
+    "assertEnumNumberBody",
+    "assertEnumNumberMember",
+    "assertEnumStringBody",
+    "assertEnumStringMember",
+    "assertEnumSymbolBody",
+    "assertExistsTypeAnnotation",
+    "assertExportAllDeclaration",
+    "assertExportDeclaration",
+    "assertExportDefaultDeclaration",
+    "assertExportDefaultSpecifier",
+    "assertExportNamedDeclaration",
+    "assertExportNamespaceSpecifier",
+    "assertExportSpecifier",
+    "assertExpression",
+    "assertExpressionStatement",
+    "assertExpressionWrapper",
+    "assertFile",
+    "assertFlow",
+    "assertFlowBaseAnnotation",
+    "assertFlowDeclaration",
+    "assertFlowPredicate",
+    "assertFlowType",
+    "assertFor",
+    "assertForInStatement",
+    "assertForOfStatement",
+    "assertForStatement",
+    "assertForXStatement",
+    "assertFunction",
+    "assertFunctionDeclaration",
+    "assertFunctionExpression",
+    "assertFunctionParameter",
+    "assertFunctionParent",
+    "assertFunctionTypeAnnotation",
+    "assertFunctionTypeParam",
+    "assertGenericTypeAnnotation",
+    "assertIdentifier",
+    "assertIfStatement",
+    "assertImmutable",
+    "assertImport",
+    "assertImportAttribute",
+    "assertImportDeclaration",
+    "assertImportDefaultSpecifier",
+    "assertImportExpression",
+    "assertImportNamespaceSpecifier",
+    "assertImportOrExportDeclaration",
+    "assertImportSpecifier",
+    "assertIndexedAccessType",
+    "assertInferredPredicate",
+    "assertInterfaceDeclaration",
+    "assertInterfaceExtends",
+    "assertInterfaceTypeAnnotation",
+    "assertInterpreterDirective",
+    "assertIntersectionTypeAnnotation",
+    "assertJSX",
+    "assertJSXAttribute",
+    "assertJSXClosingElement",
+    "assertJSXClosingFragment",
+    "assertJSXElement",
+    "assertJSXEmptyExpression",
+    "assertJSXExpressionContainer",
+    "assertJSXFragment",
+    "assertJSXIdentifier",
+    "assertJSXMemberExpression",
+    "assertJSXNamespacedName",
+    "assertJSXOpeningElement",
+    "assertJSXOpeningFragment",
+    "assertJSXSpreadAttribute",
+    "assertJSXSpreadChild",
+    "assertJSXText",
+    "assertLVal",
+    "assertLabeledStatement",
+    "assertLiteral",
+    "assertLogicalExpression",
+    "assertLoop",
+    "assertMemberExpression",
+    "assertMetaProperty",
+    "assertMethod",
+    "assertMiscellaneous",
+    "assertMixedTypeAnnotation",
+    "assertModuleDeclaration",
+    "assertModuleExpression",
+    "assertModuleSpecifier",
+    "assertNewExpression",
+    "assertNoop",
+    "assertNullLiteral",
+    "assertNullLiteralTypeAnnotation",
+    "assertNullableTypeAnnotation",
+    "assertNumberLiteral",
+    "assertNumberLiteralTypeAnnotation",
+    "assertNumberTypeAnnotation",
+    "assertNumericLiteral",
+    "assertObjectExpression",
+    "assertObjectMember",
+    "assertObjectMethod",
+    "assertObjectPattern",
+    "assertObjectProperty",
+    "assertObjectTypeAnnotation",
+    "assertObjectTypeCallProperty",
+    "assertObjectTypeIndexer",
+    "assertObjectTypeInternalSlot",
+    "assertObjectTypeProperty",
+    "assertObjectTypeSpreadProperty",
+    "assertOpaqueType",
+    "assertOptionalCallExpression",
+    "assertOptionalIndexedAccessType",
+    "assertOptionalMemberExpression",
+    "assertParenthesizedExpression",
+    "assertPattern",
+    "assertPatternLike",
+    "assertPipelineBareFunction",
+    "assertPipelinePrimaryTopicReference",
+    "assertPipelineTopicExpression",
+    "assertPlaceholder",
+    "assertPrivate",
+    "assertPrivateName",
+    "assertProgram",
+    "assertProperty",
+    "assertPureish",
+    "assertQualifiedTypeIdentifier",
+    "assertRecordExpression",
+    "assertRegExpLiteral",
+    "assertRegexLiteral",
+    "assertRestElement",
+    "assertRestProperty",
+    "assertReturnStatement",
+    "assertScopable",
+    "assertSequenceExpression",
+    "assertSpreadElement",
+    "assertSpreadProperty",
+    "assertStandardized",
+    "assertStatement",
+    "assertStaticBlock",
+    "assertStringLiteral",
+    "assertStringLiteralTypeAnnotation",
+    "assertStringTypeAnnotation",
+    "assertSuper",
+    "assertSwitchCase",
+    "assertSwitchStatement",
+    "assertSymbolTypeAnnotation",
+    "assertTSAnyKeyword",
+    "assertTSArrayType",
+    "assertTSAsExpression",
+    "assertTSBaseType",
+    "assertTSBigIntKeyword",
+    "assertTSBooleanKeyword",
+    "assertTSCallSignatureDeclaration",
+    "assertTSConditionalType",
+    "assertTSConstructSignatureDeclaration",
+    "assertTSConstructorType",
+    "assertTSDeclareFunction",
+    "assertTSDeclareMethod",
+    "assertTSEntityName",
+    "assertTSEnumBody",
+    "assertTSEnumDeclaration",
+    "assertTSEnumMember",
+    "assertTSExportAssignment",
+    "assertTSExpressionWithTypeArguments",
+    "assertTSExternalModuleReference",
+    "assertTSFunctionType",
+    "assertTSImportEqualsDeclaration",
+    "assertTSImportType",
+    "assertTSIndexSignature",
+    "assertTSIndexedAccessType",
+    "assertTSInferType",
+    "assertTSInstantiationExpression",
+    "assertTSInterfaceBody",
+    "assertTSInterfaceDeclaration",
+    "assertTSIntersectionType",
+    "assertTSIntrinsicKeyword",
+    "assertTSLiteralType",
+    "assertTSMappedType",
+    "assertTSMethodSignature",
+    "assertTSModuleBlock",
+    "assertTSModuleDeclaration",
+    "assertTSNamedTupleMember",
+    "assertTSNamespaceExportDeclaration",
+    "assertTSNeverKeyword",
+    "assertTSNonNullExpression",
+    "assertTSNullKeyword",
+    "assertTSNumberKeyword",
+    "assertTSObjectKeyword",
+    "assertTSOptionalType",
+    "assertTSParameterProperty",
+    "assertTSParenthesizedType",
+    "assertTSPropertySignature",
+    "assertTSQualifiedName",
+    "assertTSRestType",
+    "assertTSSatisfiesExpression",
+    "assertTSStringKeyword",
+    "assertTSSymbolKeyword",
+    "assertTSTemplateLiteralType",
+    "assertTSThisType",
+    "assertTSTupleType",
+    "assertTSType",
+    "assertTSTypeAliasDeclaration",
+    "assertTSTypeAnnotation",
+    "assertTSTypeAssertion",
+    "assertTSTypeElement",
+    "assertTSTypeLiteral",
+    "assertTSTypeOperator",
+    "assertTSTypeParameter",
+    "assertTSTypeParameterDeclaration",
+    "assertTSTypeParameterInstantiation",
+    "assertTSTypePredicate",
+    "assertTSTypeQuery",
+    "assertTSTypeReference",
+    "assertTSUndefinedKeyword",
+    "assertTSUnionType",
+    "assertTSUnknownKeyword",
+    "assertTSVoidKeyword",
+    "assertTaggedTemplateExpression",
+    "assertTemplateElement",
+    "assertTemplateLiteral",
+    "assertTerminatorless",
+    "assertThisExpression",
+    "assertThisTypeAnnotation",
+    "assertThrowStatement",
+    "assertTopicReference",
+    "assertTryStatement",
+    "assertTupleExpression",
+    "assertTupleTypeAnnotation",
+    "assertTypeAlias",
+    "assertTypeAnnotation",
+    "assertTypeCastExpression",
+    "assertTypeParameter",
+    "assertTypeParameterDeclaration",
+    "assertTypeParameterInstantiation",
+    "assertTypeScript",
+    "assertTypeofTypeAnnotation",
+    "assertUnaryExpression",
+    "assertUnaryLike",
+    "assertUnionTypeAnnotation",
+    "assertUpdateExpression",
+    "assertUserWhitespacable",
+    "assertV8IntrinsicIdentifier",
+    "assertVariableDeclaration",
+    "assertVariableDeclarator",
+    "assertVariance",
+    "assertVoidPattern",
+    "assertVoidTypeAnnotation",
+    "assertWhile",
+    "assertWhileStatement",
+    "assertWithStatement",
+    "assertYieldExpression"
+  ],
+  "node_modules/@babel/types/lib/builders/flow/createTypeAnnotationBasedOnTypeof.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/builders/flow/createFlowUnionType.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/modifications/flow/removeTypeDuplicates.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/builders/typescript/createTSUnionType.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/modifications/typescript/removeTypeDuplicates.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/builders/productions.js": [
+    "buildUndefinedNode"
+  ],
+  "node_modules/@babel/types/lib/clone/cloneNode.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/clone/clone.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/clone/cloneDeep.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/clone/cloneDeepWithoutLoc.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/clone/cloneWithoutLoc.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/comments/addComment.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/comments/addComments.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/comments/inheritInnerComments.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/utils/inherit.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/comments/inheritLeadingComments.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/comments/inheritsComments.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/comments/inheritTrailingComments.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/comments/removeComments.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/converters/ensureBlock.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/converters/toBlock.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/converters/toBindingIdentifierName.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/converters/toIdentifier.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/converters/toComputedKey.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/converters/toExpression.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/converters/toKeyAlias.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/modifications/removePropertiesDeep.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/traverse/traverseFast.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/modifications/removeProperties.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/converters/toStatement.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/converters/valueToNode.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/modifications/appendToMemberExpression.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/modifications/inherits.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/modifications/prependToMemberExpression.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/retrievers/getAssignmentIdentifiers.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/retrievers/getBindingIdentifiers.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/retrievers/getOuterBindingIdentifiers.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/retrievers/getFunctionName.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/traverse/traverse.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/validators/isBinding.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/validators/isBlockScoped.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/validators/isLet.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/validators/isImmutable.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/validators/isNodesEquivalent.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/validators/isReferenced.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/validators/isScope.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/validators/isSpecifierDefault.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/validators/isValidES3Identifier.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/validators/isVar.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/converters/toSequenceExpression.js": [
+    "default"
+  ],
+  "node_modules/@babel/types/lib/converters/gatherSequenceExpressions.js": [
+    "default"
+  ],
+  "node_modules/@babel/core/lib/tools/build-external-helpers.js": [
+    "default"
+  ],
+  "node_modules/@babel/core/lib/config/files/package.js": [
+    "findPackageData"
+  ],
+  "node_modules/@babel/core/lib/config/files/utils.js": [
+    "makeStaticFileCache"
+  ],
+  "node_modules/@babel/core/lib/config/caching.js": [
+    "assertSimpleType",
+    "makeStrongCache",
+    "makeStrongCacheSync",
+    "makeWeakCache",
+    "makeWeakCacheSync"
+  ],
+  "node_modules/@babel/core/lib/gensync-utils/async.js": [
+    "forwardAsync",
+    "isThenable",
+    "maybeAsync"
+  ],
+  "node_modules/@babel/core/lib/config/util.js": [
+    "isIterableIterator",
+    "mergeOptions"
+  ],
+  "node_modules/@babel/core/lib/errors/config-error.js": [
+    "default"
+  ],
+  "node_modules/@babel/core/lib/errors/rewrite-stack-trace.js": [
+    "beginHiddenCallStack",
+    "endHiddenCallStack",
+    "expectedError",
+    "injcectVirtualStackFrame"
+  ],
+  "node_modules/@babel/core/lib/config/files/configuration.js": [
+    "findConfigUpwards",
+    "findRelativeConfig",
+    "findRootConfig",
+    "loadConfig",
+    "resolveShowConfigPath"
+  ],
+  "node_modules/@babel/core/lib/config/helpers/config-api.js": [
+    "makeConfigAPI",
+    "makePluginAPI",
+    "makePresetAPI"
+  ],
+  "node_modules/@babel/core/lib/config/files/module-types.js": [
+    "default"
+  ],
+  "node_modules/@babel/core/lib/config/pattern-to-regex.js": [
+    "default"
+  ],
+  "node_modules/@babel/core/lib/config/files/plugins.js": [
+    "loadPlugin",
+    "loadPreset",
+    "resolvePlugin",
+    "resolvePreset"
+  ],
+  "node_modules/@babel/core/lib/config/files/import-meta-resolve.js": [
+    "default"
+  ],
+  "node_modules/@babel/core/lib/vendor/import-meta-resolve.js": [
+    "moduleResolve",
+    "resolve"
+  ],
+  "node_modules/@babel/core/lib/config/helpers/environment.js": [
+    "getEnv"
+  ],
+  "node_modules/@babel/core/lib/config/index.js": [
+    "createConfigItem"
+  ],
+  "node_modules/@babel/core/lib/config/plugin.js": [
+    "default"
+  ],
+  "node_modules/@babel/core/lib/config/helpers/deep-array.js": [
+    "finalize",
+    "flattenToSet"
+  ],
+  "node_modules/@babel/core/lib/config/item.js": [
+    "createConfigItem",
+    "createItemFromDescriptor",
+    "getItemDescriptor"
+  ],
+  "node_modules/@babel/core/lib/config/config-descriptors.js": [
+    "createCachedDescriptors",
+    "createDescriptor",
+    "createUncachedDescriptors"
+  ],
+  "node_modules/@babel/core/lib/gensync-utils/functional.js": [
+    "once"
+  ],
+  "node_modules/@babel/core/lib/config/resolve-targets.js": [
+    "resolveBrowserslistConfigFile",
+    "resolveTargets"
+  ],
+  "node_modules/@babel/core/lib/config/config-chain.js": [
+    "buildPresetChain",
+    "buildRootChain"
+  ],
+  "node_modules/@babel/core/lib/config/validation/options.js": [
+    "checkNoUnwrappedItemOptionPairs",
+    "validate"
+  ],
+  "node_modules/@babel/core/lib/config/validation/option-assertions.js": [
+    "access",
+    "assertArray",
+    "assertAssumptions",
+    "assertBabelrcSearch",
+    "assertBoolean",
+    "assertCallerMetadata",
+    "assertCompact",
+    "assertConfigApplicableTest",
+    "assertConfigFileSearch",
+    "assertFunction",
+    "assertIgnoreList",
+    "assertInputSourceMap",
+    "assertObject",
+    "assertPluginList",
+    "assertRootMode",
+    "assertSourceMaps",
+    "assertSourceType",
+    "assertString",
+    "assertTargets",
+    "msg"
+  ],
+  "node_modules/@babel/core/lib/config/printer.js": [
+    "ConfigPrinter"
+  ],
+  "node_modules/@babel/core/lib/config/validation/plugins.js": [
+    "validatePluginObject"
+  ],
+  "node_modules/@babel/core/lib/config/partial.js": [
+    "default"
+  ],
+  "node_modules/@babel/core/lib/transform.js": [
+    "transform",
+    "transformAsync",
+    "transformSync"
+  ],
+  "node_modules/@babel/core/lib/transformation/index.js": [
+    "run"
+  ],
+  "node_modules/@babel/core/lib/transformation/plugin-pass.js": [
+    "default"
+  ],
+  "node_modules/@babel/core/lib/transformation/block-hoist-plugin.js": [
+    "default"
+  ],
+  "node_modules/@babel/core/lib/transformation/normalize-opts.js": [
+    "default"
+  ],
+  "node_modules/@babel/core/lib/transformation/normalize-file.js": [
+    "default"
+  ],
+  "node_modules/@babel/core/lib/parser/index.js": [
+    "default"
+  ],
+  "node_modules/@babel/core/lib/parser/util/missing-plugin-helper.js": [
+    "default"
+  ],
+  "node_modules/@babel/core/lib/transformation/util/clone-deep.js": [
+    "default"
+  ],
+  "node_modules/@babel/core/lib/transformation/file/generate.js": [
+    "default"
+  ],
+  "node_modules/@babel/core/lib/transformation/file/merge-map.js": [
+    "default"
+  ],
+  "node_modules/@babel/core/lib/transform-file.js": [
+    "transformFile",
+    "transformFileAsync",
+    "transformFileSync"
+  ],
+  "node_modules/@babel/core/lib/transform-ast.js": [
+    "transformFromAst",
+    "transformFromAstAsync",
+    "transformFromAstSync"
+  ],
+  "node_modules/@babel/core/lib/parse.js": [
+    "parse",
+    "parseAsync",
+    "parseSync"
+  ],
+  "node_modules/@babel/helper-module-imports/lib/index.js": [
+    "addDefault",
+    "addNamed",
+    "addNamespace",
+    "addSideEffect"
+  ],
+  "node_modules/@babel/helper-module-imports/lib/import-injector.js": [
+    "default"
+  ],
+  "node_modules/@babel/helper-module-imports/lib/import-builder.js": [
+    "default"
+  ],
+  "node_modules/@babel/helper-module-imports/lib/is-module.js": [
+    "default"
+  ]
+}

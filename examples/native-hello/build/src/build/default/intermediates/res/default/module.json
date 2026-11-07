@@ -1,0 +1,62 @@
+{
+	"app":	{
+		"bundleName":	"com.example.native_hello",
+		"vendor":	"example",
+		"versionCode":	1000000,
+		"versionName":	"1.0.0",
+		"buildVersion":	"1",
+		"icon":	"$media:layered_image",
+		"label":	"$string:app_name",
+		"apiReleaseType":	"Beta1",
+		"compileSdkVersion":	"26.0.0.23",
+		"targetAPIVersion":	260000026,
+		"minAPIVersion":	260000026,
+		"compileSdkType":	"HarmonyOS",
+		"targetMinorAPIVersion":	0,
+		"targetPatchAPIVersion":	0,
+		"minMinorAPIVersion":	0,
+		"minPatchAPIVersion":	0,
+		"appEnvironments":	[],
+		"bundleType":	"app",
+		"buildMode":	"release",
+		"debug":	false,
+		"iconId":	16777219,
+		"labelId":	16777216
+	},
+	"module":	{
+		"name":	"src",
+		"type":	"entry",
+		"description":	"$string:module_desc",
+		"mainElement":	"EntryAbility",
+		"pages":	"$profile:main_pages",
+		"srcEntry":	"./ets/entryability/EntryAbility.ets",
+		"deviceTypes":	["phone", "tablet", "2in1", "car"],
+		"deliveryWithInstall":	true,
+		"installationFree":	false,
+		"abilities":	[{
+				"name":	"EntryAbility",
+				"srcEntry":	"./ets/entryability/EntryAbility.ets",
+				"description":	"$string:EntryAbility_desc",
+				"icon":	"$media:layered_image",
+				"label":	"$string:EntryAbility_label",
+				"startWindowIcon":	"$media:layered_image",
+				"startWindowBackground":	"$color:start_window_background",
+				"orientation":	"auto_rotation",
+				"exported":	true,
+				"skills":	[{
+						"entities":	["entity.system.home"],
+						"actions":	["action.system.home"]
+					}],
+				"descriptionId":	16777221,
+				"iconId":	16777219,
+				"labelId":	16777222,
+				"startWindowIconId":	16777219,
+				"startWindowBackgroundId":	16777224
+			}],
+		"packageName":	"src",
+		"virtualMachine":	"ark24.0.0.0",
+		"compileMode":	"esmodule",
+		"dependencies":	[],
+		"descriptionId":	16777223
+	}
+}

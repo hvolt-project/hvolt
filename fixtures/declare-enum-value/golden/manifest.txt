@@ -1,0 +1,6 @@
+module.json
+resources.index
+pack.info
+pkgContextInfo.json
+modules.abc
+sourceMaps.map

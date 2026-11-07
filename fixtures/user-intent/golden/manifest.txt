@@ -1,0 +1,7 @@
+module.json
+resources.index
+pack.info
+pkgContextInfo.json
+modules.abc
+insight_intent.json
+sourceMaps.map

@@ -8,7 +8,7 @@ license = "GPL-3.0-or-later"
 repository = "https://github.com/hvolt-project/hvolt"
 homepage = "https://github.com/hvolt-project/hvolt#readme"
 readme = "README.md"
-keywords = ["harmonyos", "openharmony", "hap", "build-tool", "hvigor"]
+keywords = ["harmonyos", "openharmony", "hap", "build-tool", "arkts"]
 categories = ["command-line-utilities", "development-tools::build-utils"]
 
 [[bin]]
@@ -38,8 +38,24 @@ rand = "0.8"
 # hdc wire protocol: RSA-3072 challenge-response, PKCS#1 v1.5 over SHA-256.
 rsa = { version = "0.9", features = ["sha2", "pem"] }
 zip = { version = "2", default-features = false, features = ["deflate"] }
+# Native USB transport to hdcd (enumerate + bulk endpoints). Pure Rust, no
+# libusb; each platform backend is implemented in-tree by nusb.
+nusb = "0.2"
 regex-lite = "0.1"
 hapsigner = { version = "0.2.0", default-features = false }
+# Already pulled in by hapsigner; used directly to read a certificate's notAfter.
+x509-cert = "0.2"
+der = "0.7"
+oxc_parser = "0.75.0"
+oxc_allocator = "0.75.0"
+oxc_span = "0.75.0"
+oxc_ast = "0.75.0"
+oxc_ast_visit = "0.75.1"
+oxc_codegen = "0.75.0"
+rcgen = { version = "0.14.7", features = ["pem"] }
+p12 = "0.6"
+pkcs8 = "0.10"
+p256 = "0.13"
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
@@ -48,7 +64,7 @@ libc = "0.2"
 # These hold for the whole crate; `cargo clippy --all-targets -- -D warnings`
 # is the review gate, `cargo fmt --check` the formatting one.
 [lints.rust]
-unsafe_code = "warn"     # exactly one site: SIGPIPE reset in main.rs, documented there
+unsafe_code = "warn"     # two sites, both documented: SIGPIPE reset in main.rs, gethostname in platform.rs
 unused_must_use = "warn" # a dropped Result is a swallowed error
 
 [lints.clippy]

@@ -1,0 +1,5 @@
+# ninja log v6
+54	119	1785128321613289926	/Users/hongyuncong/workspace/better-harmony-app-build/examples/native-hello/build/src/build/default/intermediates/cmake/default/obj/arm64-v8a/libhello.so	2ada1deb4ace78c2
+0	53	1785128321559775081	CMakeFiles/hello.dir/napi_init.cpp.o	2603bea1e4af3ed5
+1	46	1793634728846251418	CMakeFiles/hello.dir/napi_init.cpp.o	3dc63ad256babf07
+46	93	1793634728891055740	/Users/hongyuncong/workspace/better-harmony-app-build/examples/native-hello/build/src/build/default/intermediates/cmake/default/obj/arm64-v8a/libhello.so	96419b2f4b0ae41
