@@ -139,6 +139,90 @@ fn route_map_pages(dir: &Path) -> Vec<String> {
 /// under `<project>/build/hvolt-out`, and the HAP is packed from there.
 /// Returns the failure instead of exiting: a library-shaped pipeline stays
 /// composable and its error paths stay assertable.
+/// Copy the precompiled libraries each module ships beside itself.
+///
+/// The packer reads one flat `libs/<abi>/`, and a module's own `libs/<abi>/*.so` is the
+/// prebuilt half of its native surface (`libflclash.so`, 63 MB, is built outside this tree).
+/// Nothing copied them, so the device reported
+/// `export objects of native so is undefined, so name is @normalized:Y&&&libflclash.so&`
+/// and the proxy core was never loaded (clashbox, measured 2026-11-08).
+fn collect_prebuilt_libs(
+    project_dir: &Path,
+    modules: &[(String, crate::support::config::ModuleConfig)],
+    out_dir: &Path,
+) -> Result<Vec<std::path::PathBuf>, String> {
+    let libs = out_dir.join("arm64-v8a");
+    std::fs::create_dir_all(&libs).map_err(|e| format!("mkdir {}: {e}", libs.display()))?;
+    let mut copied = Vec::new();
+    for (name, _) in modules {
+        let source = project_dir.join(name).join("libs").join("arm64-v8a");
+        let Ok(entries) = std::fs::read_dir(&source) else {
+            continue;
+        };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.extension().is_none_or(|ext| ext != "so") {
+                continue;
+            }
+            let Some(file_name) = path.file_name() else {
+                continue;
+            };
+            let dest = libs.join(file_name);
+            std::fs::copy(&path, &dest).map_err(|e| format!("copy {}: {e}", path.display()))?;
+            copied.push(dest);
+        }
+    }
+    Ok(copied)
+}
+
+/// Build the native half of every module that ships C++ sources.
+///
+/// The flat layout keeps them at `<module>/cpp/CMakeLists.txt`, while `build_all` looks only
+/// under `libs/<name>/` — so a flat project produced no `.so` at all, and the device reported
+/// `export objects of native so is undefined` for `libproxy_core.so` and `libxb_components.so`
+/// (clashbox, measured 2026-11-08).
+fn build_module_native(
+    sdk_root: &Path,
+    project_dir: &Path,
+    modules: &[(String, crate::support::config::ModuleConfig)],
+    out_dir: &Path,
+) -> Result<Vec<std::path::PathBuf>, String> {
+    let libs = out_dir.join("arm64-v8a");
+    std::fs::create_dir_all(&libs).map_err(|e| format!("mkdir {}: {e}", libs.display()))?;
+    let mut produced = Vec::new();
+    for (name, _) in modules {
+        let module_dir = std::path::absolute(project_dir.join(name).join("cpp"))
+            .map_err(|e| format!("absolute {name}: {e}"))?;
+        if !module_dir.join("CMakeLists.txt").exists() {
+            continue;
+        }
+        let build_dir = out_dir
+            .parent()
+            .unwrap_or(out_dir)
+            .join(format!(".native-build-{name}"));
+        let built = crate::build::artifacts::native_compile::build(
+            sdk_root,
+            &module_dir,
+            &build_dir,
+            "Debug",
+        )?;
+        crate::build::artifacts::native_compile::strip(sdk_root, &built)?;
+        for entry in std::fs::read_dir(&built).into_iter().flatten().flatten() {
+            let path = entry.path();
+            if path.extension().is_none_or(|ext| ext != "so") {
+                continue;
+            }
+            let Some(file_name) = path.file_name() else {
+                continue;
+            };
+            let dest = libs.join(file_name);
+            std::fs::copy(&path, &dest).map_err(|e| format!("copy {}: {e}", path.display()))?;
+            produced.push(dest);
+        }
+    }
+    Ok(produced)
+}
+
 fn native_build(project_dir: &Path) -> Result<(AppConfig, SdkEnv), String> {
     let root_toml = project_dir.join("hvolt.toml");
     let app_config = AppConfig::from_file(&root_toml)?;
@@ -159,6 +243,24 @@ fn native_build(project_dir: &Path) -> Result<(AppConfig, SdkEnv), String> {
         project_dir,
         &out_dir.join("libs"),
     )?;
+    let built_native =
+        build_module_native(&sdk_root, project_dir, &modules, &out_dir.join("libs"))?;
+    if !built_native.is_empty() {
+        println!("✓ module native built: {}", built_native.len());
+    }
+    let libs_dir = out_dir.join("libs");
+    // The C++ runtime every native module links against. Without it a C++ module's exports
+    // read `undefined` at import time (see `cxx_runtime`).
+    if let Some(runtime) = crate::build::artifacts::native_compile::cxx_runtime(&sdk_root) {
+        let abi_dir = libs_dir.join("arm64-v8a");
+        std::fs::create_dir_all(&abi_dir).map_err(|e| format!("mkdir {}: {e}", abi_dir.display()))?;
+        let dest = abi_dir.join("libc++_shared.so");
+        std::fs::copy(&runtime, &dest).map_err(|e| format!("copy {}: {e}", runtime.display()))?;
+    }
+    let prebuilt = collect_prebuilt_libs(project_dir, &modules, &libs_dir)?;
+    if !prebuilt.is_empty() {
+        println!("✓ prebuilt libs copied: {}", prebuilt.len());
+    }
     if !produced.is_empty() {
         println!("✓ native built: {} lib(s)", produced.len());
     }

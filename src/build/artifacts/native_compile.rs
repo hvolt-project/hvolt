@@ -25,9 +25,25 @@ fn toolchain_bin(name: &str) -> String {
     }
 }
 
+/// The NDK's `libc++_shared.so` for arm64.
+///
+/// A module built with `CMAKE_CXX_STANDARD 20` (`xb_components`) cannot be `dlopen`-ed
+/// without it, and the runtime then reports its exports as `undefined` — the device said
+/// `export objects of native so is undefined, so name is @normalized:Y&&&libxb_components.so&`
+/// (clashbox, measured 2026-11-08). The reference packer ships the NDK's copy unchanged.
+pub fn cxx_runtime(sdk_root: &Path) -> Option<PathBuf> {
+    let path = native_root(sdk_root).join("llvm/lib/aarch64-linux-ohos/libc++_shared.so");
+    path.is_file().then_some(path)
+}
+
 /// Build one native module (a directory with CMakeLists.txt) for one ABI.
 /// Returns the directory holding the built (unstripped) .so files.
-pub fn build(sdk_root: &Path, module_dir: &Path, build_dir: &Path) -> Result<PathBuf, String> {
+pub fn build(
+    sdk_root: &Path,
+    module_dir: &Path,
+    build_dir: &Path,
+    build_type: &str,
+) -> Result<PathBuf, String> {
     let native = native_root(sdk_root);
     let cmake = native
         .join("build-tools/cmake/bin")
@@ -53,7 +69,11 @@ pub fn build(sdk_root: &Path, module_dir: &Path, build_dir: &Path) -> Result<Pat
         .arg("-DOHOS_ARCH=arm64-v8a")
         .arg(format!("-DOHOS_SDK_NATIVE={}", native.display()))
         .arg(format!("-DCMAKE_MAKE_PROGRAM={}", ninja.display()))
-        .arg("-DCMAKE_BUILD_TYPE=Release")
+        // The reference builds native code with the project's own build mode; compiling a
+        // `debug` project as Release inlines away every template instantiation, which shrinks
+        // `libxb_components.so` from 206 608 to 92 552 bytes and drops 178 exported
+        // `NapiUtils::toNapiValue<…>` symbols (clashbox, measured 2026-11-08).
+        .arg(format!("-DCMAKE_BUILD_TYPE={build_type}"))
         .arg("-G")
         .arg("Ninja")
         .arg(module_dir)
@@ -137,7 +157,7 @@ pub fn build_all(
             .unwrap_or(out_dir)
             .join(format!(".native-build-{name}"));
         let build_dir = build_root;
-        let built = build(sdk_root, &module_dir, &build_dir)?;
+        let built = build(sdk_root, &module_dir, &build_dir, "Debug")?;
         strip(sdk_root, &built)?;
         for entry in std::fs::read_dir(&built)
             .map_err(|e| format!("read {}: {e}", built.display()))?
