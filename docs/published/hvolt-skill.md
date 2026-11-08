@@ -8,16 +8,42 @@ hvolt（HarmonyOS Volt）是一个社区构建工具，将扁平化项目结构�
 二进制：`hvolt`
 仓库：`hvolt-project/hvolt`（公开社区项目）
 
+### 快速开始
+
+从 DevEco 工程到设备上跑起来，五步：
+
+```bash
+hvolt doctor                       # 1. 环境自检：SDK、node、设备后端
+hvolt migrate --dry-run --from .   # 2. 看它打算怎么迁（不落盘）
+hvolt migrate --from .             # 3. 迁成扁平工程，输出目录在 <name>-flat/
+cd <name>-flat && hvolt build      # 4. 编译打包；没配 [app.signing] 时只出 unsigned
+hvolt sign --local                 # 5. 开发板/模拟器：本地签名（零售机必须走 AGC，见「签名」）
+hvolt push                         #    装到设备（启动用 hvolt run）
+```
+
+从零建工程也可以（不需要先有 DevEco 工程）：
+
+```bash
+hvolt init myapp && cd myapp    # 生成最小可构建工程（resources/ 在项目根）
+hvolt build && hvolt sign --local && hvolt push
+```
+
+两条常见断点：
+
+- **没配签名**：`build` 仍会成功，产物是 `build/*-unsigned.hap`；`push`/`check` 会说明这一点，
+  不会让你反复重跑 build。开发板用 `hvolt sign --local`。
+- **设备没连上**：先 `hvolt device list` 看有没有设备，再 `hvolt push <addr>`。
+
 ### 扁平项目布局（hvolt 自己的工程格式）
 
-hvolt 不只是构建工具，它**定义**工程格式：一棵扁平树，`assemble` 翻成标准 HarmonyOS 工程。
+hvolt 不只是构建工具，它**定义**工程格式：`hvolt.toml` 加源码与资源，编译与打包都在 hvolt 内完成，不生成 DevEco 工程。
 权威示例：`examples/hello-world`（最小）与 `examples/hello-native`（含 C++/NAPI 原生模块）。
 
 ```
 <app>/
 ├── hvolt.toml              # 应用级：[app] bundle/name/version/vendor/icon/sdk_version/members、[app.signing]、[dependencies]
 ├── src/                    # 一个模块（目录名即模块名）
-│   ├── hvolt.toml          # 模块级：[module] name/routes/entry/device_types/obfuscation
+│   ├── hvolt.toml          # 模块级：[module] name/routes/entry/router_map/forms/backup…
 │   ├── EntryAbility.ets
 │   └── pages/Index.ets
 ├── resources/base/         # element/{string,color,float}.json + media/
@@ -33,7 +59,7 @@ hvolt 不只是构建工具，它**定义**工程格式：一棵扁平树，`ass
 1. 原生模块**只声明在 `[dependencies]`**，不写进 `app.members`（`is_native_module` 按 `type="native"` 判定）。
 2. `mylib/hvolt.toml` 的 `name` 决定产物 `lib<name>.so`；CMake target、`nm_modname`、ArkTS `import` 必须同一致
    （`name="hello"` → target `hello`、`nm_modname="libhello"`、`import { add } from 'libhello.so'`）。
-3. `types` 指向类型声明；`assemble` 生成 `src/main/cpp/types/<依赖名>/`（`oh-package.json5` + `Index.d.ts`），
+3. `types` 指向类型声明；`hvolt build` 按它解析 NAPI 类型并把编出的 `.so` 打进 HAP，
    并在模块 `oh-package.json5` 里加 `"<依赖名>.so": "file:./src/main/cpp/types/<依赖名>"`，
    同时写 `buildOption.externalNativeOptions.path = ./src/main/cpp/CMakeLists.txt`、`abiFilters = ["arm64-v8a"]`。
 
@@ -46,10 +72,10 @@ hvolt 不只是构建工具，它**定义**工程格式：一棵扁平树，`ass
 | `src/main.rs` | 入口，命令分发 | `main()` |
 | `src/support/cli.rs` | CLI 定义（clap derive） | `Args`, `Command` enum |
 | `src/sdk/manage.rs` | SDK 发现/管理/下载 | `detect()`, `list_remote()`, `download_sdk()`, `import_sdk()` |
-| `src/build/pipeline.rs` | 构建流程编排（原生链） | `native_build()`, `build_and_sign()`, `run()` |
-| `src/sign/package.rs` | 远程签名（AGC API） | `sign()`, `sign_remote()` |
-| `src/sign/native_sign.rs` | 本地签名（进程内，无 java） | `sign_package()` |
-| `src/build/hap_pack.rs` | HAP 打包（替代 app_packing_tool.jar） | `pack()` |
+| `src/build/deps/pipeline.rs` | 构建流程编排（原生链） | `native_build()`, `build_and_sign()`, `run()` |
+| `src/sign/backend.rs` | 远程签名（AGC API，随 feature 注入） | `sign_remote()` |
+| `src/sign/sign_local.rs` | 本地签名（OpenHarmony localSign，`hvolt sign --local`） | `sign()` |
+| `src/build/artifacts/hap_pack.rs` | HAP 打包（替代 app_packing_tool.jar） | `pack()` |
 | `src/support/config.rs` | `hvolt.toml` 解析 | `AppConfig`, `ModuleConfig`, `NativeModuleConfig` |
 | `src/translator/` | 扁平工程发现（模块/原生模块） | `discover_modules()`, `generate_main_pages()` |
 | `src/project/scaffold.rs` | 项目脚手架生成 | `scaffold()` |
@@ -67,7 +93,7 @@ hvolt 不只是构建工具，它**定义**工程格式：一棵扁平树，`ass
 ### 数据流
 
 ```
-hvolt.toml → build-native → assemble-hap(资源) → assemble-ets(ArkTS→abc) → pack-hap → sign → install → device
+hvolt.toml → native → res → ets(ArkTS→abc) → pack → sign → install → device
                     ↘                ↘                     ↘
                   SDK: es2abc / restool / ArkTS 声明文件（只取编译器）
 ```
@@ -119,18 +145,48 @@ orientation = "auto_rotation_unspecified"
 # 安装语义覆盖（缺省按 bundle_type 推：atomicService → 免安装）
 delivery_with_install = true
 installation_free = true
+
+# 被别的模块 import 时用的入口文件（`Index.ets` → `Index`）。
+# 缺省读模块自己的 oh-package.json5 `main`。
+main = "Index.ets"
+
+# 路由页：`NavPathStack.pushPathByName("…")` 的目标。
+# 只写 name 就够——page 与 build_function 由构建扫源码推导（`@Builder export function`
+# 的名字去掉 Builder 后缀、或文件名，与 name 忽略大小写相等即可）。推不出的才写全。
+[[module.router_map]]
+name = "route-address"
+page = "components/More/Overwrite/Network.ets"
+build_function = "NetworkRouterAddressBuilder"
+
+# 桌面卡片 → 打包成 form_config.json
+[[module.forms]]
+name = "SwitchProxyWidget1x2"
+display_name = "$string:widget_display_name"
+description = "$string:widget_desc"
+src = "widget/pages/SwitchProxyWidget1x2.ets"
+default_dimension = "1*2"
+support_dimensions = ["1*2"]
+
+# 备份策略 → 打包成 backup_config.json
+[module.backup]
+allow_to_backup_restore = true
 ```
+
+这四个字段（`router_map` / `main` / `forms` / `backup`）是 `hvolt migrate` 从
+`route_map.json` / `oh-package.json5` / `form_config.json` / `backup_config.json` 折进来的，
+迁移后工程里不再有那四个文件；直接手写工程时也只需要写这里。
 
 `[module] icon` / `start_window_icon` / `orientation` 只作用于 `entry` 指的入口 Ability；
 `[[module.abilities]]` 的 UIAbility 用各自的 `orientation`。
 
----|---|---|
+| 形态 | 源侧 | hvolt 做的 |
+|---|---|---|
 | 独立 native 模块 | `<mylib>/hvolt.toml` + `CMakeLists.txt`，并在 `[dependencies]` 声明 | 拷 cpp、写 types 桥、加 `externalNativeOptions` |
 | 模块内联 cmake | `<member>/cpp/CMakeLists.txt`（+ `<member>/libs/<abi>/*.so`） | 递归拷到 `src/main/cpp`、`src/main/libs`，写 `externalNativeOptions`（abiFilters 取 `[module] abi_filters`） |
 
 **预编译输入放源树**：`<member>/cpp/prebuilt/` 之类的位置，并在 CMakeLists 里引用；
-不要放进 `build/`——全量 assemble 会清空该目录。CMakeLists 中若有**越出模块**的相对路径
-（`../../...`），`hvolt import` 会以「可能」措辞给出 gap：扁平布局不保证这些路径存在，
+不要放进 `build/`——`hvolt clean` 会清空该目录。CMakeLists 中若有**越出模块**的相对路径
+（`../../...`），`hvolt migrate` 会以「可能」措辞给出 gap：扁平布局不保证这些路径存在，
 hvolt 也不改写 CMake 文件。
 
 `cpp/`、`libs/` 永远不会被镜像进 `ets/`——曾经会，结果是 `.cpp` 与 `CMakeLists.txt` 明码打进 HAP。
@@ -198,12 +254,11 @@ cargo test
 | 命令 | 说明 |
 |---|---|
 | `hvolt init <name>` | 生成新项目脚手架 |
-| `hvolt import [--from <dir>] [--out <dir>] [--dry-run]` | DevEco 标准布局 → 扁平工程；同时列出扁平布局表达不了的项 |
-| `hvolt assemble` | 翻译 → 标准 HarmonyOS 布局到 `build/` |
-| `hvolt build` | Native-chain build: compile ArkTS → pack HAP → sign (no external build tool / package manager / JDK) |
+| `hvolt migrate [--from <dir>] [--out <dir>] [--dry-run]` | DevEco 工程 → hvolt 布局（只留 `hvolt.toml`）；同时列出表达不了的项 |
+| `hvolt build` | 编译（自建 ArkTS 链）、打包与签名（不依赖外部构建工具 / 包管理器 / JDK） |
 | `hvolt lsp --stdio` | 语言服务器（LSP over stdio），供编辑器/agent 集成 |
 | `hvolt skill list \| show <id>` | 列出/打印内嵌文档（hvolt-skill、clean-code、harmony-device-flow） |
-| `hvolt run` | 全流程（build + push + launch） |
+| `hvolt run` | 推送并启动当前包；配了 `[app.signing]` 时先 build + sign |
 | `hvolt clean` | 清理构建产物 |
 | `hvolt doctor` | 环境/SDK/工具/设备/凭据一致性预检（exit≠0 表示存在 ✗ 项） |
 | `hvolt log` | 设备 hilog：`--level/--bundle/-T tag/-D domain/-k 关键词/--crash/--follow/--tail` |
@@ -227,6 +282,10 @@ cargo test
 
 | 命令 | 说明 |
 |---|---|
+| `hvolt check [PATH]` | 包侧质量门：重复文件、超大文件、后缀统计（缺省取最新 signed 包） |
+| `hvolt hap info [PATH]` | 读出 HAP 的 module.json / 条目数 / 大小 |
+| `hvolt clean` | 清掉 `build/` |
+| `hvolt doctor` | 环境自检（SDK / node / 设备后端），有警告时 Summary 会分开报 |
 
 ### 配置命令
 
@@ -250,7 +309,6 @@ cargo test
 |---|---|
 | `hvolt sign [HAP]` | AGC 签名：CSR→证书→登记设备→profile（需先 `hvolt agc login`）。给了 `HAP` 时签那个裸包：默认走 localSign 测试链，profile 绑**包内 bundleName**（缺失时 `--bundle` 补），结果留在包所在目录的 `<name>-signed.hap`（输入以 `-unsigned` 结尾则换成 `-signed`），签完由内置校验自证（`ApplicationVerifier` + `ProfileVerifier`）；`--p12/--profile/--cert` 三项同时给出时改用这些材料签 |
 | `hvolt sign --local [HAP]` | 官方公开测试链本地签名（**仅开发板/模拟器**；零售机装不上）。给了 `HAP` 时签该裸包，行为同上；**已带签名的包会被拒绝**（按包内 `META-INF` 判，不看文件名） |
-| `hvolt apply` | hqf 增量补丁部署（要求已装同身份包） |
 | `hvolt push [-d serial] [--hap FILE]` | 推送 newest `output/*-signed.hap` 并安装；`--hap` 指定任意位置的包文件，**未签名的包直接报错**而不是丢给设备 |
 | `hvolt screenshot -o x.jpeg [-d serial]` | 设备截图（设备侧输出 jpeg） |
 | `hvolt ui dump` | ArkUI 布局树 dump（uitest dumpLayout） |
@@ -292,13 +350,6 @@ pub struct SdkEnv {
 - SDK 中 `restool`、`es2abc` 等编译器是**平台原生二进制**（Mach-O / ELF）
 - Linux Docker 内无法运行 macOS 版本的 SDK toolchains
 
-### lint
-- 副本树同步**不跟随链接**（已修：实测 Windows 上源 177 文件 → 副本 178 文件，此前跟随 junction 会到 18337）。
-- `--fix` 未实现（见上节判据里的实测原因）。
-- `doctor` 的 `[lint]` 段只做**警告**（payload / sdk bridge 是否就绪），不把缺 DevEco 的机器算成问题。
-- 规则集与引擎清单跟 IDE 版本绑定，换 DevEco 版本需重取 payload。
-- 曾把"引擎跳过"归因于 **node 版本下限**，**已证伪并撤回**：node 20/22 与 24/26 表现相同，真因是 SDK 形态。
-
 ### doctor 的 device_types 判据
 - 可用集合 = `modulecheck/module.json` 的 schema 合法集 **∩** 本 SDK `device-define` 实际存在的集合。实测：`phone` 不在 OpenHarmony schema；`car` 在本 SDK 无 `device-define`。
 - 只做只读排查；设备侧只允许装/启停应用与读日志，不代用户注入输入。
@@ -330,19 +381,19 @@ RUST_BACKTRACE=1 cargo run -- build 2>&1
 3. 实现业务逻辑
 4. `cargo build` 验证
 
-### 模块翻译
-
-`assemble()` 流程：
+### 一次 `hvolt build` 做什么
 
 ```
-read hvolt.toml → parse config → discover modules → translate each module:
-  1. generate build-profile.json5（含 externalNativeOptions）
-  2. generate module.json5（ability/extension config）
-  3. generate oh-package.json5（依赖声明）
-  4. mirror source files（ETS/JS/C++ → build/.../ets/）
-  5. copy resources（media/string/color → AppScope/module resources）
-  6. pack the module into a HAP and sign it
+read hvolt.toml → discover modules → for each module:
+  native   : [dependencies] 的 path 指向的 CMakeLists.txt → libs/<abi>/*.so（SDK toolchain）
+  res      : resources/ → module.json + 生成的 profile（route_map/form_config/backup_config）
+  ets      : 源码 → 一份合并的 ets/modules.abc（自研 ArkTS 链，不经 hvigor）
+  pack     : module.json + resources + abc + libs → <module>-unsigned.hap
+  sign     : 有 [app.signing] 才签，否则只产出 unsigned
 ```
+
+不生成 DevEco 工程：`build/` 下没有 `build-profile.json5` / `oh-package.json5` / `hvigorfile`，
+所以 `hvigorw` 在那里没有可打开的工程。
 
 ## 构建与签名验收纪律
 

@@ -20,7 +20,7 @@ cargo test                                   # 全部通过 = 通过
 
 ## 3. 命名与模块
 
-- 一个模块一件事：`src/build/pipeline.rs`=构建编排，`src/sdk/manage.rs`=SDK 解析/下载，`src/device/`=设备协议；新职责新文件，不塞进 `main.rs`。
+- 一个模块一件事：`src/build/deps/pipeline.rs`=构建编排，`src/sdk/manage.rs`=SDK 解析/下载，`src/device/`=设备协议；新职责新文件，不塞进 `main.rs`。
 - 文件首行用一行 `// <域>: <干什么>` 起头（如 `// AGC: manage AppGallery Connect resources`）。
 - `pub` 只给 `main.rs`/`cli.rs` 分派需要的入口；其余用 `pub(crate)` 或私有。二进制 crate 没有下游消费者，`pub` 不是 API 承诺。
 - CLI 子命令动词与 `src/support/cli.rs` 的变体一一对应，不另造同义词。

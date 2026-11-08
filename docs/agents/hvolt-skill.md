@@ -49,10 +49,10 @@ hvolt 不只是构建工具，它**定义**工程格式：一棵扁平树，`ass
 | `src/main.rs` | 入口，命令分发 | `main()` |
 | `src/support/cli.rs` | CLI 定义（clap derive） | `Args`, `Command` enum |
 | `src/sdk/manage.rs` | SDK 发现/管理/下载 | `detect()`, `list_remote()`, `download_sdk()`, `import_sdk()` |
-| `src/build/pipeline.rs` | 构建流程编排（原生链） | `native_build()`, `build_and_sign()`, `run()` |
+| `src/build/deps/pipeline.rs` | 构建流程编排（原生链） | `native_build()`, `build_and_sign()`, `run()` |
 | `src/sign/package.rs` | 远程签名（AGC API） | `sign()`, `sign_remote()` |
 | `src/sign/native_sign.rs` | 本地签名（进程内，无 java） | `sign_package()` |
-| `src/build/hap_pack.rs` | HAP 打包（替代 app_packing_tool.jar） | `pack()` |
+| `src/build/artifacts/hap_pack.rs` | HAP 打包（替代 app_packing_tool.jar） | `pack()` |
 | `src/support/config.rs` | `hvolt.toml` 解析 | `AppConfig`, `ModuleConfig`, `NativeModuleConfig` |
 | `src/translator/` | 扁平工程发现（模块/原生模块） | `discover_modules()`, `generate_main_pages()` |
 | `src/project/scaffold.rs` | 项目脚手架生成 | `scaffold()` |
@@ -133,7 +133,7 @@ installation_free = true
 
 **预编译输入放源树**：`<member>/cpp/prebuilt/` 之类的位置，并在 CMakeLists 里引用；
 不要放进 `build/`——全量 assemble 会清空该目录。CMakeLists 中若有**越出模块**的相对路径
-（`../../...`），`hvolt import` 会以「可能」措辞给出 gap：扁平布局不保证这些路径存在，
+（`../../...`），`hvolt migrate` 会以「可能」措辞给出 gap：扁平布局不保证这些路径存在，
 hvolt 也不改写 CMake 文件。
 
 `cpp/`、`libs/` 永远不会被镜像进 `ets/`——曾经会，结果是 `.cpp` 与 `CMakeLists.txt` 明码打进 HAP。
@@ -201,9 +201,9 @@ cargo test
 | 命令 | 说明 |
 |---|---|
 | `hvolt init <name>` | 生成新项目脚手架 |
-| `hvolt import [--from <dir>] [--out <dir>] [--dry-run]` | DevEco 标准布局 → 扁平工程；同时列出扁平布局表达不了的项 |
+| `hvolt migrate [--from <dir>] [--out <dir>] [--dry-run]` | DevEco 工程 → hvolt 布局；同时列出表达不了的项 |
 | `hvolt build` | 原生链构建：编译 ArkTS → 打包 HAP → 签名（不调用外部构建器/包管理器/JDK） |
-| `hvolt run` | 全流程（build + push + launch） |
+| `hvolt run` | 推送并启动当前包；配了 `[app.signing]` 时先 build + sign |
 | `hvolt clean` | 清理构建产物 |
 | `hvolt doctor` | 环境/SDK/工具/设备/凭据一致性预检（exit≠0 表示存在 ✗ 项） |
 | `hvolt log` | 设备 hilog：`--level/--bundle/-T tag/-D domain/-k 关键词/--crash/--follow/--tail` |
@@ -245,7 +245,6 @@ cargo test
 |---|---|
 | `hvolt sign [HAP]` | AGC 签名：CSR→证书→登记设备→profile（需先 `hvolt agc login`）。给了 `HAP` 时签那个裸包：默认走 localSign 测试链，profile 绑**包内 bundleName**（缺失时 `--bundle` 补），结果留在包所在目录的 `<name>-signed.hap`（输入以 `-unsigned` 结尾则换成 `-signed`），签完由内置校验自证（`ApplicationVerifier` + `ProfileVerifier`）；`--p12/--profile/--cert` 三项同时给出时改用这些材料签 |
 | `hvolt sign --local [HAP]` | 官方公开测试链本地签名（**仅开发板/模拟器**；零售机装不上）。给了 `HAP` 时签该裸包，行为同上；**已带签名的包会被拒绝**（按包内 `META-INF` 判，不看文件名） |
-| `hvolt apply` | hqf 增量补丁部署（要求已装同身份包） |
 | `hvolt push [-d serial] [--hap FILE]` | 推送 newest `output/*-signed.hap` 并安装；`--hap` 指定任意位置的包文件，**未签名的包直接报错**而不是丢给设备 |
 | `hvolt screenshot -o x.jpeg [-d serial]` | 设备截图（设备侧输出 jpeg） |
 | `hvolt ui dump` | ArkUI 布局树 dump（uitest dumpLayout） |

@@ -16,8 +16,8 @@ several.
 The two constraints that usually force a split:
 
 - **Signing must reach AppGallery Connect.** Any host with a valid AGC login can sign.
-- **Installing must reach the device.** Only the host that can reach the device (`hvolt device
-  targets`) can push.
+- **Installing must reach the device.** Only a host that can reach the device (`hvolt device
+  list`, or a `hvolt device remote` target) can push.
 
 Nothing in hvolt requires the same host to do both. When the device is not attached to the
 signing host, hand the UDID over explicitly:

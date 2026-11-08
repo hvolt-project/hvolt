@@ -1,7 +1,7 @@
 # hvolt 编译 clashbox 的 gap 台账（2026-11-04）
 
 目标：用 `hvolt build` 直接生成 clashbox 的 HAP，不使用 DevEco 工具链。
-样本：`~/DshHome/clashbox-tailscale/clashbox-flat`（`hvolt import` 从 DevEco 工程转出的扁平工程），entry 模块 127 个 `.ets`。
+样本：`~/DshHome/clashbox-tailscale/clashbox-flat`（`hvolt migrate` 从 DevEco 工程转出的工程），entry 模块 127 个 `.ets`。
 
 ## 判据
 

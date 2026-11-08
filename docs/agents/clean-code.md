@@ -20,7 +20,7 @@ cargo test                                   # 全部通过 = 通过
 
 ## 3. 命名与模块
 
-- 一个模块一件事：`src/build/pipeline.rs`=构建编排，`src/sdk/manage.rs`=SDK 解析/下载，`src/device/`=设备协议；新职责新文件，不塞进 `main.rs`。
+- 一个模块一件事：`src/build/deps/pipeline.rs`=构建编排，`src/sdk/manage.rs`=SDK 解析/下载，`src/device/`=设备协议；新职责新文件，不塞进 `main.rs`。
 - 文件首行用一行 `// <域>: <干什么>` 起头（如 `// AGC: manage AppGallery Connect resources`）。
 - `pub` 只给 `main.rs`/`cli.rs` 分派需要的入口；其余用 `pub(crate)` 或私有。二进制 crate 没有下游消费者，`pub` 不是 API 承诺。
 - CLI 子命令动词与 `src/support/cli.rs` 的变体一一对应，不另造同义词。
@@ -59,8 +59,9 @@ cargo test                                   # 全部通过 = 通过
 
 ## 8. unsafe 与平台分支
 
-- 全 crate **只有一处** `unsafe`：`main.rs` 里把 SIGPIPE 复位为 `SIG_DFL`（`hvolt ... | head` 不 panic）。
-  它就地带 `#[allow(unsafe_code)]` + 理由；新增 `unsafe` 必须在本文登记。
+- 全 crate **有两处** `unsafe`，都在本表登记，新增必须同步本文：
+  - `main.rs` 把 SIGPIPE 复位为 `SIG_DFL`（`hvolt ... | head` 不 panic）；
+  - `support/platform.rs` 的 `gethostname`（`libc` 调用需要一个可写缓冲区，长度由返回的指针值给出）。
 - `#[cfg(windows)]` / `#[cfg(unix)]` 两支都要能独立读懂：目录用 `remove_dir`、符号链接用 `remove_file` 这类差异，注释写明为什么。
 
 ## 9. 测试
@@ -73,7 +74,8 @@ cargo test                                   # 全部通过 = 通过
 | 位置 | 属性 | 理由 |
 |---|---|---|
 | `src/sign/package.rs` ×4（`create_provision`/`finalize_signing`/`sign_app`/`sign_package`） | `clippy::too_many_arguments` | 与签名 CLI 表面 1:1 |
-| `src/main.rs` `reset_sigpipe` | `rustc::unsafe_code` | 唯一的 SIGPIPE 复位，见 §8 |
+| `src/main.rs` `reset_sigpipe` | `rustc::unsafe_code` | SIGPIPE 复位，见 §8 |
+| `src/support/platform.rs` `gethostname` | `rustc::unsafe_code` | `libc::gethostname` 的缓冲区契约，见 §8 |
 | `src/device/target.rs` `Shell::PowerShell` | `dead_code` | 保留方言：pwsh 默认主机接入后即用 |
 
 新增条目必须同时改这张表。

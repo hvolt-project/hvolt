@@ -207,6 +207,7 @@ into the packed package.
 | Command | Description |
 |---|---|
 | `hvolt init <name>` | Scaffold a new project (this layout) |
+| `hvolt migrate [--from <dir>] [--out <dir>] [--dry-run]` | Turn a DevEco project into this layout: only `hvolt.toml`, sources and resources survive |
 | `hvolt build` | Compile ArkTS, pack the HAP and sign it (own toolchain) |
 | `hvolt run [device] [-d <device>]` | Build + sign + push + launch in one shot |
 | `hvolt clean` | Remove build artifacts |
@@ -215,7 +216,6 @@ into the packed package.
 
 | Command | Description |
 |---|---|
-| `hvolt lint [paths…]` | Official Code Linter over the translated tree. `--all-rules` (broad rule sets), `--json`, `--fail-on <1..3>`, `--max-defects <N>`, `--fix <paths>` (in place, explicit paths only), `--config <file>` |
 | `hvolt check [--size-limit 50K]` | Package quality gate (duplicates, big files, suffix sizes, read from the archive) |
 | `hvolt hap info [path]` | bundle / version / abilities / permissions, read from the package itself |
 
@@ -253,7 +253,6 @@ into the packed package.
 | Command | Description |
 |---|---|
 | `hvolt push [device] [-d <device>] [--hap <FILE>]` | Push the newest `output/*-signed.hap` to the device; `--hap` installs the package at that path instead and refuses an unsigned one |
-| `hvolt apply [-d <device>]` | Quickfix (hqf) incremental patch — no reinstall; the same app identity must already be installed |
 | `hvolt uninstall [bundle] [-d <device>]` | Uninstall an app (default bundle: from `hvolt.toml`) |
 | `hvolt log [-T tag] [-D domain] [-k keyword] [--level D,I,W,E,F] [--bundle <b>] [--crash] [-f] [--tail <n>]` | Stream or dump hilog with filters |
 | `hvolt screenshot [-o out.jpeg] [-d <device>]` | Device screenshot |
