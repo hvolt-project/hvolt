@@ -49,3 +49,9 @@ screenshot-*.jpeg
 # Local toolchain caches and virtualenvs (never committed).
 .cargo-home/
 .venv/
+
+# Agent-side notes: this repository is public and these describe a local
+# development setup, so they stay on the machine instead of in the tree.
+/HANDOFF.md
+/AGENTS.md
+/docs/agents/

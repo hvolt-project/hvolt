@@ -12,10 +12,10 @@
 //     `hdc install` runs on that machine (its own ~/.hvolt supplies hdc + udid)
 
 // The `remote_*` helpers below drive the ssh/scp deploy path to a host that
-// holds the device (docs/agents/harmony-device-flow.md). Installs now go
-// through the native hdc transport (`hdc_proto::install`), so nothing calls
-// them yet; they are kept rather than deleted because that topology is still
-// the documented one for machines that cannot reach the device directly.
+// holds the device. Installs now go through the native hdc transport
+// (`hdc_proto::install`), so nothing calls them yet; they are kept rather than
+// deleted because that topology is still the one for machines that cannot
+// reach the device directly.
 #![allow(dead_code)]
 
 use std::path::{Path, PathBuf};

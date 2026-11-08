@@ -21,7 +21,6 @@
   },
   "optionalDependencies": {
     "@hvolt/cli-darwin-arm64": "26.0.0-9",
-    "@hvolt/cli-darwin-x64": "26.0.0-9",
     "@hvolt/cli-linux-arm64": "26.0.0-9",
     "@hvolt/cli-linux-x64": "26.0.0-9",
     "@hvolt/cli-win32-x64": "26.0.0-9"

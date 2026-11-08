@@ -7,6 +7,14 @@ versions may change the CLI surface.
 
 ## [Unreleased]
 
+### Changed
+
+- A prebuilt binary is published and installable for `linux-arm64`, built on a native arm64
+  runner. `install.sh` resolves `aarch64`/`arm64` to it and names the real support list when it
+  refuses a platform.
+- `@hvolt/cli-darwin-x64` is no longer declared. The launcher listed five platform packages
+  while the release built three, so an Intel Mac installed a package with no binary behind it.
+
 ## [26.0.0-9] — 2026-11-08
 
 ### Added
