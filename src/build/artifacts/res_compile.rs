@@ -8,6 +8,7 @@
 // exactly (`app_name 0x01000000`, `EntryAbility_desc 0x01000005`, ...).
 
 use std::path::{Path, PathBuf};
+#[cfg(test)]
 use std::process::Command;
 
 use serde_json::{json, Value};
@@ -232,6 +233,105 @@ fn write_profile(stage: &Path, name: &str, value: &serde_json::Value) -> Result<
     std::fs::write(&path, text).map_err(|e| format!("write {}: {e}", path.display()))
 }
 
+/// Overlay the selected product's resource directories onto the staged tree.
+///
+/// The list is ordered: a directory declared later replaces what an earlier one wrote. An
+/// element table (`*/element/*.json`) is merged by resource name, so a product can redefine one
+/// string without dropping the table it inherits; every other file is replaced whole.
+fn overlay_product_resources(input: &ResCompileInput<'_>, stage: &Path) -> Result<(), String> {
+    let Some(product) = input.app.resolved.as_ref() else {
+        return Ok(());
+    };
+    for directory in &product.resource_directories {
+        let source = input.project_dir.join(directory);
+        if !source.is_dir() {
+            return Err(format!(
+                "product `{}`: resource directory `{}` not found at {}",
+                product.name,
+                directory,
+                source.display()
+            ));
+        }
+        overlay_dir(&source, stage)?;
+    }
+    Ok(())
+}
+
+fn overlay_dir(source: &Path, dest: &Path) -> Result<(), String> {
+    std::fs::create_dir_all(dest).map_err(|e| format!("mkdir {}: {e}", dest.display()))?;
+    for entry in std::fs::read_dir(source)
+        .map_err(|e| format!("read {}: {e}", source.display()))?
+        .flatten()
+    {
+        let from = entry.path();
+        let to = dest.join(entry.file_name());
+        if from.is_dir() {
+            overlay_dir(&from, &to)?;
+            continue;
+        }
+        let element_table = from.extension().is_some_and(|ext| ext == "json")
+            && from
+                .parent()
+                .and_then(|parent| parent.file_name())
+                .is_some_and(|name| name == "element");
+        if element_table && to.is_file() {
+            merge_element_table(&from, &to)?;
+        } else {
+            std::fs::copy(&from, &to)
+                .map_err(|e| format!("copy {} → {}: {e}", from.display(), to.display()))?;
+        }
+    }
+    Ok(())
+}
+
+/// Merge one element table over the inherited one: same `name` wins, other entries survive.
+fn merge_element_table(from: &Path, to: &Path) -> Result<(), String> {
+    let read = |path: &Path| -> Result<serde_json::Value, String> {
+        let text =
+            std::fs::read_to_string(path).map_err(|e| format!("read {}: {e}", path.display()))?;
+        serde_json::from_str(&text).map_err(|e| format!("parse {}: {e}", path.display()))
+    };
+    let later = read(from)?;
+    let earlier = read(to)?;
+    let (Some(later), Some(earlier)) = (later.as_object(), earlier.as_object()) else {
+        return std::fs::copy(from, to)
+            .map(|_| ())
+            .map_err(|e| format!("copy {}: {e}", from.display()));
+    };
+    let mut merged = earlier.clone();
+    for (kind, value) in later {
+        let Some(entries) = value.as_array() else {
+            merged.insert(kind.clone(), value.clone());
+            continue;
+        };
+        let redefined: Vec<&str> = entries
+            .iter()
+            .filter_map(|entry| entry.get("name").and_then(|name| name.as_str()))
+            .collect();
+        let mut table: Vec<serde_json::Value> = merged
+            .get(kind)
+            .and_then(|value| value.as_array())
+            .map(|inherited| {
+                inherited
+                    .iter()
+                    .filter(|entry| {
+                        entry
+                            .get("name")
+                            .and_then(|name| name.as_str())
+                            .is_none_or(|name| !redefined.contains(&name))
+                    })
+                    .cloned()
+                    .collect()
+            })
+            .unwrap_or_default();
+        table.extend(entries.iter().cloned());
+        merged.insert(kind.clone(), serde_json::Value::Array(table));
+    }
+    let text = serde_json::to_string_pretty(&serde_json::Value::Object(merged))
+        .map_err(|e| e.to_string())?;
+    std::fs::write(to, text).map_err(|e| format!("write {}: {e}", to.display()))
+}
+
 /// Stage the resource tree restool compiles: the project's `resources/` plus a
 /// generated `profile/main_pages.json` (the reference injects it the same way).
 pub(crate) fn stage_resources(input: &ResCompileInput<'_>, stage: &Path) -> Result<(), String> {
@@ -252,6 +352,9 @@ pub(crate) fn stage_resources(input: &ResCompileInput<'_>, stage: &Path) -> Resu
         ));
     }
     copy_dir_recursive(&project_res, stage)?;
+    // The selected product's directories are overlaid before the app scope is split out: an
+    // icon or label a product redefines has to land in the same tree the split reads.
+    overlay_product_resources(input, stage)?;
     // restool assigns ids in input order, and hvigor feeds it two trees: the app-scope
     // resources first, then the module's. Reproducing that split keeps the ids aligned.
     let app_stage = stage.with_file_name("app-stage");
@@ -261,7 +364,7 @@ pub(crate) fn stage_resources(input: &ResCompileInput<'_>, stage: &Path) -> Resu
         std::fs::remove_dir_all(&app_stage)
             .map_err(|e| format!("clean {}: {e}", app_stage.display()))?;
     }
-    split_app_resources(&project_res, input.app, stage, &app_stage)?;
+    split_app_resources(input.app, stage, &app_stage)?;
     // The project may keep an app-scope tree of its own (`app-resources/`). restool numbers
     // the app scope before the module, so every media file in it has to reach `app-stage`;
     // leaving them in the module tree shifts every later id by their count (measured
@@ -323,7 +426,6 @@ pub(crate) fn stage_resources(input: &ResCompileInput<'_>, stage: &Path) -> Resu
 /// The app scope carries what `[app]` itself references: the label string and the icon (with
 /// the media that icon composes). Everything else belongs to the module.
 fn split_app_resources(
-    project_res: &Path,
     app: &AppConfig,
     module_stage: &Path,
     app_stage: &Path,
@@ -341,8 +443,10 @@ fn split_app_resources(
         moved_media.push(format!("{media_name}.json"));
     }
     // A layered image names the media it composes; those move with it.
+    // Read the staged tree, not the source: a product overlay may define the icon's
+    // layered-image manifest without also shipping the module's copy.
     if let Ok(text) = std::fs::read_to_string(
-        project_res
+        module_stage
             .join("base/media")
             .join(format!("{media_name}.json")),
     ) {
@@ -475,7 +579,18 @@ fn write_res_config(
     cfg.insert("output".into(), json!(input.out_dir));
     // restool compiles the entry module *and* every dependency module into one table; the
     // names list has to agree with `dependencies` or the ids land under the wrong package.
-    let deps = discover_dependencies(input.project_dir, &input.module.module.name);
+    // The dependency order restool sees is the declaration order of `hvolt.toml`; no hvigor
+    // manifest is read to derive it.
+    let declared: Vec<String> = input.app.dependencies.keys().cloned().collect();
+    // Every local package the project declares (`path = "deps/<scope>/<name>"`), in table
+    // order: that is where a dependency's own resources and its precompiled table live.
+    let package_roots = declared_package_roots(input.project_dir, input.app);
+    let deps = discover_dependencies(
+        input.project_dir,
+        &input.module.module.name,
+        &declared,
+        &package_roots,
+    );
     // `getRestoolModuleNames()` lists the project's own modules only; ohpm packages are
     // dependencies, not modules.
     let module_names = local_module_names(input.project_dir, &input.module.module.name);
@@ -508,7 +623,14 @@ fn write_res_config(
     // the names have to exist in this table too. The reference materialises them into a
     // generated `resource_str` directory and passes it as the last dependency.
     let mut dep_dirs: Vec<std::path::PathBuf> = deps.iter().map(|(_, dir)| dir.clone()).collect();
-    if let Some(resource_str) = write_precompiled_strings(input.project_dir, &deps, input.out_dir) {
+    let mut precompiled_roots: Vec<PathBuf> = package_roots
+        .iter()
+        .map(|(_, package)| package.clone())
+        .collect();
+    precompiled_roots.extend(deps_package_roots(input.project_dir));
+    if let Some(resource_str) =
+        write_precompiled_strings(input.project_dir, &precompiled_roots, input.out_dir)
+    {
         dep_dirs.push(resource_str);
     }
     cfg.insert("dependencies".into(), json!(dep_dirs));
@@ -526,11 +648,12 @@ fn write_res_config(
 /// directory, mirroring the reference's `resource_str` dependency.
 fn write_precompiled_strings(
     project_dir: &Path,
-    deps: &[(String, std::path::PathBuf)],
+    packages: &[PathBuf],
     out_dir: &Path,
 ) -> Option<std::path::PathBuf> {
-    // A byte-code HAR ships no `resources/`, only a table; walk the package store for those.
-    let mut precompiled: Vec<PathBuf> = Vec::new();
+    // A byte-code HAR ships no `resources/`, only a table. Packages linked from `deps/` are
+    // read from their own roots; the old `oh_modules` store is still walked when it exists.
+    let mut precompiled: Vec<PathBuf> = packages.to_vec();
     for store in [
         project_dir.join("oh_modules"),
         project_dir.join("oh_modules/.ohpm"),
@@ -538,6 +661,7 @@ fn write_precompiled_strings(
         collect_precompiled(&store, 0, &mut precompiled);
     }
     precompiled.sort();
+    precompiled.dedup();
     let mut names: Vec<String> = Vec::new();
     for root in &precompiled {
         if let Ok(text) = std::fs::read_to_string(root.join("ResourceTable.txt")) {
@@ -552,20 +676,15 @@ fn write_precompiled_strings(
             }
         }
     }
-    for (_, dir) in deps {
+    for package in packages {
         // `<pkg>/src/main/resources` → the package root carries the table.
-        let pkg_root = dir
-            .parent()
-            .and_then(|p| p.parent())
-            .and_then(|p| p.parent())
-            .unwrap_or(dir);
         let candidates = [
-            pkg_root.join("ResourceTable.txt"),
-            dir.parent().unwrap_or(dir).join("ResourceTable.txt"),
+            package.join("ResourceTable.txt"),
+            package.join("src/main/resources/ResourceTable.txt"),
         ];
         let Some(text) = candidates
             .iter()
-            .find_map(|p| std::fs::read_to_string(p).ok())
+            .find_map(|path| std::fs::read_to_string(path).ok())
         else {
             continue;
         };
@@ -613,6 +732,14 @@ fn local_module_names(project_dir: &Path, own_module: &str) -> Vec<String> {
     let Some(root) = project_dir.parent() else {
         return names;
     };
+    // The parent scan sees the project root itself as an entry. A project root with its own
+    // `resources/` therefore entered `moduleNames` as a module (measured on clashbox:
+    // `entry,clashbox,proxy_core,xb_components`), and restool then placed `entry` second, so
+    // every resource id started at `0x02000000` instead of `0x01000000`. Exclude by resolved
+    // path, not by name: a sibling module may legitimately share a name with something else.
+    let own_dir = project_dir
+        .canonicalize()
+        .unwrap_or_else(|_| project_dir.to_path_buf());
     let roots = [root, project_dir];
     for dir in roots {
         let Ok(entries) = std::fs::read_dir(dir) else {
@@ -627,6 +754,9 @@ fn local_module_names(project_dir: &Path, own_module: &str) -> Vec<String> {
                 }
                 let name = p.file_name()?.to_string_lossy().to_string();
                 if name.starts_with('.') || name == "oh_modules" || name == "build" {
+                    return None;
+                }
+                if p.canonicalize().unwrap_or_else(|_| p.clone()) == own_dir {
                     return None;
                 }
                 let has_res = p.join("resources").is_dir() || p.join("src/main/resources").is_dir();
@@ -653,14 +783,30 @@ fn local_module_names(project_dir: &Path, own_module: &str) -> Vec<String> {
 /// per ohpm dependency — and the ids for their resources only exist if they are in it.
 /// Discovery walks the layout rather than a config table because the module list lives in
 /// the caller, not here.
-fn discover_dependencies(project_dir: &Path, own_module: &str) -> Vec<(String, PathBuf)> {
+fn discover_dependencies(
+    project_dir: &Path,
+    own_module: &str,
+    declared: &[String],
+    package_roots: &[(String, PathBuf)],
+) -> Vec<(String, PathBuf)> {
     let mut out: Vec<(String, PathBuf)> = Vec::new();
+    // Declared local packages first: a `path` dependency names its directory exactly, so its
+    // `resources/` (or `src/main/resources/`) needs no guessing. `deps/<scope>/<name>` is the
+    // layout `hvolt dep sync` writes, and `oh_modules` no longer exists in such a project.
+    for (name, package) in package_roots {
+        if let Some(res) = package_resources(package) {
+            out.push((name.clone(), res));
+        }
+    }
     // `project_dir` is either the module itself or the project root; both layouts occur, so
     // the module scan runs over the directory and over its parent.
     let mut roots: Vec<&Path> = vec![project_dir];
     if let Some(parent) = project_dir.parent() {
         roots.push(parent);
     }
+    // Local packages under `deps/` that the table did not name (a module-level dependency, or
+    // a directory left behind): still a dependency's resources, so still in `dependencies`.
+    push_deps_packages(&mut out, project_dir);
     for root in roots {
         scan_module_dirs(root, project_dir, own_module, &mut out);
         push_packages(&mut out, root.join("oh_modules").join(".ohpm"));
@@ -673,9 +819,6 @@ fn discover_dependencies(project_dir: &Path, own_module: &str) -> Vec<(String, P
             *dir = canonical;
         }
     }
-    // Order matters: restool assigns ids in input order, so the reference feeds the
-    // dependency graph depth-first from the module's declared dependencies. Sorting here
-    // shifts every dependency-contributed id.
     // restool rejects a duplicated input path outright, so unique by directory before and
     // after the reorder (the package store yields the same package through two scans).
     let mut seen: Vec<PathBuf> = Vec::new();
@@ -687,16 +830,16 @@ fn discover_dependencies(project_dir: &Path, own_module: &str) -> Vec<(String, P
             true
         }
     });
-    if let Some(ordered) = dependency_order(project_dir, own_module) {
-        let mut sorted: Vec<(String, PathBuf)> = Vec::new();
-        for name in ordered {
-            if let Some(pos) = out.iter().position(|(n, _)| *n == name) {
-                sorted.push(out.remove(pos));
-            }
+    // Order matters: restool assigns ids in input order. The order is the dependency table
+    // in `hvolt.toml`, which is the only declaration the build reads.
+    let mut sorted: Vec<(String, PathBuf)> = Vec::new();
+    for name in declared {
+        if let Some(pos) = out.iter().position(|(n, _)| n == name) {
+            sorted.push(out.remove(pos));
         }
-        sorted.extend(out);
-        out = sorted;
     }
+    sorted.extend(out);
+    out = sorted;
     let mut seen: Vec<PathBuf> = Vec::new();
     out.retain(|(_, dir)| {
         if seen.contains(dir) {
@@ -709,142 +852,23 @@ fn discover_dependencies(project_dir: &Path, own_module: &str) -> Vec<(String, P
     out
 }
 
-/// Depth-first order of the module's declared dependencies, as `oh-package.json5` lists them.
-fn dependency_order(project_dir: &Path, own_module: &str) -> Option<Vec<String>> {
-    let mut ordered: Vec<String> = Vec::new();
-    for base in [
-        project_dir.to_path_buf(),
-        project_dir.parent()?.to_path_buf(),
-    ] {
-        let manifest = base.join("oh-package.json5");
-        // A module directory usually has no manifest of its own; the declared order then
-        // lives one level up. Missing the first candidate must fall through to the parent,
-        // not abandon the whole walk — the difference is the dependency order, and restool
-        // assigns ids in exactly that order (measured 2026-11-07: six dependency strings came
-        // out rotated because the walk stopped at the module directory).
-        let Ok(text) = std::fs::read_to_string(&manifest) else {
-            continue;
-        };
-        let names = declared_dependencies(&text);
-        if !names.is_empty() {
-            walk_dependencies(&base, own_module, &names, &mut ordered);
-            return Some(ordered);
-        }
-    }
-    None
-}
-
-/// `dependencies` keys of a manifest, in declaration order (the file is JSON5-ish).
-fn declared_dependencies(text: &str) -> Vec<String> {
-    let Some(start) = text
-        .find("\"dependencies\"")
-        .or_else(|| text.find("dependencies"))
-    else {
-        return Vec::new();
-    };
-    let body = &text[start..];
-    let Some(open) = body.find('{') else {
-        return Vec::new();
-    };
-    let mut depth = 0usize;
-    let mut end = body.len();
-    for (i, ch) in body[open..].char_indices() {
-        match ch {
-            '{' => depth += 1,
-            '}' => {
-                depth -= 1;
-                if depth == 0 {
-                    end = open + i;
-                    break;
-                }
-            }
-            _ => {}
-        }
-    }
-    let mut names = Vec::new();
-    for line in body[open + 1..end].lines() {
-        let line = line.trim().trim_end_matches(',');
-        let Some((key, _)) = line.split_once(':') else {
-            continue;
-        };
-        let key = key.trim().trim_matches('"').trim_matches('\'');
-        if key.is_empty()
-            || key.starts_with("//")
-            || key.starts_with('*')
-            || !key
-                .chars()
-                .next()
-                .is_some_and(|c| c.is_alphanumeric() || c == '@')
-        {
-            continue;
-        }
-        names.push(key.to_string());
-    }
-    names
-}
-
-/// Walk `names` (and their transitive dependencies) depth-first, collecting package names.
-fn walk_dependencies(
-    base: &std::path::Path,
-    own_module: &str,
-    names: &[String],
-    ordered: &mut Vec<String>,
-) {
-    for name in names {
-        if name == own_module || ordered.iter().any(|n| n == name) {
-            continue;
-        }
-        let local = base.join(name);
-        let package_root = if local.is_dir() {
-            Some(local)
-        } else {
-            find_package_dir(base, name)
-        };
-        let Some(package_root) = package_root else {
-            continue;
-        };
-        ordered.push(name.clone());
-        if let Ok(text) = std::fs::read_to_string(package_root.join("oh-package.json5")) {
-            let nested = declared_dependencies(&text);
-            if !nested.is_empty() {
-                walk_dependencies(&package_root, own_module, &nested, ordered);
-            }
-        }
-    }
-}
-
-/// `<base>/oh_modules/**/<name>` — the installed location of an ohpm package.
-fn find_package_dir(base: &std::path::Path, name: &str) -> Option<PathBuf> {
-    let flat = base.join("oh_modules").join(name);
-    if flat.is_dir() {
-        return Some(flat);
-    }
-    let store = base.join("oh_modules/.ohpm");
-    let escaped = name.replace('/', "+");
-    let entries = std::fs::read_dir(&store).ok()?.flatten();
-    for entry in entries {
-        let path = entry.path();
-        let dir_name = path.file_name()?.to_string_lossy().to_string();
-        if dir_name.starts_with(&format!("{escaped}@")) || dir_name == escaped {
-            let nested = path.join("oh_modules").join(name);
-            if nested.is_dir() {
-                return Some(nested);
-            }
-        }
-    }
-    None
-}
-
 /// Module directories beside the entry module (`xb_components`, `proxy_core`, …).
 fn scan_module_dirs(
     root: &Path,
-    _project_dir: &Path,
+    project_dir: &Path,
     own_module: &str,
     out: &mut Vec<(String, PathBuf)>,
 ) {
     let Ok(entries) = std::fs::read_dir(root) else {
         return;
     };
+    // The parent scan sees the project root itself as a sibling entry. A project root with its
+    // own `resources/` then entered `dependencies` as a module of its own (measured on
+    // clashbox: `entry,proxy_core,xb_components` plus the root `clashbox`), and restool counted
+    // one package too many. Exclude it by resolved path, not by name.
+    let project_dir = project_dir
+        .canonicalize()
+        .unwrap_or_else(|_| project_dir.to_path_buf());
     let mut siblings: Vec<PathBuf> = entries.flatten().map(|e| e.path()).collect();
     siblings.sort();
     for dir in siblings {
@@ -858,6 +882,9 @@ fn scan_module_dirs(
         if name.starts_with('.') || name == "oh_modules" || name == "build" || name == own_module {
             continue;
         }
+        if dir.canonicalize().unwrap_or_else(|_| dir.clone()) == project_dir {
+            continue;
+        }
         let res = if dir.join("resources").is_dir() {
             dir.join("resources")
         } else if dir.join("src/main/resources").is_dir() {
@@ -866,6 +893,87 @@ fn scan_module_dirs(
             continue;
         };
         out.push((name, res));
+    }
+}
+
+/// The package's own resource directory, whichever layout it uses.
+fn package_resources(package: &Path) -> Option<PathBuf> {
+    [
+        package.join("resources"),
+        package.join("src/main/resources"),
+    ]
+    .into_iter()
+    .find(|candidate| candidate.is_dir())
+}
+
+/// `[dependencies]` entries that point at a local package, in table order.
+fn declared_package_roots(project_dir: &Path, app: &AppConfig) -> Vec<(String, PathBuf)> {
+    app.dependencies
+        .iter()
+        .filter_map(|(name, dependency)| {
+            dependency
+                .path
+                .as_deref()
+                .map(|path| (name.clone(), project_dir.join(path)))
+        })
+        .collect()
+}
+
+/// Local packages under `deps/`: `deps/<name>` or `deps/<scope>/<name>`.
+fn deps_package_roots(project_dir: &Path) -> Vec<PathBuf> {
+    let deps_dir = project_dir.join("deps");
+    let Ok(entries) = std::fs::read_dir(&deps_dir) else {
+        return Vec::new();
+    };
+    let mut roots: Vec<PathBuf> = entries
+        .flatten()
+        .map(|entry| entry.path())
+        .filter(|path| path.is_dir())
+        .collect();
+    roots.sort();
+    let mut packages = Vec::new();
+    for root in roots {
+        if package_resources(&root).is_some() || root.join("hvolt.toml").is_file() {
+            packages.push(root);
+            continue;
+        }
+        // A scope directory only groups packages (`deps/<scope>/<name>`).
+        if let Ok(children) = std::fs::read_dir(&root) {
+            let mut scoped: Vec<PathBuf> = children
+                .flatten()
+                .map(|entry| entry.path())
+                .filter(|path| path.is_dir())
+                .collect();
+            scoped.sort();
+            packages.extend(scoped);
+        }
+    }
+    packages
+}
+
+/// Local packages under `deps/`, for a caller that needs their resource directories.
+fn push_deps_packages(out: &mut Vec<(String, PathBuf)>, project_dir: &Path) {
+    let deps_dir = project_dir.join("deps");
+    for package in deps_package_roots(project_dir) {
+        let Some(res) = package_resources(&package) else {
+            continue;
+        };
+        let Some(name) = package
+            .file_name()
+            .map(|name| name.to_string_lossy().to_string())
+        else {
+            continue;
+        };
+        // `deps/<scope>/<name>`: a dependency key that names a scope (`@acme/widget`).
+        let scope = package
+            .parent()
+            .filter(|parent| *parent != deps_dir)
+            .and_then(|parent| parent.file_name())
+            .map(|scope| scope.to_string_lossy().to_string());
+        match scope {
+            Some(scope) => out.push((format!("@{scope}/{name}"), res)),
+            None => out.push((name, res)),
+        }
     }
 }
 
@@ -1015,6 +1123,23 @@ pub(crate) fn compile(input: &ResCompileInput<'_>, stage: &Path) -> Result<PathB
         }
     }
 
+    // The index is written in-tree. `res_ids` reproduces restool's allocation (verified to zero
+    // disagreement on a real project) and `res_index_build` + `res_index_write` reproduce the
+    // file byte for byte (verified at 185751 bytes on the same project), so the SDK binary is
+    // no longer on this path. The SDK tool stays reachable from `cfg(test)` only, which is how the
+    // two products are compared when something on the device disagrees; a release build has no
+    // path to it at all.
+    #[cfg(test)]
+    if std::env::var("HVOLT_RESTOOL").as_deref() == Ok("1") {
+        return run_restool(&res_config, input);
+    }
+    let table = write_index_in_tree(input, &res_config, stage)?;
+    Ok(table)
+}
+
+/// Run the SDK's restool, kept for comparison against the in-tree writer.
+#[cfg(test)]
+fn run_restool(res_config: &Path, input: &ResCompileInput<'_>) -> Result<PathBuf, String> {
     let restool = crate::sdk::manage::sdk_root()
         .and_then(|root| {
             let dir = root.join("default/openharmony/toolchains");
@@ -1024,22 +1149,18 @@ pub(crate) fn compile(input: &ResCompileInput<'_>, stage: &Path) -> Result<PathB
                 .find(|p| p.exists())
         })
         .ok_or_else(|| "restool not found in SDK toolchains".to_string())?;
-
     let output = Command::new(&restool)
         .arg("-l")
-        .arg(&res_config)
+        .arg(res_config)
         .output()
         .map_err(|e| format!("run restool: {e}"))?;
     if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        let stdout = String::from_utf8_lossy(&output.stdout);
         return Err(format!(
             "restool failed: {}{}",
-            stdout.trim_end(),
-            stderr.trim_end()
+            String::from_utf8_lossy(&output.stdout).trim_end(),
+            String::from_utf8_lossy(&output.stderr).trim_end()
         ));
     }
-
     let table = input.out_dir.join("ResourceTable.txt");
     if !table.exists() {
         return Err(format!(
@@ -1048,6 +1169,192 @@ pub(crate) fn compile(input: &ResCompileInput<'_>, stage: &Path) -> Result<PathB
         ));
     }
     Ok(table)
+}
+
+/// Write `resources.index`, `resources/`, `ResourceTable.txt` and the id map without restool.
+///
+/// The staged trees and the ids restool would hand out are the whole input; everything else is
+/// derived. `resConfig.json` is read back because it already names the three input lists in
+/// restool's order (`applicationResource`, `moduleResources`, `dependencies`).
+fn write_index_in_tree(
+    input: &ResCompileInput<'_>,
+    res_config: &Path,
+    stage: &Path,
+) -> Result<PathBuf, String> {
+    let config: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(res_config).map_err(|e| format!("read resConfig.json: {e}"))?,
+    )
+    .map_err(|e| format!("parse resConfig.json: {e}"))?;
+
+    let module_name = input.module.module.name.clone();
+    let mut owned: Vec<(super::res_ids::GroupKind, String)> = Vec::new();
+    if let Some(dir) = config.get("applicationResource").and_then(|v| v.as_str()) {
+        owned.push((
+            super::res_ids::GroupKind::ApplicationResource,
+            dir.to_string(),
+        ));
+    }
+    for dir in config
+        .get("moduleResources")
+        .and_then(|v| v.as_array())
+        .into_iter()
+        .flatten()
+        .filter_map(|v| v.as_str())
+    {
+        owned.push((super::res_ids::GroupKind::ModuleResources, dir.to_string()));
+    }
+    for dir in config
+        .get("dependencies")
+        .and_then(|v| v.as_array())
+        .into_iter()
+        .flatten()
+        .filter_map(|v| v.as_str())
+    {
+        owned.push((super::res_ids::GroupKind::Dependency, dir.to_string()));
+    }
+
+    // Module id: the position of this module in `moduleNames`, which restool builds from the
+    // same list and uses as the high byte of every id.
+    let module_names: Vec<String> = config
+        .get("moduleNames")
+        .and_then(|v| v.as_str())
+        .map(|list| {
+            list.split(',')
+                .map(|name| name.trim().to_string())
+                .collect()
+        })
+        .unwrap_or_default();
+    // The high byte of every id is one-based (`0x01` for the first module), which is why the
+    // position in `moduleNames` is shifted rather than used directly.
+    let module_id = module_names
+        .iter()
+        .position(|name| *name == module_name)
+        .map(|index| index as u32 + 1)
+        .ok_or_else(|| format!("module {module_name} is missing from moduleNames"))?;
+
+    let inputs: Vec<super::res_index_build::Input<'_>> = owned
+        .iter()
+        .map(|(kind, dir)| super::res_index_build::Input {
+            kind: *kind,
+            dir: Path::new(dir),
+            // Every record names the module's own tree: restool copies dependency resources
+            // into it before writing the index.
+            sources: format!("{module_name}/resources"),
+        })
+        .collect();
+
+    // ids handed out by an earlier build are kept: a changed id makes every `$r(…)` in the
+    // already-compiled abc point at a different resource.
+    let preset = read_preset(input.out_dir)?;
+    let index = super::res_index_build::compile(RESTOOL_VERSION, module_id, &inputs, &preset)?;
+    let bytes = super::res_index_write::write(&index);
+    std::fs::write(input.out_dir.join("resources.index"), bytes)
+        .map_err(|e| format!("write resources.index: {e}"))?;
+
+    // The table and the id map come from the same assignment the index was built with.
+    let mut entries: Vec<(super::res_index::ResourceType, String, u32)> = Vec::new();
+    for config in &index.configs {
+        for entry in &config.entries {
+            entries.push((entry.kind, entry.name.clone(), entry.id));
+        }
+    }
+    let mut unique: std::collections::BTreeMap<
+        (u32, String),
+        (super::res_index::ResourceType, String, u32),
+    > = Default::default();
+    for (kind, name, id) in entries {
+        unique
+            .entry((kind.code(), name.clone()))
+            .or_insert((kind, name, id));
+    }
+    let rows: Vec<(super::res_index::ResourceType, String, u32)> = unique.into_values().collect();
+    let table = input.out_dir.join("ResourceTable.txt");
+    std::fs::write(&table, super::res_ids::render_table(&rows))
+        .map_err(|e| format!("write ResourceTable.txt: {e}"))?;
+    let ids_map = input.out_dir.join("ids_map");
+    std::fs::create_dir_all(&ids_map).map_err(|e| format!("mkdir {}: {e}", ids_map.display()))?;
+    std::fs::write(
+        ids_map.join("id_defined.json"),
+        super::res_ids::render_id_defined(&rows),
+    )
+    .map_err(|e| format!("write id_defined.json: {e}"))?;
+
+    // The table and the id map are written from the index in memory; recomputing the
+    // allocation from the same staged trees catches a write path that has drifted from the
+    // allocator before the index reaches a device. `HVOLT_RES_ID_CHECK=0` skips the pass.
+    if std::env::var("HVOLT_RES_ID_CHECK").as_deref() != Ok("0") {
+        super::id_check::verify(input.out_dir, &module_name)?;
+    }
+
+    // `resources/` is package content: rawfile and profile files plus the media the media
+    // records name. restool writes it; here it is copied from the staged tree.
+    copy_staged_content(stage, &input.out_dir.join("resources"))?;
+    Ok(table)
+}
+
+/// The version block restool stamps into `resources.index`. The device does not read it, but a
+/// byte-identical file is what makes the replacement verifiable against the tool.
+const RESTOOL_VERSION: &str = "Restool 6.1.0.003";
+
+/// Ids an earlier build already handed out, as `(type code, name, id)`.
+fn read_preset(out_dir: &Path) -> Result<std::collections::BTreeSet<(u32, String, u32)>, String> {
+    let path = out_dir.join("ids_map").join("id_defined.json");
+    let Ok(text) = std::fs::read_to_string(&path) else {
+        return Ok(Default::default());
+    };
+    let Ok(value) = serde_json::from_str::<serde_json::Value>(&text) else {
+        return Ok(Default::default());
+    };
+    let mut out = std::collections::BTreeSet::new();
+    let Some(rows) = value.get("record").and_then(|v| v.as_array()) else {
+        return Ok(out);
+    };
+    for row in rows {
+        let Some(kind) = row.get("type").and_then(|v| v.as_str()) else {
+            continue;
+        };
+        let Some(name) = row.get("name").and_then(|v| v.as_str()) else {
+            continue;
+        };
+        // The id is written as a hex string (`"0x01000000"`), not a number.
+        let Some(id) = row
+            .get("id")
+            .and_then(|v| v.as_str())
+            .and_then(|text| u32::from_str_radix(text.trim_start_matches("0x"), 16).ok())
+        else {
+            continue;
+        };
+        if let Some(kind) = super::res_index_build::type_named(kind) {
+            out.insert((kind.code(), name.to_string(), id));
+        }
+    }
+    Ok(out)
+}
+
+/// Copy the media and profile files of every qualified tree into the packaged `resources/`.
+fn copy_staged_content(stage: &Path, target: &Path) -> Result<(), String> {
+    let Ok(entries) = std::fs::read_dir(stage) else {
+        return Ok(());
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if !path.is_dir() {
+            continue;
+        }
+        let qualifier = entry.file_name().to_string_lossy().to_string();
+        for kind in ["media", "profile"] {
+            let from = path.join(kind);
+            if from.is_dir() {
+                copy_dir_recursive(&from, &target.join(&qualifier).join(kind))?;
+            }
+        }
+        // `rawfile` is packaged as the directory it is, at every qualifier that has one.
+        let rawfile = path.join("rawfile");
+        if rawfile.is_dir() {
+            copy_dir_recursive(&rawfile, &target.join(&qualifier).join("rawfile"))?;
+        }
+    }
+    Ok(())
 }
 
 /// One-shot pipeline: stage the resources and run restool.
@@ -1116,8 +1423,44 @@ pub(crate) fn run(
     };
     // 1) stage: project resources/ + generated profile/main_pages.json
     stage_resources(&input, &stage)?;
-    // 2) restool compile → resources.index, resources/, ResourceTable.*
+    // 2) compile → resources.index, resources/, ResourceTable.*
     let table = compile(&input, &stage)?;
+
+    // The manifest is rewritten now that the ids exist: `iconId`, `labelId` and the ability's
+    // `descriptionId` are resource references, and a manifest without them is not what the
+    // reference package ships. restool used to do this rewrite; the ids come from hvolt's own
+    // table now, so it happens here.
+    let ids = crate::build::compile::ets_resources::parse_table(
+        &std::fs::read_to_string(&table).map_err(|e| format!("read table: {e}"))?,
+    );
+    let manifest = crate::build::artifacts::module_json::render(
+        &crate::build::artifacts::module_json::RenderInput {
+            app,
+            module,
+            ids: &ids,
+            build_mode,
+            compile_sdk_version: &facts.version,
+            api_release_type: &facts.release_type,
+            virtual_machine: &facts.virtual_machine,
+            has_insight_intent: crate::build::artifacts::insight_intent::collect(
+                project_dir,
+                &module.module.name,
+            )
+            .map(|entries| !entries.is_empty())
+            .unwrap_or(false),
+            has_route_map: !crate::build::deps::routes::route_entries(
+                Some(&module.module),
+                module_dir,
+            )
+            .map_err(|error| format!("module.json: {error}"))?
+            .is_empty(),
+        },
+    );
+    std::fs::write(
+        &module_json_path,
+        serde_json::to_string_pretty(&manifest).map_err(|e| e.to_string())?,
+    )
+    .map_err(|e| format!("write module.json with ids: {e}"))?;
 
     // 3) the intent manifest is package content, not a resource: writing it into the restool
     //    input would add a `profile insight_intent` entry the reference package does not have.
@@ -1138,8 +1481,12 @@ pub(crate) fn run(
 
 #[cfg(test)]
 mod tests {
-    use super::push_packages;
-    use crate::support::config::{ModuleConfig, ModuleInfo};
+    use super::{
+        declared_package_roots, deps_package_roots, discover_dependencies, local_module_names,
+        overlay_dir, overlay_product_resources, push_packages, write_precompiled_strings,
+        ResCompileInput,
+    };
+    use crate::support::config::{Dependency, ModuleConfig, ModuleInfo, ResolvedProduct};
 
     /// generate_main_pages (via stage) drops the .ets suffix and keeps order.
     #[test]
@@ -1205,5 +1552,211 @@ mod tests {
         assert_eq!(out.len(), 1, "{out:?}");
         assert_eq!(out[0].0, "@linke/ui-color-picker");
         assert!(out[0].1.ends_with("ui-color-picker/src/main/resources"));
+    }
+
+    fn write(path: &std::path::Path, text: &str) {
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent).unwrap();
+        }
+        std::fs::write(path, text).unwrap();
+    }
+
+    /// Product directories overlay in declaration order: a resource named in a later directory
+    /// replaces the earlier one, and entries only the earlier directory declares survive.
+    #[test]
+    fn later_product_directory_wins_per_resource_name() {
+        let root = std::env::temp_dir().join(format!(
+            "hvolt-res-overlay-{}-{}",
+            std::process::id(),
+            "order"
+        ));
+        let _ = std::fs::remove_dir_all(&root);
+        write(
+            &root.join("base/base/element/string.json"),
+            r#"{"string":[{"name":"app_name","value":"base"},{"name":"home_text","value":"base"}]}"#,
+        );
+        write(
+            &root.join("release/base/element/string.json"),
+            r#"{"string":[{"name":"home_text","value":"release"}]}"#,
+        );
+        write(&root.join("release/base/media/mark.png"), "release");
+        write(&root.join("base/base/media/mark.png"), "base");
+
+        let stage = root.join("stage");
+        overlay_dir(&root.join("base"), &stage).unwrap();
+        overlay_dir(&root.join("release"), &stage).unwrap();
+
+        let text = std::fs::read_to_string(stage.join("base/element/string.json")).unwrap();
+        let table: serde_json::Value = serde_json::from_str(&text).unwrap();
+        let entries = table["string"].as_array().unwrap();
+        let value_of = |name: &str| {
+            entries
+                .iter()
+                .find(|entry| entry["name"] == name)
+                .and_then(|entry| entry["value"].as_str())
+                .map(str::to_string)
+        };
+        assert_eq!(value_of("home_text").as_deref(), Some("release"));
+        assert_eq!(value_of("app_name").as_deref(), Some("base"));
+        // A non-element file is replaced whole, so the later directory wins too.
+        assert_eq!(
+            std::fs::read_to_string(stage.join("base/media/mark.png")).unwrap(),
+            "release"
+        );
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// A declared directory that is not on disk fails by name instead of silently building
+    /// the default resources.
+    #[test]
+    fn missing_product_resource_directory_is_rejected() {
+        let root = std::env::temp_dir().join(format!(
+            "hvolt-res-overlay-{}-{}",
+            std::process::id(),
+            "missing"
+        ));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(&root).unwrap();
+        let mut app = crate::support::config::AppConfig::default_for("overlay");
+        app.resolved = Some(ResolvedProduct {
+            name: "release".into(),
+            resource_directories: vec!["res/release".into()],
+        });
+        let module = ModuleConfig::default_entry();
+        let module_json = root.join("module.json");
+        let out_dir = root.join("out");
+        let input = ResCompileInput {
+            project_dir: &root,
+            module_dir: &root,
+            app: &app,
+            module: &module,
+            module_json_path: &module_json,
+            out_dir: &out_dir,
+        };
+        let error = overlay_product_resources(&input, &root.join("stage"))
+            .expect_err("a missing overlay directory must be reported");
+        assert!(error.contains("release"), "{error}");
+        assert!(error.contains("res/release"), "{error}");
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// The project root sits in its parent directory, so the parent scan used to return it as a
+    /// module of its own (measured on clashbox: a root with `resources/` made restool number
+    /// `entry` second and shifted every resource id). Real siblings must survive.
+    #[test]
+    fn project_root_is_not_a_module_when_scanning_the_parent() {
+        let root = std::env::temp_dir().join(format!(
+            "hvolt-res-modnames-{}-{}",
+            std::process::id(),
+            "root"
+        ));
+        let _ = std::fs::remove_dir_all(&root);
+        let project = root.join("proj");
+        std::fs::create_dir_all(project.join("resources/base")).unwrap();
+        std::fs::create_dir_all(root.join("proxy_core/src/main/resources")).unwrap();
+        std::fs::create_dir_all(root.join("xb_components/src/main/resources")).unwrap();
+        let names = local_module_names(&project, "entry");
+        assert_eq!(names, ["entry", "proxy_core", "xb_components"], "{names:?}");
+        assert!(!names.iter().any(|name| name == "proj"));
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// Identity, not the directory name, decides: an alias pointing at the project root is the
+    /// project root, while a module directory is kept under its own name.
+    #[cfg(unix)]
+    #[test]
+    fn project_root_aliases_are_excluded_by_identity() {
+        let root = std::env::temp_dir().join(format!(
+            "hvolt-res-modnames-{}-{}",
+            std::process::id(),
+            "alias"
+        ));
+        let _ = std::fs::remove_dir_all(&root);
+        let project = root.join("proj");
+        std::fs::create_dir_all(project.join("src/main/resources")).unwrap();
+        std::fs::create_dir_all(root.join("lib/src/main/resources")).unwrap();
+        std::os::unix::fs::symlink(&project, root.join("proj-alias")).unwrap();
+        let names = local_module_names(&project, "entry");
+        assert_eq!(names, ["entry", "lib"], "{names:?}");
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// `deps/<scope>/<name>` is the layout `hvolt dep sync` writes: the declared package's
+    /// resources must reach restool, in the dependency table's order.
+    #[test]
+    fn dependency_resources_are_scanned_from_the_deps_layout() {
+        let root = std::env::temp_dir().join(format!(
+            "hvolt-res-deps-{}-{}",
+            std::process::id(),
+            "resources"
+        ));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(root.join("deps/acme/widget/src/main/resources/base")).unwrap();
+        std::fs::create_dir_all(root.join("entry/resources/base")).unwrap();
+        let mut app = crate::support::config::AppConfig::default_for("deps");
+        app.dependencies.insert(
+            "@acme/widget".into(),
+            Dependency {
+                path: Some("deps/acme/widget".into()),
+                version: Some("1.0.0".into()),
+                ..Dependency::default()
+            },
+        );
+        let declared: Vec<String> = app.dependencies.keys().cloned().collect();
+        let roots = declared_package_roots(&root, &app);
+        let deps = discover_dependencies(&root, "entry", &declared, &roots);
+        let widget = root.join("deps/acme/widget/src/main/resources");
+        let widget = widget.canonicalize().unwrap_or(widget);
+        let hits = deps.iter().filter(|(_, dir)| dir == &widget).count();
+        assert_eq!(hits, 1, "the declared package contributes once: {deps:?}");
+        assert_eq!(deps[0].0, "@acme/widget", "declared order comes first");
+        let name = deps[deps.iter().position(|(_, dir)| dir == &widget).unwrap()]
+            .0
+            .clone();
+        assert_eq!(name, "@acme/widget");
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// A precompiled package under `deps/` contributes its string names through the generated
+    /// `resource_str` directory — the same shape the reference feeds restool.
+    #[test]
+    fn precompiled_tables_under_deps_contribute_their_strings() {
+        let root = std::env::temp_dir().join(format!(
+            "hvolt-res-deps-{}-{}",
+            std::process::id(),
+            "precompiled"
+        ));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(root.join("deps/acme/widget")).unwrap();
+        std::fs::write(
+            root.join("deps/acme/widget/ResourceTable.txt"),
+            "string widget_label 0x02000000\ncolor widget_color 0x02000001\nfloat widget_size 0x02000002\n",
+        )
+        .unwrap();
+        let packages = deps_package_roots(&root);
+        let out_dir = root.join("out");
+        let resource_str = write_precompiled_strings(&root, &packages, &out_dir)
+            .expect("a precompiled table must materialise resource_str");
+        let table = std::fs::read_to_string(resource_str.join("base/element/string.json")).unwrap();
+        assert!(table.contains("widget_label"), "{table}");
+        assert!(!table.contains("widget_color"), "only strings are carried");
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// The project root sits in its parent directory, so the parent scan must not list it as a
+    /// dependency module of its own (measured on clashbox: `moduleNames` and `dependencies`
+    /// both carried the root `clashbox`).
+    #[test]
+    fn project_root_is_not_a_dependency_module() {
+        let parent =
+            std::env::temp_dir().join(format!("hvolt-res-deps-{}-{}", std::process::id(), "root"));
+        let _ = std::fs::remove_dir_all(&parent);
+        let root = parent.join("proj");
+        std::fs::create_dir_all(root.join("resources/base")).unwrap();
+        std::fs::create_dir_all(parent.join("lib/resources/base")).unwrap();
+        let deps = discover_dependencies(&root, "entry", &[], &[]);
+        let names: Vec<&str> = deps.iter().map(|(name, _)| name.as_str()).collect();
+        assert_eq!(names, ["lib"], "{names:?}");
+        let _ = std::fs::remove_dir_all(&parent);
     }
 }

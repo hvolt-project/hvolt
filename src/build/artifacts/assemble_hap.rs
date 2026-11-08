@@ -10,14 +10,26 @@ use std::path::{Path, PathBuf};
 /// Compile resources and render the package metadata into `out_dir`.
 ///
 /// Returns the resolved output directory (the caller's `out` or the default
-/// `<project>/build/hvolt-out`).
+/// `<project>/build/hvolt-out`). The product is the project's `default_product`; a caller that
+/// already resolved one (the build pipeline) uses `run_with` instead.
 pub fn run(project: &Path, module_arg: &str, out: Option<&Path>) -> Result<PathBuf, String> {
-    let app = crate::support::config::AppConfig::from_file(&project.join("hvolt.toml"))
+    let declared = crate::support::config::AppConfig::from_file(&project.join("hvolt.toml"))
         .map_err(|e| format!("read {}: {e}", project.join("hvolt.toml").display()))?;
-    let (modules, native) = crate::translator::discover_modules(project, &app)
+    let app = declared.with_product(declared.default_product_name())?;
+    run_with(project, module_arg, out, &app)
+}
+
+/// Compile resources and render the package metadata for an already-resolved product.
+pub fn run_with(
+    project: &Path,
+    module_arg: &str,
+    out: Option<&Path>,
+    app: &crate::support::config::AppConfig,
+) -> Result<PathBuf, String> {
+    let (modules, native) = crate::translator::discover_modules(project, app)
         .map_err(|e| format!("discover modules: {e}"))?;
     // Third-party packages compiled into the abc also need a package context entry.
-    let packages = crate::build::deps::npm::discover(&app, project)?;
+    let packages = crate::build::deps::npm::discover(app, project)?;
     // The source directory is only a lookup key here: everything the package records comes
     // from the module's declared name.
     let (module_dir, module_cfg) = if module_arg.is_empty() {
@@ -57,7 +69,7 @@ pub fn run(project: &Path, module_arg: &str, out: Option<&Path>) -> Result<PathB
         project,
         &project.join(&module_dir),
         module_cfg,
-        &app,
+        app,
         &res_dir,
         build_mode,
         &facts,
@@ -72,7 +84,7 @@ pub fn run(project: &Path, module_arg: &str, out: Option<&Path>) -> Result<PathB
     let final_module = out_dir.join("module.json");
     std::fs::copy(&restool_module, &final_module).map_err(|e| format!("copy module.json: {e}"))?;
 
-    // 3) rpcid.sc: syscap_tool from SDK device-define intersection
+    // 3) rpcid.sc: encoded in-tree from the SDK device-define intersection
     let syscap_path = crate::build::artifacts::syscap::generate(
         &sdk_root,
         out_dir,
@@ -100,8 +112,12 @@ pub fn run(project: &Path, module_arg: &str, out: Option<&Path>) -> Result<PathB
             // The package carries the module's declared name, not its source directory.
             module_name: &logical_name,
             module: module_cfg,
-            app: &app,
-            product: "default",
+            app,
+            product: app
+                .resolved
+                .as_ref()
+                .map(|p| p.name.as_str())
+                .unwrap_or("default"),
             build_mode,
             compile_sdk_version: &facts.version,
             api_release_type: &facts.release_type,
@@ -139,7 +155,7 @@ pub fn run(project: &Path, module_arg: &str, out: Option<&Path>) -> Result<PathB
             module_version: "1.0.0",
             ets_deps: &ets_deps,
             packages: &packages,
-            app: &app,
+            app,
         },
     );
     let pc_path = out_dir.join("pkgContextInfo.json");

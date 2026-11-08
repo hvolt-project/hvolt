@@ -218,35 +218,6 @@ pub(crate) fn module_root(ets_dir: &Path) -> &Path {
     root
 }
 
-/// The entry name a module's own manifest declares, without its extension.
-///
-/// `oh-package.json5` `main` is the file the module is addressed by: `Index.ets` → `Index`.
-/// A module without a manifest yields `None`, and the caller keeps
-/// [`DEFAULT_MODULE_ENTRY`].
-pub(crate) fn declared_entry(module_root: &Path) -> Option<String> {
-    let text = std::fs::read_to_string(module_root.join("oh-package.json5"))
-        .or_else(|_| std::fs::read_to_string(module_root.join("package.json")))
-        .ok()?;
-    let start = text.find("\"main\"")? + "\"main\"".len();
-    let rest = &text[start..];
-    let open = rest.find('"')?;
-    let rest = &rest[open + 1..];
-    let close = rest.find('"')?;
-    let value = rest[..close].trim().trim_start_matches("./").to_string();
-    let name = value.rsplit('/').next().unwrap_or(&value).to_string();
-    let name = name
-        .trim_end_matches(".d.ets")
-        .trim_end_matches(".d.ts")
-        .trim_end_matches(".ets")
-        .trim_end_matches(".ts")
-        .to_string();
-    if name.is_empty() || name.ends_with(".js") {
-        None
-    } else {
-        Some(name)
-    }
-}
-
 /// Version a dependency module's records carry.  The entry module is the exception: it
 /// carries none, because the device addresses it without one (measured against a reference
 /// package, where every `entry.*` record reads `&entry.…&` while `proxy_core.*` reads

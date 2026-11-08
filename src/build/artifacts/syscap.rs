@@ -1,19 +1,15 @@
 // syscap: generate the HAP's rpcid.sc from the SDK's per-device syscap lists.
 //
 // the reference's `SyscapTransform` intersects the device-type SysCaps (from
-// `<sdk>/ets/api/device-define/<device>.json`) and feeds the result to
-// `syscap_tool -R -e -i rpcid.json -o <out>`, which encodes `rpcid.sc`.
-// Verified byte-identical against the reference's output on asr-ondevice
-// (default×tablet×2in1, 206 syscaps): 52 742 bytes, equal.
+// `<sdk>/ets/api/device-define/<device>.json`) and encodes the result as `rpcid.sc`.
+// The encoding lives in `rpcid_sc`, which replaced the SDK's own encoder; the JSON input
+// is still written next to the output as `rpcid.json`.
+// Verified byte-identical against the SDK's encoder output on asr-ondevice
+// (default×tablet×2in1, 206 syscaps): 52 742 bytes, equal (`fixtures/rpcid/`).
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 
-/// Generate rpcid.sc for the given device types. Returns the output path.
-/// `device_types` order decides the syscap order: the reference keeps the intersection
-/// in the order of the *first* device's JSON (a Set built iteratively), so we
-/// filter the first device's list by the intersection set.
 /// Read one device type's syscap list.
 ///
 /// Measured on the shipped 26.0.0.23 SDK: `device-define/` carries `default`,
@@ -41,6 +37,11 @@ fn device_caps(define_dir: &Path, device: &str) -> Result<serde_json::Value, Str
     serde_json::from_str(&text).map_err(|e| format!("parse {}: {e}", path.display()))
 }
 
+/// Generate rpcid.sc for the given device types. Returns the output path.
+///
+/// `device_types` order decides the syscap order: the reference keeps the intersection
+/// in the order of the *first* device's JSON (a Set built iteratively), so this filters
+/// the first device's list by the intersection set.
 pub fn generate(
     sdk_root: &Path,
     out_dir: &Path,
@@ -81,7 +82,8 @@ pub fn generate(
         .filter(|c| inter.contains(*c))
         .collect();
 
-    // rpcid.json — the schema syscap_tool expects (api_version + syscap).
+    // rpcid.json — the schema the reference's encoder consumes (api_version + syscap).
+    std::fs::create_dir_all(out_dir).map_err(|e| format!("mkdir {}: {e}", out_dir.display()))?;
     let rpcid = serde_json::json!({
         "api_version": api_version,
         "syscap": ordered,
@@ -93,35 +95,8 @@ pub fn generate(
     )
     .map_err(|e| format!("write {}: {e}", rpcid_path.display()))?;
 
-    // syscap_tool -R -e -i rpcid.json -o outdir → rpcid.sc
-    let tool_dir = sdk_root.join("default/openharmony/toolchains");
-    let tool = crate::support::platform::exe_names("syscap_tool")
-        .iter()
-        .map(|n| tool_dir.join(n))
-        .find(|p| p.exists())
-        .ok_or_else(|| format!("syscap_tool not found at {}", tool_dir.display()))?;
-    std::fs::create_dir_all(out_dir).map_err(|e| format!("mkdir {}: {e}", out_dir.display()))?;
-    let output = Command::new(&tool)
-        .arg("-R")
-        .arg("-e")
-        .arg("-i")
-        .arg(&rpcid_path)
-        .arg("-o")
-        .arg(out_dir)
-        .output()
-        .map_err(|e| format!("run syscap_tool: {e}"))?;
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(format!("syscap_tool failed: {}", stderr.trim_end()));
-    }
-
     let sc = out_dir.join("rpcid.sc");
-    if !sc.exists() {
-        return Err(format!(
-            "syscap_tool succeeded but no rpcid.sc at {}",
-            sc.display()
-        ));
-    }
+    crate::build::artifacts::rpcid_sc::write(&sc, api_version, &ordered)?;
     Ok(sc)
 }
 
@@ -133,7 +108,7 @@ mod tests {
     #[test]
     fn intersection_keeps_first_device_order() {
         // Can't run against a real SDK in unit tests; the function is exercised
-        // end-to-end by `assemble-hap`. Here we just confirm the ordering helper
+        // end-to-end by `assemble-hap`. This only confirms the ordering helper
         // behaves: filter by set, keep source order.
         let src = ["b", "a", "c", "d"];
         let keep: BTreeSet<String> = ["a", "c"].iter().map(|s| s.to_string()).collect();
