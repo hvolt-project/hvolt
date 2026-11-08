@@ -49,3 +49,6 @@ screenshot-*.jpeg
 # Local toolchain caches and virtualenvs (never committed).
 .cargo-home/
 .venv/
+
+# Agent-side handoff notes: local only, never committed.
+/HANDOFF.md
