@@ -40,6 +40,9 @@ oh_modules/
 
 # One-off compile/capture artifacts land in the repo root by default; keep them out.
 *.abc
+# Except the golden byte-code a fixture compares against: that file is the baseline, not an
+# artifact, and `abc_records` reads it by path. A fixture's `actual/` stays ignored.
+!fixtures/*/golden/modules.abc
 layout-*.json
 screenshot-*.jpeg
 
