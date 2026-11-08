@@ -13,11 +13,12 @@ use std::path::{Path, PathBuf};
 use serde_json::Value;
 
 use crate::support::config::{
-    AbilityConfig, AppConfig, AppFields, Dependency, MetadataItem, ModuleConfig, ModuleInfo,
-    ModulePermission, SigningConfig, Skill, UriScheme,
+    AbilityConfig, AppConfig, AppFields, BackupConfig, Dependency, FormDef, FormWindow,
+    MetadataItem, ModuleConfig, ModuleInfo, ModulePermission, RouterMapDef, SigningConfig, Skill,
+    UriScheme,
 };
 
-/// Fields found in the source project that the flat layout cannot express.
+/// Fields found in the source project that the hvolt layout cannot express.
 pub type Gaps = Vec<String>;
 
 pub fn run(from: Option<&Path>, out: Option<&Path>, dry_run: bool) -> Result<(), String> {
@@ -94,7 +95,7 @@ pub fn run(from: Option<&Path>, out: Option<&Path>, dry_run: bool) -> Result<(),
     import_app_scope(&from, &out, &mut gaps)?;
 
     print_gaps(&gaps);
-    println!("  written. next: cd {} && hvolt assemble", out.display());
+    println!("  written. next: cd {} && hvolt build", out.display());
     Ok(())
 }
 
@@ -102,7 +103,7 @@ fn print_gaps(gaps: &Gaps) {
     if gaps.is_empty() {
         return;
     }
-    println!("  not expressible in the flat layout ({}):", gaps.len());
+    println!("  not expressible in the hvolt layout ({}):", gaps.len());
     for g in gaps {
         println!("    - {}", g);
     }
@@ -394,6 +395,151 @@ fn normalise_sdk(raw: &str) -> String {
     }
 }
 
+/// The widget definitions a module ships, from its `form_config.json`.
+///
+/// The manifest itself is not carried over any more; its content becomes `[[module.forms]]`.
+fn form_defs(profile_dir: &Path) -> Vec<FormDef> {
+    let Ok(json) = read_json5(&profile_dir.join("form_config.json")) else {
+        return Vec::new();
+    };
+    json.get("forms")
+        .and_then(|value| value.as_array())
+        .map(|forms| {
+            forms
+                .iter()
+                .filter_map(|form| {
+                    Some(FormDef {
+                        name: form.get("name")?.as_str()?.to_string(),
+                        display_name: str_of(form, "displayName"),
+                        description: str_of(form, "description"),
+                        src: form
+                            .get("src")?
+                            .as_str()?
+                            .trim_start_matches("./")
+                            .to_string(),
+                        ui_syntax: str_of(form, "uiSyntax"),
+                        window: form.get("window").map(|window| FormWindow {
+                            design_width: window
+                                .get("designWidth")
+                                .and_then(|value| value.as_u64())
+                                .unwrap_or(0) as u32,
+                            auto_design_width: window
+                                .get("autoDesignWidth")
+                                .and_then(|value| value.as_bool())
+                                .unwrap_or(false),
+                        }),
+                        color_mode: str_of(form, "colorMode"),
+                        is_dynamic: bool_of(form, "isDynamic"),
+                        is_default: bool_of(form, "isDefault"),
+                        update_enabled: bool_of(form, "updateEnabled"),
+                        scheduled_update_time: form
+                            .get("scheduledUpdateTime")
+                            .and_then(|value| value.as_str())
+                            .map(String::from),
+                        update_duration: form
+                            .get("updateDuration")
+                            .and_then(|value| value.as_u64())
+                            .map(|value| value as u32),
+                        default_dimension: str_of(form, "defaultDimension"),
+                        support_dimensions: form
+                            .get("supportDimensions")
+                            .and_then(|value| value.as_array())
+                            .map(|dimensions| {
+                                dimensions
+                                    .iter()
+                                    .filter_map(|dimension| dimension.as_str().map(String::from))
+                                    .collect()
+                            })
+                            .unwrap_or_default(),
+                    })
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+/// The `backup_config.json` a module ships, in toml form.
+fn backup_config(profile_dir: &Path) -> Option<BackupConfig> {
+    let json = read_json5(&profile_dir.join("backup_config.json")).ok()?;
+    Some(BackupConfig {
+        allow_to_backup_restore: bool_of(&json, "allowToBackupRestore"),
+    })
+}
+
+/// A string field, defaulting the same way the manifest's own defaults do.
+fn str_of(json: &Value, field: &str) -> String {
+    json.get(field)
+        .and_then(|value| value.as_str())
+        .unwrap_or_default()
+        .to_string()
+}
+
+fn bool_of(json: &Value, field: &str) -> bool {
+    json.get(field)
+        .and_then(|value| value.as_bool())
+        .unwrap_or(false)
+}
+
+/// The routes a module's `route_map.json` declares.
+///
+/// `page` and `build_function` are kept only when they cannot be derived from the name: the
+/// build matches a route name against each file's `@Builder export function` (case-insensitive,
+/// underscore-sensitive) and its stem. That resolves both fields for thirteen of clashbox's
+/// nineteen routes; `LogDetails` keeps `page` and `EditArrayConfig` keeps `build_function`
+/// because one of the two disagrees with the name, and `route-address`, `compatible`,
+/// `access_control` and `online_app_search` keep both because neither matches.
+fn route_defs(profile_dir: &Path) -> Vec<RouterMapDef> {
+    let Ok(json) = read_json5(&profile_dir.join("route_map.json")) else {
+        return Vec::new();
+    };
+    json.get("routerMap")
+        .and_then(|value| value.as_array())
+        .map(|entries| {
+            entries
+                .iter()
+                .filter_map(|entry| {
+                    let name = entry.get("name").and_then(|value| value.as_str())?;
+                    let build_function = entry
+                        .get("buildFunction")
+                        .and_then(|value| value.as_str())
+                        .unwrap_or_default();
+                    let page = entry
+                        .get("pageSourceFile")
+                        .and_then(|value| value.as_str())
+                        .unwrap_or_default();
+                    // The stem of the builder, without the `Builder` suffix.
+                    let derived_builder = build_function
+                        .strip_suffix("Builder")
+                        .unwrap_or(build_function);
+                    let derive_builder = derived_builder.eq_ignore_ascii_case(name);
+                    let derive_page = page
+                        .rsplit('/')
+                        .next()
+                        .and_then(|file| file.strip_suffix(".ets"))
+                        .is_some_and(|stem| stem.eq_ignore_ascii_case(name));
+                    Some(RouterMapDef {
+                        name: name.to_string(),
+                        page: (!derive_page && !page.is_empty())
+                            .then(|| page.trim_start_matches("src/main/ets/").to_string()),
+                        build_function: (!derive_builder && !build_function.is_empty())
+                            .then(|| build_function.to_string()),
+                    })
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+/// The `main` file a module declares in its own `oh-package.json5`.
+fn module_main(module_root: &Path) -> Option<String> {
+    let json = read_json5(&module_root.join("oh-package.json5")).ok()?;
+    json.get("main")
+        .and_then(|value| value.as_str())
+        .map(|main| main.trim_start_matches("./").to_string())
+        // Entry modules declare `main: ""`; an empty string is not a file name.
+        .filter(|main| !main.is_empty())
+}
+
 fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfig)>, String> {
     let bp = read_json5(&from.join("build-profile.json5"))?;
     let mut out = Vec::new();
@@ -448,6 +594,14 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
         } else {
             Vec::new()
         };
+        // The route names this module registers, and the file the device addresses it by.
+        // Both live in hvigor manifests today (`route_map.json`, `oh-package.json5`) and are
+        // folded into `hvolt.toml` so the migrated project carries no json config at all.
+        let profile_dir = module_root.join("src/main/resources/base/profile");
+        let router_map = route_defs(&profile_dir);
+        let main = module_main(&module_root);
+        let forms = form_defs(&profile_dir);
+        let backup = backup_config(&profile_dir);
 
         // abilities: the first UIAbility is the module entry
         let mut entry = "EntryAbility.ets".to_string();
@@ -577,7 +731,7 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
         let (cpp_flags, native_arguments, abi_filters) = read_native_flags(&module_root);
         for line in out_of_module_cmake_refs(&module_root) {
             gaps.push(format!(
-                "{dir}: cpp/CMakeLists.txt may reference paths outside the module ({line}) — the flat layout does not preserve them; hvolt does not rewrite CMake files"
+                "{dir}: cpp/CMakeLists.txt may reference paths outside the module ({line}) — the hvolt layout does not preserve them; hvolt does not rewrite CMake files"
             ));
         }
         let cfg = ModuleConfig {
@@ -586,6 +740,11 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
             module: ModuleInfo {
                 name,
                 routes,
+                // Route names only: the page and its `@Builder` are derived by the build.
+                router_map,
+                main,
+                forms,
+                backup,
                 // An imported module keeps its own visual root, if it declares one.
                 ace_super_visual_path: mj
                     .get("aceSuperVisualPath")
@@ -744,7 +903,7 @@ fn string_list(v: &Value, key: &str) -> Vec<String> {
 /// the native code with default optimisation (the source set `-O3 -fvisibility=hidden`).
 /// CMakeLists lines that point outside the module with a relative path.
 ///
-/// The flat layout guarantees nothing about paths above `<member>/`, and hvolt does not rewrite
+/// The hvolt layout guarantees nothing about paths above `<member>/`, and hvolt does not rewrite
 /// CMake files, so an escaping reference will only surface as a configure error later. Careful
 /// wording: a relative path may legitimately resolve inside the source tree, so this is a
 /// "may", not a verdict.
@@ -956,7 +1115,7 @@ fn copy_ets(
         .collect();
     if !found.is_empty() {
         gaps.push(format!(
-            "{}: test sources ({}) are not part of the flat layout and no ohosTest target is generated — they stay in the source project",
+            "{}: test sources ({}) are not part of the hvolt layout and no ohosTest target is generated — they stay in the source project",
             found.join("/"),
             found.join(", ")
         ));
@@ -982,9 +1141,50 @@ fn source_test_dirs(ets_src: &Path) -> Vec<PathBuf> {
         .collect()
 }
 
+/// The `profile/` manifests the build derives, so a migrated project does not carry them.
+///
+/// Each of these is generated from `hvolt.toml` now: `main_pages.json` and `route_map.json`
+/// from the module's `routes` and `router_map`, and the form/backup manifests from their own
+/// tables. Copying the source files would leave two sources of truth, and the toml would
+/// silently lose to whichever the build read second.
+const DERIVED_PROFILES: &[&str] = &[
+    "route_map.json",
+    "main_pages.json",
+    "form_config.json",
+    "backup_config.json",
+];
+
+/// Copy a module's resource tree, leaving the derived `profile/` manifests behind.
 fn copy_resources(src: &Path, dst: &Path) -> Result<(), String> {
-    if src.is_dir() {
-        copy_dir(src, dst)?;
+    if !src.is_dir() {
+        return Ok(());
+    }
+    copy_resources_inner(src, dst)
+}
+
+fn copy_resources_inner(src: &Path, dst: &Path) -> Result<(), String> {
+    fs::create_dir_all(dst).map_err(|e| format!("create {}: {}", dst.display(), e))?;
+    for entry in fs::read_dir(src)
+        .map_err(|e| format!("read {}: {}", src.display(), e))?
+        .flatten()
+    {
+        let path = entry.path();
+        let name = entry.file_name();
+        let name_str = name.to_string_lossy();
+        if path.is_dir() {
+            copy_resources_inner(&path, &dst.join(&name))?;
+            continue;
+        }
+        // Any `profile/` level, any theme: `dark/profile/main_pages.json` is a derivation of
+        // the same route list, not an independent file.
+        let in_profile = path
+            .parent()
+            .and_then(|parent| parent.file_name())
+            .is_some_and(|parent| parent == "profile");
+        if in_profile && DERIVED_PROFILES.iter().any(|derived| *derived == name_str) {
+            continue;
+        }
+        fs::copy(&path, dst.join(&name)).map_err(|e| format!("copy {}: {}", path.display(), e))?;
     }
     Ok(())
 }
@@ -1028,14 +1228,14 @@ fn copy_dir(src: &Path, dst: &Path) -> Result<(), String> {
 fn write_app_toml(out: &Path, cfg: &AppConfig) -> Result<(), String> {
     let body = toml::to_string(cfg).map_err(|e| format!("serialize hvolt.toml: {}", e))?;
     let header =
-        "# Imported by `hvolt import` — review members, products and signing before building.\n\n";
+        "# Written by `hvolt migrate` — review members, products and signing before building.\n\n";
     fs::write(out.join("hvolt.toml"), format!("{header}{body}"))
         .map_err(|e| format!("write hvolt.toml: {}", e))
 }
 
 fn write_module_toml(dir: &Path, cfg: &ModuleConfig) -> Result<(), String> {
     let body = toml::to_string(cfg).map_err(|e| format!("serialize module hvolt.toml: {}", e))?;
-    let header = "# Imported by `hvolt import`.\n\n";
+    let header = "# Written by `hvolt migrate`.\n\n";
     fs::write(dir.join("hvolt.toml"), format!("{header}{body}"))
         .map_err(|e| format!("write {}/hvolt.toml: {}", dir.display(), e))
 }

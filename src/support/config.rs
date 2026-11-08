@@ -463,12 +463,110 @@ pub struct AbilityConfig {
     pub process: Option<String>,
 }
 
+/// One widget a module declares (`form_config.json` `forms[]`).
+///
+/// The field set mirrors what the device's form manager reads; defaults follow the manifest
+/// the reference project ships, so a field omitted in `hvolt.toml` still lands with the value
+/// hvigor would have written.
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+pub struct FormDef {
+    pub name: String,
+    /// e.g. `$string:widget_display_name`.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub display_name: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub description: String,
+    /// Module-relative source of the widget page.
+    pub src: String,
+    #[serde(default = "default_ui_syntax")]
+    pub ui_syntax: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub window: Option<FormWindow>,
+    #[serde(default = "default_color_mode")]
+    pub color_mode: String,
+    #[serde(default)]
+    pub is_dynamic: bool,
+    #[serde(default)]
+    pub is_default: bool,
+    #[serde(default)]
+    pub update_enabled: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scheduled_update_time: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub update_duration: Option<u32>,
+    pub default_dimension: String,
+    #[serde(default)]
+    pub support_dimensions: Vec<String>,
+}
+
+/// The `window` block of a widget definition.
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+pub struct FormWindow {
+    #[serde(default)]
+    pub design_width: u32,
+    #[serde(default)]
+    pub auto_design_width: bool,
+}
+
+/// `backup_config.json`. The only field the device reads is whether the app's data may be
+/// restored onto a new device.
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+pub struct BackupConfig {
+    #[serde(default)]
+    pub allow_to_backup_restore: bool,
+}
+
+fn default_ui_syntax() -> String {
+    "arkts".to_string()
+}
+
+fn default_color_mode() -> String {
+    "auto".to_string()
+}
+
+/// One `NavPathStack` route a module registers.
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+pub struct RouterMapDef {
+    /// The name `pushPathByName` is called with.
+    pub name: String,
+    /// Module-relative page (`components/More/Log.ets`). Derived when omitted.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page: Option<String>,
+    /// The `@Builder export function` the installer wraps. Derived when omitted.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub build_function: Option<String>,
+}
+
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct ModuleInfo {
     pub name: String,
     /// Page routes for main_pages.json.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub routes: Vec<String>,
+    /// `NavPathStack` routes this module registers.
+    ///
+    /// `page` and `build_function` may be omitted: they are then derived from the module's
+    /// sources by matching the route name against each file's `@Builder export function`
+    /// (case-insensitive, underscore-sensitive) and its file stem. Of clashbox's nineteen
+    /// routes, thirteen omit both fields, `LogDetails` omits the builder, `EditArrayConfig`
+    /// omits the page, and the remaining four (`route-address`, `compatible`,
+    /// `access_control`, `online_app_search`) write both out because the comparison above
+    /// does not match their builders.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub router_map: Vec<RouterMapDef>,
+    /// The module's `main` file, which is the name the device addresses it by
+    /// (`Index.ets` → `Index`). Absent = the module's own entry.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub main: Option<String>,
+    /// Widget definitions, emitted as `resources/base/profile/form_config.json`.
+    ///
+    /// That manifest is a carrier: nothing in the build reads it, only the device does. It is
+    /// expressed here so a migrated project carries no json config of its own.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub forms: Vec<FormDef>,
+    /// `resources/base/profile/backup_config.json`, emitted from this table.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub backup: Option<BackupConfig>,
     /// Root of the supervisual sources. When set, a page whose `.visual` sibling exists is
     /// compiled from that file instead of the `.ets` one (the reference resolves it in
     /// `findVisualFile`: same relative path, extension swapped).
@@ -807,6 +905,10 @@ impl ModuleConfig {
         ModuleConfig {
             dependencies: BTreeMap::new(),
             module: ModuleInfo {
+                router_map: Vec::new(),
+                main: None,
+                forms: Vec::new(),
+                backup: None,
                 src_entry: None,
                 // The module name is not the source directory: the device resolves
                 // `srcEntry` against it, so `src` produced records like
