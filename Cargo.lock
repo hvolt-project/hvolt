@@ -816,7 +816,7 @@ dependencies = [
 
 [[package]]
 name = "hvolt"
-version = "26.0.0-8"
+version = "26.0.0-9"
 dependencies = [
  "base64 0.22.1",
  "clap",

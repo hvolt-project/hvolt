@@ -7,6 +7,8 @@ versions may change the CLI surface.
 
 ## [Unreleased]
 
+## [26.0.0-9] — 2026-11-08
+
 ### Added
 
 - `hvolt dep sync [DIR]` turns registry packages that are already on disk into
@@ -21,6 +23,9 @@ versions may change the CLI surface.
 
 ### Changed
 
+- Device access speaks the hdc wire protocol in process: the handshake (RSA-PSS over SHA512
+  with a fresh session id), `shell`, file send and install all run against the device's `hdcd`
+  without spawning `hdc`.
 - The build reads no hvigor manifest: `oh-package.json5`, `build-profile.json5`, `package.json`
   and `hvigorfile.ts` are not configuration sources, and a bare import the `[dependencies]` table
   does not cover is an error naming the package instead of being resolved from a leftover
