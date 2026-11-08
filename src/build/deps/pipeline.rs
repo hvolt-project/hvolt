@@ -174,9 +174,16 @@ fn build_module_native(
     Ok(produced)
 }
 
-fn native_build(project_dir: &Path) -> Result<(AppConfig, SdkEnv), String> {
+fn native_build(project_dir: &Path, product: Option<&str>) -> Result<(AppConfig, SdkEnv), String> {
     let root_toml = project_dir.join("hvolt.toml");
-    let app_config = AppConfig::from_file(&root_toml)?;
+    // `from_file` returns the file as written; the product's overrides are resolved here, once,
+    // so every stage below reads one effective config.
+    let declared = AppConfig::from_file(&root_toml)?;
+    let product_name = product
+        .map(str::to_string)
+        .unwrap_or_else(|| declared.default_product_name().to_string());
+    let app_config = declared.with_product(&product_name)?;
+    println!("  product: {product_name}");
 
     let sdk_env = crate::sdk::manage::detect(app_config.app.sdk_path.as_deref().unwrap_or(""))
         .map_err(|e| format!("SDK not available: {}", e))?;
@@ -232,7 +239,12 @@ fn native_build(project_dir: &Path) -> Result<(AppConfig, SdkEnv), String> {
 
     // 2) resources + module metadata under the same hvolt-out
     let module_arg = modules.first().map(|(n, _)| n.clone()).unwrap_or_default();
-    crate::build::artifacts::assemble_hap::run(project_dir, &module_arg, Some(&out_dir))?;
+    crate::build::artifacts::assemble_hap::run_with(
+        project_dir,
+        &module_arg,
+        Some(&out_dir),
+        &app_config,
+    )?;
 
     // 3) modules.abc from the module's .ets tree
     // Record names carry the module's logical name, not its directory: the device
@@ -370,11 +382,13 @@ fn native_build(project_dir: &Path) -> Result<(AppConfig, SdkEnv), String> {
             version: &app_config.app.version,
             version_code: app_config.app.version_code(),
             bundle_type: &app_config.app.bundle_type,
-            // hvolt builds the default product: the signing config and the pack step address
-            // it by that name (`build_and_sign`, `pack_info`), and the import translation
-            // ignores `buildModeSet` (`project/import.rs`: "hvolt always builds the default
-            // product").
-            product: "default",
+            // The product this build resolves; it names the profile entry and the package in
+            // `pack.info` (`build_and_sign`, `pack_info`).
+            product: app_config
+                .resolved
+                .as_ref()
+                .map(|product| product.name.as_str())
+                .unwrap_or("default"),
             // The module target hvigor names in the generated profile; hvolt has one target per
             // module and it is always `default`.
             target: "default",
@@ -394,10 +408,10 @@ fn native_build(project_dir: &Path) -> Result<(AppConfig, SdkEnv), String> {
         },
     )?;
 
-    // The installer and the launcher read `media/layered_image.json` verbatim: its
-    // `$media:<name>` references have to be the compiled ids, which is what the
-    // reference's packer substitutes before archiving.
-    resolve_media_references(&out_dir)?;
+    // The launcher and the installer read `media/layered_image.json` (base and dark) and
+    // `profile/form_config.json` verbatim: their `$<kind>:<name>` references have to be the
+    // compiled ids, which is what the reference's packer substitutes before archiving.
+    resolve_json_references(&out_dir)?;
 
     // 4) pack the unsigned HAP from hvolt-out
     let build_dir = project_dir.join("build");
@@ -410,56 +424,103 @@ fn native_build(project_dir: &Path) -> Result<(AppConfig, SdkEnv), String> {
 }
 
 /// Install a package over the hdc wire protocol, for TCP targets only.
-/// Substitute `$media:<name>` with `$media:<id>` inside every JSON under `resources/`.
+/// Substitute `$<kind>:<name>` with `$<kind>:<id>` inside every JSON under `resources/`.
 ///
-/// The launcher reads `media/layered_image.json` verbatim; with name references it
-/// renders a broken icon, while the reference packer ships compiled ids there.
-fn resolve_media_references(out_dir: &std::path::Path) -> Result<(), String> {
+/// The launcher reads `media/layered_image.json` verbatim; with name references it renders a
+/// broken icon. The installer reads `profile/form_config.json` the same way, where name
+/// references leave every widget unnamed. The reference's packer compiles every resource
+/// reference it archives, so this walks all of `resources/` rather than one media directory.
+fn resolve_json_references(out_dir: &std::path::Path) -> Result<(), String> {
     let table_path = out_dir.join("res/ResourceTable.txt");
     let Ok(text) = std::fs::read_to_string(&table_path) else {
         return Ok(());
     };
     let ids = crate::build::compile::ets_resources::parse_table(&text);
-    let media_dir = out_dir.join("resources/base/media");
-    let Ok(entries) = std::fs::read_dir(&media_dir) else {
-        return Ok(());
+    let mut files = Vec::new();
+    collect_json_files(&out_dir.join("resources"), &mut files);
+    for path in files {
+        rewrite_json_references(&path, &ids)?;
+    }
+    Ok(())
+}
+
+/// Collect every `*.json` below `dir`, depth first.
+fn collect_json_files(dir: &std::path::Path, out: &mut Vec<std::path::PathBuf>) {
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return;
     };
     for entry in entries.flatten() {
         let path = entry.path();
-        if path.extension().map(|e| e != "json").unwrap_or(true) {
-            continue;
+        if path.is_dir() {
+            collect_json_files(&path, out);
+        } else if path.extension().map(|e| e == "json").unwrap_or(false) {
+            out.push(path);
         }
-        let Ok(body) = std::fs::read_to_string(&path) else {
+    }
+}
+
+/// Rewrite one file's `$<kind>:<name>` references to their compiled ids, in place.
+fn rewrite_json_references(
+    path: &std::path::Path,
+    ids: &crate::build::compile::ets_resources::ResourceTable,
+) -> Result<(), String> {
+    let Ok(body) = std::fs::read_to_string(path) else {
+        return Ok(());
+    };
+    if !body.contains('$') {
+        return Ok(());
+    }
+    // Take the whole reference name (`background_white_medium`) before looking it up:
+    // replacing `$media:background_white` first would leave a dangling `_medium`.
+    let mut out = String::with_capacity(body.len());
+    let mut rest = body.as_str();
+    while let Some(pos) = rest.find('$') {
+        out.push_str(&rest[..pos]);
+        let after = &rest[pos..];
+        let Some((kind, tail)) = split_reference(after) else {
+            out.push('$');
+            rest = &after[1..];
             continue;
         };
-        if !body.contains("$media:") {
-            continue;
-        }
-        // Take the whole reference name (`background_white_medium`) before looking it up:
-        // replacing `$media:background_white` first would leave a dangling `_medium`.
-        let mut out = String::with_capacity(body.len());
-        let mut rest = body.as_str();
-        while let Some(pos) = rest.find("$media:") {
-            out.push_str(&rest[..pos + "$media:".len()]);
-            let after = &rest[pos + "$media:".len()..];
-            let name_len = after
-                .find(|c: char| !(c.is_ascii_alphanumeric() || c == '_' || c == '.'))
-                .unwrap_or(after.len());
-            let name = &after[..name_len];
-            match ids.get(&("media".to_string(), name.to_string())) {
+        let name_len = tail
+            .find(|c: char| !(c.is_ascii_alphanumeric() || c == '_' || c == '.'))
+            .unwrap_or(tail.len());
+        let name = &tail[..name_len];
+        out.push('$');
+        out.push_str(kind);
+        out.push(':');
+        // `$string:16777380` is already compiled — only names need a lookup.
+        if !name.is_empty() && name.chars().all(|c| c.is_ascii_digit()) {
+            out.push_str(name);
+        } else {
+            match ids.get(&(kind.to_string(), name.to_string())) {
                 Some(id) => out.push_str(&id.to_string()),
                 None => out.push_str(name),
             }
-            rest = &after[name_len..];
         }
-        out.push_str(rest);
-        if out != body {
-            // The rewritten file is what gets packed: a silent failure here ships a
-            // `layered_image.json` still holding resource names, i.e. a broken icon.
-            std::fs::write(&path, out).map_err(|e| format!("write {}: {e}", path.display()))?;
-        }
+        rest = &tail[name_len..];
+    }
+    out.push_str(rest);
+    if out != body {
+        // The rewritten file is what gets packed: a silent failure here ships a
+        // `layered_image.json` still holding resource names, i.e. a broken icon.
+        std::fs::write(path, out).map_err(|e| format!("write {}: {e}", path.display()))?;
     }
     Ok(())
+}
+
+/// Split `$<kind>:<rest>` into the kind and everything after its colon.
+///
+/// Returns `None` for a `$` that does not start a resource reference, so a stray dollar
+/// sign in a string is copied through untouched.
+fn split_reference(text: &str) -> Option<(&str, &str)> {
+    let text = text.strip_prefix('$')?;
+    let colon = text.find(':')?;
+    let kind = &text[..colon];
+    if kind.is_empty() || !kind.chars().all(|c| c.is_ascii_lowercase()) {
+        return None;
+    }
+    Some((kind, &text[colon + 1..]))
 }
 
 fn native_install(target: &str, hap: &std::path::Path) -> Result<(), String> {
@@ -470,10 +531,17 @@ fn native_install(target: &str, hap: &std::path::Path) -> Result<(), String> {
 
 /// Build + sign only (no push). Used by `hvolt build`.
 /// Err is returned (caller must propagate exit code) — signing failure is a failure.
-pub fn build_and_sign(project_dir: &Path) -> Result<(), String> {
-    let (app_config, sdk_env) = native_build(project_dir)?;
+///
+/// `product` is `--product`; None selects the config's `default_product`, then `default`.
+pub fn build_and_sign(project_dir: &Path, product: Option<&str>) -> Result<(), String> {
+    let (app_config, sdk_env) = native_build(project_dir, product)?;
+    let product_name = app_config
+        .resolved
+        .as_ref()
+        .map(|product| product.name.clone())
+        .unwrap_or_else(|| "default".to_string());
 
-    let Some(signing) = app_config.app.signing_for("default") else {
+    let Some(signing) = app_config.app.signing_for(&product_name) else {
         println!("  (no signing config, skipping sign)");
         return Ok(());
     };
@@ -494,6 +562,7 @@ pub fn build_and_sign(project_dir: &Path) -> Result<(), String> {
     crate::sign::package::sign_app(
         &sdk_env,
         project_dir,
+        &product_name,
         &signing.store_file,
         &signing.store_password,
         &signing.key_alias,
@@ -532,7 +601,8 @@ pub fn run(project_dir: &Path, device: Option<&str>) {
     // package `hvolt sign --local` just produced look stale — `run` → build → "older than the
     // current build" → sign → run … Pushing what exists is the only path that terminates.
     let has_signing = AppConfig::from_file(&project_dir.join("hvolt.toml"))
-        .map(|cfg| cfg.app.signing_for("default").is_some())
+        .and_then(|cfg| cfg.with_product(cfg.default_product_name()))
+        .map(|cfg| !cfg.app.signing.is_empty())
         .unwrap_or(false);
     if !has_signing {
         match find_signed_hap(project_dir) {
@@ -550,6 +620,7 @@ pub fn run(project_dir: &Path, device: Option<&str>) {
                 // Only the bundle name is needed here; building would rewrite the unsigned
                 // package and make this one stale again on the next `run`.
                 let bundle = AppConfig::from_file(&project_dir.join("hvolt.toml"))
+                    .and_then(|cfg| cfg.with_product(cfg.default_product_name()))
                     .map(|cfg| cfg.app.bundle)
                     .unwrap_or_default();
                 push_package(&hap, device).unwrap_or_else(|e| report_push_failure(e));
@@ -573,12 +644,17 @@ pub fn run(project_dir: &Path, device: Option<&str>) {
         }
     }
 
-    let (app_config, sdk_env) = native_build(project_dir).unwrap_or_else(|e| {
+    let (app_config, sdk_env) = native_build(project_dir, None).unwrap_or_else(|e| {
         eprintln!("✗ {}", e);
         std::process::exit(1);
     });
+    let product_name = app_config
+        .resolved
+        .as_ref()
+        .map(|product| product.name.clone())
+        .unwrap_or_else(|| "default".to_string());
 
-    let Some(signing) = app_config.app.signing_for("default") else {
+    let Some(signing) = app_config.app.signing_for(&product_name) else {
         // `hvolt sign --local` writes a signed package but installs no config, so pointing
         // at it alone was a loop: run → sign --local → run → the same error. Pushing the
         // package it produced is what breaks that loop.
@@ -614,6 +690,7 @@ pub fn run(project_dir: &Path, device: Option<&str>) {
     if let Err(e) = crate::sign::package::sign_app(
         &sdk_env,
         project_dir,
+        &product_name,
         &signing.store_file,
         &signing.store_password,
         &signing.key_alias,
@@ -806,11 +883,30 @@ pub(crate) fn sources_newer_than(project_dir: &std::path::Path, package: &std::p
     newest.is_some_and(|newest| newest > package_at)
 }
 
+/// Directories a build may have written a package to: `output/`, each `output/<product>/`,
+/// then `build/`. A non-default product's package lives one level deeper, so the finders have
+/// to look there too; the newest file still wins, as it does inside one directory.
+fn package_dirs(project_dir: &std::path::Path) -> Vec<std::path::PathBuf> {
+    let output = project_dir.join("output");
+    let mut dirs = vec![output.clone()];
+    if let Ok(entries) = std::fs::read_dir(&output) {
+        let mut products: Vec<std::path::PathBuf> = entries
+            .flatten()
+            .map(|entry| entry.path())
+            .filter(|path| path.is_dir())
+            .collect();
+        products.sort();
+        dirs.extend(products);
+    }
+    dirs.push(project_dir.join("build"));
+    dirs
+}
+
 /// The newest `*-unsigned.hap` a build produced, for a caller that has to explain why the
 /// signed one is missing.
 pub(crate) fn find_unsigned_hap(project_dir: &std::path::Path) -> Option<std::path::PathBuf> {
     let mut found = Vec::new();
-    for dir in [project_dir.join("output"), project_dir.join("build")] {
+    for dir in package_dirs(project_dir) {
         let Ok(entries) = std::fs::read_dir(&dir) else {
             continue;
         };
@@ -831,8 +927,8 @@ pub(crate) fn find_unsigned_hap(project_dir: &std::path::Path) -> Option<std::pa
 
 pub fn find_signed_hap(project_dir: &std::path::Path) -> Result<std::path::PathBuf, String> {
     let mut cands: Vec<std::path::PathBuf> = Vec::new();
-    for dir in ["output", "build"] {
-        let Ok(entries) = std::fs::read_dir(project_dir.join(dir)) else {
+    for dir in package_dirs(project_dir) {
+        let Ok(entries) = std::fs::read_dir(dir) else {
             continue;
         };
         cands.extend(
@@ -899,7 +995,8 @@ pub fn find_signed_hap(project_dir: &std::path::Path) -> Result<std::path::PathB
              boards), then `hvolt push` — or add an [app.signing] table and build again",
             unsigned.display()
         ),
-        None => "no *-signed.hap in output/ or build/ — run `hvolt build` first".to_string(),
+        None => "no *-signed.hap in output/, output/<product>/ or build/ — run `hvolt build` first"
+            .to_string(),
     })
 }
 

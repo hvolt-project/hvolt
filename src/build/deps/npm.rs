@@ -1,15 +1,13 @@
 //! Third-party packages the app declares in `hvolt.toml` `[dependencies]`.
 //!
 //! A HAP is not only its own modules: `import { parse } from 'yaml'` names a package the
-//! device expects to find as `yaml.browser.dist.index` inside the merged abc.  The flat
-//! project lists those packages in `[dependencies]`; `hvolt.toml` is the configuration
-//! source, so a package's hvigor manifests (`oh-package.json5`, `package.json`) are read as
-//! *content* to locate its sources.
+//! device expects to find as `yaml.browser.dist.index` inside the merged abc. The project
+//! lists those packages in `[dependencies]`, and that table is the whole declaration: kind,
+//! version and entry all come from it, or from the package's own directory shape when the
+//! declaration leaves a field out. No hvigor manifest is read at build time.
 //!
-//! One exception to that division: a package the sources import while `hvolt.toml` does not
-//! declare it (`hvolt migrate` can lose a declaration) is taken from the project's own
-//! `oh-package.json5`. There the manifest is used as the declaration the flat config is
-//! missing — a name the sources merely mention (a typo, a system module) does not qualify.
+//! A bare import the table does not cover is an error naming the package. It is never
+//! resolved by guessing from a leftover `oh-package.json5`.
 
 use std::path::{Path, PathBuf};
 
@@ -57,6 +55,10 @@ pub struct Package {
     pub source_root: PathBuf,
     /// Entry module inside `source_root`, without extension, e.g. `browser/dist/index`.
     pub entry: String,
+    /// The `[dependencies].entry` value as declared, e.g. `./dist/index.js`. Records carry the
+    /// declaration verbatim (extension dropped), which is what the device resolves the package
+    /// by; `entry` alone cannot reconstruct it after the bundle substitution.
+    pub declared: Option<String>,
     pub kind: Kind,
 }
 
@@ -159,6 +161,7 @@ pub fn discover(app: &AppConfig, project_dir: &Path) -> Result<Vec<Package>, Str
             .kind
             .as_deref()
             .and_then(Kind::parse)
+            .or_else(|| manifest_kind(&dir))
             .unwrap_or_else(|| detect_kind(&dir));
         if kind == Kind::Native {
             continue;
@@ -195,69 +198,68 @@ pub fn discover(app: &AppConfig, project_dir: &Path) -> Result<Vec<Package>, Str
         let package = layout(name, dep, &dir, kind, version)?;
         packages.push(package);
     }
-    packages.extend(discover_imported(app, project_dir, &packages)?);
+    verify_imported(app, project_dir, &packages)?;
     packages.sort_by(|a, b| a.name.cmp(&b.name));
     packages.dedup_by(|a, b| a.name == b.name);
     Ok(packages)
 }
 
-/// Packages the project's sources import while `[dependencies]` does not declare them.
+/// Dependency keys every member module declares in its own `hvolt.toml`.
+fn module_dependency_names(
+    project_dir: &Path,
+    members: &[String],
+) -> std::collections::BTreeSet<String> {
+    let mut names = std::collections::BTreeSet::new();
+    for member in members {
+        let path = project_dir.join(member).join("hvolt.toml");
+        let Ok(text) = std::fs::read_to_string(&path) else {
+            continue;
+        };
+        let Ok(value) = text.parse::<toml::Value>() else {
+            continue;
+        };
+        if let Some(table) = value.get("dependencies").and_then(|deps| deps.as_table()) {
+            names.extend(table.keys().cloned());
+        }
+    }
+    names
+}
+
+/// Fail when a source imports a third-party package `[dependencies]` does not declare.
 ///
-/// `hvolt migrate` can drop a declaration (measured on clashbox, 2026-11-06: `EntryAbility.ets`
-/// imports `@cxy/sandboxfinder` dynamically and the project's `oh-package.json5` lists it,
-/// but the generated `hvolt.toml` never mentions it). The import alone is not evidence — a
-/// typo, a system module or a member of the project itself reads the same way — so a package
-/// is admitted only when the project's own `oh-package.json5` lists it under `dependencies`.
-fn discover_imported(
+/// Build time reads no hvigor manifest: the dependency table in `hvolt.toml` is the only
+/// declaration. A bare import that is neither a project member nor declared there is an error
+/// naming the package — never something reconstructed from a leftover `oh-package.json5`.
+fn verify_imported(
     app: &AppConfig,
     project_dir: &Path,
     declared: &[Package],
-) -> Result<Vec<Package>, String> {
-    let manifest = manifest_dependencies(&project_dir.join("oh-package.json5"));
-    if manifest.is_empty() {
-        return Ok(Vec::new());
-    }
+) -> Result<(), String> {
     let mut imported = std::collections::BTreeSet::new();
     collect_imported_names(project_dir, &mut imported);
-    let mut out = Vec::new();
-    for (name, spec) in &manifest {
-        if declared.iter().any(|package| &package.name == name)
-            || app.dependencies.contains_key(name)
-            || app.app.members.iter().any(|member| member == name)
-            || !imported.contains(name)
-            || spec.starts_with("file:")
-            || spec.starts_with("link:")
-        {
-            continue;
-        }
-        let Some(dir) =
-            installed_package_dir(project_dir, name).or_else(|| cached_package_dir(name, spec))
-        else {
-            continue;
-        };
-        let kind = detect_kind(&dir);
-        if kind == Kind::Native {
-            continue;
-        }
-        // The installed package's manifest carries the version it was resolved to; the
-        // declaration only carries the range (`^1.0.5`).
-        let version = read_manifest_field(&dir, "version")
-            .or_else(|| exact_version(spec))
-            .unwrap_or_else(|| "1.0.0".to_string());
-        let dep = Dependency {
-            path: None,
-            version: Some(spec.clone()),
-            registry: None,
-            kind: None,
-            entry: None,
-            alias: None,
-            optional: false,
-        };
-        let package = layout(name, &dep, &dir, kind, version)
-            .map_err(|e| format!("dependency '{name}' is imported but cannot be laid out: {e}"))?;
-        out.push(package);
+    // A member module declares its own dependencies in its own `hvolt.toml`; those names are
+    // legal imports of the project even though the root table does not carry them.
+    let module_deps = module_dependency_names(project_dir, &app.app.members);
+    let mut missing: Vec<&String> = imported
+        .iter()
+        .filter(|name| !declared.iter().any(|package| &package.name == *name))
+        .filter(|name| !app.dependencies.contains_key(*name))
+        .filter(|name| !app.app.members.iter().any(|member| member == *name))
+        .filter(|name| !module_deps.contains(*name))
+        // Native bindings are declared by the module that builds the `.so`, and
+        // `BuildProfile` is a constant module the toolchain emits.
+        .filter(|name| !name.ends_with(".so") && *name != "BuildProfile")
+        .collect();
+    if missing.is_empty() {
+        return Ok(());
     }
-    Ok(out)
+    missing.sort();
+    let names: Vec<String> = missing.iter().map(|name| format!("'{name}'")).collect();
+    Err(format!(
+        "sources import {} but hvolt.toml [dependencies] does not declare it: hvolt reads no \
+         oh-package.json5, so every imported package is declared in [dependencies]",
+        names.join(", ")
+    ))
 }
 
 /// Bare package names the project's sources reference, static or dynamic.
@@ -378,137 +380,6 @@ pub(crate) fn dynamic_requests(text: &str) -> Vec<DynamicRequest> {
     out
 }
 
-/// `dependencies` of an `oh-package.json5`, as `name → declared range`.
-///
-/// The file is JSON5 (comments, trailing commas, single quotes), so the object is read
-/// structurally instead of through `serde_json`.
-fn manifest_dependencies(path: &Path) -> std::collections::BTreeMap<String, String> {
-    let Ok(text) = std::fs::read_to_string(path) else {
-        return Default::default();
-    };
-    let Some(start) = text
-        .find("\"dependencies\"")
-        .or_else(|| text.find("dependencies"))
-    else {
-        return Default::default();
-    };
-    let Some(open) = text[start..].find('{').map(|at| start + at) else {
-        return Default::default();
-    };
-    let mut out = std::collections::BTreeMap::new();
-    let mut index = open + 1;
-    while let Some((key, after_key)) = json5_string(&text, index) {
-        let Some(colon) = text[after_key..].find(':').map(|at| after_key + at) else {
-            break;
-        };
-        let Some((value, after_value)) = json5_string(&text, colon + 1) else {
-            break;
-        };
-        out.insert(key, value);
-        index = after_value;
-    }
-    out
-}
-
-/// The quoted string at or after `from`, with the index just past its closing quote.
-fn json5_string(text: &str, from: usize) -> Option<(String, usize)> {
-    let index = skip_json5(text, from);
-    let quote = text[index..].chars().next()?;
-    if quote != '"' && quote != '\'' {
-        return None;
-    }
-    let start = index + quote.len_utf8();
-    let mut escaped = false;
-    for (offset, ch) in text[start..].char_indices() {
-        if escaped {
-            escaped = false;
-            continue;
-        }
-        if ch == '\\' {
-            escaped = true;
-        } else if ch == quote {
-            let end = start + offset;
-            return Some((text[start..end].to_string(), end + ch.len_utf8()));
-        }
-    }
-    None
-}
-
-/// The index of the next JSON5 value: whitespace, commas and comments are skipped.
-fn skip_json5(text: &str, from: usize) -> usize {
-    let bytes = text.as_bytes();
-    let mut index = from;
-    loop {
-        match bytes.get(index) {
-            Some(b' ' | b'\t' | b'\r' | b'\n' | b',') => index += 1,
-            Some(b'/') if bytes.get(index + 1) == Some(&b'/') => {
-                while index < bytes.len() && bytes[index] != b'\n' {
-                    index += 1;
-                }
-            }
-            Some(b'/') if bytes.get(index + 1) == Some(&b'*') => {
-                index += 2;
-                while index + 1 < bytes.len() && !(bytes[index] == b'*' && bytes[index + 1] == b'/')
-                {
-                    index += 1;
-                }
-                index = (index + 2).min(bytes.len());
-            }
-            _ => return index,
-        }
-    }
-}
-
-/// `<project>/oh_modules/<name>`, or the `.ohpm` store entry for it.
-fn installed_package_dir(project_dir: &Path, name: &str) -> Option<PathBuf> {
-    let flat = project_dir.join("oh_modules").join(name);
-    if flat.is_dir() {
-        return Some(flat);
-    }
-    let escaped = name.replace('/', "+");
-    let store = project_dir.join("oh_modules").join(".ohpm");
-    for entry in std::fs::read_dir(store).ok()?.flatten() {
-        let dir_name = entry.file_name().to_string_lossy().to_string();
-        if dir_name.starts_with(&format!("{escaped}@")) || dir_name == escaped {
-            let nested = entry.path().join("oh_modules").join(name);
-            if nested.is_dir() {
-                return Some(nested);
-            }
-        }
-    }
-    None
-}
-
-/// The package cache entry for a declared range, when the package is not installed beside
-/// the project: `<cache>/<registry>/<name>/<version>`.
-fn cached_package_dir(name: &str, spec: &str) -> Option<PathBuf> {
-    if let Some(version) = exact_version(spec) {
-        let dir = crate::build::deps::npm_cache::package_dir("default", name, &version);
-        if dir.is_dir() {
-            return Some(dir);
-        }
-    }
-    let mut versions: Vec<PathBuf> = std::fs::read_dir(crate::build::deps::npm_cache::package_dir(
-        "default", name, "",
-    ))
-    .ok()?
-    .flatten()
-    .map(|entry| entry.path())
-    .filter(|path| path.is_dir())
-    .collect();
-    versions.sort();
-    versions.pop()
-}
-
-/// The exact version a declaration pins (`^1.0.5` → `1.0.5`), or `None` for a range no
-/// directory is named after.
-fn exact_version(spec: &str) -> Option<String> {
-    let trimmed = spec
-        .trim()
-        .trim_start_matches(['^', '~', '=', '>', '<', ' ']);
-    is_exact(trimmed).then(|| trimmed.to_string())
-}
-
 /// Where a dependency lives: its `path`, or the package cache for a registry dependency.
 ///
 /// A registry dependency's directory is keyed by the *resolved* version, never by the range
@@ -553,10 +424,40 @@ pub fn is_exact(version: &str) -> bool {
 }
 
 /// Detect a package's kind from its contents, per the layout table in the spec.
+/// `[module]` of a package's own `hvolt.toml`, the declaration a flattened dependency ships.
+fn package_manifest(dir: &Path) -> Option<toml::Value> {
+    let text = std::fs::read_to_string(dir.join("hvolt.toml")).ok()?;
+    let value: toml::Value = text.parse().ok()?;
+    value.get("module").cloned()
+}
+
+/// The kind a package declares for itself.
+fn manifest_kind(dir: &Path) -> Option<Kind> {
+    let module = package_manifest(dir)?;
+    match module.get("type").and_then(|value| value.as_str())? {
+        "bytecode" | "byte-code" => Some(Kind::ByteCode),
+        "arkts" => Some(Kind::Arkts),
+        "native" => Some(Kind::Native),
+        "js" | "javascript" => Some(Kind::Js),
+        _ => None,
+    }
+}
+
+/// The entry a package declares for itself.
+fn manifest_main(dir: &Path) -> Option<String> {
+    let module = package_manifest(dir)?;
+    module
+        .get("main")
+        .and_then(|value| value.as_str())
+        .map(str::to_string)
+}
+
 fn detect_kind(dir: &Path) -> Kind {
     // A package that ships its own bytecode and no implementation source has to be merged,
     // not compiled: compiling it would only see the `.d.ets` declarations.
-    if dir.join("ets/modules.abc").is_file() && !has_implementation_sources(dir) {
+    if (dir.join("modules.abc").is_file() || dir.join("ets/modules.abc").is_file())
+        && !has_implementation_sources(dir)
+    {
         return Kind::ByteCode;
     }
     if dir.join("src/main/ets").is_dir() || dir.join("Index.ets").is_file() {
@@ -580,32 +481,34 @@ fn layout(
     let (source_root, entry) = match kind {
         Kind::Arkts => {
             let ets = dir.join("src").join("main").join("ets");
-            // The declared entry decides the root: a package may keep `index.ets` beside its
-            // manifest while every component lives under `src/main/ets`.  Rooting at
+            // The declared entry decides the root: a package may keep `index.ets` at its own
+            // root while every component lives under `src/main/ets`. Rooting at
             // `src/main/ets` in that case loses the entry file and names the records after a
-            // path that never exists.
-            let declared = read_manifest_field(dir, "main")
-                .map(|m| m.trim_start_matches("./").to_string())
-                .filter(|m| dir.join(m).is_file());
-            if dep.entry.is_none() {
-                if let Some(main) = declared {
-                    return Ok(Package {
-                        name: name.to_string(),
-                        alias,
-                        dir: dir.to_path_buf(),
-                        version,
-                        source_root: dir.to_path_buf(),
-                        entry: strip_source(&main),
-                        kind,
-                    });
-                }
+            // path that never exists. The declaration is `[dependencies].entry`.
+            let declared = dep
+                .entry
+                .as_deref()
+                .map(|entry| entry.trim_start_matches("./").to_string())
+                .filter(|entry| dir.join(entry).is_file());
+            if let Some(main) = declared {
+                return Ok(Package {
+                    name: name.to_string(),
+                    alias,
+                    dir: dir.to_path_buf(),
+                    version,
+                    source_root: dir.to_path_buf(),
+                    entry: strip_source(&main),
+                    declared: dep.entry.clone(),
+                    kind,
+                });
             }
             let root = if ets.is_dir() { ets } else { dir.to_path_buf() };
             let entry = dep
                 .entry
                 .clone()
+                .or_else(|| manifest_main(dir))
                 .map(|e| strip_source(&e))
-                .unwrap_or_else(|| default_arkts_entry(dir, &root));
+                .unwrap_or_else(default_arkts_entry);
             (root, entry)
         }
         Kind::Js => {
@@ -613,16 +516,20 @@ fn layout(
             // Node build beside it resolves `require` and node builtins, which no device has.
             let browser = dir.join("browser");
             let (root, entry) = if browser.join("dist/index.js").is_file() {
+                // A declaration names the entry relative to the package root; the compiler
+                // roots a browser bundle at `browser/`, so that prefix is dropped here.
                 let entry = dep
                     .entry
                     .clone()
-                    .map(|e| strip_js_ext(&e))
+                    .or_else(|| manifest_main(dir))
+                    .map(|e| relative_to_root(&e, &browser, dir))
                     .unwrap_or_else(|| "dist/index".to_string());
                 (browser, entry)
             } else {
                 let entry = dep
                     .entry
                     .clone()
+                    .or_else(|| manifest_main(dir))
                     .or_else(|| js_entry(dir))
                     .unwrap_or_else(|| "index".to_string());
                 (dir.to_path_buf(), strip_js_ext(&entry))
@@ -638,6 +545,7 @@ fn layout(
         version,
         source_root,
         entry,
+        declared: dep.entry.clone(),
         kind,
     })
 }
@@ -733,78 +641,60 @@ fn collect_declarations(dir: &Path, out: &mut String, depth: usize) {
     }
 }
 
-/// The file a package declares as its entry (`main` in its manifest), if any.
+/// The file a package's resolved entry maps to, if the package ships one.
 ///
 /// Packages ship several files that map to the same staged name (`index.ets`, `index.ts`,
-/// `index.js`); the declared one is the implementation and has to win that collision.
+/// `index.js`); the declared entry is the implementation and has to win that collision. The
+/// declaration is `[dependencies].entry` in `hvolt.toml`, never a hvigor manifest.
 pub fn entry_file_name(package: &Package) -> Option<String> {
-    let declared = read_manifest_field(&package.dir, "main")?;
-    let name = declared
-        .trim_start_matches("./")
-        .rsplit('/')
-        .next()
-        .unwrap_or(&declared)
-        .to_string();
-    if name.is_empty() {
-        None
-    } else {
-        Some(name)
-    }
-}
-
-/// The prebuilt abc a byte-code HAR ships.
-pub fn abc_path(package: &Package) -> PathBuf {
-    package.dir.join("ets").join("modules.abc")
-}
-
-/// An ArkTS package's entry: its manifest `main`, else `Index`.
-fn default_arkts_entry(dir: &Path, source_root: &Path) -> String {
-    let declared = read_manifest_field(dir, "main");
-    if let Some(main) = declared {
-        let stem = strip_source(&main);
-        let candidate = source_root.join(format!("{stem}.ets"));
-        if candidate.is_file() || source_root.join(format!("{stem}.ts")).is_file() {
-            return stem;
+    let stem = package.entry.rsplit('/').next()?;
+    for ext in ["ets", "ts", "js"] {
+        let candidate = format!("{stem}.{ext}");
+        if package.source_root.join(&candidate).is_file() || package.dir.join(&candidate).is_file()
+        {
+            return Some(candidate);
         }
-    }
-    "Index".to_string()
-}
-
-/// A JavaScript package's entry, from its manifest `module` / `main`, else its browser build.
-fn js_entry(dir: &Path) -> Option<String> {
-    for key in ["module", "main"] {
-        if let Some(value) = read_manifest_field(dir, key) {
-            return Some(strip_js_ext(&value));
-        }
-    }
-    // A package that ships a browser bundle is addressed through that bundle.
-    if dir.join("browser/dist/index.js").is_file() {
-        return Some("browser/dist/index".to_string());
     }
     None
 }
 
-/// The first string value of a top-level `"key"` in a package manifest.
-///
-/// The manifest is content here, not configuration: it says where the package put its files.
-fn read_manifest_field(dir: &Path, key: &str) -> Option<String> {
-    let text = std::fs::read_to_string(dir.join("oh-package.json5"))
-        .or_else(|_| std::fs::read_to_string(dir.join("package.json")))
-        .ok()?;
-    let needle = format!("\"{key}\"");
-    let start = text.find(&needle)? + needle.len();
-    let rest = &text[start..];
-    let colon = rest.find(':')?;
-    let rest = &rest[colon + 1..];
-    let open = rest.find('"')?;
-    let rest = &rest[open + 1..];
-    let close = rest.find('"')?;
-    let value = rest[..close].trim().to_string();
-    if value.is_empty() {
-        None
-    } else {
-        Some(value)
+/// The prebuilt abc a byte-code HAR ships: `modules.abc` at the package root, or the
+/// `ets/modules.abc` an ohpm store copy still carries.
+pub fn abc_path(package: &Package) -> PathBuf {
+    let flat = package.dir.join("modules.abc");
+    if flat.is_file() {
+        return flat;
     }
+    package.dir.join("ets").join("modules.abc")
+}
+
+/// Drop a source-root prefix from a declared entry, and its extension.
+fn relative_to_root(entry: &str, root: &Path, dir: &Path) -> String {
+    let stem = strip_js_ext(entry);
+    let Ok(rest) = root.strip_prefix(dir) else {
+        return stem;
+    };
+    let prefix = rest.to_string_lossy().replace('\\', "/");
+    if prefix.is_empty() {
+        return stem;
+    }
+    match stem.strip_prefix(&format!("{prefix}/")) {
+        Some(tail) => tail.to_string(),
+        None => stem,
+    }
+}
+
+/// An ArkTS package's entry: `Index`, the name every component library ships.
+fn default_arkts_entry() -> String {
+    "Index".to_string()
+}
+
+/// A JavaScript package's entry, from the tree it ships: its browser build, else `index`.
+fn js_entry(dir: &Path) -> Option<String> {
+    if dir.join("browser/dist/index.js").is_file() {
+        return Some("browser/dist/index".to_string());
+    }
+    dir.join("index.js").is_file().then(|| "index".to_string())
 }
 
 /// Drop the source-root prefix and the extension from a declared entry.
@@ -857,6 +747,7 @@ mod tests {
             version: "1.0.5".into(),
             source_root: PathBuf::from("/p/src/main/ets"),
             entry: "Index".into(),
+            declared: None,
             kind: Kind::Arkts,
         };
         assert_eq!(
@@ -875,6 +766,7 @@ mod tests {
             version: "2.8.0".into(),
             source_root: PathBuf::from("/p/browser"),
             entry: "dist/index".into(),
+            declared: None,
             kind: Kind::Js,
         };
         assert_eq!(js.record_prefix_slash(), "yaml/browser");
@@ -920,22 +812,6 @@ mod tests {
             package_name_of("@normalized:N&&&yaml/dist/index&2.8.0"),
             None
         );
-    }
-
-    #[test]
-    fn manifest_dependencies_reads_json5_declarations() {
-        let path = std::env::temp_dir().join(format!("hvolt-manifest-{}", std::process::id()));
-        std::fs::write(
-            &path,
-            "{\n  // the store\n  \"dependencies\": {\n    \"yaml\": \"^2.8.0\",\n    '@cxy/x': '^1.0.5',\n  },\n  \"devDependencies\": { \"@ohos/hypium\": \"1.0.19\" }\n}\n",
-        )
-        .expect("write manifest");
-        let deps = super::manifest_dependencies(&path);
-        let _ = std::fs::remove_file(&path);
-        assert_eq!(deps.get("yaml").map(String::as_str), Some("^2.8.0"));
-        assert_eq!(deps.get("@cxy/x").map(String::as_str), Some("^1.0.5"));
-        assert!(!deps.contains_key("@ohos/hypium"), "{deps:?}");
-        assert_eq!(deps.len(), 2, "{deps:?}");
     }
 }
 

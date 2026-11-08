@@ -36,6 +36,17 @@ pub(crate) fn cxx_runtime(sdk_root: &Path) -> Option<PathBuf> {
     path.is_file().then_some(path)
 }
 
+/// The host's own copy of a build tool, falling back to the SDK's.
+///
+/// `cmake` and `ninja` are general-purpose tools: the SDK ships pinned copies only so a
+/// project builds without installing anything. Preferring the host keeps the SDK a source
+/// of OHOS-specific pieces (toolchain file, NDK) instead of a generic tool locker. The
+/// SDK copy stays the fallback, so a machine with neither still fails at the same place
+/// with the same message.
+fn host_tool_or_sdk(name: &str, sdk_bin: &Path) -> PathBuf {
+    crate::support::platform::on_path(name).unwrap_or_else(|| sdk_bin.join(toolchain_bin(name)))
+}
+
 /// Build one native module (a directory with CMakeLists.txt) for one ABI.
 /// Returns the directory holding the built (unstripped) .so files.
 pub(crate) fn build(
@@ -45,12 +56,9 @@ pub(crate) fn build(
     build_type: &str,
 ) -> Result<PathBuf, String> {
     let native = native_root(sdk_root);
-    let cmake = native
-        .join("build-tools/cmake/bin")
-        .join(toolchain_bin("cmake"));
-    let ninja = native
-        .join("build-tools/cmake/bin")
-        .join(toolchain_bin("ninja"));
+    let sdk_bin = native.join("build-tools/cmake/bin");
+    let cmake = host_tool_or_sdk("cmake", &sdk_bin);
+    let ninja = host_tool_or_sdk("ninja", &sdk_bin);
     if !cmake.exists() {
         return Err(format!("cmake not found at {}", cmake.display()));
     }

@@ -1,11 +1,12 @@
 // Build: the build chain — pack, native compile, ArkTS/ABC, resources, HAP assembly.
 use std::path::PathBuf;
 
-pub(crate) fn build() {
-    crate::build::deps::pipeline::build_and_sign(std::path::Path::new(".")).unwrap_or_else(|e| {
-        eprintln!("✗ {}", e);
-        std::process::exit(1);
-    });
+pub(crate) fn build(product: Option<String>) {
+    crate::build::deps::pipeline::build_and_sign(std::path::Path::new("."), product.as_deref())
+        .unwrap_or_else(|e| {
+            eprintln!("✗ {}", e);
+            std::process::exit(1);
+        });
 }
 
 pub(crate) fn pack_hap(module_build: PathBuf, out: PathBuf, hvolt_out: bool) {
@@ -120,23 +121,7 @@ pub(crate) fn assemble_ets(ets_dir: PathBuf, out: PathBuf, bundle: String, modul
 
 pub(crate) fn compile_abc(ts_root: PathBuf, out: PathBuf, file_threads: u32) {
     let result = (|| -> Result<(), String> {
-        let es2abc = crate::sdk::manage::sdk_root()
-            .and_then(|r| {
-                let sub = if cfg!(windows) {
-                    "build-win"
-                } else {
-                    "build-mac"
-                };
-                crate::support::platform::exe_names("es2abc")
-                    .iter()
-                    .map(|n| {
-                        r.join(format!(
-                            "default/openharmony/ets/build-tools/ets-loader/bin/ark/{sub}/bin/{n}"
-                        ))
-                    })
-                    .find(|p| p.exists())
-            })
-            .ok_or_else(|| "es2abc not found in SDK ets-loader".to_string())?;
+        let es2abc = crate::build::ets_assemble::sdk_es2abc()?;
         // The incoming tree is already staged, so a source-level `use shared`
         // directive is no longer recoverable: no staged file carries the flag.
         let shared = std::collections::BTreeSet::new();
@@ -166,10 +151,15 @@ pub(crate) fn compile_abc(ts_root: PathBuf, out: PathBuf, file_threads: u32) {
     }
 }
 
+pub(crate) fn abc_records(path: PathBuf) {
+    crate::build::compile::abc_records::run(&path);
+}
+
 pub(crate) fn res_compile(project: PathBuf, module: String, out: Option<PathBuf>) {
     let run = || -> Result<(), String> {
-        let app = crate::support::config::AppConfig::from_file(&project.join("hvolt.toml"))
+        let declared = crate::support::config::AppConfig::from_file(&project.join("hvolt.toml"))
             .map_err(|e| format!("read {}: {e}", project.join("hvolt.toml").display()))?;
+        let app = declared.with_product(declared.default_product_name())?;
         let (modules, _native) = crate::translator::discover_modules(&project, &app)
             .map_err(|e| format!("discover modules: {e}"))?;
         let module_cfg = pick_module(&modules, &module)?;
@@ -223,8 +213,9 @@ pub(crate) fn render_module_json(
     pkg_context: bool,
 ) {
     let run = || -> Result<(), String> {
-        let app = crate::support::config::AppConfig::from_file(&project.join("hvolt.toml"))
+        let declared = crate::support::config::AppConfig::from_file(&project.join("hvolt.toml"))
             .map_err(|e| format!("read {}: {e}", project.join("hvolt.toml").display()))?;
+        let app = declared.with_product(declared.default_product_name())?;
         let (modules, native) = crate::translator::discover_modules(&project, &app)
             .map_err(|e| format!("discover modules: {e}"))?;
         let (module_dir, module_cfg) = match modules
@@ -275,7 +266,11 @@ pub(crate) fn render_module_json(
                     module_name: &module_dir,
                     module: module_cfg,
                     app: &app,
-                    product: "default",
+                    product: app
+                        .resolved
+                        .as_ref()
+                        .map(|product| product.name.as_str())
+                        .unwrap_or("default"),
                     build_mode: &build_mode,
                     compile_sdk_version: &compile_sdk_version,
                     api_release_type: &api_release_type,

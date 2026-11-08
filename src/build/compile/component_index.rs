@@ -705,7 +705,7 @@ struct Bare {
     #[test]
     fn real_file_scan() {
         let text = std::fs::read_to_string(
-        "/Users/hongyuncong/DshHome/clashbox-tailscale/clashbox-flat/xb_components/components/Xb_Button.ets",
+        "/Users/hongyuncong/DshHome/clashbox-tailscale/clashbox/xb_components/components/Xb_Button.ets",
     )
     .unwrap();
         let decls = crate::build::compile::component_index::scan_declarations(

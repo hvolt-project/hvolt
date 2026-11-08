@@ -585,7 +585,7 @@ fn strip_line_comments(text: &str, strip: impl Fn(usize) -> bool) -> String {
 /// `// 注册回调，防止反向回弹` after the last one stays).
 ///
 /// A one-line argument is returned untouched. That is the shape that carries the property-line
-/// comments the reference keeps — 56 across 32 files of the `clashbox-flat` copy.
+/// comments the reference keeps — 56 across 32 files of the `clashbox` copy.
 fn reprint_attribute_arguments(arguments: &str, call_indent: &str) -> String {
     let text = arguments.trim();
     if !text.starts_with('{') || !text.contains('\n') {

@@ -16,27 +16,34 @@ use oxc_span::SourceType;
 use crate::build::lower::ets_transpile::TranspileOptions;
 use crate::build::stage::process_import::load_kit_configs;
 
-/// Resolve the SDK's `es2abc` launcher (platform-aware: `build-win` vs
-/// `build-mac`, `.exe` on Windows). The native (standalone) build chain and the
-/// `assemble-ets` CLI both use this.
+/// Resolve the SDK's `es2abc` launcher.
+///
+/// The binary sits under a subdirectory named for the host the SDK was unpacked for:
+/// `build-win` on Windows, `build-mac` on macOS, plain `build` on Linux. All three are
+/// probed in that order rather than assuming one from `cfg!`, because a release build must
+/// work on every platform the npm package targets — including both Linux targets.
 pub fn sdk_es2abc() -> Result<PathBuf, String> {
-    crate::sdk::manage::sdk_root()
-        .and_then(|r| {
-            let sub = if cfg!(windows) {
-                "build-win"
-            } else {
-                "build-mac"
-            };
-            crate::support::platform::exe_names("es2abc")
-                .iter()
-                .map(|n| {
-                    r.join(format!(
-                        "default/openharmony/ets/build-tools/ets-loader/bin/ark/{sub}/bin/{n}"
-                    ))
-                })
-                .find(|p| p.exists())
-        })
-        .ok_or_else(|| "es2abc not found in SDK ets-loader".to_string())
+    let root = crate::sdk::manage::sdk_root().ok_or_else(|| "no SDK root resolved".to_string())?;
+    let ark = root.join("default/openharmony/ets/build-tools/ets-loader/bin/ark");
+    es2abc_under(&ark).ok_or_else(|| {
+        format!(
+            "es2abc not found under {} (probed build-win, build-mac, build)",
+            ark.display()
+        )
+    })
+}
+
+/// Locate the launcher under any of the host-specific layouts, in probe order.
+fn es2abc_under(ark: &std::path::Path) -> Option<PathBuf> {
+    for sub in ["build-win", "build-mac", "build"] {
+        for name in crate::support::platform::exe_names("es2abc") {
+            let candidate = ark.join(sub).join("bin").join(name);
+            if candidate.is_file() {
+                return Some(candidate);
+            }
+        }
+    }
+    None
 }
 
 /// Resolve the SDK's `kit_configs` directory (the ets-loader kit table es2abc
@@ -254,9 +261,10 @@ pub fn assemble(
             project_builders.push(name);
         }
     }
-    // The entry name each module's own manifest declares (`Index` for a component library,
-    // the fallback when there is no manifest). A member module is addressed through it, and
-    // its package entry is the staged file at `<module>/<entry>`.
+    // The entry name the module declares in its own `hvolt.toml` (`Index` for a component
+    // library, the fallback when it declares none). A member module is addressed through it,
+    // and its package entry is the staged file at `<module>/<entry>`. No hvigor manifest is
+    // consulted: `[module].main` is the declaration.
     let module_entries: std::collections::BTreeMap<String, String> = modules
         .iter()
         .map(|m| {
@@ -266,11 +274,6 @@ pub fn assemble(
                     .map(|main| {
                         let name = main.rsplit('/').next().unwrap_or(main);
                         name.trim_end_matches(".ets").to_string()
-                    })
-                    .or_else(|| {
-                        crate::build::compile::abc_compile::declared_entry(
-                            crate::build::compile::abc_compile::module_root(m.dir),
-                        )
                     })
                     .unwrap_or_else(|| {
                         crate::build::compile::abc_compile::DEFAULT_MODULE_ENTRY.to_string()
@@ -2089,15 +2092,20 @@ fn package_url(spec: &str, packages: &[crate::build::deps::npm::Package]) -> Opt
 /// the entry as written.
 fn package_entry_url(package: &crate::build::deps::npm::Package) -> String {
     let path = package_entry_path(package).unwrap_or_else(|| package.entry.clone());
+    // The record prefix carries the package's source root (`yaml/browser`), while the entry is
+    // spelled relative to that root (`dist/index`); joining them gives the path the device
+    // resolves. Using the bare alias here loses the root and the request misses the record.
     format!(
         "@normalized:N&&&{}/{}&{}",
-        package.alias, path, package.version
+        package.record_prefix_slash(),
+        path,
+        package.version
     )
 }
 
 /// The package-directory-relative entry path of one package, without its extension.
 fn package_entry_path(package: &crate::build::deps::npm::Package) -> Option<String> {
-    let declared = declared_package_main(&package.dir)?;
+    let declared = package.declared.clone()?;
     let file = declared.rsplit('/').next().unwrap_or(&declared).to_string();
     let stem = |name: &str| {
         let mut name = name.to_string();
@@ -2122,24 +2130,6 @@ fn package_entry_path(package: &crate::build::deps::npm::Package) -> Option<Stri
         }
     }
     Some(stem(declared.trim_start_matches("./")))
-}
-
-/// The `main` a package's own manifest declares, as written (`./dist/index.js`).
-fn declared_package_main(dir: &std::path::Path) -> Option<String> {
-    let text = std::fs::read_to_string(dir.join("oh-package.json5"))
-        .or_else(|_| std::fs::read_to_string(dir.join("package.json")))
-        .ok()?;
-    let start = text.find("\"main\"")? + "\"main\"".len();
-    let rest = &text[start..];
-    let open = rest.find('"')?;
-    let rest = &rest[open + 1..];
-    let close = rest.find('"')?;
-    let value = rest[..close].trim().to_string();
-    if value.is_empty() {
-        None
-    } else {
-        Some(value)
-    }
 }
 
 /// Copy one package's sources into the staging tree, rewriting each file's imports the way
@@ -2261,8 +2251,8 @@ fn stage_package(
     // extra file stays staged: `@mcui/mccharts`'s `utils/defaultOption` is imported by
     // `pageView/Charts.ets` in the source, but the transform erases that statement as unread
     // (the five names only ever occur there as the struct's own field names), so the reference
-    // never compiles the file and we stage and record it unreferenced. It resolves — the record
-    // exists — so the package still loads; the cost is one unused entry in the staged tree.
+    // never compiles the file and hvolt stages and records it unreferenced. It resolves — the
+    // record exists — so the package still loads; the cost is one unused entry in the staged tree.
     // Switching this to the post-transform graph means transforming before the file set is
     // known; the erasure rules live in the lowering and still move, which is how the 60-vs-59
     // staged/compiled mismatch came back the first time. A post-staging reachability pass would
@@ -2950,6 +2940,36 @@ fn imports_build_profile(content: &str, profile_record: &str) -> bool {
 mod tests {
     use super::rewrite_relative_imports;
 
+    /// The launcher's directory name depends on the host the SDK was unpacked for. A macOS
+    /// SDK carries `build-mac`, a Linux one carries plain `build`; a resolver that assumes
+    /// `build-mac` makes every Linux release build fail at `es2abc not found`.
+    #[test]
+    fn es2abc_resolves_under_each_host_layout() {
+        for sub in ["build-win", "build-mac", "build"] {
+            let dir =
+                std::env::temp_dir().join(format!("hvolt-es2abc-{sub}-{}", std::process::id()));
+            let bin = dir.join(sub).join("bin");
+            std::fs::create_dir_all(&bin).unwrap();
+            let name = crate::support::platform::exe_names("es2abc")[0].clone();
+            let exe = bin.join(&name);
+            std::fs::write(&exe, b"stub").unwrap();
+
+            let found = super::es2abc_under(&dir).expect("layout resolves");
+            assert_eq!(found, exe, "layout {sub}");
+
+            std::fs::remove_dir_all(&dir).unwrap();
+        }
+    }
+
+    /// An SDK with no launcher reports the path it searched instead of a bare "not found".
+    #[test]
+    fn es2abc_absent_reports_the_probed_root() {
+        let dir = std::env::temp_dir().join(format!("hvolt-es2abc-empty-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        assert!(super::es2abc_under(&dir).is_none());
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
     /// The record the reference package carries for clashbox's entry product.
     const TEST_PROFILE_RECORD: &str = "build/default/generated/profile/default/BuildProfile";
 
@@ -3231,6 +3251,7 @@ mod tests {
             version: "1.0.0".to_string(),
             source_root: std::path::PathBuf::from("/p"),
             entry: "Index".to_string(),
+            declared: None,
             kind: crate::build::deps::npm::Kind::Arkts,
         };
         let content = "import { Helper } from '../utils/Helper';\n\
@@ -3299,6 +3320,7 @@ mod tests {
             version: "1.0.0".to_string(),
             source_root: root.clone(),
             entry: "Index".to_string(),
+            declared: None,
             kind: crate::build::deps::npm::Kind::ByteCode,
         };
         assert_eq!(
@@ -3379,6 +3401,7 @@ mod tests {
             version: "2.8.9".to_string(),
             source_root: root.join("src/main/ets"),
             entry: "Nav".to_string(),
+            declared: None,
             kind: crate::build::deps::npm::Kind::Arkts,
         };
         let out = std::env::temp_dir().join(format!("hvolt-package-page-{}", std::process::id()));

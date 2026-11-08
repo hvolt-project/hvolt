@@ -2,9 +2,11 @@
 //!
 //! hvigor asks the SDK for these (version strings, the ark bytecode version for a compatible
 //! API level); hvolt must take them from the same place instead of carrying literals, or a
-//! different SDK silently produces a different package.
+//! different SDK silently produces a different package. The bytecode version is the one value
+//! that does not need the SDK at run time: it is a per-level constant, kept in `sdk_bytecode`
+//! and re-measured against the installed SDK by that module's tests.
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 /// Facts read from one installed SDK.
 #[derive(Debug, Clone)]
@@ -18,22 +20,17 @@ pub struct SdkFacts {
 }
 
 impl SdkFacts {
-    /// Read the SDK metadata next to the compilers and ask the toolchain for the bytecode
-    /// version of `compatible_api`.
+    /// Read the SDK metadata next to the compilers and look up the bytecode version for
+    /// `compatible_api`.
+    ///
+    /// `node_binary` is not used: the bytecode version comes from the `sdk_bytecode` table, so
+    /// detecting facts no longer spawns a Node process.
     pub fn detect(
         sdk_root: &Path,
-        node_binary: &Path,
+        _node_binary: &Path,
         compatible_api: u32,
     ) -> Result<Self, String> {
-        // The store keeps every version beside a `default` link; the platform tree lives one
-        // level below whichever root the caller resolved.
-        let platform = if sdk_root.join("default/openharmony").is_dir() {
-            sdk_root.join("default/openharmony")
-        } else if sdk_root.join("ets").is_dir() {
-            sdk_root.to_path_buf()
-        } else {
-            sdk_root.join("openharmony")
-        };
+        let platform = platform_root(sdk_root);
         let package = platform.join("ets/oh-uni-package.json");
         let text = std::fs::read_to_string(&package)
             .map_err(|e| format!("read {}: {e}", package.display()))?;
@@ -52,35 +49,39 @@ impl SdkFacts {
         Ok(Self {
             version,
             release_type,
-            virtual_machine: ark_version(&platform, node_binary, compatible_api),
+            virtual_machine: ark_version(compatible_api),
         })
+    }
+}
+
+/// The platform tree of an SDK root.
+///
+/// The store keeps every version beside a `default` link; the platform tree lives one level
+/// below whichever root the caller resolved.
+pub(crate) fn platform_root(sdk_root: &Path) -> PathBuf {
+    if sdk_root.join("default/openharmony").is_dir() {
+        sdk_root.join("default/openharmony")
+    } else if sdk_root.join("ets").is_dir() {
+        sdk_root.to_path_buf()
+    } else {
+        sdk_root.join("openharmony")
     }
 }
 
 /// `ark` + the bytecode version the SDK picks for `api`.
 ///
-/// The value is the toolchain's own answer (`ts2abc.js --target-api-version <api>`), not a
-/// table kept here: an API level maps to a bytecode version inside the SDK.
-fn ark_version(ohos_sdk: &Path, node_binary: &Path, api: u32) -> String {
-    let script = ohos_sdk.join("ets/build-tools/ets-loader/bin/ark/ts2abc.js");
-    if !script.is_file() {
-        return String::new();
-    }
-    let output = std::process::Command::new(node_binary)
-        .arg(&script)
-        .arg("--target-api-version")
-        .arg(api.to_string())
-        .output();
-    match output {
-        Ok(output) if output.status.success() => {
-            let text = String::from_utf8_lossy(&output.stdout).trim().to_string();
-            if text.is_empty() {
-                String::new()
-            } else {
-                format!("ark{text}")
-            }
+/// The lookup lives in `sdk_bytecode::TABLE`; a level the table does not cover reports a
+/// warning instead of leaving the field empty in silence, because an empty `virtualMachine`
+/// is a malformed package rather than a degraded one.
+fn ark_version(api: u32) -> String {
+    match super::sdk_bytecode::bytecode_version(api) {
+        Some(version) => format!("ark{version}"),
+        None => {
+            eprintln!(
+                "Warning: no bytecode version for API level {api}; virtualMachine will be empty"
+            );
+            String::new()
         }
-        _ => String::new(),
     }
 }
 
