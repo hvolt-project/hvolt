@@ -26,6 +26,31 @@ signing host, hand the UDID over explicitly:
 HVOLT_DEVICE_UDID=$UDID hvolt sign            # on the sign host
 ```
 
+## When the build host cannot reach the device
+
+A build host is often on a different subnet than the device, so `hvolt push` there times out
+even though the package is ready. Relay the signed HAP to a host that can reach the device
+instead of rebuilding or re-signing elsewhere (measured 2026-11-08):
+
+```bash
+# 1 build + sign on the build host
+hvolt build                                   # → output/<name>-signed.hap
+
+# 2 copy to the device host (scp target must be a Windows-style path on a Windows host)
+scp output/<name>-signed.hap user@device-host:C:/tmp/
+
+# 3 install from the device host — external files need --hap
+hvolt push --hap C:/tmp/<name>-signed.hap -d <ip:port>
+
+# 4 launch an already-installed package without rebuilding it
+hvolt exec <ip:port> --shell "aa start -a EntryAbility -b <bundle>"
+```
+
+`hvolt run` re-reads `hvolt.toml` and rebuilds, so it cannot be used to just launch an installed
+package; `hvolt exec … --shell` sends the command over the device link instead. Wireless targets
+do not appear in `hvolt device list` (that lists USB only) — `hvolt device connect <ip:port>`
+verifies reachability and records the address in the config.
+
 ## Two signing chains — pick the right one or the HAP will not install
 
 | Chain | Command | Trusted by |
@@ -73,6 +98,10 @@ hvolt build                 # ← this one produces the signed HAP
   `hvolt device connect <ip:port>`.
 - **`hvolt sign` reports `No device UDID found`** when no device is visible — pass
   `HVOLT_DEVICE_UDID` as shown above.
+- **`hvolt push`'s positional argument is not a file path.** It is treated as a project
+  artifact name and looked up under `output/` + `build/`. Pass an arbitrary file with
+  `--hap <FILE>`; an unsigned package is rejected before it reaches the device rather than
+  failing at install time.
 - **`local.properties` (sdk.dir)**: hvolt no longer needs it: the native chain reads the SDK path from config
   resolves the SDK from that file as well as `DEVECO_SDK_HOME`; without it, module tasks abort
   with `00303208 Unable to find 'sdk.dir'`. DevEco Studio writes the same file.

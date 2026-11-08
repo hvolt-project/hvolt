@@ -1,7 +1,7 @@
 # hvolt 编译 clashbox 的 gap 台账（2026-11-04）
 
 目标：用 `hvolt build` 直接生成 clashbox 的 HAP，不使用 DevEco 工具链。
-样本：`~/DshHome/clashbox-tailscale/clashbox-flat`（`hvolt migrate` 从 DevEco 工程转出的工程），entry 模块 127 个 `.ets`。
+样本：`~/DshHome/clashbox-tailscale/clashbox`（`hvolt migrate` 从 DevEco 工程转出的工程），entry 模块 127 个 `.ets`。
 
 ## 判据
 
@@ -63,7 +63,7 @@ hvolt 现在是**文本改写**（`rewrite_builders` 做括号配对后插入 `,
 A. 继续在文本改写上加规则（按当前速率，剩余 19 个文件逐个定位，但每修一类都可能引入新的误改，需回归）。
 B. 把 builder/组件块改写改为基于 oxc AST 的结构变换，判据与官方 `processComponentBlock` 对齐（工作量集中在 `ets_component.rs` 的一个新 pass，之后文本层面的特例可以撤掉）。
 
-两条路都要设备验证兜底：`clashbox-flat` 目前 build 仍卡在 `ConfigAdd.ets`，尚未产出 HAP。
+两条路都要设备验证兜底：`clashbox` 目前 build 仍卡在 `ConfigAdd.ets`，尚未产出 HAP。
 ## 2026-11-04 夜间：入口 record 找不到 —— 变量排查矩阵
 
 症状（恒定）：设备启动后 `Cannot find module '&entry/src/main/ets/entryability/EntryAbility&' , which is application Entry Point`。

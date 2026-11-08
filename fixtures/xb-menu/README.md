@@ -5,7 +5,7 @@
 
 ## 复刻方式
 
-- 正文逐字节取自 `clashbox-flat/xb_components/components/Xb_Menu.ets`，只在末尾追加一个
+- 正文逐字节取自 `clashbox/xb_components/components/Xb_Menu.ets`，只在末尾追加一个
   `@Entry` 页面来调用这个全局 `@Builder function`；
 - import 换桩：`../settings/SettingsCommonOp` 的 `MenuItem` 接口用同目录最小桩
   （`project/src/settings/SettingsCommonOp.ets`），`@kit.ArkUI` 的 `SymbolGlyphModifier` 保留；

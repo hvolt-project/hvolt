@@ -5,10 +5,10 @@
 
 ## 来源
 
-任务给的路径 `clashbox-flat/xb_components/src/main/ets/components/Proxy/ProxyNodeItem.ets` 不存在；
+任务给的路径 `clashbox/xb_components/src/main/ets/components/Proxy/ProxyNodeItem.ets` 不存在；
 本机有两份内容相同的副本（`diff -u` 输出 `IDENTICAL`，各 160 行）：
 
-- `~/DshHome/clashbox-tailscale/clashbox-flat/entry/components/Proxy/ProxyNodeItem.ets`
+- `~/DshHome/clashbox-tailscale/clashbox/entry/components/Proxy/ProxyNodeItem.ets`
 - `~/DshHome/clashbox-tailscale/clashbox/entry/src/main/ets/components/Proxy/ProxyNodeItem.ets`
 
 `input.ets` 用前者原文（第 8 行注释起至文件末尾），只做了下面两处改动。

@@ -4,7 +4,7 @@ A real component file from clashbox, replayed as a fixture: the whole
 `xb_components/src/main/ets/components/Proxy/ProxyGroupItem.ets` page component, with every
 project-local import turned into a same-file stub so it builds standalone.
 
-Source: `~/DshHome/clashbox-tailscale/clashbox-flat/entry/components/Proxy/ProxyGroupItem.ets`
+Source: `~/DshHome/clashbox-tailscale/clashbox/entry/components/Proxy/ProxyGroupItem.ets`
 (494 lines). The same file exists at `clashbox/entry/src/main/ets/components/Proxy/ProxyGroupItem.ets`
 under the DevEco layout and the two are byte-identical.
 
@@ -17,7 +17,7 @@ that is checkable:
 
 ```sh
 sed -n '191,666p' fixtures/proxy-group-item/input.ets | cmp - \
-  <(sed -n '19,$p' ~/DshHome/clashbox-tailscale/clashbox-flat/entry/components/Proxy/ProxyGroupItem.ets)
+  <(sed -n '19,$p' ~/DshHome/clashbox-tailscale/clashbox/entry/components/Proxy/ProxyGroupItem.ets)
 ```
 
 The `@kit.*` imports are kept on purpose — the SDK provides them, and their rewrite

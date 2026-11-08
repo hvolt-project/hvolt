@@ -1,12 +1,12 @@
 # configuration-page
 
 The first real-file fixture that is a **page** rather than a component:
-`entry/pages/ConfigurationPage.ets` from clashbox-flat (1029 lines), `@Entry` and all. The two
+`entry/pages/ConfigurationPage.ets` from clashbox (1029 lines), `@Entry` and all. The two
 earlier real-file fixtures (`proxy-node-item`, `proxy-group-item`) are components, so the entry
 point emission — `registerNamedRoute`, the `@Entry` struct itself — had no real-file coverage
 before this one.
 
-Source: `~/DshHome/clashbox-tailscale/clashbox-flat/entry/pages/ConfigurationPage.ets`
+Source: `~/DshHome/clashbox-tailscale/clashbox/entry/pages/ConfigurationPage.ets`
 (also at `clashbox/entry/src/main/ets/pages/ConfigurationPage.ets`, same content).
 
 ## How `input.ets` was derived
@@ -16,7 +16,7 @@ Only the original import block (lines 1-46) was replaced; everything else is byt
 
 ```sh
 sed -n '349,$p' fixtures/configuration-page/input.ets | cmp - \
-  <(sed -n '47,$p' ~/DshHome/clashbox-tailscale/clashbox-flat/entry/pages/ConfigurationPage.ets)
+  <(sed -n '47,$p' ~/DshHome/clashbox-tailscale/clashbox/entry/pages/ConfigurationPage.ets)
 ```
 
 The `@kit.*` / `@ohos.*` imports are kept (ArkUI, PerformanceAnalysisKit, base, ShareKit, ArkData,

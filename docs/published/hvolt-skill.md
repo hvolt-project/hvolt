@@ -261,7 +261,7 @@ cargo test
 | `hvolt run` | 推送并启动当前包；配了 `[app.signing]` 时先 build + sign |
 | `hvolt clean` | 清理构建产物 |
 | `hvolt doctor` | 环境/SDK/工具/设备/凭据一致性预检（exit≠0 表示存在 ✗ 项） |
-| `hvolt log` | 设备 hilog：`--level/--bundle/-T tag/-D domain/-k 关键词/--crash/--follow/--tail` |
+| `hvolt log` | 设备 hilog：`--level/--bundle/-T tag/-D domain/-k 关键词/--crash/--follow/--tail`（bundle 过滤只有长选项 `--bundle`） |
 | `hvolt file send·recv` | 设备文件传输（完成判据 `FileTransfer finish`） |
 | `hvolt uninstall [bundle]` | 卸载（bundle 缺省取 hvolt.toml） |
 
@@ -310,7 +310,8 @@ cargo test
 | `hvolt sign [HAP]` | AGC 签名：CSR→证书→登记设备→profile（需先 `hvolt agc login`）。给了 `HAP` 时签那个裸包：默认走 localSign 测试链，profile 绑**包内 bundleName**（缺失时 `--bundle` 补），结果留在包所在目录的 `<name>-signed.hap`（输入以 `-unsigned` 结尾则换成 `-signed`），签完由内置校验自证（`ApplicationVerifier` + `ProfileVerifier`）；`--p12/--profile/--cert` 三项同时给出时改用这些材料签 |
 | `hvolt sign --local [HAP]` | 官方公开测试链本地签名（**仅开发板/模拟器**；零售机装不上）。给了 `HAP` 时签该裸包，行为同上；**已带签名的包会被拒绝**（按包内 `META-INF` 判，不看文件名） |
 | `hvolt push [-d serial] [--hap FILE]` | 推送 newest `output/*-signed.hap` 并安装；`--hap` 指定任意位置的包文件，**未签名的包直接报错**而不是丢给设备 |
-| `hvolt screenshot -o x.jpeg [-d serial]` | 设备截图（设备侧输出 jpeg） |
+| `hvolt screenshot -o x.jpeg [-d serial]` | 设备截图（设备侧输出 jpeg；`-o` 写 `.png` 也不会转码，落盘仍是 JPEG） |
+| `hvolt exec <addr> --shell '<cmd>'` | 在设备上执行一条 shell 命令，走设备链路不调 hdc 二进制。用于启动已装包：`aa start -a <ability> -b <bundle>`；`hvolt run` 会重读 hvolt.toml 重新构建，不能拿来启动已装包 |
 | `hvolt ui dump` | ArkUI 布局树 dump（uitest dumpLayout） |
 | `hvolt device list \| connect <host:port> \| remote` | 设备列表 / TCP 连接（tconn）/ 登记跨机安装目标 |
 | `hvolt emulator list\|start\|stop\|create\|delete\|images\|license` | 模拟器与系统镜像（**二进制与镜像随 DevEco Studio 分发**，仅 Windows/macOS；Linux 无官方二进制） |

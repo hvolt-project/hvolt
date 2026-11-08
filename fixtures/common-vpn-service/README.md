@@ -4,7 +4,7 @@
 
 ## 复刻方式
 
-- 正文**逐字节**取自 `clashbox-flat/proxy_core/rpc/CommonVpnService.ts`，可用
+- 正文**逐字节**取自 `clashbox/proxy_core/rpc/CommonVpnService.ts`，可用
   `cmp fixtures/common-vpn-service/project/src/common/CommonVpnService.ts <原文件>` 复核（当前一致）；
 - **没有做 import 换桩**：原文只 import `@kit.NetworkKit` 与 `@kit.AbilityKit`，两者按规则保留，
   参考侧与 hvolt 都能解析；
