@@ -87,6 +87,11 @@ jobs:
             target: x86_64-unknown-linux-gnu
             bin: hvolt
             archive: tar.gz
+          - key: linux-arm64
+            os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+            bin: hvolt
+            archive: tar.gz
           - key: win32-x64
             os: windows-2022
             target: x86_64-pc-windows-msvc

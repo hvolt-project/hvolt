@@ -26,7 +26,8 @@ case "$os" in
   linux)
     case "$arch" in
       x86_64|amd64) key="linux-x64" ;;
-      *) die "no prebuilt binary for Linux $arch (supported: x86_64)" ;;
+      aarch64|arm64) key="linux-arm64" ;;
+      *) die "no prebuilt binary for Linux $arch (supported: x86_64, aarch64)" ;;
     esac ;;
   *)
     die "unsupported OS $os; on Windows use install.ps1" ;;
