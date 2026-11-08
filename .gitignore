@@ -50,5 +50,8 @@ screenshot-*.jpeg
 .cargo-home/
 .venv/
 
-# Agent-side handoff notes: local only, never committed.
+# Agent-side notes: this repository is public and these describe a local
+# development setup, so they stay on the machine instead of in the tree.
 /HANDOFF.md
+/AGENTS.md
+/docs/agents/
