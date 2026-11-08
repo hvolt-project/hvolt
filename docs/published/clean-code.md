@@ -153,3 +153,32 @@ grep -rn 'pub(crate) fn ' src/*.rs | grep -vE '&Path|Command|SdkEnv'
 
 判据：PR 描述中存在「行为变更」段落，且带命令原始输出。
 
+
+## 13. 版本号
+
+`MAJOR.MINOR.PATCH` 与 hvolt 所对应的 SDK 版本一致（`26.0.0` = SDK 26.0.0），`-N` 是 hvolt
+自己的修订号。SDK 换代时才动前三段。
+
+同一版本号出现在六处，必须完全一致，发布前逐处核对：
+
+| 位置 | 字段 |
+|---|---|
+| `Cargo.toml` | `[package] version` |
+| `npm/package.json` | `version` |
+| `npm/package.json` | `optionalDependencies` 里五个平台的版本 |
+| `npm/platforms/*/package.json`（5 个） | `version` |
+
+`optionalDependencies` 必须覆盖 `npm/stage.mjs` 的 `TARGETS` 全部平台（darwin-arm64、
+darwin-x64、linux-arm64、linux-x64、win32-x64）；少列一个，该平台的用户装到的就是空壳包。
+
+```bash
+# 六处版本号一致：输出应只有一种值
+grep -m1 '^version' Cargo.toml
+grep -m1 '"version"' npm/package.json
+grep -h '"version"' npm/platforms/*/package.json | sort -u
+# 平台覆盖：两边的平台数应相同
+node -e "console.log(Object.keys(require('./npm/package.json').optionalDependencies).length)"
+ls npm/platforms | wc -l
+```
+
+判据：前三条输出同为一个版本串，后两条输出为同一个数。

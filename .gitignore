@@ -10,6 +10,10 @@ dist/
 # source tree — 63 `.rs` files that were never committed and could not be recovered.
 /build/
 
+# The same rule for the example projects: `examples/<name>/build/` is whichever tool ran
+# there last (hvigor copies the whole project into it), never source.
+/examples/*/build/
+
 node_modules/
 *.vsix
 

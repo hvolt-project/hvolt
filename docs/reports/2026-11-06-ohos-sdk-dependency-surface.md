@@ -5,9 +5,11 @@
 
 ## 结论
 
-1. 依赖面很窄，但扎得很深：**6 个 SDK 内平台二进制 + 1 个 SDK 内 node 脚本 + 9 类数据文件 + 1 个远端 API**。
+1. 依赖面很窄，但扎得很深：**2 个 SDK 内平台二进制 + 1 个 SDK 内 node 脚本 + 9 类数据文件 + 1 个远端 API**。
    编译器之外的 SDK 内容（hvigorw / ohpm / JDK / codelinter / 设备通道二进制）已经全部拔掉，
    与 `docs/reports/2026-11-04-purge-external-deps.md` 的裁定一致。
+   （2026-11-08 复测：`syscap_tool` 由 `rpcid_sc.rs` 自实现、`restool` 由 `res_ids` +
+   `res_index_build` 复刻、`cmake`/`ninja` 改为 host 优先，SDK 平台二进制从 6 降到 2。）
 2. 耦合方式不是"调用 SDK 的 API"，而是**按路径就地取文件**：`sdk_root()/default/openharmony/...`
    这一条路径假设被 13 个硬失败点重复依赖，而 `doctor` 与 `sdk_facts` 各自维护了更宽容的形态探测——
    两套形态认知并不一致，这是依赖面里最大的结构风险。
@@ -21,7 +23,7 @@
 | 涉及 SDK 的源文件 | 30 个 | `grep -rl sdk --include=*.rs src \| wc -l` |
 | SDK 引用行 | 462 行 | `grep -rn sdk --include=*.rs src \| wc -l` |
 | 硬失败点（缺即 `Err`/退出） | 13 处 | 见下表 |
-| SDK 内被执行的平台二进制 | 6 个 | es2abc / restool / syscap_tool / cmake / ninja / llvm-strip |
+| SDK 内被执行的平台二进制 | 2 个 | es2abc / llvm-strip（syscap_tool 与 restool 于 2026-11-08 分别由 `rpcid_sc.rs`、`res_ids` 自实现替代；cmake/ninja 同日改为 host 优先） |
 | SDK 内被 node 执行的脚本 | 1 个 | `ets-loader/bin/ark/ts2abc.js` |
 | 被解析的 SDK 数据文件 | 9 类 | 见下表 |
 | 远端接口 | 1 个 | `repo.harmonyos.com/sdkmanager/v5/ohos/getSdkList` |
@@ -33,9 +35,9 @@
 | SDK 内路径 | 消费者 | 用途 |
 |---|---|---|
 | `default/openharmony/ets/build-tools/ets-loader/bin/ark/{build-mac,build-win}/bin/es2abc` | [ets_assemble.rs:21-38](src/build/ets_assemble.rs#L21-L38)、[main.rs:324-335](src/main.rs#L324-L335) | ArkTS→`.abc` 合并，主链必经（[pipeline.rs:181](src/build/deps/pipeline.rs#L181)） |
-| `default/openharmony/toolchains/restool` | [res_compile.rs:707-715](src/build/artifacts/res_compile.rs#L707-L715) | 资源编译，产出 `ResourceTable.txt` 与 id 注入版 `module.json` |
-| `default/openharmony/toolchains/syscap_tool` | [syscap.rs:96-102](src/build/artifacts/syscap.rs#L96-L102) | 由 device-define 交集生成 `rpcid.sc` |
-| `default/openharmony/native/build-tools/cmake/bin/{cmake,ninja}` | [native_compile.rs:30-42](src/build/artifacts/native_compile.rs#L30-L42) | 原生模块 configure/build |
+| ~~`default/openharmony/toolchains/restool`~~ | 已消除（2026-11-08）：`res_ids` + `res_index_build` + `res_index_write`（[res_compile.rs](src/build/artifacts/res_compile.rs)） | 资源 id 分配与 `resources.index` 字节复刻；SDK 工具只留 `cfg(test)` 可达，供对账 |
+| ~~`default/openharmony/toolchains/syscap_tool`~~ | 已消除：`src/build/artifacts/rpcid_sc.rs` | 自实现 `rpcid.sc` 编码，与工具产物逐字节一致（52742 B，sha256 `56435e3f…690e8f`） |
+| `default/openharmony/native/build-tools/cmake/bin/{cmake,ninja}` | ~~已改~~（2026-11-08）：`host_tool_or_sdk` 优先取 host PATH | 原生模块 configure/build；只有 host 缺失时才回落到 SDK 的副本 |
 | `default/openharmony/native/llvm/bin/llvm-strip` | [native_compile.rs:85-90](src/build/artifacts/native_compile.rs#L85-L90) | 原生 `.so` strip |
 | `default/openharmony/ets/build-tools/ets-loader/bin/ark/ts2abc.js`（node 执行） | [sdk_facts.rs:64-80](src/build/deps/sdk_facts.rs#L64-L80) | 以 `--target-api-version` 问出字节码版本；**这是让 node 跑 SDK 的 JS 逻辑**，不是读数据 |
 
@@ -109,12 +111,13 @@ DevEco 升级不保证其形状。`kit_configs` 的 `symbols.{source,bindings}` 
 | 依赖项 | 能否自持 | 代价 |
 |---|---|---|
 | es2abc | 否（本仓无 ArkTS→abc 编译器） | 需接 oxc 之外的完整 Ark 编译器，工程量等同重做 es2abc |
-| restool | 部分 | 资源编译规则与 `resources.index` 二进制格式可复刻，已有 `ets_resources.rs` 解析一侧 |
-| syscap_tool | 是 | `rpcid.sc` 是 `rpcid.json` 的编码，格式已知（文件头注释记录过字节等价的实测） |
-| cmake / ninja / llvm-strip | 是 | 换成系统工具链即可，但需保证 `ohos.toolchain.cmake` 的语义一致 |
+| restool | 是（2026-11-08 已实现） | `res_ids` 复现 id 分配、`res_index_build` + `res_index_write` 复现 `resources.index` 字节，真实工程上对账零分歧；SDK 工具只留 `cfg(test)` 对账 |
+| syscap_tool | 否（2026-11-08 已自实现） | `rpcid.sc` 布局由 19 个探针钉死并写进 `rpcid_sc.rs` 模块注释；与原工具产物 `cmp` 无差异 |
+| cmake / ninja | 是（2026-11-08 已实现） | `host_tool_or_sdk` 优先取 host PATH，SDK 副本降为回落；clashbox 实测 `CMAKE_COMMAND=/opt/homebrew/bin/cmake`，`libxb_components.so` 206608 B、`libproxy_core.so` 57664 B |
+| llvm-strip | 保留 SDK | host 上未必有同目标的 llvm-strip，系统 `strip` 不认 OHOS ELF |
 | oh-uni-package.json / sdk-pkg.json | 是 | 纯数据，可内置 |
 | kit_configs / sysResource.js / device-define | 是 | 需要在仓库内维护快照，代价是随 SDK 版本漂移 |
 | ts2abc.js 的问询 | 是 | API level→字节码版本是一张可固化的表，但要按 SDK 版本分支 |
 
 结论：真正不可替代的只有 **es2abc**；其余都是"数据 + 格式"，可以抽成 hvolt 自带的 SDK 快照，
-把依赖面从"目录布局 + 六个二进制"收敛到"一个编译器 + 一份数据快照"。
+把依赖面从"目录布局 + 六个二进制"收敛到"一个编译器 + 一个 strip 工具 + 一份数据快照"。
