@@ -24,7 +24,7 @@ use crate::support::cli::Command;
 pub(crate) fn dispatch(command: Command) {
     match command {
         Command::Init { name } => project::init(name),
-        Command::Import { from, out, dry_run } => project::import(from, out, dry_run),
+        Command::Migrate { from, out, dry_run } => project::migrate(from, out, dry_run),
         Command::Build => build::build(),
         Command::Sign {
             hap,

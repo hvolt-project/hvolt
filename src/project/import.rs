@@ -36,21 +36,21 @@ pub fn run(from: Option<&Path>, out: Option<&Path>, dry_run: bool) -> Result<(),
     let app_cfg = read_app_config(&from, &mut gaps)?;
     let modules = read_modules(&from, &mut gaps)?;
 
-    println!("import {} → {}", from.display(), out.display());
+    println!("migrate {} → {}", from.display(), out.display());
     println!(
         "  app: {} {} ({})",
         app_cfg.app.bundle, app_cfg.app.version, app_cfg.app.bundle_type
     );
     for (dir, cfg) in &modules {
         println!(
-            "  module: {} ({}) → {}/  routes {}",
+            "  module: {} → {}/  [{}]  {} route(s)",
             cfg.module.name,
+            dir,
             if cfg.module.module_type.is_empty() {
                 "entry"
             } else {
                 cfg.module.module_type.as_str()
             },
-            dir,
             cfg.module.routes.len()
         );
     }

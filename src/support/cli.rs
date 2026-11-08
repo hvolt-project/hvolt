@@ -31,19 +31,23 @@ pub enum Command {
         /// Project name
         name: String,
     },
-    /// Import: DevEco Studio layout → flat hvolt project (reverse of assemble)
-    Import {
-        /// Project to import (default: current directory)
+    /// Migrate: a DevEco Studio project → the hvolt layout (`hvolt.toml` is its only config)
+    ///
+    /// Everything the build derives is left to the build: only what a project cannot express
+    /// by `hvolt.toml`, its sources and its resources is carried over, and the hvigor
+    /// manifests (`oh-package.json5`, `route_map.json`, `form_config.json`,
+    /// `backup_config.json`) are folded into the toml instead of being copied.
+    Migrate {
+        /// Project to migrate (default: current directory)
         #[arg(long, value_name = "DIR")]
         from: Option<PathBuf>,
-        /// Where to write the flat project (default: <cwd>/<name>-flat)
+        /// Where to write the migrated project (default: <cwd>/<name>-flat)
         #[arg(long, value_name = "DIR")]
         out: Option<PathBuf>,
-        /// Only report the mapping and the fields the flat layout cannot express
+        /// Only report the mapping and the fields the hvolt layout cannot express
         #[arg(long)]
         dry_run: bool,
     },
-    /// Assemble: translate user structure → HarmonyOS standard layout
     /// Build: compile (own ArkTS chain), pack and sign
     Build,
     /// Sign: generate signing materials (.p12, .cer, .p7b) and configure project
