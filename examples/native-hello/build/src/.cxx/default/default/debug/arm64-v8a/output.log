@@ -1,4 +1,0 @@
-ninja: Entering directory `/Users/hongyuncong/workspace/better-harmony-app-build/examples/native-hello/build/src/.cxx/default/default/debug/arm64-v8a'
-[1/2] Building CXX object CMakeFiles/hello.dir/napi_init.cpp.o
-clang++: warning: argument unused during compilation: '--gcc-toolchain=/Users/hongyuncong/.hvolt/sdk/default/hms/native/BiSheng' [-Wunused-command-line-argument]
-[2/2] Linking CXX shared library /Users/hongyuncong/workspace/better-harmony-app-build/examples/native-hello/build/src/build/default/intermediates/cmake/default/obj/arm64-v8a/libhello.so

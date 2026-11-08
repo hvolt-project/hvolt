@@ -1,8 +1,0 @@
-[
-{
-  "directory": "/Users/hongyuncong/workspace/better-harmony-app-build/examples/native-hello/build/src/.cxx/default/default/debug/arm64-v8a",
-  "command": "/Users/hongyuncong/.hvolt/sdk/default/hms/native/BiSheng/bin/clang++ --target=aarch64-linux-ohos --gcc-toolchain=/Users/hongyuncong/.hvolt/sdk/default/hms/native/BiSheng --sysroot=/Users/hongyuncong/.hvolt/sdk/default/openharmony/native/sysroot -Dhello_EXPORTS -I/Users/hongyuncong/.hvolt/sdk/default/hms/native/sysroot/usr/include -I/Users/hongyuncong/workspace/better-harmony-app-build/examples/native-hello/build/src/src/main/cpp -I/Users/hongyuncong/workspace/better-harmony-app-build/examples/native-hello/build/src/src/main/cpp/include -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -fno-addrsig -Wa,--noexecstack -Wformat -Werror=format-security   -D__MUSL__ -O0 -g -fno-limit-debug-info  -fPIC -o CMakeFiles/hello.dir/napi_init.cpp.o -c /Users/hongyuncong/workspace/better-harmony-app-build/examples/native-hello/build/src/src/main/cpp/napi_init.cpp",
-  "file": "/Users/hongyuncong/workspace/better-harmony-app-build/examples/native-hello/build/src/src/main/cpp/napi_init.cpp",
-  "output": "CMakeFiles/hello.dir/napi_init.cpp.o"
-}
-]
