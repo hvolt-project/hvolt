@@ -30,9 +30,21 @@ pub(crate) fn build_native(project: PathBuf, out: Option<PathBuf>) {
             crate::sdk::manage::sdk_root().ok_or_else(|| "no SDK root resolved".to_string())?;
         let default_out = project.join("build/hvolt-out/libs");
         let out_dir = out.unwrap_or(default_out);
-        let produced = crate::build::artifacts::native_compile::build_all(
-            &sdk_root, &native, &project, &out_dir,
-        )?;
+        let native_names: Vec<(String, std::path::PathBuf)> = native
+            .iter()
+            .map(|(name, _)| {
+                let dir = app
+                    .dependencies
+                    .get(name)
+                    .and_then(|dep| dep.path.as_deref());
+                let dir = dir
+                    .map(|path| project.join(path))
+                    .unwrap_or_else(|| project.join("libs").join(name));
+                (name.clone(), dir)
+            })
+            .collect();
+        let produced =
+            crate::build::artifacts::native_compile::build_all(&sdk_root, &native_names, &out_dir)?;
         for p in &produced {
             println!("  lib {}", p.display());
         }
@@ -65,6 +77,7 @@ pub(crate) fn assemble_ets(ets_dir: PathBuf, out: PathBuf, bundle: String, modul
             // A bare ETS tree assembled by this command is not a configured module, so it is
             // not a HAR.
             compile_har: false,
+            main: None,
         }];
         let abc = crate::build::ets_assemble::assemble(
             &staged,
@@ -160,6 +173,12 @@ pub(crate) fn res_compile(project: PathBuf, module: String, out: Option<PathBuf>
         let (modules, _native) = crate::translator::discover_modules(&project, &app)
             .map_err(|e| format!("discover modules: {e}"))?;
         let module_cfg = pick_module(&modules, &module)?;
+        let module_dir = modules
+            .iter()
+            .find(|(_, cfg)| cfg.module.name == module_cfg.module.name)
+            .map(|(dir, _)| dir.clone())
+            .or_else(|| modules.first().map(|(dir, _)| dir.clone()))
+            .ok_or_else(|| "no modules found in hvolt.toml".to_string())?;
         let default_out = project.join("build/hvolt-out/res");
         let out_dir = out.unwrap_or(default_out);
         let env = crate::sdk::manage::detect("")?;
@@ -168,7 +187,13 @@ pub(crate) fn res_compile(project: PathBuf, module: String, out: Option<PathBuf>
             .unwrap_or_default();
         let facts = crate::build::deps::sdk_facts::SdkFacts::detect(&env.ohos_sdk, &node, api)?;
         let table = crate::build::artifacts::res_compile::run(
-            &project, module_cfg, &app, &out_dir, "debug", &facts,
+            &project,
+            &project.join(&module_dir),
+            module_cfg,
+            &app,
+            &out_dir,
+            "debug",
+            &facts,
         )?;
         println!("✓ resources compiled: {}", table.display());
         Ok(())
@@ -222,10 +247,7 @@ pub(crate) fn render_module_json(
                 api_release_type: &api_release_type,
                 virtual_machine: "",
                 has_insight_intent: false,
-                has_route_map: project
-                    .join(&module_dir)
-                    .join("resources/base/profile/route_map.json")
-                    .is_file(),
+                has_route_map: !module_cfg.module.router_map.is_empty(),
             },
         );
         let formatted =
