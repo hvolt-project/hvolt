@@ -1142,7 +1142,7 @@ pub(crate) fn compile(input: &ResCompileInput<'_>, stage: &Path) -> Result<PathB
 fn run_restool(res_config: &Path, input: &ResCompileInput<'_>) -> Result<PathBuf, String> {
     let restool = crate::sdk::manage::sdk_root()
         .and_then(|root| {
-            let dir = root.join("default/openharmony/toolchains");
+            let dir = crate::sdk::manage::component_root(&root, "toolchains");
             crate::support::platform::exe_names("restool")
                 .iter()
                 .map(|n| dir.join(n))

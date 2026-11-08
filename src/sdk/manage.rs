@@ -1098,6 +1098,15 @@ fn link_component(link: PathBuf, target: &Path) -> Result<(), String> {
     }
 }
 
+/// A component tree as the build sees it: `sdk_root/default/openharmony/<comp>`.
+///
+/// `sdk_root` points at the directory holding version directories and `default` is the
+/// symlink to the active one (`ensure_default_symlink`). This is the layout the build path
+/// assumes, so a caller names a component and nothing else.
+pub(crate) fn component_root(sdk_root: &Path, comp: &str) -> PathBuf {
+    sdk_root.join("default/openharmony").join(comp)
+}
+
 /// Where a component actually landed for this platform's package shape:
 /// `openharmony/<comp>` (linux/darwin zips) or `<comp>` at the version root
 /// (some windows zips — measured: native).

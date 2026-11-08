@@ -279,7 +279,7 @@ mod tests {
     fn sdk_encoder() -> Option<PathBuf> {
         let root = crate::sdk::manage::discovered_sdk_root("")?;
         let dirs = [
-            root.join("default/openharmony/toolchains"),
+            crate::sdk::manage::component_root(&root, "toolchains"),
             root.join("openharmony/toolchains"),
             root.join("toolchains"),
         ];

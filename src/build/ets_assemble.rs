@@ -24,7 +24,8 @@ use crate::build::stage::process_import::load_kit_configs;
 /// work on every platform the npm package targets — including both Linux targets.
 pub fn sdk_es2abc() -> Result<PathBuf, String> {
     let root = crate::sdk::manage::sdk_root().ok_or_else(|| "no SDK root resolved".to_string())?;
-    let ark = root.join("default/openharmony/ets/build-tools/ets-loader/bin/ark");
+    let ark =
+        crate::sdk::manage::component_root(&root, "ets").join("build-tools/ets-loader/bin/ark");
     es2abc_under(&ark).ok_or_else(|| {
         format!(
             "es2abc not found under {} (probed build-win, build-mac, build)",

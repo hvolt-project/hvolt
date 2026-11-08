@@ -49,7 +49,7 @@ pub fn generate(
     device_types: &[String],
 ) -> Result<PathBuf, String> {
     // `<sdk>/default/openharmony/ets/api/device-define/<device>.json`.
-    let define_dir = sdk_root.join("default/openharmony/ets/api/device-define");
+    let define_dir = crate::sdk::manage::component_root(sdk_root, "ets").join("api/device-define");
 
     if device_types.is_empty() {
         return Err("no device types declared, cannot intersect syscaps".to_string());

@@ -12,7 +12,7 @@ use std::process::Command;
 
 /// Where the SDK's native toolchain lives.
 fn native_root(sdk_root: &Path) -> PathBuf {
-    sdk_root.join("default/openharmony/native")
+    crate::sdk::manage::component_root(sdk_root, "native")
 }
 
 /// Windows ships the toolchain as `.exe`; plain names resolve in bash but not
@@ -199,7 +199,8 @@ mod tests {
     #[test]
     fn cxx_runtime_resolves_the_ndk_copy() {
         let root = std::env::temp_dir().join(format!("hvolt-cxx-{}", std::process::id()));
-        let abi_dir = root.join("default/openharmony/native/llvm/lib/aarch64-linux-ohos");
+        let abi_dir =
+            crate::sdk::manage::component_root(&root, "native").join("llvm/lib/aarch64-linux-ohos");
         std::fs::create_dir_all(&abi_dir).expect("mkdir");
         let expected = abi_dir.join("libc++_shared.so");
         std::fs::write(&expected, b"x").expect("write");
