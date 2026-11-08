@@ -1,12 +1,14 @@
 # Handoff — hvolt 26.0.0-9
 
 工作区：`/Users/hongyuncong/workspace/better-harmony-app-build`
-当前基线：`main` = `bc7f104`（release: 26.0.0-9 (#44)）
+当前基线：`main` = `9bb5c80`（ci: build the darwin lane on macos-15 (#45)）
 
 ## 状态
 
+- **26.0.0-9 已发布**：GitHub release `v26.0.0-9`（三个构件 + `SHA256SUMS.txt`），npm `@hvolt/cli` 与三个平台包均为 `26.0.0-9`。
 - PR 43（#43）已合并：资源编译树内化、SDK 平台二进制收敛到 `es2abc` + `llvm-strip`、npm 平台包对齐、产品变体、`src/` 拆领域模块、命令改名 `build`/`migrate`。
 - PR 44（#44）已合并：版本号 `26.0.0-9`，覆盖 `Cargo.toml`、`Cargo.lock`、`npm/package.json` 与五个 `npm/platforms/*`。
+- PR 45（#45）已合并：darwin 构建从 `macos-14` 迁到 `macos-15`（前者被 GitHub 退役）。
 - 发布由 `release.yml` 驱动：`main` 上版本比最新 tag 新就自动构建 + GitHub release + npm publish，不靠手动打 tag。
 
 本文件替代此前那份「自建 ArkTS 编译链」handoff。旧的逆向细节已落进代码与 `docs/agents/`，最新状态以仓库为准。
