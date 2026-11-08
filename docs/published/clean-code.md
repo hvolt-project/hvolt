@@ -1,6 +1,6 @@
 # hvolt clean-code 规范
 
-适用于 `src/**`。改代码前必读；提交前必须让三道闸全绿。
+适用于 `src/**`。改代码前必读；提交前必须让三道检查全部通过。
 
 ## 1. 验收命令（三条全绿才提交）
 
@@ -10,7 +10,7 @@ cargo clippy --all-targets -- -D warnings    # 末行 "Finished" = 通过
 cargo test                                   # 全部通过 = 通过
 ```
 
-口径由 `rustfmt.toml` 与 `Cargo.toml` 的 `[lints]` 固定，不靠人工记忆。
+判定规则由 `rustfmt.toml` 与 `Cargo.toml` 的 `[lints]` 固定，不靠人工记忆。
 任一条不过，不提交。
 
 ## 2. 格式化
@@ -20,10 +20,10 @@ cargo test                                   # 全部通过 = 通过
 
 ## 3. 命名与模块
 
-- 一个模块一件事：`src/lint.rs`=扫描，`src/sdk.rs`=SDK 解析/下载，`src/tools.rs`=工具安装；新职责新文件，不塞进 `main.rs`。
+- 一个模块一件事：`src/build/deps/pipeline.rs`=构建编排，`src/sdk/manage.rs`=SDK 解析/下载，`src/device/`=设备协议；新职责新文件，不塞进 `main.rs`。
 - 文件首行用一行 `// <域>: <干什么>` 起头（如 `// AGC: manage AppGallery Connect resources`）。
 - `pub` 只给 `main.rs`/`cli.rs` 分派需要的入口；其余用 `pub(crate)` 或私有。二进制 crate 没有下游消费者，`pub` 不是 API 承诺。
-- CLI 子命令动词与 `src/cli.rs` 的变体一一对应，不另造同义词。
+- CLI 子命令动词与 `src/support/cli.rs` 的变体一一对应，不另造同义词。
 
 ## 4. 错误处理
 
@@ -72,10 +72,9 @@ cargo test                                   # 全部通过 = 通过
 
 | 位置 | 属性 | 理由 |
 |---|---|---|
-| `src/lint.rs` `build_args` | `clippy::too_many_arguments` | 一个参数对 codelinter 一个 flag，原样透传 |
-| `src/sign.rs` ×4（`create_provision`/`finalize_signing`/`sign_app`/`sign_package`） | `clippy::too_many_arguments` | 与签名 CLI 表面 1:1 |
+| `src/sign/package.rs` ×4（`create_provision`/`finalize_signing`/`sign_app`/`sign_package`） | `clippy::too_many_arguments` | 与签名 CLI 表面 1:1 |
 | `src/main.rs` `reset_sigpipe` | `rustc::unsafe_code` | 唯一的 SIGPIPE 复位，见 §8 |
-| `src/target.rs` `Shell::PowerShell` | `dead_code` | 保留方言：pwsh 默认主机接入后即用 |
+| `src/device/target.rs` `Shell::PowerShell` | `dead_code` | 保留方言：pwsh 默认主机接入后即用 |
 
 新增条目必须同时改这张表。
 
@@ -101,15 +100,15 @@ cargo test                                   # 全部通过 = 通过
 ```bash
 # 默认值与 runtimeOS 字面量，带上上下文一行，便于确认是否附了指回真源的注释
 grep -rn -B1 '"HarmonyOS"\|"OpenHarmony"' src --include='*.rs' \
-  | grep -v test | grep -v '^src/config.rs' | grep -v '^--$'
+  | grep -v test | grep -v '^src/support/config.rs' | grep -v '^--$'
 ```
 
 判据：命中为 0，或每条命中上方紧邻一行注释说明它为何不是 runtimeOS 策略。
-当前两处合规例外：`src/sign_local.rs` 的 profile `developer-id`、`src/translator/strategy.rs`
+当前两处合规例外：`src/sign/sign_local.rs` 的 profile `developer-id`、`src/translator/strategy.rs`
 的 signingConfigs `type`，均为签名配置的固定字段。
 
-真源位置：runtimeOS 的默认值与比较在 `src/config.rs`（`DEFAULT_RUNTIME_OS`、
-`effective_runtime_os`、`is_open_harmony`）；平台判断在 `src/platform.rs`。
+真源位置：runtimeOS 的默认值与比较在 `src/support/config.rs`（`DEFAULT_RUNTIME_OS`、
+`effective_runtime_os`、`is_open_harmony`）；平台判断在 `src/support/platform.rs`。
 
 ### 12.2 接缝纯度
 
@@ -129,24 +128,24 @@ grep -rn 'pub(crate) fn ' src/*.rs | grep -vE '&Path|Command|SdkEnv'
 (b) 业务判定被抽到同文件的无 IO 函数里，并带单元测试。
 
 路径候选列表、curl 参数打包中的 `if`/`match` 属 (a)，不算规则。
-反例：`assemble_and_build` 曾把四处 `process::exit` 与构建设置混在一起，判定无法单独调用，
+反例：`build_and_sign` 曾把四处 `process::exit` 与构建设置混在一起，判定无法单独调用，
 属 (b) 不成立。
 
 ### 12.3 改动可回退粒度
 
-一个提交只承载一类改动：收敛重复、抽出接缝、修复缺陷三者不混提。
+一个提交只承载一类改动：合并重复、抽出接缝、修复缺陷三者不混提。
 混提后无法单独回退其中一类，评审也无法逐条核对。
 
 判据：`git show --stat <commit>` 的文件集合若同时包含「仅搬移/重命名」与「行为变更」两类，
 即判为不达标，拆分后重提。
 
-已按本条拆分的实例：`sign.rs` 的 `SignRequest` 收敛、`build_hvigor::strip_signing_configs`
-的字符串感知修复、`platform` 判断收敛，属三类改动，应分三次提交。
+已按本条拆分的实例：`sign.rs` 的 `SignRequest` 合并、`pipeline::native_build` 的拆分
+的字符串感知修复、`platform` 判断合并，属三类改动，应分三次提交。
 
 ### 12.4 行为变更须显式报备
 
 结构改动若顺带改变行为（例如修复了原实现会写坏文件的扫描逻辑），必须在 PR 描述里单独列一段：
-症状、根因、修法、复验读数。不得并入「重构」一并交付。
+症状、造成该现象的原因、修改方式、复验读数。不得并入「重构」一并交付。
 
 ```bash
 # 改动前后各跑一次真实调用，保存原始输出
@@ -154,3 +153,32 @@ grep -rn 'pub(crate) fn ' src/*.rs | grep -vE '&Path|Command|SdkEnv'
 
 判据：PR 描述中存在「行为变更」段落，且带命令原始输出。
 
+
+## 13. 版本号
+
+`MAJOR.MINOR.PATCH` 与 hvolt 所对应的 SDK 版本一致（`26.0.0` = SDK 26.0.0），`-N` 是 hvolt
+自己的修订号。SDK 换代时才动前三段。
+
+同一版本号出现在六处，必须完全一致，发布前逐处核对：
+
+| 位置 | 字段 |
+|---|---|
+| `Cargo.toml` | `[package] version` |
+| `npm/package.json` | `version` |
+| `npm/package.json` | `optionalDependencies` 里五个平台的版本 |
+| `npm/platforms/*/package.json`（5 个） | `version` |
+
+`optionalDependencies` 必须覆盖 `npm/stage.mjs` 的 `TARGETS` 全部平台（darwin-arm64、
+darwin-x64、linux-arm64、linux-x64、win32-x64）；少列一个，该平台的用户装到的就是空壳包。
+
+```bash
+# 六处版本号一致：输出应只有一种值
+grep -m1 '^version' Cargo.toml
+grep -m1 '"version"' npm/package.json
+grep -h '"version"' npm/platforms/*/package.json | sort -u
+# 平台覆盖：两边的平台数应相同
+node -e "console.log(Object.keys(require('./npm/package.json').optionalDependencies).length)"
+ls npm/platforms | wc -l
+```
+
+判据：前三条输出同为一个版本串，后两条输出为同一个数。

@@ -6,7 +6,13 @@ dist/
 *.egg-info/
 
 # Generated HarmonyOS projects (for testing)
-build/
+# Anchored: an unanchored `build/` also matched `src/build/`, which is the compiler's own
+# source tree — 63 `.rs` files that were never committed and could not be recovered.
+/build/
+
+# The same rule for the example projects: `examples/<name>/build/` is whichever tool ran
+# there last (hvigor copies the whole project into it), never source.
+/examples/*/build/
 
 node_modules/
 *.vsix
@@ -31,3 +37,15 @@ oh_modules/
 # a blanket `git add -A` must never reach them.
 .cache/
 .scratch/
+
+# One-off compile/capture artifacts land in the repo root by default; keep them out.
+*.abc
+# Except the golden byte-code a fixture compares against: that file is the baseline, not an
+# artifact, and `abc_records` reads it by path. A fixture's `actual/` stays ignored.
+!fixtures/*/golden/modules.abc
+layout-*.json
+screenshot-*.jpeg
+
+# Local toolchain caches and virtualenvs (never committed).
+.cargo-home/
+.venv/

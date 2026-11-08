@@ -1,0 +1,9 @@
+@Entry
+@Component
+struct VisualView {
+  build() {
+    Column() {
+      Text('from supervisual/pages')
+    }
+  }
+}

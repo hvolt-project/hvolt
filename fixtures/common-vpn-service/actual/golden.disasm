@@ -1,0 +1,1966 @@
+# source binary: modules.abc
+
+# ====================
+# LITERALS
+
+0 0x13f0 { 3 [ i32:1, string:"CommonVpnServicePage", i32:0, ]}
+1 0xe65 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+10 0x9e9 { 1 [ i32:0, ]}
+11 0x9e0 { 1 [ i32:0, ]}
+12 0x9c2 { 4 [ string:"data", null_value:0, string:"encoding", string:"utf-8", ]}
+13 0x9d7 { 1 [ string:"172.19.0.2", ]}
+14 0x51f 
+15 0x998 { 10 [ string:"interface", string:"vpn-tun", string:"destination", null_value:0, string:"gateway", null_value:0, string:"hasGateway", u1:0, string:"isDefaultRoute", null_value:0, ]}
+16 0x916 { 4 [ string:"Address", string:"AddressWithPrefix", string:"VpnConfig", string:"CommonVpnService", ]}
+19 0x1373 { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+2 0xe0e { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+4 0x13b0 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+5 0x1360 { 3 [ i32:1, string:"this", i32:0, ]}
+6 0xdc0 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+7 0x1328 { 2 [ string:"CommonVpnServicePage", string:"initialRender", ]}
+8 0x9fb { 13 [ string:"sendClient", method:#~@3>#sendClient, method_affiliate:2, string:"getTunFd", method:#~@3>#getTunFd, method_affiliate:1, string:"protect", method:#~@3>#protect, method_affiliate:1, string:"stopVpn", method:#~@3>#stopVpn, method_affiliate:0, i32:4, ]}
+9 0x9f2 { 1 [ i32:0, ]}
+17 0x1336 { 1 [
+	MODULE_REQUEST_ARRAY: {
+		0 : @normalized:N&&&entry/src/main/ets/common/CommonVpnService&,
+	};
+	ModuleTag: REGULAR_IMPORT, local_name: CommonVpnService, import_name: CommonVpnService, module_request: @normalized:N&&&entry/src/main/ets/common/CommonVpnService&;
+]}
+18 0x92e { 9 [
+	MODULE_REQUEST_ARRAY: {
+		0 : @ohos:net.vpnExtension,
+	};
+	ModuleTag: REGULAR_IMPORT, local_name: vpnExtension, import_name: default, module_request: @ohos:net.vpnExtension;
+	ModuleTag: LOCAL_EXPORT, local_name: Address, export_name: Address;
+	ModuleTag: LOCAL_EXPORT, local_name: AddressWithPrefix, export_name: AddressWithPrefix;
+	ModuleTag: LOCAL_EXPORT, local_name: CommonVpnService, export_name: CommonVpnService;
+	ModuleTag: LOCAL_EXPORT, local_name: VpnConfig, export_name: VpnConfig;
+	ModuleTag: LOCAL_EXPORT, local_name: cidrToAddressWithPrefix, export_name: cidrToAddressWithPrefix;
+	ModuleTag: LOCAL_EXPORT, local_name: cidrToRoute, export_name: cidrToRoute;
+	ModuleTag: LOCAL_EXPORT, local_name: isIpv4, export_name: isIpv4;
+	ModuleTag: LOCAL_EXPORT, local_name: isIpv6, export_name: isIpv6;
+]}
+20 0x523 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+3 0xdce { 3 [
+	MODULE_REQUEST_ARRAY: {
+		0 : @ohos:app.ability.UIAbility,
+		1 : @ohos:hilog,
+	};
+	ModuleTag: REGULAR_IMPORT, local_name: UIAbility, import_name: default, module_request: @ohos:app.ability.UIAbility;
+	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
+	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
+]}
+
+# ====================
+# RECORDS
+
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x51f
+	u32 moduleRecordIdx = 0x523
+}
+
+.language TypeScript
+.record &entry.src.main.ets.common.CommonVpnService& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x916
+	u32 moduleRecordIdx = 0x92e
+}
+
+.language ArkTS
+.record &entry.src.main.ets.entryability.EntryAbility& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0xdc0
+	u32 moduleRecordIdx = 0xdce
+}
+
+.language ArkTS
+.record &entry.src.main.ets.pages.Index& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x1328
+	u32 moduleRecordIdx = 0x1336
+}
+
+.language ECMAScript
+.record @ohos.app {
+	u8 @native.ohos.app = 0x0
+}
+
+.language ECMAScript
+.record @ohos.curves {
+	u8 @native.ohos.curves = 0x0
+}
+
+.language ECMAScript
+.record @ohos.matrix4 {
+	u8 @native.ohos.matrix4 = 0x0
+}
+
+.language ECMAScript
+.record @system.app {
+	u8 @native.system.app = 0x0
+}
+
+.language ECMAScript
+.record @system.curves {
+	u8 @native.system.curves = 0x0
+}
+
+.language ECMAScript
+.record @system.matrix4 {
+	u8 @native.system.matrix4 = 0x0
+}
+
+.language ECMAScript
+.record @system.router {
+	u8 @native.system.router = 0x0
+}
+
+.language ECMAScript
+.record _ESConcurrentModuleRequestsAnnotation {
+}
+
+.language ECMAScript
+.record _ESSlotNumberAnnotation {
+}
+
+# ====================
+# METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda.str "use strict"
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x26 }
+.language TypeScript
+.function any &entry.src.main.ets.common.CommonVpnService&.#*#cidrToAddressWithPrefix(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v3
+	sta v9
+	lda v9
+	ldobjbyname 0x0, "split"
+	sta v8
+	lda.str "/"
+	sta v10
+	lda v8
+	callthis1 0x2, v9, v10
+	sta v5
+	lda v5
+	sta v9
+	lda v9
+	ldobjbyname 0x4, "length"
+	sta v8
+	ldai 0x2
+	noteq 0x6, v8
+	jeqz jump_label_0
+	ldnull
+	return
+jump_label_0:
+	lda v5
+	sta v10
+	ldai 0x0
+	sta v11
+	lda v11
+	ldobjbyvalue 0x7, v10
+	sta v9
+	lda v9
+	ldobjbyname 0x9, "trim"
+	sta v8
+	lda v8
+	callthis0 0xb, v9
+	sta v4
+	tryldglobalbyname 0xd, "parseInt"
+	sta v8
+	lda v5
+	sta v9
+	ldai 0x1
+	sta v10
+	lda v10
+	ldobjbyvalue 0xe, v9
+	sta v9
+	lda v8
+	callarg1 0x10, v9
+	sta v6
+	tryldglobalbyname 0x12, "Number"
+	sta v9
+	lda v9
+	ldobjbyname 0x13, "isNaN"
+	sta v8
+	lda v6
+	sta v10
+	lda v8
+	callthis1 0x15, v9, v10
+	callruntime.isfalse 0x17
+	jnez jump_label_1
+	ldnull
+	return
+jump_label_1:
+	ldlocalmodulevar 0x6
+	sta v8
+	lda v3
+	sta v9
+	lda v8
+	callarg1 0x18, v9
+	callruntime.isfalse 0x1a
+	jnez jump_label_2
+	ldlocalmodulevar 0x1
+	throw.undefinedifholewithname "AddressWithPrefix"
+	sta v8
+	ldlocalmodulevar 0x0
+	throw.undefinedifholewithname "Address"
+	sta v10
+	lda v4
+	sta v11
+	ldai 0x1
+	sta v12
+	newobjrange 0x1b, 0x3, v10
+	sta v9
+	lda v6
+	sta v10
+	newobjrange 0x1d, 0x3, v8
+	return
+jump_label_2:
+	ldlocalmodulevar 0x7
+	sta v8
+	lda v3
+	sta v9
+	lda v8
+	callarg1 0x1f, v9
+	callruntime.isfalse 0x21
+	jnez jump_label_3
+	ldlocalmodulevar 0x1
+	throw.undefinedifholewithname "AddressWithPrefix"
+	sta v8
+	ldlocalmodulevar 0x0
+	throw.undefinedifholewithname "Address"
+	sta v10
+	lda v4
+	sta v11
+	ldai 0x2
+	sta v12
+	newobjrange 0x22, 0x3, v10
+	sta v9
+	lda v6
+	sta v10
+	newobjrange 0x24, 0x3, v8
+	return
+jump_label_3:
+	ldnull
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x14 }
+.language TypeScript
+.function any &entry.src.main.ets.common.CommonVpnService&.#*#cidrToRoute(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	ldlocalmodulevar 0x4
+	sta v8
+	lda v3
+	sta v9
+	lda v8
+	callarg1 0x0, v9
+	sta v4
+	lda v4
+	sta v8
+	ldnull
+	eq 0x2, v8
+	jeqz jump_label_0
+	ldnull
+	return
+jump_label_0:
+	lda v4
+	sta v9
+	lda v9
+	ldobjbyname 0x3, "address"
+	sta v8
+	lda v8
+	ldobjbyname 0x5, "family"
+	sta v5
+	lda v5
+	sta v8
+	ldai 0x2
+	eq 0x7, v8
+	jeqz jump_label_1
+	lda.str "fe80::"
+	jmp jump_label_2
+jump_label_1:
+	lda.str "172.19.0.1"
+jump_label_2:
+	sta v6
+	createobjectwithbuffer 0x8, { 10 [ string:"interface", string:"vpn-tun", string:"destination", null_value:0, string:"gateway", null_value:0, string:"hasGateway", u1:0, string:"isDefaultRoute", null_value:0, ]}
+	sta v8
+	lda v4
+	definepropertybyname 0x9, "destination", v8
+	ldlocalmodulevar 0x0
+	throw.undefinedifholewithname "Address"
+	sta v9
+	lda v6
+	sta v10
+	lda v5
+	sta v11
+	newobjrange 0xb, 0x3, v9
+	definepropertybyname 0xd, "gateway", v8
+	lda v3
+	sta v10
+	lda.str "0.0.0.0/0"
+	eq 0xf, v10
+	sta v9
+	callruntime.istrue 0x10
+	jnez jump_label_3
+	lda v3
+	sta v10
+	lda.str "::/0"
+	eq 0x11, v10
+	jmp jump_label_4
+jump_label_3:
+	lda v9
+jump_label_4:
+	definepropertybyname 0x12, "isDefaultRoute", v8
+	lda v8
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x18 }
+.language TypeScript
+.function any &entry.src.main.ets.common.CommonVpnService&.#*#isIpv4(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v3
+	sta v10
+	lda v10
+	ldobjbyname 0x0, "split"
+	sta v9
+	lda.str "/"
+	sta v11
+	lda v9
+	callthis1 0x2, v10, v11
+	sta v8
+	ldai 0x0
+	sta v9
+	lda v9
+	ldobjbyvalue 0x4, v8
+	sta v7
+	lda v7
+	ldobjbyname 0x6, "trim"
+	sta v6
+	lda v6
+	callthis0 0x8, v7
+	sta v4
+	lda v4
+	sta v10
+	lda v10
+	ldobjbyname 0xa, "split"
+	sta v9
+	lda.str "."
+	sta v11
+	lda v9
+	callthis1 0xc, v10, v11
+	sta v8
+	lda v8
+	ldobjbyname 0xe, "length"
+	sta v7
+	ldai 0x4
+	eq 0x10, v7
+	sta v6
+	callruntime.isfalse 0x11
+	jnez jump_label_0
+	lda v4
+	sta v9
+	lda v9
+	ldobjbyname 0x12, "indexOf"
+	sta v8
+	lda.str ":"
+	sta v10
+	lda v8
+	callthis1 0x14, v9, v10
+	sta v7
+	ldai 0x1
+	sta v8
+	lda v8
+	neg 0x16
+	eq 0x17, v7
+	jmp jump_label_1
+jump_label_0:
+	lda v6
+jump_label_1:
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0xf }
+.language TypeScript
+.function any &entry.src.main.ets.common.CommonVpnService&.#*#isIpv6(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v3
+	sta v8
+	lda v8
+	ldobjbyname 0x0, "split"
+	sta v7
+	lda.str "/"
+	sta v9
+	lda v7
+	callthis1 0x2, v8, v9
+	sta v5
+	lda v5
+	sta v9
+	ldai 0x0
+	sta v10
+	lda v10
+	ldobjbyvalue 0x4, v9
+	sta v8
+	lda v8
+	ldobjbyname 0x6, "trim"
+	sta v7
+	lda v7
+	callthis0 0x8, v8
+	sta v4
+	lda v4
+	sta v9
+	lda v9
+	ldobjbyname 0xa, "indexOf"
+	sta v8
+	lda.str ":"
+	sta v10
+	lda v8
+	callthis1 0xc, v9, v10
+	sta v7
+	ldai 0x0
+	greatereq 0xe, v7
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x7 }
+.language TypeScript
+.function any &entry.src.main.ets.common.CommonVpnService&.#~@0=#Address(any a0, any a1, any a2, any a3, any a4, any a5) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	mov v5, a5
+	lda v5
+	sta v7
+	ldundefined
+	stricteq 0x0, v7
+	jeqz jump_label_0
+	ldai 0x0
+	sta v5
+jump_label_0:
+	lda v2
+	sta v7
+	lda v3
+	stobjbyname 0x1, "address", v7
+	lda v2
+	sta v7
+	lda v4
+	stobjbyname 0x3, "family", v7
+	lda v2
+	sta v7
+	lda v5
+	stobjbyname 0x5, "port", v7
+	lda v2
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x4 }
+.language TypeScript
+.function any &entry.src.main.ets.common.CommonVpnService&.#~@1=#AddressWithPrefix(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	lda v2
+	sta v6
+	lda v3
+	stobjbyname 0x0, "address", v6
+	lda v2
+	sta v6
+	lda v4
+	stobjbyname 0x2, "prefixLength", v6
+	lda v2
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x1d }
+.language TypeScript
+.function any &entry.src.main.ets.common.CommonVpnService&.#~@2=#VpnConfig(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	lda v3
+	sta v6
+	ldundefined
+	stricteq 0x0, v6
+	jeqz jump_label_0
+	ldlocalmodulevar 0x0
+	throw.undefinedifholewithname "Address"
+	sta v6
+	lda.str "172.19.0.1"
+	sta v7
+	ldai 0x1
+	sta v8
+	newobjrange 0x1, 0x3, v6
+	sta v3
+jump_label_0:
+	lda v4
+	sta v6
+	ldundefined
+	stricteq 0x3, v6
+	jeqz jump_label_1
+	createarraywithbuffer 0x4, { 1 [ string:"172.19.0.2", ]}
+	sta v6
+	sta v4
+jump_label_1:
+	lda v2
+	sta v6
+	ldtrue
+	stobjbyname 0x5, "isIPv4Accepted", v6
+	lda v2
+	sta v6
+	ldfalse
+	stobjbyname 0x7, "isIPv6Accepted", v6
+	lda v2
+	sta v6
+	createemptyarray 0x9
+	sta v7
+	stobjbyname 0xa, "trustedApplications", v6
+	lda v2
+	sta v6
+	createemptyarray 0xc
+	sta v7
+	stobjbyname 0xd, "blockedApplications", v6
+	lda v2
+	sta v6
+	createemptyarray 0xf
+	sta v7
+	ldlocalmodulevar 0x1
+	throw.undefinedifholewithname "AddressWithPrefix"
+	sta v8
+	lda v3
+	sta v9
+	ldai 0x1e
+	sta v10
+	newobjrange 0x10, 0x3, v8
+	stownbyindex 0x12, v7, 0x0
+	lda v7
+	stobjbyname 0x14, "addresses", v6
+	lda v2
+	sta v6
+	createemptyarray 0x16
+	sta v7
+	stobjbyname 0x17, "routes", v6
+	lda v2
+	sta v6
+	ldai 0x578
+	stobjbyname 0x19, "mtu", v6
+	lda v2
+	sta v6
+	lda v4
+	stobjbyname 0x1b, "dnsAddresses", v6
+	lda v2
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x2 }
+.language TypeScript
+.function any &entry.src.main.ets.common.CommonVpnService&.#~@3=#CommonVpnService(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v2
+	sta v5
+	lda v3
+	stobjbyname 0x0, "context", v5
+	lda v2
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x2d }
+.language TypeScript
+.function any &entry.src.main.ets.common.CommonVpnService&.#~@3>#getTunFd(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	asyncfunctionenter
+	sta v5
+try_begin_label_1:
+	ldai 0x1
+	sta v6
+	lda v6
+	neg 0x0
+	sta v4
+try_begin_label_0:
+	lda v2
+	sta v6
+	ldexternalmodulevar 0x0
+	throw.undefinedifholewithname "vpnExtension"
+	sta v8
+	lda v8
+	ldobjbyname 0x1, "createVpnConnection"
+	sta v7
+	lda v2
+	sta v9
+	lda v9
+	ldobjbyname 0x3, "context"
+	sta v9
+	lda v7
+	callthis1 0x5, v8, v9
+	stobjbyname 0x7, "vpnConnection", v6
+	lda v2
+	sta v8
+	lda v8
+	ldobjbyname 0x9, "vpnConnection"
+	sta v7
+	lda v7
+	ldobjbyname 0xb, "create"
+	sta v6
+	lda v3
+	sta v8
+	lda v6
+	callthis1 0xd, v7, v8
+	asyncfunctionawaituncaught v5
+	suspendgenerator v5
+	lda v5
+	resumegenerator
+	sta v7
+	lda v5
+	getresumemode
+	sta v6
+	ldai 0x1
+	eq 0xf, v6
+	jeqz jump_label_7
+	lda v7
+	throw
+jump_label_7:
+	lda v7
+	sta v4
+	tryldglobalbyname 0x10, "console"
+	sta v7
+	lda v7
+	ldobjbyname 0x11, "log"
+	sta v6
+	lda.str "ClashVPN"
+	sta v8
+	lda.str "获取tunFd: "
+	sta v9
+	lda v4
+	add2 0x13, v9
+	sta v9
+	lda.str ""
+	add2 0x14, v9
+	sta v9
+	lda v6
+	callthis2 0x15, v7, v8, v9
+	lda v4
+	sta v6
+	lda v6
+	asyncfunctionresolve v5
+	return
+try_end_label_0:
+	jmp handler_end_label_0_0
+handler_begin_label_0_0:
+	sta v6
+	tryldglobalbyname 0x17, "console"
+	sta v8
+	lda v8
+	ldobjbyname 0x18, "log"
+	sta v7
+	lda.str "ClashVPN"
+	sta v9
+	lda.str "Clash启动失败 "
+	sta v10
+	lda v6
+	sta v11
+	lda v11
+	ldobjbyname 0x1a, "message"
+	add2 0x1c, v10
+	sta v10
+	lda.str " => "
+	add2 0x1d, v10
+	sta v10
+	lda v6
+	sta v11
+	lda v11
+	ldobjbyname 0x1e, "stack"
+	add2 0x20, v10
+	sta v10
+	lda.str ""
+	add2 0x21, v10
+	sta v10
+	lda v7
+	callthis2 0x22, v8, v9, v10
+	lda v2
+	sta v9
+	lda v9
+	ldobjbyname 0x24, "vpnConnection"
+	sta v8
+	ldnull
+	strictnoteq 0x26, v8
+	jeqz jump_label_8
+	ldundefined
+	strictnoteq 0x27, v8
+	jeqz jump_label_8
+	jmp jump_label_9
+jump_label_8:
+	ldundefined
+	jmp jump_label_10
+jump_label_9:
+	lda v8
+	lda v8
+	ldobjbyname 0x28, "destroy"
+	sta v7
+	lda v7
+	callthis0 0x2a, v8
+jump_label_10:
+	ldai 0x1
+	sta v7
+	lda v7
+	neg 0x2c
+	sta v7
+	lda v7
+	asyncfunctionresolve v5
+	return
+handler_end_label_0_0:
+	ldundefined
+	asyncfunctionresolve v5
+	return
+try_end_label_1:
+	sta v6
+	asyncfunctionreject v5
+	return
+:
+
+.catchall try_begin_label_0, try_end_label_0, handler_begin_label_0_0, handler_end_label_0_0
+.catchall try_begin_label_1, try_end_label_1, try_end_label_1, handler_end_label_1_0
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x9 }
+.language TypeScript
+.function any &entry.src.main.ets.common.CommonVpnService&.#~@3>#protect(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	asyncfunctionenter
+	sta v4
+try_begin_label_0:
+	lda v2
+	sta v7
+	lda v7
+	ldobjbyname 0x0, "vpnConnection"
+	sta v6
+	ldnull
+	strictnoteq 0x2, v6
+	jeqz jump_label_3
+	ldundefined
+	strictnoteq 0x3, v6
+	jeqz jump_label_3
+	jmp jump_label_4
+jump_label_3:
+	ldundefined
+	jmp jump_label_5
+jump_label_4:
+	lda v6
+	lda v6
+	ldobjbyname 0x4, "protect"
+	sta v5
+	lda v3
+	sta v7
+	lda v5
+	callthis1 0x6, v6, v7
+jump_label_5:
+	asyncfunctionawaituncaught v4
+	suspendgenerator v4
+	lda v4
+	resumegenerator
+	sta v6
+	lda v4
+	getresumemode
+	sta v5
+	ldai 0x1
+	eq 0x8, v5
+	jeqz jump_label_6
+	lda v6
+	throw
+jump_label_6:
+	lda v6
+	ldundefined
+	asyncfunctionresolve v4
+	return
+try_end_label_0:
+	sta v5
+	asyncfunctionreject v4
+	return
+:
+
+.catchall try_begin_label_0, try_end_label_0, try_end_label_0, handler_end_label_0_0
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x8 }
+.language TypeScript
+.function any &entry.src.main.ets.common.CommonVpnService&.#~@3>#sendClient(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	asyncfunctionenter
+	sta v5
+try_begin_label_0:
+	lda v3
+	sta v7
+	lda v7
+	ldobjbyname 0x0, "send"
+	sta v6
+	createobjectwithbuffer 0x2, { 4 [ string:"data", null_value:0, string:"encoding", string:"utf-8", ]}
+	sta v8
+	lda v4
+	definepropertybyname 0x3, "data", v8
+	lda v8
+	sta v8
+	lda v6
+	callthis1 0x5, v7, v8
+	asyncfunctionawaituncaught v5
+	suspendgenerator v5
+	lda v5
+	resumegenerator
+	sta v7
+	lda v5
+	getresumemode
+	sta v6
+	ldai 0x1
+	eq 0x7, v6
+	jeqz jump_label_3
+	lda v7
+	throw
+jump_label_3:
+	lda v7
+	ldundefined
+	asyncfunctionresolve v5
+	return
+try_end_label_0:
+	sta v6
+	asyncfunctionreject v5
+	return
+:
+
+.catchall try_begin_label_0, try_end_label_0, try_end_label_0, handler_end_label_0_0
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x14 }
+.language TypeScript
+.function any &entry.src.main.ets.common.CommonVpnService&.#~@3>#stopVpn(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda v2
+	sta v4
+	lda v4
+	ldobjbyname 0x0, "vpnConnection"
+	callruntime.istrue 0x2
+	jnez jump_label_0
+	ldtrue
+	jmp jump_label_1
+jump_label_0:
+	ldfalse
+jump_label_1:
+	callruntime.isfalse 0x3
+	jnez jump_label_2
+	lda v2
+	sta v4
+	ldexternalmodulevar 0x0
+	throw.undefinedifholewithname "vpnExtension"
+	sta v6
+	lda v6
+	ldobjbyname 0x4, "createVpnConnection"
+	sta v5
+	lda v2
+	sta v7
+	lda v7
+	ldobjbyname 0x6, "context"
+	sta v7
+	lda v5
+	callthis1 0x8, v6, v7
+	stobjbyname 0xa, "vpnConnection", v4
+jump_label_2:
+	lda v2
+	sta v6
+	lda v6
+	ldobjbyname 0xc, "vpnConnection"
+	sta v5
+	ldnull
+	strictnoteq 0xe, v5
+	jeqz jump_label_3
+	ldundefined
+	strictnoteq 0xf, v5
+	jeqz jump_label_3
+	jmp jump_label_4
+jump_label_3:
+	ldundefined
+	jmp jump_label_5
+jump_label_4:
+	lda v5
+	lda v5
+	ldobjbyname 0x10, "destroy"
+	sta v4
+	lda v4
+	callthis0 0x12, v5
+jump_label_5:
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x10 }
+.language TypeScript
+.function any &entry.src.main.ets.common.CommonVpnService&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	definefunc 0x0, &entry.src.main.ets.common.CommonVpnService&.#*#cidrToAddressWithPrefix:(any,any,any,any), 0x1
+	stmodulevar 0x4
+	definefunc 0x1, &entry.src.main.ets.common.CommonVpnService&.#*#cidrToRoute:(any,any,any,any), 0x1
+	stmodulevar 0x5
+	definefunc 0x2, &entry.src.main.ets.common.CommonVpnService&.#*#isIpv4:(any,any,any,any), 0x1
+	stmodulevar 0x6
+	definefunc 0x3, &entry.src.main.ets.common.CommonVpnService&.#*#isIpv6:(any,any,any,any), 0x1
+	stmodulevar 0x7
+	ldhole
+	sta v7
+	defineclasswithbuffer 0x4, &entry.src.main.ets.common.CommonVpnService&.#~@0=#Address:(any,any,any,any,any,any), { 1 [ i32:0, ]}, 0x2, v7
+	sta v5
+	sta v6
+	lda v5
+	ldobjbyname 0x5, "prototype"
+	sta v8
+	lda v5
+	stmodulevar 0x0
+	ldhole
+	sta v7
+	defineclasswithbuffer 0x7, &entry.src.main.ets.common.CommonVpnService&.#~@1=#AddressWithPrefix:(any,any,any,any,any), { 1 [ i32:0, ]}, 0x2, v7
+	sta v5
+	sta v6
+	lda v5
+	ldobjbyname 0x8, "prototype"
+	sta v8
+	lda v5
+	stmodulevar 0x1
+	ldhole
+	sta v7
+	defineclasswithbuffer 0xa, &entry.src.main.ets.common.CommonVpnService&.#~@2=#VpnConfig:(any,any,any,any,any), { 1 [ i32:0, ]}, 0x0, v7
+	sta v5
+	sta v6
+	lda v5
+	ldobjbyname 0xb, "prototype"
+	sta v8
+	lda v5
+	stmodulevar 0x3
+	ldhole
+	sta v7
+	defineclasswithbuffer 0xd, &entry.src.main.ets.common.CommonVpnService&.#~@3=#CommonVpnService:(any,any,any,any), { 13 [ string:"sendClient", method:#~@3>#sendClient, method_affiliate:2, string:"getTunFd", method:#~@3>#getTunFd, method_affiliate:1, string:"protect", method:#~@3>#protect, method_affiliate:1, string:"stopVpn", method:#~@3>#stopVpn, method_affiliate:0, i32:4, ]}, 0x1, v7
+	sta v5
+	sta v6
+	lda v5
+	ldobjbyname 0xe, "prototype"
+	sta v8
+	lda v5
+	stmodulevar 0x2
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x2 }
+.language ArkTS
+.function any &entry.src.main.ets.entryability.EntryAbility&.#~@0=#EntryAbility(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	copyrestargs 0x0
+	sta v3
+	lda v3
+	sta v5
+	lda v0
+	supercallspread 0x0, v5
+	sta v5
+	lda v2
+	throw.ifsupernotcorrectcall 0x1
+	lda v5
+	sta v2
+	lda v2
+try_begin_label_0:
+	throw.ifsupernotcorrectcall 0x0
+try_end_label_0:
+	return
+handler_begin_label_0_0:
+	throw
+:
+
+.catchall try_begin_label_0, try_end_label_0, handler_begin_label_0_0, handler_end_label_0_0
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x4 }
+.language ArkTS
+.function any &entry.src.main.ets.entryability.EntryAbility&.#~@0>#onBackground(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldexternalmodulevar 0x1
+	throw.undefinedifholewithname "hilog"
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "info"
+	sta v4
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "DOMAIN"
+	sta v6
+	lda.str "testTag"
+	sta v7
+	lda.str "%{public}s"
+	sta v8
+	lda.str "Ability onBackground"
+	sta v9
+	lda v4
+	callthisrange 0x2, 0x4, v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x4 }
+.language ArkTS
+.function any &entry.src.main.ets.entryability.EntryAbility&.#~@0>#onCreate(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	ldexternalmodulevar 0x1
+	throw.undefinedifholewithname "hilog"
+	sta v7
+	lda v7
+	ldobjbyname 0x0, "info"
+	sta v6
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "DOMAIN"
+	sta v8
+	lda.str "testTag"
+	sta v9
+	lda.str "%{public}s"
+	sta v10
+	lda.str "Ability onCreate"
+	sta v11
+	lda v6
+	callthisrange 0x2, 0x4, v7
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x4 }
+.language ArkTS
+.function any &entry.src.main.ets.entryability.EntryAbility&.#~@0>#onDestroy(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldexternalmodulevar 0x1
+	throw.undefinedifholewithname "hilog"
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "info"
+	sta v4
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "DOMAIN"
+	sta v6
+	lda.str "testTag"
+	sta v7
+	lda.str "%{public}s"
+	sta v8
+	lda.str "Ability onDestroy"
+	sta v9
+	lda v4
+	callthisrange 0x2, 0x4, v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x4 }
+.language ArkTS
+.function any &entry.src.main.ets.entryability.EntryAbility&.#~@0>#onForeground(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldexternalmodulevar 0x1
+	throw.undefinedifholewithname "hilog"
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "info"
+	sta v4
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "DOMAIN"
+	sta v6
+	lda.str "testTag"
+	sta v7
+	lda.str "%{public}s"
+	sta v8
+	lda.str "Ability onForeground"
+	sta v9
+	lda v4
+	callthisrange 0x2, 0x4, v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x9 }
+.language ArkTS
+.function any &entry.src.main.ets.entryability.EntryAbility&.#~@0>#onWindowStageCreate(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	ldexternalmodulevar 0x1
+	throw.undefinedifholewithname "hilog"
+	sta v6
+	lda v6
+	ldobjbyname 0x0, "info"
+	sta v5
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "DOMAIN"
+	sta v7
+	lda.str "testTag"
+	sta v8
+	lda.str "%{public}s"
+	sta v9
+	lda.str "Ability onWindowStageCreate"
+	sta v10
+	lda v5
+	callthisrange 0x2, 0x4, v6
+	lda v3
+	sta v6
+	lda v6
+	ldobjbyname 0x4, "loadContent"
+	sta v5
+	lda.str "pages/Index"
+	sta v7
+	definefunc 0x6, &entry.src.main.ets.entryability.EntryAbility&.#~@0>@1*#:(any,any,any,any), 0x1
+	sta v8
+	lda v5
+	callthis2 0x7, v6, v7, v8
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x4 }
+.language ArkTS
+.function any &entry.src.main.ets.entryability.EntryAbility&.#~@0>#onWindowStageDestroy(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldexternalmodulevar 0x1
+	throw.undefinedifholewithname "hilog"
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "info"
+	sta v4
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "DOMAIN"
+	sta v6
+	lda.str "testTag"
+	sta v7
+	lda.str "%{public}s"
+	sta v8
+	lda.str "Ability onWindowStageDestroy"
+	sta v9
+	lda v4
+	callthisrange 0x2, 0x4, v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x10 }
+.language ArkTS
+.function any &entry.src.main.ets.entryability.EntryAbility&.#~@0>@1*#(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v3
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "code"
+	callruntime.isfalse 0x2
+	jnez jump_label_0
+	ldexternalmodulevar 0x1
+	throw.undefinedifholewithname "hilog"
+	sta v6
+	lda v6
+	ldobjbyname 0x3, "error"
+	sta v5
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "DOMAIN"
+	sta v7
+	lda.str "testTag"
+	sta v8
+	lda.str "Failed to load the content. Cause: %{public}s"
+	sta v9
+	tryldglobalbyname 0x5, "JSON"
+	sta v11
+	lda v11
+	ldobjbyname 0x6, "stringify"
+	sta v10
+	lda v3
+	sta v12
+	lda v10
+	callthis1 0x8, v11, v12
+	sta v10
+	lda v5
+	callthisrange 0xa, 0x4, v6
+	ldundefined
+	ldundefined
+	returnundefined
+jump_label_0:
+	ldexternalmodulevar 0x1
+	throw.undefinedifholewithname "hilog"
+	sta v6
+	lda v6
+	ldobjbyname 0xc, "info"
+	sta v5
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "DOMAIN"
+	sta v7
+	lda.str "testTag"
+	sta v8
+	lda.str "Succeeded in loading the content."
+	sta v9
+	lda v5
+	callthis3 0xe, v6, v7, v8, v9
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x3 }
+.language ArkTS
+.function any &entry.src.main.ets.entryability.EntryAbility&.func_main_0(any a0, any a1, any a2) <static> {
+	newlexenvwithname 0x1, { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldai 0x0
+	sta v4
+	lda v4
+	stlexvar 0x0, 0x0
+	ldexternalmodulevar 0x0
+	throw.undefinedifholewithname "UIAbility"
+	sta v6
+	defineclasswithbuffer 0x0, &entry.src.main.ets.entryability.EntryAbility&.#~@0=#EntryAbility:(any,any,any,any), { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}, 0x0, v6
+	sta v4
+	sta v5
+	lda v4
+	ldobjbyname 0x1, "prototype"
+	sta v7
+	lda v4
+	stmodulevar 0x0
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#*#(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x2 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#*#^1(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "CommonVpnServicePage"
+	sta v4
+	ldundefined
+	sta v5
+	createemptyobject
+	sta v6
+	newobjrange 0x0, 0x3, v4
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0<#getEntryName(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda.str "CommonVpnServicePage"
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x17 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0=#CommonVpnServicePage(any a0, any a1, any a2, any a3, any a4, any a5, any a6, any a7, any a8) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	mov v5, a5
+	mov v6, a6
+	mov v7, a7
+	mov v8, a8
+	lda v6
+	sta v10
+	ldundefined
+	stricteq 0x0, v10
+	jeqz jump_label_4
+	ldai 0x1
+	sta v10
+	lda v10
+	neg 0x1
+	sta v6
+jump_label_4:
+	lda v7
+	sta v10
+	ldundefined
+	stricteq 0x2, v10
+	jeqz jump_label_5
+	ldundefined
+	sta v7
+jump_label_5:
+	lda v3
+	sta v10
+	lda v5
+	sta v11
+	lda v6
+	sta v12
+	lda v8
+	sta v13
+	supercallthisrange 0x3, 0x4, v10
+	sta v10
+	lda v2
+	throw.ifsupernotcorrectcall 0x1
+	lda v10
+	sta v2
+	lda v7
+	typeof 0x5
+	sta v10
+	lda.str "function"
+	stricteq 0x7, v10
+	jeqz jump_label_6
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v10
+	lda v7
+	stobjbyname 0x8, "paramsGenerator_", v10
+jump_label_6:
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v10
+	tryldglobalbyname 0xa, "ObservedPropertySimplePU"
+	sta v11
+	lda.str ""
+	sta v12
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v13
+	lda.str "note"
+	sta v14
+	newobjrange 0xb, 0x4, v11
+	stobjbyname 0xd, "__note", v10
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v11
+	lda v11
+	ldobjbyname 0xf, "setInitiallyProvidedValue"
+	sta v10
+	lda v4
+	sta v12
+	lda v10
+	callthis1 0x11, v11, v12
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v11
+	lda v11
+	ldobjbyname 0x13, "finalizeConstruction"
+	sta v10
+	lda v10
+	callthis0 0x15, v11
+	lda v2
+try_begin_label_0:
+	throw.ifsupernotcorrectcall 0x0
+try_end_label_0:
+	return
+handler_begin_label_0_0:
+	throw
+:
+
+.catchall try_begin_label_0, try_end_label_0, handler_begin_label_0_0, handler_end_label_0_0
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x5 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>#aboutToAppear(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda v2
+	sta v4
+	ldexternalmodulevar 0x0
+	throw.undefinedifholewithname "CommonVpnService"
+	typeof 0x0
+	sta v5
+	lda.str "function"
+	stricteq 0x2, v5
+	jeqz jump_label_0
+	lda.str "loaded"
+	jmp jump_label_1
+jump_label_0:
+	lda.str "missing"
+jump_label_1:
+	stobjbyname 0x3, "note", v4
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x17 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>#aboutToBeDeleted(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda v2
+	sta v6
+	lda v6
+	ldobjbyname 0x0, "__note"
+	sta v5
+	lda v5
+	ldobjbyname 0x2, "aboutToBeDeleted"
+	sta v4
+	lda v4
+	callthis0 0x4, v5
+	tryldglobalbyname 0x6, "SubscriberManager"
+	sta v7
+	lda v7
+	ldobjbyname 0x7, "Get"
+	sta v6
+	lda v6
+	callthis0 0x9, v7
+	sta v5
+	lda v5
+	ldobjbyname 0xb, "delete"
+	sta v4
+	lda v2
+	sta v7
+	lda v7
+	ldobjbyname 0xd, "id__"
+	sta v6
+	lda v6
+	callthis0 0xf, v7
+	sta v6
+	lda v4
+	callthis1 0x11, v5, v6
+	lda v2
+	sta v5
+	lda v5
+	ldobjbyname 0x13, "aboutToBeDeletedInternal"
+	sta v4
+	lda v4
+	callthis0 0x15, v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x16 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>#initialRender(any a0, any a1, any a2) <static> {
+	newlexenvwithname 0x1, { 3 [ i32:1, string:"this", i32:0, ]}
+	mov v0, a0
+	mov v1, a1
+	lda a2
+	stlexvar 0x0, 0x0
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "observeComponentCreation2"
+	sta v4
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@0>@1*#:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0x3, "Column"
+	sta v7
+	lda v4
+	callthis2 0x4, v5, v6, v7
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0x6, "observeComponentCreation2"
+	sta v4
+	definefunc 0x8, &entry.src.main.ets.pages.Index&.#~@0>@1*#^1:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0x9, "Text"
+	sta v7
+	lda v4
+	callthis2 0xa, v5, v6, v7
+	tryldglobalbyname 0xc, "Text"
+	sta v5
+	lda v5
+	ldobjbyname 0xd, "pop"
+	sta v4
+	lda v4
+	callthis0 0xf, v5
+	tryldglobalbyname 0x11, "Column"
+	sta v5
+	lda v5
+	ldobjbyname 0x12, "pop"
+	sta v4
+	lda v4
+	callthis0 0x14, v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x6 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>#note(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda v2
+	sta v6
+	lda v6
+	ldobjbyname 0x0, "__note"
+	sta v5
+	lda v5
+	ldobjbyname 0x2, "get"
+	sta v4
+	lda v4
+	callthis0 0x4, v5
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x6 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>#note^1(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v2
+	sta v7
+	lda v7
+	ldobjbyname 0x0, "__note"
+	sta v6
+	lda v6
+	ldobjbyname 0x2, "set"
+	sta v5
+	lda v3
+	sta v7
+	lda v5
+	callthis1 0x4, v6, v7
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x6 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>#purgeVariableDependenciesOnElmtId(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v2
+	sta v7
+	lda v7
+	ldobjbyname 0x0, "__note"
+	sta v6
+	lda v6
+	ldobjbyname 0x2, "purgeDependencyOnElmtId"
+	sta v5
+	lda v3
+	sta v7
+	lda v5
+	callthis1 0x4, v6, v7
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x4 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>#rerender(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda v2
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "updateDirtyElements"
+	sta v4
+	lda v4
+	callthis0 0x2, v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x7 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>#setInitiallyProvidedValue(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v3
+	sta v6
+	lda v6
+	ldobjbyname 0x0, "note"
+	sta v5
+	ldundefined
+	strictnoteq 0x2, v5
+	jeqz jump_label_0
+	lda v2
+	sta v5
+	lda v3
+	sta v6
+	lda v6
+	ldobjbyname 0x3, "note"
+	stobjbyname 0x5, "note", v5
+jump_label_0:
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>#updateStateVars(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x5 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>@1*#(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "Column"
+	sta v7
+	lda v7
+	ldobjbyname 0x1, "create"
+	sta v6
+	lda v6
+	callthis0 0x3, v7
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x7 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>@1*#^1(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "Text"
+	sta v7
+	lda v7
+	ldobjbyname 0x1, "create"
+	sta v6
+	ldlexvar 0x0, 0x0
+	sta v8
+	lda v8
+	ldobjbyname 0x3, "note"
+	sta v8
+	lda v6
+	callthis1 0x5, v7, v8
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x26 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.func_main_0(any a0, any a1, any a2) <static> {
+	newlexenvwithname 0x1, { 3 [ i32:1, string:"CommonVpnServicePage", i32:0, ]}
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda.str "finalizeConstruction"
+	sta v5
+	tryldglobalbyname 0x0, "ViewPU"
+	sta v6
+	lda v6
+	ldobjbyname 0x1, "prototype"
+	isin 0x3, v5
+	callruntime.istrue 0x4
+	jnez jump_label_0
+	ldtrue
+	jmp jump_label_1
+jump_label_0:
+	ldfalse
+jump_label_1:
+	callruntime.isfalse 0x5
+	jnez jump_label_2
+	tryldglobalbyname 0x6, "Reflect"
+	sta v6
+	lda v6
+	ldobjbyname 0x7, "set"
+	sta v5
+	tryldglobalbyname 0x9, "ViewPU"
+	sta v7
+	lda v7
+	ldobjbyname 0xa, "prototype"
+	sta v7
+	lda.str "finalizeConstruction"
+	sta v8
+	definefunc 0xc, &entry.src.main.ets.pages.Index&.#*#:(any,any,any), 0x0
+	sta v9
+	lda v5
+	callthis3 0xd, v6, v7, v8, v9
+jump_label_2:
+	tryldglobalbyname 0xf, "ViewPU"
+	sta v7
+	defineclasswithbuffer 0x10, &entry.src.main.ets.pages.Index&.#~@0=#CommonVpnServicePage:(any,any,any,any,any,any,any,any,any), { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}, 0x3, v7
+	sta v5
+	sta v6
+	lda v5
+	ldobjbyname 0x11, "prototype"
+	sta v8
+	lda.str "note"
+	sta v9
+	ldundefined
+	sta v10
+	lda v8
+	definemethod 0x13, &entry.src.main.ets.pages.Index&.#~@0>#note:(any,any,any), 0x0
+	sta v11
+	ldfalse
+	definegettersetterbyvalue v8, v9, v11, v10
+	lda.str "note"
+	sta v9
+	ldundefined
+	sta v10
+	lda v8
+	definemethod 0x14, &entry.src.main.ets.pages.Index&.#~@0>#note^1:(any,any,any,any), 0x1
+	sta v11
+	ldfalse
+	definegettersetterbyvalue v8, v9, v10, v11
+	lda v8
+	definemethod 0x15, &entry.src.main.ets.pages.Index&.#~@0>#aboutToAppear:(any,any,any), 0x0
+	stownbyname 0x16, "aboutToAppear", v8
+	lda v8
+	definemethod 0x18, &entry.src.main.ets.pages.Index&.#~@0>#initialRender:(any,any,any), 0x0
+	stownbyname 0x19, "initialRender", v8
+	lda v8
+	definemethod 0x1b, &entry.src.main.ets.pages.Index&.#~@0>#rerender:(any,any,any), 0x0
+	stownbyname 0x1c, "rerender", v8
+	lda v5
+	definemethod 0x1e, &entry.src.main.ets.pages.Index&.#~@0<#getEntryName:(any,any,any), 0x0
+	stownbyname 0x1f, "getEntryName", v5
+	lda v5
+	sta v5
+	lda v5
+	stlexvar 0x0, 0x0
+	tryldglobalbyname 0x21, "registerNamedRoute"
+	sta v5
+	definefunc 0x22, &entry.src.main.ets.pages.Index&.#*#^1:(any,any,any), 0x0
+	sta v6
+	lda.str ""
+	sta v7
+	createobjectwithbuffer 0x23, { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+	sta v8
+	lda v8
+	sta v8
+	lda v5
+	callargs3 0x24, v6, v7, v8
+	ldundefined
+	returnundefined
+}
+
+# ====================
+# STRING
+
+[offset:0x74a, name_value:address]
+[offset:0x760, name_value:prefixLength]
+[offset:0x7b9, name_value:destination]
+[offset:0x7c6, name_value:family]
+[offset:0x7ce, name_value:gateway]
+[offset:0x800, name_value:port]
+[offset:0x830, name_value:dnsAddresses]
+[offset:0x85d, name_value:context]
+[offset:0x885, name_value:error]
+[offset:0x8b9, name_value:message]
+[offset:0x8dd, name_value:Address]
+[offset:0x8e6, name_value:AddressWithPrefix]
+[offset:0x904, name_value:CommonVpnService]
+[offset:0xa50, name_value:vpnExtension]
+[offset:0xabd, name_value:isDefaultRoute]
+[offset:0xacd, name_value:data]
+[offset:0xb06, name_value:protect]
+[offset:0xeb7, name_value:UIAbility]
+[offset:0xec2, name_value:hilog]
+[offset:0xf10, name_value:DOMAIN]
+[offset:0x1312, name_value:CommonVpnServicePage]
+[offset:0x1403, name_value:initialRender]
+[offset:0x144f, name_value:setInitiallyProvidedValue]
+[offset:0x149e, name_value:aboutToBeDeleted]
+[offset:0x14eb, name_value:pages/Index]
+[offset:0x16fc, name_value:use strict]
+[offset:0x1714, name_value:split]
+[offset:0x171b, name_value:/]
+[offset:0x171e, name_value:length]
+[offset:0x1726, name_value:trim]
+[offset:0x172c, name_value:parseInt]
+[offset:0x1736, name_value:Number]
+[offset:0x173e, name_value:isNaN]
+[offset:0x1745, name_value:fe80::]
+[offset:0x174d, name_value:172.19.0.1]
+[offset:0x1759, name_value:0.0.0.0/0]
+[offset:0x1764, name_value:::/0]
+[offset:0x176a, name_value:.]
+[offset:0x176d, name_value:indexOf]
+[offset:0x1776, name_value::]
+[offset:0x1779, name_value:isIPv4Accepted]
+[offset:0x1789, name_value:isIPv6Accepted]
+[offset:0x1799, name_value:trustedApplications]
+[offset:0x17ae, name_value:blockedApplications]
+[offset:0x17c3, name_value:addresses]
+[offset:0x17ce, name_value:routes]
+[offset:0x17d6, name_value:mtu]
+[offset:0x17db, name_value:createVpnConnection]
+[offset:0x17f0, name_value:vpnConnection]
+[offset:0x17ff, name_value:create]
+[offset:0x1807, name_value:console]
+[offset:0x1810, name_value:log]
+[offset:0x1815, name_value:ClashVPN]
+[offset:0x181f, name_value:获取tunFd: ]
+[offset:0x182e, name_value:]
+[offset:0x1830, name_value:Clash启动失败 ]
+[offset:0x1844, name_value: => ]
+[offset:0x184a, name_value:stack]
+[offset:0x1851, name_value:destroy]
+[offset:0x185a, name_value:send]
+[offset:0x1860, name_value:prototype]
+[offset:0x186b, name_value:info]
+[offset:0x1871, name_value:testTag]
+[offset:0x187a, name_value:%{public}s]
+[offset:0x1886, name_value:Ability onBackground]
+[offset:0x189c, name_value:Ability onCreate]
+[offset:0x18ae, name_value:Ability onDestroy]
+[offset:0x18c1, name_value:Ability onForeground]
+[offset:0x18d7, name_value:Ability onWindowStageCreate]
+[offset:0x18f4, name_value:loadContent]
+[offset:0x1901, name_value:Ability onWindowStageDestroy]
+[offset:0x191f, name_value:code]
+[offset:0x1925, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x1954, name_value:JSON]
+[offset:0x195a, name_value:stringify]
+[offset:0x1965, name_value:Succeeded in loading the content.]
+[offset:0x1988, name_value:function]
+[offset:0x1992, name_value:paramsGenerator_]
+[offset:0x19a4, name_value:ObservedPropertySimplePU]
+[offset:0x19be, name_value:note]
+[offset:0x19c4, name_value:__note]
+[offset:0x19cc, name_value:finalizeConstruction]
+[offset:0x19e2, name_value:loaded]
+[offset:0x19ea, name_value:missing]
+[offset:0x19f3, name_value:SubscriberManager]
+[offset:0x1a06, name_value:Get]
+[offset:0x1a0b, name_value:delete]
+[offset:0x1a13, name_value:id__]
+[offset:0x1a19, name_value:aboutToBeDeletedInternal]
+[offset:0x1a33, name_value:observeComponentCreation2]
+[offset:0x1a4e, name_value:Column]
+[offset:0x1a56, name_value:Text]
+[offset:0x1a5c, name_value:pop]
+[offset:0x1a61, name_value:get]
+[offset:0x1a66, name_value:set]
+[offset:0x1a6b, name_value:purgeDependencyOnElmtId]
+[offset:0x1a84, name_value:updateDirtyElements]
+[offset:0x1a99, name_value:ViewPU]
+[offset:0x1aa1, name_value:Reflect]
+[offset:0x1aaa, name_value:aboutToAppear]
+[offset:0x1ab9, name_value:rerender]
+[offset:0x1ac3, name_value:getEntryName]
+[offset:0x1ad1, name_value:registerNamedRoute]

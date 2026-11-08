@@ -1,0 +1,28 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "demo"
+    },
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "demo"
+    },
+    {
+      "name": "add_config",
+      "value": "add_config"
+    },
+    {
+      "name": "new_blank_configuration",
+      "value": "new_blank_configuration"
+    }
+  ]
+}

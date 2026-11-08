@@ -9,23 +9,47 @@ several.
 
 | Role | What it needs | Responsibility |
 |---|---|---|
-| Build host | Rust toolchain, SDK, hvigor/ohpm/node/jdk | `hvolt build` (produces the unsigned HAP) |
+| Build host | Rust toolchain, SDK compilers | `hvolt build` (produces the signed HAP) |
 | Sign host | AppGallery Connect login state (see below) | `hvolt sign` (exchanges CSR for cert + profile) |
-| Device host | hdc + the physical device (USB or wireless) | `hvolt push` / `hdc install` / `hdc shell` |
+| Device host | the physical device (USB or wireless) | `hvolt push` / shell over the device link |
 
 The two constraints that usually force a split:
 
 - **Signing must reach AppGallery Connect.** Any host with a valid AGC login can sign.
-- **Installing must reach the device.** Only the host that can see the device (hdc `list
-  targets`) can push.
+- **Installing must reach the device.** Only a host that can reach the device (`hvolt device
+  list`, or a `hvolt device remote` target) can push.
 
 Nothing in hvolt requires the same host to do both. When the device is not attached to the
 signing host, hand the UDID over explicitly:
 
 ```bash
-UDID=$(hdc shell bm get --udid | tail -1)     # on the device host
 HVOLT_DEVICE_UDID=$UDID hvolt sign            # on the sign host
 ```
+
+## When the build host cannot reach the device
+
+A build host is often on a different subnet than the device, so `hvolt push` there times out
+even though the package is ready. Relay the signed HAP to a host that can reach the device
+instead of rebuilding or re-signing elsewhere (measured 2026-11-08):
+
+```bash
+# 1 build + sign on the build host
+hvolt build                                   # → output/<name>-signed.hap
+
+# 2 copy to the device host (scp target must be a Windows-style path on a Windows host)
+scp output/<name>-signed.hap user@device-host:C:/tmp/
+
+# 3 install from the device host — external files need --hap
+hvolt push --hap C:/tmp/<name>-signed.hap -d <ip:port>
+
+# 4 launch an already-installed package without rebuilding it
+hvolt exec <ip:port> --shell "aa start -a EntryAbility -b <bundle>"
+```
+
+`hvolt run` re-reads `hvolt.toml` and rebuilds, so it cannot be used to just launch an installed
+package; `hvolt exec … --shell` sends the command over the device link instead. Wireless targets
+do not appear in `hvolt device list` (that lists USB only) — `hvolt device connect <ip:port>`
+verifies reachability and records the address in the config.
 
 ## Two signing chains — pick the right one or the HAP will not install
 
@@ -70,11 +94,15 @@ hvolt build                 # ← this one produces the signed HAP
   The AGC generator now uses a non-hex alphabet (since 26.0.0-3). Workaround if you hit an old
   password: repackage the keystore with `keytool -importkeystore` using a non-hex password and
   update `hvolt.toml` to match.
-- **Wireless debugging drops.** When `hdc list targets` only shows `COM*` entries and install
-  reports `need connect-key`, reconnect first: `hdc tconn <ip:port>`.
+- **Wireless debugging drops.** When `hvolt device list` shows no target, reconnect first:
+  `hvolt device connect <ip:port>`.
 - **`hvolt sign` reports `No device UDID found`** when no device is visible — pass
   `HVOLT_DEVICE_UDID` as shown above.
-- **`local.properties` (sdk.dir)**: hvolt writes it during `run_assemble` because hvigor
+- **`hvolt push`'s positional argument is not a file path.** It is treated as a project
+  artifact name and looked up under `output/` + `build/`. Pass an arbitrary file with
+  `--hap <FILE>`; an unsigned package is rejected before it reaches the device rather than
+  failing at install time.
+- **`local.properties` (sdk.dir)**: hvolt no longer needs it: the native chain reads the SDK path from config
   resolves the SDK from that file as well as `DEVECO_SDK_HOME`; without it, module tasks abort
   with `00303208 Unable to find 'sdk.dir'`. DevEco Studio writes the same file.
 - **Verify the release build you actually ship.** `hvolt agc whoami` returning an account means

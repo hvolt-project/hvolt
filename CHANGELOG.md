@@ -7,6 +7,49 @@ versions may change the CLI surface.
 
 ## [Unreleased]
 
+### Added
+
+- `hvolt dep sync [DIR]` turns registry packages that are already on disk into
+  `deps/<scope>/<name>/`: sources move to the package root, specifiers that addressed
+  `src/main/ets/` are rewritten, each package gets its own `hvolt.toml` (`type` = `arkts` /
+  `bytecode` / `js`), and the root `[dependencies]` switches to `path`. No network, no registry
+  lookup.
+- Hidden `hvolt abc-records <FILE>` lists the records of a `modules.abc` with the source file
+  each one came from, without the SDK's `ark_disasm`.
+- `hvolt dep sync` is the only writer of `deps/`; the build resolves a package's kind, entry and
+  version from its own `hvolt.toml` or its directory shape.
+
+### Changed
+
+- The build reads no hvigor manifest: `oh-package.json5`, `build-profile.json5`, `package.json`
+  and `hvigorfile.ts` are not configuration sources, and a bare import the `[dependencies]` table
+  does not cover is an error naming the package instead of being resolved from a leftover
+  manifest. `src/main/ets` no longer exists inside dependencies.
+- Byte-code dependencies carry `modules.abc` at the package root (`deps/<x>/modules.abc`), not
+  under `ets/`.
+- API level → bytecode version comes from an in-tree table (`src/build/deps/sdk_bytecode.rs`, 19
+  rows) instead of running the SDK's `ts2abc.js` through Node.
+- `rpcid.sc` is encoded in-tree (`src/build/artifacts/rpcid_sc.rs`) instead of invoking the SDK's
+  `syscap_tool`. Byte-identical to the tool's output on the measured fixture (52742 bytes,
+  sha256 `56435e3f…690e8f`).
+- Signing, packing and package checking no longer run the SDK's Java tools. `hvolt sign` uses
+  `hapsigner` in process for localSign, for signing the provisioning profile, and for the
+  acceptance checks; `hvolt check` computes duplicate / oversized / per-suffix statistics from
+  the archive directory instead of parsing the tool's `stat.json`; the hidden `hvolt pack-hap`
+  assembles a HAP from hvigor intermediates.
+
+### Fixed
+
+- `hvolt doctor` no longer reports a device-type error for library modules: `type = "har"` /
+  `"hsp"` members ship no device profile, so their `device_types` list is not a claim the
+  installed SDK has to satisfy.
+- `hvolt check --size-limit` compares bytes. The SDK tool's `--stat-file-size` is in KB, so the
+  previous pass-through made every threshold 1024x larger than requested.
+- The provisioning profile carries the leaf certificate only. The whole chain used to be written
+  into `bundle-info.distribution-certificate`, which the SDK tool silently truncated.
+- Key aliases resolve case-insensitively against the p12 store: the official test store holds
+  them lower-case while callers name them as the SDK documents them.
+
 ## [26.0.0-8] — 2026-11-01
 
 ### Added
@@ -18,7 +61,7 @@ versions may change the CLI surface.
   covers a package that declares none); giving all three materials signs with those instead.
   The result is verified with `hap-sign-tool verify-app` before the command reports success.
 - `hvolt push --hap <FILE>` installs a package at an arbitrary path. An unsigned package is
-  refused before reaching `hdc`, which would otherwise only report a signature error.
+  refused before reaching the device transport, which would otherwise only report a signature error.
 
 ### Fixed
 

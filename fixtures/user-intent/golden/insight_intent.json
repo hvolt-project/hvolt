@@ -1,0 +1,16 @@
+{
+  "extractInsightIntents": [
+    {
+      "decoratorFile": "@normalized:N&&&entry/src/main/ets/pages/Index&",
+      "decoratorClass": "IntentView",
+      "intentName": "PlayMusic",
+      "domain": "music",
+      "intentVersion": "1.0.0",
+      "displayName": "播放音乐",
+      "uri": "music://play",
+      "bundleName": "com.example.demo",
+      "moduleName": "entry",
+      "decoratorType": "@InsightIntentLink"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "string": [
+    { "name": "module_desc", "value": "fixture module" },
+    { "name": "EntryAbility_desc", "value": "fixture ability" },
+    { "name": "EntryAbility_label", "value": "Fixture" }
+  ]
+}

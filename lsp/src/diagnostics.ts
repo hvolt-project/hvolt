@@ -78,8 +78,8 @@ function flattenModulePath(inside: string, root: string): string {
   return join(root, inside.slice(0, at), inside.slice(at + marker.length));
 }
 
-/** hvigor's diagnostics: `Error Message: <text>. At File: <path>:<line>:<col>`. */
-export function parseHvigor(text: string, root: string): Diagnostic[] {
+/** Build diagnostics: `Error Message: <text>. At File: <path>:<line>:<col>`. */
+export function parseBuildError(text: string, root: string): Diagnostic[] {
   const out: Diagnostic[] = [];
   const pattern = /Error Message: ([\s\S]*?)At File: ([^\s:]+(?::[A-Za-z]:)?[^\s]*?):(\d+):(\d+)/g;
   for (const match of text.matchAll(pattern)) {
@@ -92,7 +92,7 @@ export function parseHvigor(text: string, root: string): Diagnostic[] {
       column: Number(column),
       message: rawMessage.trim().replace(/\.$/, ""),
       severity: "error",
-      source: "hvigor",
+      source: "hvolt",
     });
   }
   return out;

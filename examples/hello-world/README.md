@@ -14,12 +14,11 @@ hello-world/
 
 ```bash
 cd examples/hello-world
-hvolt assemble      # translate only: flat tree → standard HarmonyOS project under build/
-hvolt build         # translate + hvigorw build + sign
-hvolt run           # build, then push and launch
+hvolt build         # compile ArkTS, pack into build/ (signs when configured)
+hvolt sign --local  # this example has no [app.signing]: sign for a board or emulator
+hvolt run           # push and launch the signed package
 ```
 
-`hvolt init my-app` produces exactly this layout. The output of `hvolt assemble` (`build/`) is a
-complete HarmonyOS project: running `hvigorw assembleHap` on it yields `BUILD SUCCESSFUL`. Without a
-signing config it produces `*-unsigned.hap`, which is separate from the signing step of
-`hvolt build`.
+`hvolt init my-app` produces exactly this layout. `hvolt build` reads only `hvolt.toml` and the
+sources: it does not generate a DevEco project under `build/`, so `hvigorw` has nothing to open
+there. Without a signing config it produces `build/*-unsigned.hap`.

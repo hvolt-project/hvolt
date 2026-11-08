@@ -19,16 +19,16 @@ Three rules:
    treated as a regular ETS module).
 2. `name` in `mylib/hvolt.toml` fixes the artifact name: `hello` → `libhello.so`. The CMake target,
    `nm_modname` and the ArkTS `import` must all use that same name.
-3. `types` points at the ArkTS type declaration (`Index.d.ts`). `assemble` copies it to
-   `src/main/cpp/types/<dependency>/` and adds
-   `"libhello.so": "file:./src/main/cpp/types/libhello"` to the module's `oh-package.json5`.
+3. `types` points at the ArkTS type declaration (`Index.d.ts`). `hvolt build` compiles
+   `cpp/` through the SDK toolchain and packs the resulting `<name>.so` into the HAP.
 
 ```bash
 cd examples/hello-native
-hvolt assemble      # produces src/main/cpp/{CMakeLists.txt,napi_init.cpp,types/libhello/*}
-hvolt build         # includes the C++ build (CMake + NDK)
+hvolt build         # compiles cpp/ through the SDK toolchain and packs the .so into the HAP
+hvolt sign --local  # this example has no [app.signing]: sign for a board or emulator
+hvolt run           # push and launch the signed package
 ```
 
-Measured on this tree: after `assemble`, `hvigorw assembleHap` on `build/` reports `BUILD SUCCESSFUL`
-and produces `libhello.so` (arm64-v8a) plus `src-default-unsigned.hap`. The ArkTS compiler emits one
-informational warning that napi modules are verified by a later SDK version; it is not an error.
+The HAP carries `libs/arm64-v8a/libhello.so` next to `ets/modules.abc`, which is where the
+runtime loads a NAPI module from. The ArkTS compiler emits one informational warning that napi
+modules are verified by a later SDK version; it is not an error.
