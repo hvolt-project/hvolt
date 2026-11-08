@@ -4,16 +4,114 @@ use serde::{Deserialize, Deserializer, Serialize};
 use std::collections::BTreeMap;
 use std::path::Path;
 
-/// Root hvolt.toml: [app] + optional [dependencies] + optional [app.signing]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+/// Root hvolt.toml: [app] + optional [dependencies] + optional [app.signing] +
+/// optional product variants (`[products.<name>]`).
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct AppConfig {
     pub app: AppFields,
+    /// Product variants: `[products.<name>]` overrides the identity fields, the signing
+    /// config, and the resource directories. Unwritten fields inherit from the root.
+    #[serde(default)]
+    pub products: BTreeMap<String, ProductConfig>,
+    /// Product a build selects when `--product` is absent. None = `default`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub default_product: Option<String>,
     /// App-wide dependencies: every member sees them.
     #[serde(default)]
     pub dependencies: BTreeMap<String, Dependency>,
     /// Named dependency sources; a dependency picks one by name, `default` otherwise.
     #[serde(default)]
     pub registries: BTreeMap<String, Registry>,
+    /// Set by `with_product`; never read from or written to the file.
+    #[serde(skip)]
+    pub resolved: Option<ResolvedProduct>,
+}
+
+/// One `[products.<name>]` table.
+///
+/// The override set is deliberately narrow: `bundle` / `name` / `version` / `version_code` /
+/// `vendor` / `icon`. `sdk_version`, `runtime_os`, `members` and `dependencies` describe the
+/// project (toolchain and module set), not the artifact, so they cannot vary per product.
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+pub struct ProductConfig {
+    #[serde(default)]
+    pub app: ProductApp,
+    /// Signing materials. Unwritten fields inherit from `[app.signing.<product>]` or
+    /// `[app.signing.default]`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub signing: Option<ProductSigning>,
+    #[serde(default)]
+    pub resources: ProductResources,
+}
+
+/// The artifact-level identity fields a product may override.
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+pub struct ProductApp {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bundle: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version_code: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vendor: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub icon: Option<String>,
+}
+
+/// `[products.<name>.resources]`: resource directories this product overlays.
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+pub struct ProductResources {
+    /// Project-root-relative directories, in overlay order. A later directory replaces an
+    /// entry of the same name from an earlier one.
+    #[serde(default)]
+    pub directories: Vec<String>,
+}
+
+/// `[products.<name>.signing]`: a partial signing config; omitted fields inherit.
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+pub struct ProductSigning {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub store_file: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub store_password: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key_alias: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key_password: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub certpath: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub profile: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sign_alg: Option<String>,
+}
+
+impl ProductSigning {
+    /// Merge these overrides over `base`: an unwritten field keeps the inherited value.
+    fn over(&self, base: SigningConfig) -> SigningConfig {
+        fn pick(override_value: &Option<String>, inherited: String) -> String {
+            override_value.clone().unwrap_or(inherited)
+        }
+        SigningConfig {
+            store_file: pick(&self.store_file, base.store_file),
+            store_password: pick(&self.store_password, base.store_password),
+            key_alias: pick(&self.key_alias, base.key_alias),
+            key_password: pick(&self.key_password, base.key_password),
+            certpath: pick(&self.certpath, base.certpath),
+            profile: pick(&self.profile, base.profile),
+            sign_alg: pick(&self.sign_alg, base.sign_alg),
+        }
+    }
+}
+
+/// What `with_product` resolved: the selected product and its resource overlay order.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolvedProduct {
+    pub name: String,
+    pub resource_directories: Vec<String>,
 }
 
 /// One dependency source: a public registry or a local directory served as one.
@@ -23,7 +121,7 @@ pub struct Registry {
     pub url: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct AppFields {
     pub bundle: String,
     pub name: String,
@@ -96,6 +194,35 @@ where
 
 /// Signing materials for one build mode (debug/release).
 impl SigningConfig {
+    /// The all-empty value a product's partial signing merges over when it inherits nothing.
+    fn empty() -> Self {
+        Self {
+            store_file: String::new(),
+            store_password: String::new(),
+            key_alias: String::new(),
+            key_password: String::new(),
+            certpath: String::new(),
+            profile: String::new(),
+            sign_alg: default_sign_alg(),
+        }
+    }
+
+    /// Material fields a signing config cannot do without (empty = the field is missing).
+    fn missing_materials(&self) -> Vec<&'static str> {
+        [
+            ("store_file", &self.store_file),
+            ("store_password", &self.store_password),
+            ("key_alias", &self.key_alias),
+            ("key_password", &self.key_password),
+            ("certpath", &self.certpath),
+            ("profile", &self.profile),
+        ]
+        .into_iter()
+        .filter(|(_, value)| value.trim().is_empty())
+        .map(|(name, _)| name)
+        .collect()
+    }
+
     /// DevEco Studio stores signing passwords encoded (long hex), and hap-sign-tool needs the
     /// plaintext — such a config can never sign, no matter how the build is driven.
     pub fn passwords_look_encoded(&self) -> bool {
@@ -735,8 +862,114 @@ impl AppConfig {
                 runtime_os: default_runtime_os(),
                 members: vec!["src".into()],
             },
+            products: BTreeMap::new(),
+            default_product: None,
+            resolved: None,
             dependencies: BTreeMap::new(),
         }
+    }
+
+    /// Every product name this config can build: `[products.*]` keys, the `[app] products`
+    /// list, and `default` (always addressable, so a project without variants still resolves).
+    pub fn product_names(&self) -> Vec<String> {
+        let mut names: std::collections::BTreeSet<String> =
+            self.app.products.iter().cloned().collect();
+        names.extend(self.products.keys().cloned());
+        names.insert("default".to_string());
+        names.into_iter().collect()
+    }
+
+    /// The product a build selects when none is named: `default_product`, else `default`.
+    pub fn default_product_name(&self) -> &str {
+        self.default_product
+            .as_deref()
+            .map(str::trim)
+            .filter(|name| !name.is_empty())
+            .unwrap_or("default")
+    }
+
+    /// Resolve one product over the root config: identity overrides, signing, resource dirs.
+    ///
+    /// This is the only place the inheritance rule lives. `from_file` keeps returning the file
+    /// as written, so callers and tests can tell the declared config from the effective one.
+    /// An unknown name is rejected with the names that would have worked.
+    pub fn with_product(&self, name: &str) -> Result<AppConfig, String> {
+        let name = name.trim();
+        let names = self.product_names();
+        if !names.iter().any(|known| known == name) {
+            return Err(format!(
+                "unknown product `{name}` — available products: {}",
+                names.join(", ")
+            ));
+        }
+        let product = self.products.get(name);
+        let mut effective = self.clone();
+        if let Some(product) = product {
+            let overrides = &product.app;
+            if let Some(bundle) = &overrides.bundle {
+                effective.app.bundle = bundle.clone();
+            }
+            if let Some(display) = &overrides.name {
+                effective.app.name = display.clone();
+            }
+            if let Some(version) = &overrides.version {
+                effective.app.version = version.clone();
+            }
+            if let Some(code) = overrides.version_code {
+                effective.app.version_code = code;
+            }
+            if let Some(vendor) = &overrides.vendor {
+                effective.app.vendor = vendor.clone();
+            }
+            if let Some(icon) = &overrides.icon {
+                effective.app.icon = icon.clone();
+            }
+        }
+        let resource_directories = product
+            .map(|product| product.resources.directories.clone())
+            .unwrap_or_default();
+        // The selected product's signing is the only entry an effective config carries:
+        // `signing_for` then has exactly one answer instead of a fallback chain.
+        let signing = self.resolve_signing(name, product.and_then(|p| p.signing.as_ref()))?;
+        effective.app.signing = signing
+            .map(|config| BTreeMap::from([(name.to_string(), config)]))
+            .unwrap_or_default();
+        effective.resolved = Some(ResolvedProduct {
+            name: name.to_string(),
+            resource_directories,
+        });
+        Ok(effective)
+    }
+
+    /// Merge a product's partial signing over its inherited base.
+    ///
+    /// Base order: `[app.signing.<product>]` (a migrated signingConfig keeps its own name),
+    /// then `[app.signing.default]`. A product table that names no base and leaves required
+    /// fields out is rejected here rather than at the keystore.
+    fn resolve_signing(
+        &self,
+        product: &str,
+        partial: Option<&ProductSigning>,
+    ) -> Result<Option<SigningConfig>, String> {
+        let base = self
+            .app
+            .signing
+            .get(product)
+            .or_else(|| self.app.signing.get("default"));
+        let Some(partial) = partial else {
+            return Ok(base.cloned());
+        };
+        let merged = partial.over(base.cloned().unwrap_or_else(SigningConfig::empty));
+        let missing = merged.missing_materials();
+        if !missing.is_empty() {
+            return Err(format!(
+                "product `{product}`: signing references no base to inherit from and leaves {} \
+                 unset — write them under [products.{product}.signing] or add \
+                 [app.signing.default]",
+                missing.join(", ")
+            ));
+        }
+        Ok(Some(merged))
     }
 
     pub fn from_file(path: &Path) -> Result<Self, String> {
@@ -1154,5 +1387,223 @@ mod runtime_predicate_tests {
             device_types_for_runtime("HarmonyOS"),
             super::DEVICE_TYPES_HARMONYOS
         );
+    }
+}
+
+#[cfg(test)]
+mod product_tests {
+    use super::AppConfig;
+
+    /// A project with one variant: the release product overrides identity + signing + resources.
+    const VARIANT_TOML: &str = r#"
+default_product = "release"
+
+[app]
+bundle = "org.example.app"
+name = "app"
+version = "1.0.0"
+version_code = 1000000
+vendor = "example"
+icon = "$media:base"
+products = ["default", "release"]
+
+[app.signing.default]
+store_file = "signing/default.p12"
+store_password = "plain"
+key_alias = "debugKey"
+key_password = "plain"
+certpath = "signing/default.cer"
+profile = "signing/default.p7b"
+
+[products.release.app]
+bundle = "org.example.app.release"
+version_code = 2000000
+
+[products.release.resources]
+directories = ["res/base", "res/release"]
+
+[products.release.signing]
+store_file = "signing/release.p12"
+"#;
+
+    fn variant_config() -> AppConfig {
+        toml::from_str(VARIANT_TOML).expect("parse variant hvolt.toml")
+    }
+
+    /// Fields the product leaves out keep the root value; only the six named fields vary.
+    #[test]
+    fn unwritten_fields_inherit_from_root() {
+        let root = variant_config();
+        let release = root.with_product("release").expect("release resolves");
+        assert_eq!(release.app.bundle, "org.example.app.release");
+        assert_eq!(release.app.version_code, 2000000);
+        // Not overridden -> root values.
+        assert_eq!(release.app.name, root.app.name);
+        assert_eq!(release.app.version, root.app.version);
+        assert_eq!(release.app.vendor, root.app.vendor);
+        assert_eq!(release.app.icon, root.app.icon);
+        // Project-level fields never vary by product.
+        assert_eq!(release.app.sdk_version, root.app.sdk_version);
+        assert_eq!(release.app.runtime_os, root.app.runtime_os);
+        assert_eq!(release.app.members, root.app.members);
+        assert_eq!(release.dependencies, root.dependencies);
+    }
+
+    /// The root config stays as written; resolving produces a new value.
+    #[test]
+    fn resolution_does_not_mutate_the_declared_config() {
+        let root = variant_config();
+        let _ = root.with_product("release").expect("release resolves");
+        assert_eq!(root.app.bundle, "org.example.app");
+        assert!(root.resolved.is_none());
+    }
+
+    /// A product signing table is partial: unwritten fields come from `[app.signing.default]`.
+    #[test]
+    fn signing_fields_inherit_from_the_default_config() {
+        let release = variant_config()
+            .with_product("release")
+            .expect("release resolves");
+        let signing = release
+            .app
+            .signing_for("release")
+            .expect("release signing resolved");
+        assert_eq!(signing.store_file, "signing/release.p12");
+        assert_eq!(signing.store_password, "plain");
+        assert_eq!(signing.certpath, "signing/default.cer");
+        assert_eq!(signing.profile, "signing/default.p7b");
+    }
+
+    /// A product with no signing table of its own inherits the root default unchanged.
+    #[test]
+    fn product_without_signing_table_inherits_the_root_default() {
+        let toml_text = r#"
+[app]
+bundle = "org.example.app"
+name = "app"
+version = "1.0.0"
+products = ["default", "release"]
+
+[app.signing.default]
+store_file = "signing/default.p12"
+store_password = "plain"
+key_alias = "k"
+key_password = "plain"
+certpath = "signing/default.cer"
+profile = "signing/default.p7b"
+
+[products.release.app]
+bundle = "org.example.app.release"
+"#;
+        let root: AppConfig = toml::from_str(toml_text).expect("parse");
+        let release = root.with_product("release").expect("release resolves");
+        let signing = release.app.signing_for("release").expect("signing");
+        assert_eq!(signing.store_file, "signing/default.p12");
+    }
+
+    /// A partial product signing with nothing to inherit from fails by name, not at the keystore.
+    #[test]
+    fn incomplete_product_signing_without_a_base_is_rejected() {
+        let toml_text = r#"
+[app]
+bundle = "org.example.app"
+name = "app"
+version = "1.0.0"
+products = ["default", "release"]
+
+[products.release.signing]
+store_file = "signing/release.p12"
+"#;
+        let root: AppConfig = toml::from_str(toml_text).expect("parse");
+        let error = root
+            .with_product("release")
+            .expect_err("incomplete signing must be rejected");
+        assert!(error.contains("store_password"), "{error}");
+        assert!(error.contains("products.release.signing"), "{error}");
+    }
+
+    /// The old shape — a bare name list in `[app] products` — still parses and resolves.
+    #[test]
+    fn legacy_name_list_still_parses() {
+        let toml_text = r#"
+[app]
+bundle = "org.example.app"
+name = "app"
+version = "1.0.0"
+products = ["default", "release"]
+"#;
+        let root: AppConfig = toml::from_str(toml_text).expect("parse the legacy list");
+        assert!(root.products.is_empty());
+        assert_eq!(root.product_names(), vec!["default", "release"]);
+        let release = root.with_product("release").expect("release resolves");
+        assert_eq!(release.app.bundle, root.app.bundle);
+        assert_eq!(release.resolved.expect("resolved").name, "release");
+    }
+
+    /// A product the config never declares is rejected with the names it does declare.
+    #[test]
+    fn unknown_product_names_the_available_ones() {
+        let error = variant_config()
+            .with_product("typo")
+            .expect_err("unknown product must not resolve");
+        assert!(error.contains("typo"), "{error}");
+        assert!(error.contains("available products"), "{error}");
+        assert!(error.contains("default"), "{error}");
+        assert!(error.contains("release"), "{error}");
+    }
+
+    /// `default_product` decides which product a build selects without `--product`.
+    #[test]
+    fn default_product_is_the_configured_one() {
+        assert_eq!(variant_config().default_product_name(), "release");
+        let mut plain = variant_config();
+        plain.default_product = None;
+        assert_eq!(plain.default_product_name(), "default");
+        plain.default_product = Some("  ".into());
+        assert_eq!(plain.default_product_name(), "default");
+    }
+
+    /// The overlay order is the declaration order; later directories win at staging time.
+    #[test]
+    fn resource_directories_keep_their_declaration_order() {
+        let release = variant_config()
+            .with_product("release")
+            .expect("release resolves");
+        let resolved = release.resolved.expect("resolved");
+        assert_eq!(resolved.resource_directories, ["res/base", "res/release"]);
+        // A product that declares none overlays nothing.
+        let default = variant_config()
+            .with_product("default")
+            .expect("default resolves");
+        assert!(default
+            .resolved
+            .expect("resolved")
+            .resource_directories
+            .is_empty());
+    }
+
+    /// A config survives a serializer round trip: the writer (`hvolt migrate`) and the reader
+    /// agree, including the product tables and the root-level `default_product`.
+    #[test]
+    fn config_round_trips_through_toml() {
+        let mut original = AppConfig::default_for("roundtrip");
+        original.default_product = Some("release".into());
+        original.products.insert(
+            "release".into(),
+            toml::from_str(
+                r#"
+[app]
+bundle = "com.example.roundtrip.release"
+
+[resources]
+directories = ["res/release"]
+"#,
+            )
+            .expect("parse product fixture"),
+        );
+        let text = toml::to_string(&original).expect("serialize hvolt.toml");
+        assert!(text.contains("default_product"), "{text}");
+        let parsed: AppConfig = toml::from_str(&text).expect("parse hvolt.toml");
+        assert_eq!(parsed, original);
     }
 }

@@ -7,11 +7,25 @@ use crate::sign::native_sign::{self, LocalSign};
 use std::fs;
 use std::path::{Path, PathBuf};
 
+/// Where a product's signed package lands.
+///
+/// The default product keeps the historical `output/` so existing scripts and docs keep
+/// working; every other product gets its own directory, so two products never overwrite
+/// each other.
+pub fn output_dir(project_dir: &Path, product: &str) -> PathBuf {
+    if product == "default" {
+        project_dir.join("output")
+    } else {
+        project_dir.join("output").join(product)
+    }
+}
+
 /// Sign the unsigned HAP in process (`native_sign`), localSign identity.
 #[allow(clippy::too_many_arguments)] // mirrors the signing CLI surface 1:1
 pub fn sign_app(
     _sdk: &crate::sdk::manage::SdkEnv,
     project_dir: &Path,
+    product: &str,
     store_file: &str,
     store_password: &str,
     key_alias: &str,
@@ -21,8 +35,9 @@ pub fn sign_app(
     sign_alg: &str,
 ) -> Result<(), String> {
     let unsigned = find_unsigned_hap(&project_dir.join("build"))?;
-    let output_dir = project_dir.join("output");
-    fs::create_dir_all(&output_dir).map_err(|e| format!("create output/: {}", e))?;
+    let output_dir = output_dir(project_dir, product);
+    fs::create_dir_all(&output_dir)
+        .map_err(|e| format!("create {}: {}", output_dir.display(), e))?;
     let output_name = unsigned
         .file_name()
         .unwrap_or_default()

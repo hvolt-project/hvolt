@@ -54,8 +54,18 @@ pub enum Command {
         #[arg(long)]
         dry_run: bool,
     },
+    /// Dependencies: bring packages already on disk into `deps/`
+    Dep {
+        #[command(subcommand)]
+        action: DepAction,
+    },
     /// Build: compile (own ArkTS chain), pack and sign
-    Build,
+    Build {
+        /// Product variant to build (`[products.<name>]`). Default: the config's
+        /// `default_product`, else `default`.
+        #[arg(long, value_name = "NAME")]
+        product: Option<String>,
+    },
     /// Sign: generate signing materials (.p12, .cer, .p7b) and configure project
     #[command(
         after_help = "`--local` works in every build. Remote signing through AppGallery Connect\n\
@@ -158,6 +168,16 @@ pub enum Command {
         /// Worker threads (default: 8)
         #[arg(long, default_value_t = 8)]
         file_threads: u32,
+    },
+    /// List the records inside a modules.abc, without the SDK's ark_disasm
+    ///
+    /// Prints one `name<TAB>source file` line per record (the `.record` set ark_disasm
+    /// would list). It does not read method code, so it cannot compare instructions.
+    #[command(hide = true)]
+    AbcRecords {
+        /// modules.abc path
+        #[arg(value_name = "FILE")]
+        path: std::path::PathBuf,
     },
     /// Build native modules with the SDK cmake+ninja (experimental)
     ///
@@ -415,7 +435,11 @@ pub enum Command {
         device: Option<String>,
     },
     /// Check environment, SDK, tools, device, auth and project consistency
-    Doctor,
+    Doctor {
+        /// Validate this product variant (default: the config's `default_product`)
+        #[arg(long, value_name = "NAME")]
+        product: Option<String>,
+    },
     /// Manage emulators
     #[command(
         after_help = "The emulator binary and system images ship only with DevEco Studio\n\
@@ -572,8 +596,18 @@ pub enum SdkAction {
     },
 }
 
-#[derive(Subcommand)]
+/// `hvolt dep <action>`
+#[derive(Debug, Subcommand)]
+pub enum DepAction {
+    /// Flatten registry packages that are already on disk into `deps/<scope>/<name>/`
+    Sync {
+        /// Project directory (default: current directory)
+        #[arg(value_name = "DIR")]
+        project: Option<PathBuf>,
+    },
+}
 
+#[derive(Subcommand)]
 pub enum EmuAction {
     /// List available emulator instances
     List {

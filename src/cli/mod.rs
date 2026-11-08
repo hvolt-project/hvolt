@@ -25,7 +25,8 @@ pub(crate) fn dispatch(command: Command) {
     match command {
         Command::Init { name } => project::init(name),
         Command::Migrate { from, out, dry_run } => project::migrate(from, out, dry_run),
-        Command::Build => build::build(),
+        Command::Dep { action } => project::dep(action),
+        Command::Build { product } => build::build(product),
         Command::Sign {
             hap,
             local,
@@ -73,6 +74,7 @@ pub(crate) fn dispatch(command: Command) {
             out,
             file_threads,
         } => build::compile_abc(ts_root, out, file_threads),
+        Command::AbcRecords { path } => build::abc_records(path),
         Command::ResCompile {
             project,
             module,
@@ -159,7 +161,7 @@ pub(crate) fn dispatch(command: Command) {
         ),
         Command::File { action } => device::file(action),
         Command::Uninstall { bundle, device } => deploy::uninstall(bundle, device),
-        Command::Doctor => project::doctor(),
+        Command::Doctor { product } => project::doctor(product),
         Command::ExportReport { ts_root } => project::export_report(ts_root),
         Command::ParseReport { dir } => project::parse_report(dir),
         Command::Check {

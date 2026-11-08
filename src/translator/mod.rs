@@ -42,6 +42,20 @@ enum ModuleKind {
 /// used to be implemented only in the `[dependencies]` path; a native MEMBER
 /// was therefore parsed as an ETS module and silently skipped (and under the
 /// strict-parse change it failed with a confusing "missing field `module`").
+/// Whether a `hvolt.toml` describes a flattened dependency rather than a member module.
+fn is_package_module(raw: &str) -> bool {
+    let Ok(value) = raw.parse::<toml::Value>() else {
+        return false;
+    };
+    matches!(
+        value
+            .get("module")
+            .and_then(|module| module.get("type"))
+            .and_then(|kind| kind.as_str()),
+        Some("arkts") | Some("js") | Some("javascript") | Some("bytecode") | Some("byte-code")
+    )
+}
+
 fn parse_module_file(path: &Path) -> Result<ModuleKind, String> {
     let raw = std::fs::read_to_string(path)
         .map_err(|e| format!("cannot read {}: {}", path.display(), e))?;
@@ -103,6 +117,13 @@ pub fn discover_modules(root: &Path, app_config: &AppConfig) -> Result<ModuleSet
                 continue;
             }
         };
+        if is_package_module(&raw) {
+            // A flattened dependency describes itself in its own `hvolt.toml`, but it is not a
+            // member module: the build compiles it through the package path, so discovery
+            // leaves it alone. Members carry `type = "har"`/`"hsp"`, packages `arkts`/`js`/
+            // `bytecode`.
+            continue;
+        }
         if is_native_module(&raw) {
             match toml::from_str::<NativeModuleConfig>(&raw) {
                 Ok(cfg) => {

@@ -52,7 +52,10 @@ impl Report {
 
 /// Run all checks. project_dir is the CWD; project-level checks only run
 /// when hvolt.toml exists there.
-pub fn run(project_dir: &Path) -> Report {
+///
+/// `product` is `--product`; None validates the product a build would select
+/// (`default_product`, then `default`).
+pub fn run(project_dir: &Path, product: Option<&str>) -> Report {
     let rep = Report {
         issues: std::cell::Cell::new(0),
         warnings: std::cell::Cell::new(0),
@@ -86,7 +89,7 @@ pub fn run(project_dir: &Path) -> Report {
     let toml_path = project_dir.join("hvolt.toml");
     if toml_path.exists() {
         println!("[project] {}", project_dir.display());
-        check_project(&rep, &toml_path, sdk_root.as_deref());
+        check_project(&rep, &toml_path, sdk_root.as_deref(), product);
     }
 
     rep
@@ -510,7 +513,7 @@ fn check_auth(rep: &Report) {
     }
 }
 
-fn check_project(rep: &Report, toml_path: &Path, sdk_root: Option<&Path>) {
+fn check_project(rep: &Report, toml_path: &Path, sdk_root: Option<&Path>, product: Option<&str>) {
     let app = match AppConfig::from_file(toml_path) {
         Ok(a) => a,
         Err(e) => {
@@ -525,6 +528,77 @@ fn check_project(rep: &Report, toml_path: &Path, sdk_root: Option<&Path>) {
             return;
         }
     };
+    // The selected product must resolve before any SDK-dependent check: an unknown name is a
+    // config error, not an environment problem, and it has to be named with the alternatives.
+    let selected = product
+        .map(|name| name.trim().to_string())
+        .unwrap_or_else(|| app.default_product_name().to_string());
+    let selected_app = match app.with_product(&selected) {
+        Ok(effective) => {
+            rep.line(
+                true,
+                false,
+                "project",
+                "product",
+                &format!(
+                    "`{selected}` (variants: {})",
+                    app.product_names().join(", ")
+                ),
+                "",
+            );
+            let base = toml_path.parent().unwrap_or(Path::new("."));
+            let absent: Vec<String> = effective
+                .resolved
+                .as_ref()
+                .map(|resolved| {
+                    resolved
+                        .resource_directories
+                        .iter()
+                        .filter(|directory| !base.join(directory).is_dir())
+                        .cloned()
+                        .collect()
+                })
+                .unwrap_or_default();
+            if absent.is_empty() {
+                rep.line(
+                    true,
+                    false,
+                    "project",
+                    "resources",
+                    "product resource directories present",
+                    "",
+                );
+            } else {
+                rep.line(
+                    false,
+                    false,
+                    "project",
+                    "resources",
+                    &format!(
+                        "product `{selected}` declares missing directories: {}",
+                        absent.join(", ")
+                    ),
+                    &format!(
+                        "create them or fix [products.{selected}.resources] directories in hvolt.toml"
+                    ),
+                );
+            }
+            Some(effective)
+        }
+        Err(error) => {
+            rep.line(
+                false,
+                false,
+                "project",
+                "product",
+                &format!("{error} (selected: `{selected}`)"),
+                "pass an existing name to `hvolt build --product`, or declare it as \
+                 [products.<name>] in hvolt.toml",
+            );
+            None
+        }
+    };
+
     let Some(root) = sdk_root else {
         rep.line(
             false,
@@ -608,6 +682,17 @@ fn check_project(rep: &Report, toml_path: &Path, sdk_root: Option<&Path>) {
             let m_toml = toml_path.parent().unwrap().join(member).join("hvolt.toml");
             if let Ok(content) = std::fs::read_to_string(&m_toml) {
                 if let Ok(mc) = content.parse::<toml::Value>() {
+                    // A library module (`type = "har"`/`"hsp"`) ships no device profile of its
+                    // own: its `device_types` list is inherited vocabulary, not a claim the SDK
+                    // has to satisfy. Only an ability module goes through SyscapTransform.
+                    let module_type = mc
+                        .get("module")
+                        .and_then(|m| m.get("type"))
+                        .and_then(|t| t.as_str())
+                        .unwrap_or("");
+                    if matches!(module_type, "har" | "hsp" | "shared") {
+                        continue;
+                    }
                     if let Some(dts) = mc
                         .get("module")
                         .and_then(|m| m.get("device_types"))
@@ -686,8 +771,11 @@ fn check_project(rep: &Report, toml_path: &Path, sdk_root: Option<&Path>) {
         }
     }
 
-    // signing files exist?
-    if let Some(signing) = app.app.signing_for("default") {
+    // signing files exist? The selected product's materials, which may differ from the root.
+    if let Some(signing) = selected_app
+        .as_ref()
+        .and_then(|effective| effective.app.signing.get(&selected))
+    {
         let base = toml_path.parent().unwrap();
         let mut absent = Vec::new();
         for f in [&signing.store_file, &signing.certpath, &signing.profile] {
@@ -757,5 +845,79 @@ mod device_type_intersect_tests {
             intersect_device_types(None, &[], &["default", "tablet"]),
             v(&["default", "tablet"])
         );
+    }
+}
+
+#[cfg(test)]
+mod product_check_tests {
+    use super::{check_project, Report};
+
+    fn report() -> Report {
+        Report {
+            issues: std::cell::Cell::new(0),
+            warnings: std::cell::Cell::new(0),
+        }
+    }
+
+    fn project(tag: &str, body: &str) -> std::path::PathBuf {
+        let root = std::env::temp_dir().join(format!(
+            "hvolt-doctor-product-{}-{}",
+            tag,
+            std::process::id()
+        ));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(&root).unwrap();
+        std::fs::write(root.join("hvolt.toml"), body).unwrap();
+        root
+    }
+
+    const VARIANT: &str = r#"
+[app]
+bundle = "org.example.app"
+name = "app"
+version = "1.0.0"
+products = ["default", "release"]
+
+[products.release.app]
+bundle = "org.example.app.release"
+"#;
+
+    /// A declared product resolves: no error is counted (the SDK checks are skipped here).
+    #[test]
+    fn declared_product_is_accepted() {
+        let root = project("known", VARIANT);
+        let rep = report();
+        check_project(&rep, &root.join("hvolt.toml"), None, Some("release"));
+        assert_eq!(rep.issues.get(), 0);
+        assert_eq!(rep.warnings.get(), 1, "the SDK line is a warning");
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// An unknown `--product` is an error, not a silent fallback.
+    #[test]
+    fn unknown_product_is_an_error() {
+        let root = project("unknown", VARIANT);
+        let rep = report();
+        check_project(&rep, &root.join("hvolt.toml"), None, Some("typo"));
+        assert_eq!(rep.issues.get(), 1);
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// Without `--product` the config's `default_product` is what gets validated.
+    #[test]
+    fn invalid_default_product_is_an_error() {
+        let body = r#"
+default_product = "absent"
+
+[app]
+bundle = "org.example.app"
+name = "app"
+version = "1.0.0"
+"#;
+        let root = project("default", body);
+        let rep = report();
+        check_project(&rep, &root.join("hvolt.toml"), None, None);
+        assert_eq!(rep.issues.get(), 1);
+        let _ = std::fs::remove_dir_all(&root);
     }
 }

@@ -23,8 +23,37 @@ pub(crate) fn migrate(from: Option<PathBuf>, out: Option<PathBuf>, dry_run: bool
     }
 }
 
-pub(crate) fn doctor() {
-    let rep = crate::project::doctor::run(std::path::Path::new("."));
+pub(crate) fn dep(action: crate::support::cli::DepAction) {
+    match action {
+        crate::support::cli::DepAction::Sync { project } => sync_deps(project),
+    }
+}
+
+/// `hvolt dep sync`: registry packages on disk → `deps/<scope>/<name>/`.
+fn sync_deps(project: Option<PathBuf>) {
+    let dir = project.unwrap_or_else(|| PathBuf::from("."));
+    match crate::project::dep_sync::sync(&dir) {
+        Ok(moved) if moved.is_empty() => println!("no registry dependency to move"),
+        Ok(moved) => {
+            for item in &moved {
+                println!(
+                    "✓ {} → {} (from {})",
+                    item.package,
+                    item.dest,
+                    item.from.display()
+                );
+            }
+            println!("{} package(s) now live under deps/", moved.len());
+        }
+        Err(e) => {
+            eprintln!("✗ {}", e);
+            std::process::exit(1);
+        }
+    }
+}
+
+pub(crate) fn doctor(product: Option<String>) {
+    let rep = crate::project::doctor::run(std::path::Path::new("."), product.as_deref());
     std::process::exit(rep.finish());
 }
 

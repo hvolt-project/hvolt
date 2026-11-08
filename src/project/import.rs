@@ -14,8 +14,8 @@ use serde_json::Value;
 
 use crate::support::config::{
     AbilityConfig, AppConfig, AppFields, BackupConfig, Dependency, FormDef, FormWindow,
-    MetadataItem, ModuleConfig, ModuleInfo, ModulePermission, RouterMapDef, SigningConfig, Skill,
-    UriScheme,
+    MetadataItem, ModuleConfig, ModuleInfo, ModulePermission, ProductApp, ProductConfig,
+    ProductResources, ProductSigning, RouterMapDef, SigningConfig, Skill, UriScheme,
 };
 
 /// Fields found in the source project that the hvolt layout cannot express.
@@ -203,28 +203,31 @@ fn read_app_config(from: &Path, gaps: &mut Gaps) -> Result<AppConfig, String> {
     let name = resolve_app_name(from, &label)
         .unwrap_or_else(|| bundle.rsplit('.').next().unwrap_or("app").to_string());
 
-    // products / signing configs live in the root build-profile
+    // Products / signing configs live in the root build-profile.
     let bp_path = from.join("build-profile.json5");
     let mut products = vec!["default".to_string()];
+    let mut product_configs: BTreeMap<String, ProductConfig> = BTreeMap::new();
+    let mut default_product: Option<String> = None;
     let mut signing = BTreeMap::new();
     let sdk_version = crate::support::config::SDK_PLATFORM_VERSION.to_string();
     let mut compatible_sdk_version = String::new();
     let mut target_sdk = String::new();
+    let root_version_code = a.get("versionCode").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
     if bp_path.is_file() {
         let bp = read_json5(&bp_path)?;
         if let Some(app_bp) = bp.get("app") {
-            if let Some(list) = app_bp.get("products").and_then(|p| p.as_array()) {
-                let names: Vec<String> = list
-                    .iter()
-                    .filter_map(|p| p.get("name").and_then(|n| n.as_str()).map(String::from))
-                    .collect();
-                if !names.is_empty() {
-                    products = names;
-                }
+            let product_list: Vec<Value> = app_bp
+                .get("products")
+                .and_then(|p| p.as_array())
+                .cloned()
+                .unwrap_or_default();
+            if !product_list.is_empty() {
+                products.clear();
+            }
+            if let Some(product) = product_list.first() {
                 // Each key is read on its own: taking the first hit let `targetSdkVersion`
                 // shadow `compatibleSdkVersion`, silently raising the compatibility floor
                 // (a project pinned to API 23 came out pinned to 26).
-                let product = &list[0];
                 let compile = str_at(product, &["compileSdkVersion"]);
                 let target = str_at(product, &["targetSdkVersion"]);
                 let compatible = str_at(product, &["compatibleSdkVersion"]);
@@ -292,10 +295,40 @@ fn read_app_config(from: &Path, gaps: &mut Gaps) -> Result<AppConfig, String> {
                     }
                 }
             }
+            // Products are imported after `signingConfigs`: a product's `signingConfig`
+            // names one of them, and the name alone is not enough to sign with.
+            let identity = (bundle.as_str(), version.as_str(), root_version_code);
+            for entry in &product_list {
+                let Some(product_name) = entry.get("name").and_then(|name| name.as_str()) else {
+                    gaps.push(
+                        "build-profile product without a name skipped — hvolt addresses a product                          by [products.<name>]"
+                            .to_string(),
+                    );
+                    continue;
+                };
+                if !products.iter().any(|known| known == product_name) {
+                    products.push(product_name.to_string());
+                }
+                product_configs.insert(
+                    product_name.to_string(),
+                    import_product(entry, product_name, identity, &signing, gaps),
+                );
+            }
+            if let Some(first) = product_list
+                .first()
+                .and_then(|entry| entry.get("name"))
+                .and_then(|name| name.as_str())
+            {
+                // hvigor builds the first product by default; hvolt's implicit default is
+                // `default`, so a project whose first product is another name has to say so.
+                if first != "default" {
+                    default_product = Some(first.to_string());
+                }
+            }
             if let Some(mode_set) = app_bp.get("buildModeSet") {
                 if !mode_set.is_null() {
                     gaps.push(
-                        "buildModeSet ignored (hvolt always builds the default product)"
+                        "buildModeSet ignored (hvolt builds one product per `hvolt build                          --product`; there is no release/debug mode set)"
                             .to_string(),
                     );
                 }
@@ -329,11 +362,14 @@ fn read_app_config(from: &Path, gaps: &mut Gaps) -> Result<AppConfig, String> {
 
     Ok(AppConfig {
         registries: BTreeMap::new(),
+        products: product_configs,
+        default_product,
+        resolved: None,
         app: AppFields {
             bundle,
             name,
             version,
-            version_code: a.get("versionCode").and_then(|v| v.as_u64()).unwrap_or(0) as u32,
+            version_code: root_version_code,
             build_version: a
                 .get("buildVersion")
                 .and_then(|v| v.as_str())
@@ -354,6 +390,141 @@ fn read_app_config(from: &Path, gaps: &mut Gaps) -> Result<AppConfig, String> {
         },
         dependencies: BTreeMap::new(),
     })
+}
+
+/// One `app.products[]` entry → `[products.<name>]`.
+///
+/// Only the artifact-level fields travel (`bundleName`, `versionName`, `versionCode`,
+/// `resource.directories`, `signingConfig`). Everything that decides the toolchain, the module
+/// set or the package layout is project-wide in hvolt, so it is reported as a gap instead of
+/// being written somewhere it would not take effect.
+fn import_product(
+    entry: &Value,
+    name: &str,
+    identity: (&str, &str, u32),
+    signing: &BTreeMap<String, SigningConfig>,
+    gaps: &mut Gaps,
+) -> ProductConfig {
+    let (root_bundle, root_version, root_version_code) = identity;
+    let mut overrides = ProductApp::default();
+    if let Some(bundle) = str_at(entry, &["bundleName"]) {
+        if bundle != root_bundle {
+            overrides.bundle = Some(bundle);
+        }
+    }
+    if let Some(version) = str_at(entry, &["versionName"]) {
+        if version != root_version {
+            overrides.version = Some(version);
+        }
+    }
+    if let Some(code) = entry.get("versionCode").and_then(|value| value.as_u64()) {
+        let code = code as u32;
+        if code != root_version_code {
+            overrides.version_code = Some(code);
+        }
+    }
+
+    let mut resources = ProductResources::default();
+    if let Some(resource) = entry.get("resource") {
+        resources.directories = resource
+            .get("directories")
+            .and_then(|dirs| dirs.as_array())
+            .map(|dirs| {
+                dirs.iter()
+                    .filter_map(|dir| dir.as_str().map(String::from))
+                    .collect()
+            })
+            .unwrap_or_default();
+        let extra: Vec<&str> = resource
+            .as_object()
+            .map(|object| {
+                object
+                    .keys()
+                    .map(String::as_str)
+                    .filter(|key| *key != "directories")
+                    .collect()
+            })
+            .unwrap_or_default();
+        if !extra.is_empty() {
+            gaps.push(format!(
+                "product `{name}`: resource.{} is not expressible — only resource.directories is carried",
+                extra.join(", resource.")
+            ));
+        }
+    }
+
+    if entry
+        .get("targets")
+        .and_then(|targets| targets.as_array())
+        .is_some_and(|targets| !targets.is_empty())
+    {
+        gaps.push(format!(
+            "product `{name}`: modules[].targets is not expressible — hvolt builds the same module              set for every product"
+        ));
+    }
+    for key in [
+        "compileSdkVersion",
+        "targetSdkVersion",
+        "compatibleSdkVersion",
+        "runtimeOS",
+        "deviceTypes",
+        "buildOption",
+        "output",
+    ] {
+        if entry.get(key).is_some() {
+            gaps.push(format!(
+                "product `{name}`: `{key}` is project-wide in hvolt (it decides the toolchain, the                  module set or the package layout) — the root value is kept"
+            ));
+        }
+    }
+
+    let mut signing_overrides = None;
+    if let Some(config_name) = entry.get("signingConfig").and_then(|name| name.as_str()) {
+        match signing.get(config_name) {
+            Some(material) => {
+                signing_overrides = product_signing_overrides(material, signing.get("default"));
+            }
+            None => gaps.push(format!(
+                "product `{name}`: signingConfig `{config_name}` was not imported (its materials                  are missing or DevEco-encoded) — write [products.{name}.signing] by hand"
+            )),
+        }
+    }
+
+    ProductConfig {
+        app: overrides,
+        signing: signing_overrides,
+        resources,
+    }
+}
+
+/// A product's materials, reduced to the fields that differ from the inherited default.
+///
+/// An equal field is omitted so the written table says exactly what the product changes, and a
+/// project whose default config already carries the same materials gets no duplicated table.
+fn product_signing_overrides(
+    material: &SigningConfig,
+    base: Option<&SigningConfig>,
+) -> Option<ProductSigning> {
+    let pick = |value: &str, inherited: Option<&str>| match inherited {
+        Some(inherited) if inherited == value => None,
+        _ => Some(value.to_string()),
+    };
+    let overrides = ProductSigning {
+        store_file: pick(&material.store_file, base.map(|b| b.store_file.as_str())),
+        store_password: pick(
+            &material.store_password,
+            base.map(|b| b.store_password.as_str()),
+        ),
+        key_alias: pick(&material.key_alias, base.map(|b| b.key_alias.as_str())),
+        key_password: pick(
+            &material.key_password,
+            base.map(|b| b.key_password.as_str()),
+        ),
+        certpath: pick(&material.certpath, base.map(|b| b.certpath.as_str())),
+        profile: pick(&material.profile, base.map(|b| b.profile.as_str())),
+        sign_alg: pick(&material.sign_alg, base.map(|b| b.sign_alg.as_str())),
+    };
+    (overrides != ProductSigning::default()).then_some(overrides)
 }
 
 /// "6.1.1(24)" → "26.0.0"-style plain version is what hvolt writes; keep the numeric part.
@@ -1254,7 +1425,10 @@ fn import_app_scope(from: &Path, out: &Path, gaps: &mut Gaps) -> Result<(), Stri
     Ok(())
 }
 
-/// Local `file:` dependencies (a bundled .har) → [dependencies], with the payload copied in.
+/// `dependencies` of the source project → `[dependencies]`, with local payloads copied in.
+///
+/// Registry entries keep their declared range; `file:` entries carry the copied payload and a
+/// `path`. Nothing is left for the build to rediscover from a manifest.
 fn collect_dependencies(
     from: &Path,
     out: &Path,
@@ -1272,9 +1446,17 @@ fn collect_dependencies(
     for (name, spec) in map {
         let Some(s) = spec.as_str() else { continue };
         let Some(path) = s.strip_prefix("file:") else {
-            gaps.push(format!(
-                "registry dependency {name} = {s} has no flat equivalent yet"
-            ));
+            // A registry dependency is a declaration, not a payload: the version range stays as
+            // written and the package payload is resolved from `oh_modules` at build time. It
+            // goes into the table so the build reads no hvigor manifest.
+            deps.insert(
+                name.clone(),
+                Dependency {
+                    path: None,
+                    version: Some(s.to_string()),
+                    ..Dependency::default()
+                },
+            );
             continue;
         };
         let rel = path.trim_start_matches("./");
@@ -1448,7 +1630,7 @@ mod cmake_ref_tests {
 
 #[cfg(test)]
 mod module_dependency_path_tests {
-    use super::module_dependencies;
+    use super::{module_dependencies, read_app_config};
     use std::fs;
 
     fn module_with_dep(tag: &str, spec: &str) -> std::path::PathBuf {
@@ -1486,5 +1668,167 @@ mod module_dependency_path_tests {
         let deps = module_dependencies("entry", &dir);
         assert_eq!(deps["libentry.so"].path.as_deref(), Some("../shared"));
         let _ = fs::remove_dir_all(&dir);
+    }
+
+    /// A DevEco project whose build-profile declares products and signing configs.
+    fn dev_project(tag: &str) -> std::path::PathBuf {
+        let root = std::env::temp_dir().join(format!(
+            "hvolt-import-products-{}-{}",
+            tag,
+            std::process::id()
+        ));
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir_all(root.join("AppScope")).unwrap();
+        fs::create_dir_all(root.join("signing/debug")).unwrap();
+        // A config whose materials are absent on this machine is dropped by the import, so the
+        // fixtures have to exist for the product's `signingConfig` to resolve.
+        for name in [
+            "default.p12",
+            "default.cer",
+            "default.p7b",
+            "release.p12",
+            "release.cer",
+            "release.p7b",
+        ] {
+            fs::write(root.join("signing/debug").join(name), "").unwrap();
+        }
+        fs::write(
+            root.join("AppScope/app.json5"),
+            r#"{"app":{"bundleName":"org.example.app","versionCode":1000000,"versionName":"1.0.0","vendor":"example"}}"#,
+        )
+        .unwrap();
+        root
+    }
+
+    /// `app.products[]` becomes `[products.<name>]`: identity overrides, resource directories,
+    /// the linked signing config, and a gap for what hvolt cannot express per product.
+    #[test]
+    fn build_profile_products_become_product_tables() {
+        let root = dev_project("full");
+        fs::write(
+            root.join("build-profile.json5"),
+            r#"{
+              "app": {
+                "signingConfigs": [
+                  {
+                    "name": "default",
+                    "material": {
+                      "storeFile": "signing/debug/default.p12",
+                      "storePassword": "plain",
+                      "keyAlias": "debugKey",
+                      "keyPassword": "plain",
+                      "certpath": "signing/debug/default.cer",
+                      "profile": "signing/debug/default.p7b",
+                      "signAlg": "SHA256withECDSA"
+                    }
+                  },
+                  {
+                    "name": "releaseSign",
+                    "material": {
+                      "storeFile": "signing/debug/release.p12",
+                      "storePassword": "plain",
+                      "keyAlias": "debugKey",
+                      "keyPassword": "plain",
+                      "certpath": "signing/debug/release.cer",
+                      "profile": "signing/debug/release.p7b",
+                      "signAlg": "SHA256withECDSA"
+                    }
+                  }
+                ],
+                "products": [
+                  { "name": "default", "signingConfig": "default" },
+                  {
+                    "name": "release",
+                    "bundleName": "org.example.app.release",
+                    "versionName": "2.0.0",
+                    "versionCode": 2000000,
+                    "signingConfig": "releaseSign",
+                    "resource": { "directories": ["app-resources", "res/release"] },
+                    "targets": [{ "name": "default" }],
+                    "compileSdkVersion": "26.0.0"
+                  }
+                ]
+              }
+            }"#,
+        )
+        .unwrap();
+
+        let mut gaps = Vec::new();
+        let cfg = read_app_config(&root, &mut gaps).expect("import build-profile");
+        assert_eq!(cfg.app.bundle, "org.example.app");
+        assert_eq!(cfg.app.products, ["default", "release"]);
+        assert!(cfg.default_product.is_none(), "first product is default");
+
+        let release = cfg.products.get("release").expect("release product table");
+        assert_eq!(
+            release.app.bundle.as_deref(),
+            Some("org.example.app.release")
+        );
+        assert_eq!(release.app.version.as_deref(), Some("2.0.0"));
+        assert_eq!(release.app.version_code, Some(2000000));
+        assert_eq!(
+            release.resources.directories,
+            ["app-resources", "res/release"]
+        );
+        // The linked config is carried as the fields that differ from the inherited default.
+        let signing = release.signing.as_ref().expect("release signing override");
+        assert_eq!(
+            signing.store_file.as_deref(),
+            Some("signing/debug/release.p12")
+        );
+        assert_eq!(signing.key_alias, None, "equal field inherits");
+        assert!(
+            gaps.iter()
+                .any(|gap| gap.contains("modules[].targets") && gap.contains("release")),
+            "{gaps:?}"
+        );
+        assert!(
+            gaps.iter()
+                .any(|gap| gap.contains("compileSdkVersion") && gap.contains("release")),
+            "{gaps:?}"
+        );
+
+        // The written config resolves to the source's identity and materials.
+        let effective = cfg.with_product("release").expect("release resolves");
+        assert_eq!(effective.app.bundle, "org.example.app.release");
+        assert_eq!(effective.app.version, "2.0.0");
+        assert_eq!(effective.app.version_code(), 2_000_000);
+        assert_eq!(
+            effective.app.signing_for("release").unwrap().store_file,
+            "signing/debug/release.p12"
+        );
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    /// The first product decides the default, and a product that changes nothing gets no
+    /// override table (the inheritance carries it).
+    #[test]
+    fn the_first_product_becomes_default_product() {
+        let root = dev_project("first");
+        fs::write(
+            root.join("build-profile.json5"),
+            r#"{
+              "app": {
+                "products": [
+                  { "name": "free", "bundleName": "org.example.app" },
+                  { "name": "paid", "bundleName": "org.example.app.paid" }
+                ]
+              }
+            }"#,
+        )
+        .unwrap();
+
+        let mut gaps = Vec::new();
+        let cfg = read_app_config(&root, &mut gaps).expect("import build-profile");
+        assert_eq!(cfg.default_product.as_deref(), Some("free"));
+        assert_eq!(cfg.product_names(), ["default", "free", "paid"]);
+        let free = cfg.products.get("free").expect("free product");
+        assert!(free.app.bundle.is_none(), "identical to the root value");
+        assert!(free.app.version.is_none());
+        assert!(free.app.version_code.is_none());
+        assert!(free.signing.is_none());
+        let paid = cfg.products.get("paid").expect("paid product");
+        assert_eq!(paid.app.bundle.as_deref(), Some("org.example.app.paid"));
+        let _ = fs::remove_dir_all(&root);
     }
 }

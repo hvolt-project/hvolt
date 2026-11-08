@@ -378,7 +378,11 @@ pub(crate) fn test_chain(bundle: &str, apl: &str, kind: ProfileKind) -> Result<T
 pub fn sign(project_dir: &Path, apl: &str, kind: ProfileKind) -> Result<(), String> {
     use crate::support::config::AppConfig;
 
-    let app_cfg = AppConfig::from_file(&project_dir.join("hvolt.toml"))?;
+    // Sign what the project would build by default: the product's identity and its signing
+    // output directory, not the root config's.
+    let declared = AppConfig::from_file(&project_dir.join("hvolt.toml"))?;
+    let product = declared.default_product_name().to_string();
+    let app_cfg = declared.with_product(&product)?;
     let bundle = app_cfg.app.bundle.clone();
 
     println!(
@@ -404,6 +408,7 @@ pub fn sign(project_dir: &Path, apl: &str, kind: ProfileKind) -> Result<(), Stri
     crate::sign::package::sign_app(
         &chain.env,
         project_dir,
+        &product,
         &chain.p12.to_string_lossy(),
         TEST_P12_PWD,
         chain.alias,
