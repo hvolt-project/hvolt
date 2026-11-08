@@ -704,10 +704,13 @@ struct Bare {
 
     #[test]
     fn real_file_scan() {
-        let text = std::fs::read_to_string(
-        "/Users/hongyuncong/DshHome/clashbox-tailscale/clashbox/xb_components/components/Xb_Button.ets",
-    )
-    .unwrap();
+        // A tracked fixture, so the test reads the same file on every machine. A path outside
+        // the repository makes the suite depend on one checkout.
+        let path = concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/fixtures/animatable-extend/input.ets"
+        );
+        let text = std::fs::read_to_string(path).unwrap();
         let decls = crate::build::compile::component_index::scan_declarations(
             "entry",
             "test/Source",

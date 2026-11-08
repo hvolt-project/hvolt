@@ -280,6 +280,14 @@ mod tests {
     fn a_system_resource_resolves_to_the_sdk_id() {
         // `sys.color.icon_emphasize` is 125830995 in the SDK's `sysResource.js`; leaving the
         // `$r(…)` call in place makes the runtime report "Invalid resource ID: 0".
+        //
+        // The id lives in the SDK, which a clean checkout and CI do not have: with no table the
+        // lookup has nothing to resolve against and the reference is reported missing. Skip
+        // there — set `HVOLT_SYS_RESOURCE` to the SDK's `sysResource.js` to run it.
+        if sys_resource_id("color", "icon_emphasize").is_none() {
+            eprintln!("skipped: no sysResource.js; set HVOLT_SYS_RESOURCE to run this test");
+            return;
+        }
         let table = parse_table(TABLE);
         let (out, missing) = rewrite(
             "ThemeControl.setDefaultTheme($r('sys.color.icon_emphasize'))",
