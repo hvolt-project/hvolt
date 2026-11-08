@@ -20,9 +20,11 @@
     "node": ">=18"
   },
   "optionalDependencies": {
-    "@hvolt/cli-darwin-arm64": "26.0.0-7",
-    "@hvolt/cli-linux-x64": "26.0.0-7",
-    "@hvolt/cli-win32-x64": "26.0.0-7"
+    "@hvolt/cli-darwin-arm64": "26.0.0-8",
+    "@hvolt/cli-darwin-x64": "26.0.0-8",
+    "@hvolt/cli-linux-arm64": "26.0.0-8",
+    "@hvolt/cli-linux-x64": "26.0.0-8",
+    "@hvolt/cli-win32-x64": "26.0.0-8"
   },
   "publishConfig": {
     "access": "public"
