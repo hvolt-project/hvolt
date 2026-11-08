@@ -201,7 +201,9 @@ pub(crate) fn rewrite(
     // table. The call sites come from the tree, so `$r` inside a string or a comment is data;
     // the text between replacements is copied byte for byte.
     let Some(calls) = crate::build::ets_transform::resource_calls(source) else {
-        eprintln!("resource rewrite skipped: the module does not parse");
+        if crate::build::ets_transform::parse_diagnostics_enabled() {
+            eprintln!("resource rewrite skipped: the module does not parse");
+        }
         return (source.to_string(), Vec::new());
     };
     let mut edits: Vec<(usize, usize, String)> = Vec::new();

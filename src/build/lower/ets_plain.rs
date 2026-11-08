@@ -26,9 +26,8 @@ pub(crate) fn lower(
     src: &str,
     kits: &BTreeMap<String, BTreeMap<String, KitEntry>>,
 ) -> Result<String, String> {
-    // `deviceInfo.apiAvailable(v)` becomes the comparison it stands for before anything else
-    // looks at the source; the rewrite is idempotent, so a caller that already ran it pays
-    // only a tokenize.
+    // Keep the file as written: `settle_system_imports` later needs the original to see what
+    // the lowering erased (a decorator's import, for one).
     let written = src;
     // A file that declares a top-level `@Builder function` carries view code the plain printing
     // would copy out untouched: the body is a component block, and the reference expands it into

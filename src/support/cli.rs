@@ -14,10 +14,16 @@ use clap::{Parser, Subcommand};
     version = env!("CARGO_PKG_VERSION"),
     long_version = concat!(env!("CARGO_PKG_VERSION"), " (SDK ", "26.0.0", ")"),
     after_help = "Examples:\n  \
-        hvolt init myapp && cd myapp && hvolt run        # project → device in one line\n  \
+        hvolt init myapp && cd myapp && hvolt build       # new project → HAP, no signing needed\n  \
+        hvolt migrate --from ./DevEcoProj --dry-run       # see what a migration would change\n  \
+        hvolt sign --local && hvolt push                  # development board: sign locally, install\n  \
         hvolt sdk list-remote && hvolt sdk download 26.0.0.38\n  \
         hvolt check --size-limit 2M                       # package quality gate\n  \
-        hvolt screenshot -d <serial>                      # capture from a specific device\n\nDevEco Studio is NOT required, except for `emulator` (needs its binary and images).\nSee README § DevEco Studio."
+        hvolt screenshot <serial>                         # capture from a specific device\n\n\
+A build without [app.signing] produces an unsigned HAP; \n\
+`hvolt sign --local` signs it for development boards and emulators.\n\
+DevEco Studio is NOT required, except for `emulator` (needs its binary and images).\n\
+See README § DevEco Studio."
 )]
 pub struct Args {
     #[command(subcommand)]
@@ -142,6 +148,8 @@ pub enum Command {
         #[arg(long, default_value = "")]
         module: String,
     },
+    /// Internal: lower expanded .ts files to one modules.abc (called by `build`)
+    #[command(hide = true)]
     CompileAbc {
         /// Directory holding the pre-pass expanded .ts files
         ts_root: std::path::PathBuf,
@@ -291,7 +299,7 @@ pub enum Command {
         #[arg(long, value_name = "HAP")]
         install: Option<std::path::PathBuf>,
     },
-    /// Build + sign + push + launch in one shot
+    /// Push and launch the current package; with [app.signing] it builds and signs first
     Run {
         /// Device address (e.g. 192.168.1.100:38565 or serial number)
         device: Option<String>,
@@ -301,6 +309,9 @@ pub enum Command {
     },
     /// Package-side quality gate: duplicate files, oversized files, per-suffix totals
     Check {
+        /// package to inspect (default: the newest signed one in output/ or build/)
+        #[arg(value_name = "PATH")]
+        package: Option<std::path::PathBuf>,
         /// also flag files over this size (bytes, or 50K / 2M / 1G, case-insensitive)
         #[arg(long, value_parser = parse_size)]
         size_limit: Option<u64>,
@@ -346,6 +357,9 @@ pub enum Command {
         #[arg(short, long)]
         out: Option<std::path::PathBuf>,
         /// target device (serial or ip:port)
+        #[arg(value_name = "ADDR")]
+        device_pos: Option<String>,
+        /// target device (same as positional)
         #[arg(short, long)]
         device: Option<String>,
     },
@@ -381,7 +395,10 @@ pub enum Command {
         #[arg(long)]
         tail: Option<usize>,
         /// Target device (default: configured target)
-        #[arg(short = 'd', long)]
+        #[arg(value_name = "ADDR")]
+        device_pos: Option<String>,
+        /// Target device (same as positional)
+        #[arg(short = 'd', long = "device", value_name = "ADDR")]
         device: Option<String>,
     },
     /// File transfer with the device
@@ -424,7 +441,7 @@ pub enum Command {
         #[command(subcommand)]
         action: AgcAction,
     },
-    /// Manage hvolt configuration (java_home, node_home, sdk_path)
+    /// Manage hvolt configuration (sdk_path, node_home, device_*; see `config get`)
     Config {
         #[command(subcommand)]
         action: ConfigAction,
@@ -441,6 +458,9 @@ pub enum Command {
 pub enum SkillAction {
     /// List embedded documents
     List {
+        /// Include the content hash (build fingerprint)
+        #[arg(short, long)]
+        verbose: bool,
         /// One id per line — nothing else (agent-friendly)
         #[arg(long)]
         plain: bool,
@@ -634,8 +654,7 @@ pub fn parse() -> Args {
 pub enum ConfigAction {
     /// Show all configuration values
     Get,
-    /// Set a configuration key: sdk_path, node_home, java_home, ohpm_path,
-    /// sdk_support_version, device_target, device_host, device_hdc
+    /// Set a configuration key (valid keys are listed by `hvolt config get`)
     Set {
         /// Configuration key
         key: String,

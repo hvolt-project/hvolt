@@ -11,6 +11,7 @@ use crate::support::config::AppConfig;
 
 pub struct Report {
     issues: std::cell::Cell<usize>,
+    warnings: std::cell::Cell<usize>,
 }
 
 impl Report {
@@ -23,22 +24,28 @@ impl Report {
             "✗"
         };
         println!("  {} [{}] {:<12} {}", mark, section, name, detail);
-        if !ok && !fix.is_empty() {
-            println!("      → {}", fix);
-            if !warn {
+        if !ok {
+            if warn {
+                self.warnings.set(self.warnings.get() + 1);
+            } else {
                 self.issues.set(self.issues.get() + 1);
+            }
+            if !fix.is_empty() {
+                println!("      → {}", fix);
             }
         }
     }
 
     pub fn finish(&self) -> i32 {
-        let n = self.issues.get();
-        if n == 0 {
+        let errors = self.issues.get();
+        let warnings = self.warnings.get();
+        if errors == 0 && warnings == 0 {
             println!("Summary: all checks passed");
             0
         } else {
-            println!("Summary: {} issue(s)", n);
-            1
+            // A `⚠` on screen next to "all checks passed" reads as a broken tool.
+            println!("Summary: {errors} error(s), {warnings} warning(s)");
+            i32::from(errors > 0)
         }
     }
 }
@@ -48,6 +55,7 @@ impl Report {
 pub fn run(project_dir: &Path) -> Report {
     let rep = Report {
         issues: std::cell::Cell::new(0),
+        warnings: std::cell::Cell::new(0),
     };
 
     println!("hvolt doctor");
@@ -444,7 +452,16 @@ fn check_devices(rep: &Report, _sdk_root: Option<&Path>) {
             "run `hvolt device connect <serial|ip:port>` (native hdc, no hdc binary)",
         );
     } else {
-        rep.line(true, false, "device", "target", &cfg.device_target, "");
+        // A configured target is not a reachable device: `hvolt push` still fails when nothing
+        // answers on the other end, so this line says only what it knows.
+        rep.line(
+            false,
+            true,
+            "device",
+            "target",
+            &format!("{} configured (not probed)", cfg.device_target),
+            "run `hvolt device list` to see what is actually connected",
+        );
     }
 }
 

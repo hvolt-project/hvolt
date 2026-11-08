@@ -471,6 +471,10 @@ color start_window_background 0x01000008
         // ModuleInfo has no Default derive; build the one field set asr uses.
         let module = ModuleConfig {
             module: ModuleInfo {
+                router_map: Vec::new(),
+                main: None,
+                forms: Vec::new(),
+                backup: None,
                 src_entry: None,
                 name: "src".into(),
                 entry: "EntryAbility.ets".into(),

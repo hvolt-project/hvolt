@@ -678,7 +678,17 @@ pub fn list_installed() {
     }
 
     versions.sort_by(|a, b| b.version.cmp(&a.version));
-
+    // One line per version: `v26.0.0.23` and `default` are the same installation seen through
+    // a second directory and a symlink. Listing them separately reads as "three installed".
+    let mut seen: Vec<(String, String)> = Vec::new();
+    versions.retain(|sdk| {
+        let key = (sdk.version.clone(), sdk.platform_version.clone());
+        if seen.contains(&key) {
+            return false;
+        }
+        seen.push(key);
+        true
+    });
     println!("Installed SDK versions (in {}):", root.display());
     for (i, sdk) in versions.iter().enumerate() {
         let active_mark = if sdk.dir_name == "default" {

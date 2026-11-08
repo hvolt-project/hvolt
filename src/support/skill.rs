@@ -60,12 +60,18 @@ fn hash_docs(docs: &[(&str, &str)]) -> String {
 }
 
 /// Human-friendly listing (header + aligned description column).
-pub fn print_list() {
-    println!(
-        "hvolt {} — embedded docs (content {})",
-        env!("CARGO_PKG_VERSION"),
-        docs_hash()
-    );
+pub fn print_list(verbose: bool) {
+    // The content hash is a build fingerprint; it means nothing to a reader and reads as
+    // noise at the top of a list, so it only shows up when asked for.
+    if verbose {
+        println!(
+            "hvolt {} — embedded docs (content {})",
+            env!("CARGO_PKG_VERSION"),
+            docs_hash()
+        );
+    } else {
+        println!("hvolt {} — embedded docs", env!("CARGO_PKG_VERSION"));
+    }
     println!("{:<20} description", "id");
     for (id, desc) in all() {
         println!("{:<20} {}", id, desc);

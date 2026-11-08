@@ -21,13 +21,17 @@ pub(crate) fn config(action: ConfigAction) {
 
 pub(crate) fn skill(action: SkillAction) {
     match action {
-        crate::support::cli::SkillAction::List { plain, json } => {
+        crate::support::cli::SkillAction::List {
+            plain,
+            json,
+            verbose,
+        } => {
             if plain {
                 crate::support::skill::print_list_plain();
             } else if json {
                 crate::support::skill::print_list_json();
             } else {
-                crate::support::skill::print_list();
+                crate::support::skill::print_list(verbose);
             }
         }
         crate::support::cli::SkillAction::Show { name } => {

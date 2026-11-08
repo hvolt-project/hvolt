@@ -458,9 +458,13 @@ pub fn shell(
     timeout: Duration,
 ) -> Result<String, String> {
     let mut conn = HdcConn::connect_device(addr, timeout)?;
-    eprintln!("[shell] connected");
+    if std::env::var("HVOLT_USB_DEBUG").is_ok() {
+        eprintln!("[shell] connected");
+    }
     handshake(&mut conn, addr, version, identity)?;
-    eprintln!("[shell] handshake ok");
+    if std::env::var("HVOLT_USB_DEBUG").is_ok() {
+        eprintln!("[shell] handshake ok");
+    }
     let channel = rand::random::<u32>() & 0x7fff_ffff;
     let protect = PayloadProtect {
         channel_id: channel,
@@ -482,7 +486,9 @@ pub fn shell(
     // session (connection closed right after). Command frames travel on a new
     // (random) task channel and are checked against the session auth state.
     conn.send_packet(protect, &cmdline)?;
-    eprintln!("[shell] sent {} bytes", cmdline.len());
+    if std::env::var("HVOLT_USB_DEBUG").is_ok() {
+        eprintln!("[shell] sent {} bytes", cmdline.len());
+    }
     // The device answers on the channel and then keeps the session open, so a
     // blocking read would hang forever. A short idle timeout ends the read.
     // The device keeps the channel open after answering, so an idle timeout
@@ -495,14 +501,16 @@ pub fn shell(
         match conn.recv_packet() {
             Ok((p, payload)) => {
                 pkts += 1;
-                eprintln!(
-                    "[shell] pkt {} chan={} flag={} len={} hex={:02x?}",
-                    pkts,
-                    p.channel_id,
-                    p.command_flag,
-                    payload.len(),
-                    &payload[..payload.len().min(24)]
-                );
+                if std::env::var("HVOLT_USB_DEBUG").is_ok() {
+                    eprintln!(
+                        "[shell] pkt {} chan={} flag={} len={} hex={:02x?}",
+                        pkts,
+                        p.channel_id,
+                        p.command_flag,
+                        payload.len(),
+                        &payload[..payload.len().min(24)]
+                    );
+                }
                 // `CMD_KERNEL_CHANNEL_CLOSE` on *our* task channel ends the command.
                 // The handshake also closes the auth channel (channel 0) with the
                 // same flag right after connect; that trailer must not be mistaken
@@ -519,12 +527,16 @@ pub fn shell(
                 }
             }
             Err(e) => {
-                eprintln!("[shell] recv end: {e}");
+                if std::env::var("HVOLT_USB_DEBUG").is_ok() {
+                    eprintln!("[shell] recv end: {e}");
+                }
                 break;
             }
         }
     }
-    eprintln!("[shell] done pkts={} out_len={}", pkts, output.len());
+    if std::env::var("HVOLT_USB_DEBUG").is_ok() {
+        eprintln!("[shell] done pkts={} out_len={}", pkts, output.len());
+    }
     Ok(output)
 }
 
@@ -780,7 +792,9 @@ pub fn install(
     // creates the task for WAKEUP_SLAVETASK, then routes APP_* frames to it),
     // then announce the install.
     conn.send_packet(frame(CMD_KERNEL_WAKEUP_SLAVETASK), &[])?;
-    eprintln!("[install] wakeup sent");
+    if std::env::var("HVOLT_USB_DEBUG").is_ok() {
+        eprintln!("[install] wakeup sent");
+    }
     // No ack for the wakeup frame: the daemon creates the task and moves on
     // without replying (its dispatch has no handler), and the next frame on
     // this channel is the one that answers.
@@ -797,9 +811,13 @@ pub fn install(
     put_uint(&mut config, 9, 0);
     put_str(&mut config, 10, "install");
     put_str(&mut config, 11, "");
-    eprintln!("[install] app_check sending {} bytes", config.len());
+    if std::env::var("HVOLT_USB_DEBUG").is_ok() {
+        eprintln!("[install] app_check sending {} bytes", config.len());
+    }
     conn.send_packet(frame(CMD_APP_CHECK), &config)?;
-    eprintln!("[install] app_check sent, waiting ack");
+    if std::env::var("HVOLT_USB_DEBUG").is_ok() {
+        eprintln!("[install] app_check sent, waiting ack");
+    }
     // The daemon opens the staging file asynchronously and answers APP_BEGIN;
     // streaming before that leaves its fd unset and every write fails with
     // EBADF (device log: `WhenTransferFinish with errno:9`, 0/2782537 bytes).
@@ -850,15 +868,19 @@ pub fn install(
         conn.send_packet(frame(CMD_APP_DATA), &payload)?;
         pos += chunk.len() as u64;
     }
-    eprintln!("[install] {} bytes sent, awaiting result", pos);
+    if std::env::var("HVOLT_USB_DEBUG").is_ok() {
+        eprintln!("[install] {} bytes sent, awaiting result", pos);
+    }
     // The daemon installs once the byte count matches the announced size, then
     // replies with the outcome (mode byte + text).
     let (_, mut reply) = conn.recv_packet()?;
-    eprintln!(
-        "[install] result frame {} bytes hex={:02x?}",
-        reply.len(),
-        &reply[..reply.len().min(24)]
-    );
+    if std::env::var("HVOLT_USB_DEBUG").is_ok() {
+        eprintln!(
+            "[install] result frame {} bytes hex={:02x?}",
+            reply.len(),
+            &reply[..reply.len().min(24)]
+        );
+    }
     // A short frame is the daemon's begin/feature marker; the installer's own
     // message is longer, so only wait when the payload is still tiny. Heartbeats
     // (`command:5000`) are never the result.
@@ -878,7 +900,9 @@ pub fn install(
         String::from_utf8_lossy(&reply).to_string()
     };
     let text = text.trim().to_string();
-    eprintln!("[install] device says: {text}");
+    if std::env::var("HVOLT_USB_DEBUG").is_ok() {
+        eprintln!("[install] device says: {text}");
+    }
     // The daemon reports failure as plain text ("error: failed to install …"); a
     // transport-level success without a clean "success" word is not an install.
     let lowered = text.to_ascii_lowercase();

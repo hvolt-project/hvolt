@@ -97,6 +97,11 @@ pub struct StageModule<'a> {
     /// a `NavDestination`'s page path is `""` while a HAR compiles
     /// (`process_component_build.js::navigationOrNavDestinationCreateContent`).
     pub compile_har: bool,
+    /// The `main` the module's `hvolt.toml` declares (`Index.ets` → `Index`).
+    ///
+    /// It is the name other modules address this one by. `None` falls back to the module's
+    /// own manifest on disk, which is how a project that has not migrated still resolves.
+    pub main: Option<&'a str>,
 }
 
 /// Everything a merge needs besides the staged sources themselves.
@@ -257,12 +262,19 @@ pub fn assemble(
         .map(|m| {
             (
                 m.name.to_string(),
-                crate::build::compile::abc_compile::declared_entry(
-                    crate::build::compile::abc_compile::module_root(m.dir),
-                )
-                .unwrap_or_else(|| {
-                    crate::build::compile::abc_compile::DEFAULT_MODULE_ENTRY.to_string()
-                }),
+                m.main
+                    .map(|main| {
+                        let name = main.rsplit('/').next().unwrap_or(main);
+                        name.trim_end_matches(".ets").to_string()
+                    })
+                    .or_else(|| {
+                        crate::build::compile::abc_compile::declared_entry(
+                            crate::build::compile::abc_compile::module_root(m.dir),
+                        )
+                    })
+                    .unwrap_or_else(|| {
+                        crate::build::compile::abc_compile::DEFAULT_MODULE_ENTRY.to_string()
+                    }),
             )
         })
         .collect();
@@ -645,7 +657,9 @@ pub fn assemble(
                 match rewritten {
                     Some(rewritten) => rewritten,
                     None => {
-                        eprintln!("import rewrite skipped: {module} does not parse");
+                        if crate::build::ets_transform::parse_diagnostics_enabled() {
+                            eprintln!("import rewrite skipped: {module} does not parse");
+                        }
                         content
                     }
                 }
@@ -897,7 +911,9 @@ fn rewrite_relative_imports(
         // The lowering emits valid TypeScript, so a file that does not parse here is a defect
         // in this pipeline rather than an input to guess at: report it and leave the text as
         // it stands.
-        eprintln!("relative-import rewrite skipped: {module} does not parse");
+        if crate::build::ets_transform::parse_diagnostics_enabled() {
+            eprintln!("relative-import rewrite skipped: {module} does not parse");
+        }
         return content.to_string();
     };
     for specifier in specifiers {
@@ -997,7 +1013,9 @@ fn rewrite_dialog_builders(content: &str, source: &str) -> String {
     // is read from the tree: an `ObjectProperty` whose key is `builder` and whose value calls a
     // registered component, so a `builder:` inside a string or a comment is not a candidate.
     let Some(sites) = crate::build::ets_transform::builder_sites(content) else {
-        eprintln!("dialog builder rewrite skipped: the module does not parse");
+        if crate::build::ets_transform::parse_diagnostics_enabled() {
+            eprintln!("dialog builder rewrite skipped: the module does not parse");
+        }
         return content.to_string();
     };
     let controllers = dialog_controllers(content);
@@ -1374,9 +1392,11 @@ fn declares_as_type(source: &str, name: &str) -> bool {
                 || crate::build::lower::enum_init::declares_const_enum(source, name)
         }
         None => {
-            eprintln!(
-                "type-only pass: the target module does not parse; reading `{name}` from its tokens"
-            );
+            if crate::build::ets_transform::parse_diagnostics_enabled() {
+                eprintln!(
+                    "type-only pass: the target module does not parse; reading `{name}` from its tokens"
+                );
+            }
             declares_as_type_by_tokens(source, name)
         }
     }
@@ -2530,10 +2550,12 @@ fn rewrite_package_imports(
     // The specifiers come from the tree, so a `from` inside a comment or a string cannot
     // split a statement, and a binding list spread over several lines is one node.
     let Some(specifiers) = crate::build::ets_transform::module_specifiers(content) else {
-        eprintln!(
-            "package import rewrite skipped: {} does not parse",
-            rel.display()
-        );
+        if crate::build::ets_transform::parse_diagnostics_enabled() {
+            eprintln!(
+                "package import rewrite skipped: {} does not parse",
+                rel.display()
+            );
+        }
         return content.to_string();
     };
     // The urls are resolved per request: a request some statement in this file loads at

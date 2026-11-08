@@ -141,10 +141,17 @@ fn duplicate_groups(
     Ok(groups)
 }
 
-pub fn check_package(project_dir: &Path, size_limit: Option<u64>) -> Result<(), String> {
-    let hap_path = find_signed_hap(project_dir)?;
+pub fn check_package(
+    project_dir: &Path,
+    package: Option<&Path>,
+    size_limit: Option<u64>,
+) -> Result<(), String> {
+    let hap_path = match package {
+        Some(path) => path.to_path_buf(),
+        None => find_signed_hap(project_dir)?,
+    };
     println!(
-        "检查包: {}",
+        "Package: {}",
         hap_path.file_name().unwrap().to_string_lossy()
     );
 
@@ -153,18 +160,18 @@ pub fn check_package(project_dir: &Path, size_limit: Option<u64>) -> Result<(), 
 
     if let Some(lim) = st.size_limit {
         if st.over_limit.is_empty() {
-            println!("✓ 无超过 {} B 的大文件", lim);
+            println!("✓ no file over {} B", lim);
         } else {
-            println!("⚠ 超过 {} B 的文件 {} 个:", lim, st.over_limit.len());
+            println!("⚠ {} file(s) over {} B:", st.over_limit.len(), lim);
             for (f, sz) in st.over_limit.iter().take(10) {
                 println!("    {:>8.1} KB  {}", *sz as f64 / 1024.0, f);
             }
         }
     }
     if st.duplicates.is_empty() {
-        println!("✓ 无重复文件");
+        println!("✓ no duplicate files");
     } else {
-        println!("⚠ 重复文件组 {} 个:", st.duplicates.len());
+        println!("⚠ {} duplicate group(s):", st.duplicates.len());
         for (first, rest, sz) in st.duplicates.iter().take(10) {
             println!(
                 "    {:>8.1} KB × {}  ({})",
@@ -175,24 +182,22 @@ pub fn check_package(project_dir: &Path, size_limit: Option<u64>) -> Result<(), 
         }
     }
     if !st.suffixes.is_empty() {
-        println!("按后缀体积分布 (top 8):");
+        println!("Size by suffix (top 8):");
         for (sfx, total, cnt) in st.suffixes.iter().take(8) {
             println!(
-                "    {:>9.1} KB  {:>4} 个  {}",
+                "    {:>9.1} KB  {:>4}  {}",
                 *total as f64 / 1024.0,
                 cnt,
                 sfx
             );
         }
     }
-    println!(
-        "\n{}",
-        if clean {
-            "✓ 包侧检查通过"
-        } else {
-            "✗ 包侧检查未通过（见上方明细）"
-        }
-    );
+    if !clean {
+        // A gate that exits 0 on failure is not a gate: `hvolt check && hvolt push` would
+        // always pass in CI.
+        return Err("package-side check failed (see the detail above)".to_string());
+    }
+    println!("\n✓ package checks passed");
     Ok(())
 }
 

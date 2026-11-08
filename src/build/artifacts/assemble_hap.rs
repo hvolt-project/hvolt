@@ -20,7 +20,7 @@ pub fn run(project: &Path, module_arg: &str, out: Option<&Path>) -> Result<PathB
     let packages = crate::build::deps::npm::discover(&app, project)?;
     // The source directory is only a lookup key here: everything the package records comes
     // from the module's declared name.
-    let (_source_dir, module_cfg) = if module_arg.is_empty() {
+    let (module_dir, module_cfg) = if module_arg.is_empty() {
         modules
             .first()
             .map(|(n, m)| (n.clone(), m))
@@ -54,7 +54,13 @@ pub fn run(project: &Path, module_arg: &str, out: Option<&Path>) -> Result<PathB
 
     let res_dir = out_dir.join("res");
     let table_path = crate::build::artifacts::res_compile::run(
-        project, module_cfg, &app, &res_dir, build_mode, &facts,
+        project,
+        &project.join(&module_dir),
+        module_cfg,
+        &app,
+        &res_dir,
+        build_mode,
+        &facts,
     )?;
     let table_text = std::fs::read_to_string(&table_path)
         .map_err(|e| format!("read {}: {e}", table_path.display()))?;

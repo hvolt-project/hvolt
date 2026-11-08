@@ -7,7 +7,7 @@
 //! *content* to locate its sources.
 //!
 //! One exception to that division: a package the sources import while `hvolt.toml` does not
-//! declare it (`hvolt import` can lose a declaration) is taken from the project's own
+//! declare it (`hvolt migrate` can lose a declaration) is taken from the project's own
 //! `oh-package.json5`. There the manifest is used as the declaration the flat config is
 //! missing — a name the sources merely mention (a typo, a system module) does not qualify.
 
@@ -167,10 +167,21 @@ pub fn discover(app: &AppConfig, project_dir: &Path) -> Result<Vec<Package>, Str
             if dep.optional {
                 continue;
             }
-            return Err(format!(
-                "dependency '{name}' is declared but {} does not exist; run `hvolt dep sync`",
-                dir.display()
-            ));
+            // Two different mistakes land here: a `path` that points nowhere, and a
+            // registry dependency that has no local copy — hvolt does not fetch packages, so
+            // "check your path" is not advice the second case can act on.
+            return Err(match &dep.path {
+                Some(path) => format!(
+                    "dependency '{name}' declares `path = \"{path}\"` but {} does not exist",
+                    dir.display()
+                ),
+                None => format!(
+                    "dependency '{name}' is a registry dependency with no local copy at {}. \
+                     hvolt does not fetch packages: vendor it and declare `path = \"...\"` \
+                     in [dependencies]",
+                    dir.display()
+                ),
+            });
         }
         // A path dependency carries the version it declares; a registry dependency carries
         // the version the lock resolved, so records and imports agree on one string.
@@ -192,7 +203,7 @@ pub fn discover(app: &AppConfig, project_dir: &Path) -> Result<Vec<Package>, Str
 
 /// Packages the project's sources import while `[dependencies]` does not declare them.
 ///
-/// `hvolt import` can drop a declaration (measured on clashbox, 2026-11-06: `EntryAbility.ets`
+/// `hvolt migrate` can drop a declaration (measured on clashbox, 2026-11-06: `EntryAbility.ets`
 /// imports `@cxy/sandboxfinder` dynamically and the project's `oh-package.json5` lists it,
 /// but the generated `hvolt.toml` never mentions it). The import alone is not evidence — a
 /// typo, a system module or a member of the project itself reads the same way — so a package
@@ -518,7 +529,9 @@ fn resolve_dir(
             Some(version) if is_exact(version) => version.to_string(),
             Some(range) => {
                 return Err(format!(
-                    "dependency '{name}' = \"{range}\" has no resolved version in hvolt.lock; run `hvolt dep sync`"
+                    "dependency '{name}' = \"{range}\" needs a pinned version: hvolt does not \
+                     fetch from a registry, so write the exact version (\"1.2.3\") or add \
+                     `path` pointing at a vendored copy"
                 ))
             }
             None => return Ok(None),
@@ -928,7 +941,7 @@ mod tests {
 
 /// The resolved dependency versions a build has to agree with.
 ///
-/// `hvolt.lock` is written by `hvolt dep sync`; until it exists every registry dependency has
+/// `hvolt.lock` pins resolved versions; until it exists every ranged dependency has
 /// to be declared with an exact version, which is a fact the declaration itself carries.
 #[derive(Debug, Default)]
 pub struct Lock {

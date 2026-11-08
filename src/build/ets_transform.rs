@@ -742,8 +742,17 @@ enum Scope {
 ///   - `declares_type` decides a re-exported name's side from the module it comes from, since
 ///     a re-export is never read locally.
 ///
+/// Whether a lowering diagnostic should be printed.
+///
+/// A module that fails to parse is a pipeline defect, not user input: the rewrite degrades to
+/// a token-level reading so the build continues. Printing one line per import symbol turns a
+/// build into hundreds of lines nobody can act on, so the detail sits behind
+/// `HVOLT_DEBUG_PARSE` and the build stays quiet.
+pub(crate) fn parse_diagnostics_enabled() -> bool {
+    std::env::var_os("HVOLT_DEBUG_PARSE").is_some()
+}
+
 /// `None` means the text does not parse; the caller keeps it as it stands.
-#[allow(dead_code)] // the assembly call site lands with the import-emission handoff
 pub(crate) fn rewrite_imports(
     text: &str,
     source: Option<&str>,

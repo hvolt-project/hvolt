@@ -16,7 +16,7 @@ pub(crate) fn init(name: String) {
     println!("  Next: cd {} && hvolt build", name);
 }
 
-pub(crate) fn import(from: Option<PathBuf>, out: Option<PathBuf>, dry_run: bool) {
+pub(crate) fn migrate(from: Option<PathBuf>, out: Option<PathBuf>, dry_run: bool) {
     if let Err(e) = crate::project::import::run(from.as_deref(), out.as_deref(), dry_run) {
         eprintln!("✗ {}", e);
         std::process::exit(1);
@@ -38,8 +38,12 @@ pub(crate) fn clean() {
     }
 }
 
-pub(crate) fn check(size_limit: Option<u64>) {
-    if let Err(e) = crate::project::check::check_package(std::path::Path::new("."), size_limit) {
+pub(crate) fn check(package: Option<PathBuf>, size_limit: Option<u64>) {
+    if let Err(e) = crate::project::check::check_package(
+        std::path::Path::new("."),
+        package.as_deref(),
+        size_limit,
+    ) {
         eprintln!("✗ {}", e);
         std::process::exit(1);
     }

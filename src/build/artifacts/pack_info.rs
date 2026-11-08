@@ -140,6 +140,10 @@ mod tests {
     fn module() -> ModuleConfig {
         ModuleConfig {
             module: ModuleInfo {
+                router_map: Vec::new(),
+                main: None,
+                forms: Vec::new(),
+                backup: None,
                 src_entry: None,
                 name: "src".into(),
                 entry: "EntryAbility.ets".into(),

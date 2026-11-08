@@ -388,6 +388,18 @@ pub fn sign(project_dir: &Path, apl: &str, kind: ProfileKind) -> Result<(), Stri
         bundle
     );
 
+    // Signing an unsigned package that predates the sources produces a package with a fresh
+    // mtime over old code, and every mtime check downstream then believes it. Refuse here so
+    // the fix starts at `build`.
+    if let Some(unsigned) = crate::build::deps::pipeline::find_unsigned_hap(project_dir) {
+        if crate::build::deps::pipeline::sources_newer_than(project_dir, &unsigned) {
+            return Err(format!(
+                "{} is older than the sources: run `hvolt build` first, then `hvolt sign --local`",
+                unsigned.display()
+            ));
+        }
+    }
+
     let chain = test_chain(&bundle, apl, kind)?;
     crate::sign::package::sign_app(
         &chain.env,
