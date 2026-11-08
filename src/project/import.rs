@@ -301,7 +301,7 @@ fn read_app_config(from: &Path, gaps: &mut Gaps) -> Result<AppConfig, String> {
             for entry in &product_list {
                 let Some(product_name) = entry.get("name").and_then(|name| name.as_str()) else {
                     gaps.push(
-                        "build-profile product without a name skipped — hvolt addresses a product                          by [products.<name>]"
+                        "build-profile product without a name skipped — hvolt addresses a product by [products.<name>]"
                             .to_string(),
                     );
                     continue;
@@ -328,7 +328,7 @@ fn read_app_config(from: &Path, gaps: &mut Gaps) -> Result<AppConfig, String> {
             if let Some(mode_set) = app_bp.get("buildModeSet") {
                 if !mode_set.is_null() {
                     gaps.push(
-                        "buildModeSet ignored (hvolt builds one product per `hvolt build                          --product`; there is no release/debug mode set)"
+                        "buildModeSet ignored (hvolt builds one product per `hvolt build --product`; there is no release/debug mode set)"
                             .to_string(),
                     );
                 }
@@ -459,7 +459,7 @@ fn import_product(
         .is_some_and(|targets| !targets.is_empty())
     {
         gaps.push(format!(
-            "product `{name}`: modules[].targets is not expressible — hvolt builds the same module              set for every product"
+            "product `{name}`: modules[].targets is not expressible — hvolt builds the same module set for every product"
         ));
     }
     for key in [
@@ -473,7 +473,7 @@ fn import_product(
     ] {
         if entry.get(key).is_some() {
             gaps.push(format!(
-                "product `{name}`: `{key}` is project-wide in hvolt (it decides the toolchain, the                  module set or the package layout) — the root value is kept"
+                "product `{name}`: `{key}` is project-wide in hvolt (it decides the toolchain, the module set or the package layout) — the root value is kept"
             ));
         }
     }
@@ -485,7 +485,7 @@ fn import_product(
                 signing_overrides = product_signing_overrides(material, signing.get("default"));
             }
             None => gaps.push(format!(
-                "product `{name}`: signingConfig `{config_name}` was not imported (its materials                  are missing or DevEco-encoded) — write [products.{name}.signing] by hand"
+                "product `{name}`: signingConfig `{config_name}` was not imported (its materials are missing or DevEco-encoded) — write [products.{name}.signing] by hand"
             )),
         }
     }
