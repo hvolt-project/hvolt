@@ -17,6 +17,9 @@ use crate::support::config::{AppConfig, ModuleConfig};
 /// What restool needs: everything that names the resources and the module.
 pub struct ResCompileInput<'a> {
     pub project_dir: &'a Path,
+    /// The module's own root: its `resources/` is what this compiles. A multi-module project
+    /// keeps one per module (`<module>/resources`), so the staging root is not the project's.
+    pub module_dir: &'a Path,
     pub app: &'a AppConfig,
     pub module: &'a ModuleConfig,
     /// The rendered module.json (process-profile shape) restool validates refs against.
@@ -38,9 +41,52 @@ pub struct ResCompileInput<'a> {
 /// `ohmurl` names the module that owns the page, which is the first segment of
 /// `pageSourceFile`, and its version: the entry module's records carry none (a bare `&`),
 /// a dependency module's carry its own.
-fn fill_route_map(
+fn write_route_map(
     stage: &Path,
-    project_dir: &Path,
+    module_dir: &Path,
+    module: &crate::support::config::ModuleInfo,
+    bundle: &str,
+) -> Result<(), String> {
+    if module.router_map.is_empty() {
+        // A project that has not migrated still ships its own `route_map.json`; the copy that
+        // came with it carries no `ohmurl`, so fill it rather than leave it inert.
+        return fill_staged_route_map(stage, module_dir, &module.name, bundle);
+    }
+    // Same resolver the lowering uses: one derivation, one failure mode. Two copies here
+    // published a route the abc never registered.
+    let resolved = crate::build::deps::routes::route_entries(Some(module), module_dir)?;
+    let mut entries = Vec::new();
+    for route in &resolved {
+        let owner = route_owner(module_dir, &route.page, &module.name)?;
+        let version = if owner == module.name { "" } else { "1.0.0" };
+        let stem = route.page.strip_suffix(".ets").unwrap_or(&route.page);
+        entries.push(serde_json::json!({
+            "name": route.name,
+            "pageSourceFile": format!("src/main/ets/{}", route.page),
+            "buildFunction": route.build_function,
+            "ohmurl": format!("@normalized:N&&&{owner}/src/main/ets/{stem}&{version}"),
+            "bundleName": bundle,
+            "moduleName": module.name,
+        }));
+    }
+    let profile_dir = stage.join("base").join("profile");
+    std::fs::create_dir_all(&profile_dir)
+        .map_err(|e| format!("mkdir {}: {e}", profile_dir.display()))?;
+    let text = serde_json::to_string_pretty(&serde_json::json!({ "routerMap": entries }))
+        .map_err(|e| e.to_string())?;
+    let path = profile_dir.join("route_map.json");
+    std::fs::write(&path, text).map_err(|e| format!("write {}: {e}", path.display()))
+}
+
+/// Fill `ohmurl` / `bundleName` / `moduleName` into a `route_map.json` that came with the
+/// project.
+///
+/// The installer resolves a `NavPathStack` push through `ohmurl`; a manifest copied verbatim
+/// has none, so the push finds the name and no target. This is the path a project takes before
+/// it is migrated, where the manifest is the source of truth.
+fn fill_staged_route_map(
+    stage: &Path,
+    module_dir: &Path,
     module_name: &str,
     bundle: &str,
 ) -> Result<(), String> {
@@ -51,76 +97,190 @@ fn fill_route_map(
     let Ok(mut json) = serde_json::from_str::<serde_json::Value>(&text) else {
         return Ok(());
     };
-    let Some(entries) = json.get_mut("routerMap").and_then(|value| value.as_array_mut()) else {
+    let Some(entries) = json
+        .get_mut("routerMap")
+        .and_then(|value| value.as_array_mut())
+    else {
         return Ok(());
     };
     for entry in entries.iter_mut() {
-        let Some(source) = entry
-            .get("pageSourceFile")
-            .and_then(|value| value.as_str())
-            .map(str::to_string)
+        let Some(page) = entry["pageSourceFile"]
+            .as_str()
+            .map(|source| source.trim_start_matches("src/main/ets/").to_string())
         else {
             continue;
         };
-        let owner = route_owner(project_dir, &source, module_name);
+        let owner = route_owner(module_dir, &page, module_name)?;
         let version = if owner == module_name { "" } else { "1.0.0" };
-        let stem = source.trim_end_matches(".ets");
-        entry["ohmurl"] = serde_json::json!(format!("@normalized:N&&&{owner}/{stem}&{version}"));
+        let stem = page.strip_suffix(".ets").unwrap_or(&page);
+        entry["ohmurl"] = serde_json::json!(format!(
+            "@normalized:N&&&{owner}/src/main/ets/{stem}&{version}"
+        ));
         entry["bundleName"] = serde_json::json!(bundle);
         entry["moduleName"] = serde_json::json!(module_name);
     }
     let text = serde_json::to_string_pretty(&json).map_err(|e| e.to_string())?;
-    std::fs::write(&path, text).map_err(|e| format!("write {}: {e}", path.display()))?;
-    Ok(())
+    std::fs::write(&path, text).map_err(|e| format!("write {}: {e}", path.display()))
 }
 
-/// Which module a `pageSourceFile` belongs to.
+/// Which module a route page belongs to.
 ///
-/// A module's `route_map.json` can name a page another module owns (`entry` lists
-/// `xb_components`' `Xb_Studio`), and `ohmurl` has to name the owner. The source tree keeps
-/// the flat layout (`<module>/components/…`), while `pageSourceFile` is written against the
-/// standard one (`src/main/ets/components/…`), so the probe drops that prefix.
-fn route_owner(project_dir: &Path, source: &str, module_name: &str) -> String {
-    let relative = source.strip_prefix("src/main/ets/").unwrap_or(source);
-    let Some(parent) = project_dir.parent() else {
-        return module_name.to_string();
-    };
-    for entry in std::fs::read_dir(parent).into_iter().flatten().flatten() {
-        let dir = entry.path();
-        if !dir.is_dir() {
-            continue;
-        }
-        if dir.join(relative).is_file() {
-            return dir
-                .file_name()
-                .and_then(|name| name.to_str())
-                .unwrap_or(module_name)
-                .to_string();
-        }
+/// A module's `[[module.router_map]]` can name a page another module owns (`entry` lists
+/// `xb_components`' `Xb_Studio`), and the installer resolves the route through the owner's
+/// `ohmurl`. The page path here is module-relative (`components/...`), so the probe tries the
+/// flat layout (`<module>/components/...`) of each sibling module.
+fn route_owner(module_dir: &Path, page: &str, own: &str) -> Result<String, String> {
+    // The module that stages this page owns it unless a sibling also has a file at that
+    // relative path.
+    if module_dir.join(page).is_file() {
+        return Ok(own.to_string());
     }
-    module_name.to_string()
+    let Some(workspace) = module_dir.parent() else {
+        return Ok(own.to_string());
+    };
+    let mut candidates: Vec<std::path::PathBuf> = std::fs::read_dir(workspace)
+        .into_iter()
+        .flatten()
+        .flatten()
+        .map(|entry| entry.path())
+        .filter(|dir| dir.is_dir() && dir.join(page).is_file())
+        .collect();
+    candidates.sort();
+    match candidates.len() {
+        // No sibling has it: the page is this module's own file that is not staged yet.
+        0 => Ok(own.to_string()),
+        1 => {
+            let cfg = crate::build::deps::routes::module_config(&candidates[0])
+                .map_err(|error| format!("route `{page}`: {error}"))?;
+            Ok(cfg.module.name)
+        }
+        // Two modules with the same relative page: the ohmurl would name one of them at
+        // random. Refuse rather than publish a route that points at the wrong module.
+        _ => Err(format!(
+            "route `{page}` exists in more than one module ({}); a route must name a page \
+             one module owns",
+            candidates
+                .iter()
+                .map(|dir| dir.display().to_string())
+                .collect::<Vec<_>>()
+                .join(", ")
+        )),
+    }
+}
+
+/// The widget manifest, from `[[module.forms]]`.
+fn write_form_config(
+    stage: &Path,
+    module: &crate::support::config::ModuleInfo,
+) -> Result<(), String> {
+    if module.forms.is_empty() {
+        return Ok(());
+    }
+    let forms: Vec<serde_json::Value> = module
+        .forms
+        .iter()
+        .map(|form| {
+            serde_json::json!({
+                "name": form.name,
+                "displayName": form.display_name,
+                "description": form.description,
+                "src": format!("./{}", form.src),
+                "uiSyntax": form.ui_syntax,
+                "window": form.window.as_ref().map(|window| serde_json::json!({
+                    "designWidth": window.design_width,
+                    "autoDesignWidth": window.auto_design_width,
+                })),
+                "colorMode": form.color_mode,
+                "isDynamic": form.is_dynamic,
+                "isDefault": form.is_default,
+                "updateEnabled": form.update_enabled,
+                "scheduledUpdateTime": form.scheduled_update_time,
+                "updateDuration": form.update_duration,
+                "defaultDimension": form.default_dimension,
+                "supportDimensions": form.support_dimensions,
+            })
+        })
+        .collect();
+    write_profile(
+        stage,
+        "form_config.json",
+        &serde_json::json!({ "forms": forms }),
+    )
+}
+
+/// `backup_config.json`, from `[module.backup]`.
+fn write_backup_config(
+    stage: &Path,
+    module: &crate::support::config::ModuleInfo,
+) -> Result<(), String> {
+    let Some(backup) = &module.backup else {
+        return Ok(());
+    };
+    write_profile(
+        stage,
+        "backup_config.json",
+        &serde_json::json!({ "allowToBackupRestore": backup.allow_to_backup_restore }),
+    )
+}
+
+fn write_profile(stage: &Path, name: &str, value: &serde_json::Value) -> Result<(), String> {
+    let profile_dir = stage.join("base").join("profile");
+    std::fs::create_dir_all(&profile_dir)
+        .map_err(|e| format!("mkdir {}: {e}", profile_dir.display()))?;
+    let path = profile_dir.join(name);
+    let text = serde_json::to_string_pretty(value).map_err(|e| e.to_string())?;
+    std::fs::write(&path, text).map_err(|e| format!("write {}: {e}", path.display()))
 }
 
 /// Stage the resource tree restool compiles: the project's `resources/` plus a
 /// generated `profile/main_pages.json` (the reference injects it the same way).
-pub fn stage_resources(input: &ResCompileInput<'_>, stage: &Path) -> Result<(), String> {
-    let project_res = input.project_dir.join("resources");
+pub(crate) fn stage_resources(input: &ResCompileInput<'_>, stage: &Path) -> Result<(), String> {
+    // Two layouts are valid: a migrated project keeps resources beside its module
+    // (`entry/resources/`), a scaffolded one keeps them at the project root
+    // (`resources/`, which is what `hvolt init` writes). Prefer the module, fall back to the
+    // root — checking only one of them broke `hvolt init` projects.
+    let project_res = if input.module_dir.join("resources").is_dir() {
+        input.module_dir.join("resources")
+    } else {
+        input.project_dir.join("resources")
+    };
     if !project_res.is_dir() {
         return Err(format!(
-            "no resources/ directory at {}",
-            project_res.display()
+            "no resources/ directory at {} or {}",
+            input.module_dir.join("resources").display(),
+            input.project_dir.join("resources").display()
         ));
     }
     copy_dir_recursive(&project_res, stage)?;
     // restool assigns ids in input order, and hvigor feeds it two trees: the app-scope
     // resources first, then the module's. Reproducing that split keeps the ids aligned.
     let app_stage = stage.with_file_name("app-stage");
+    // Same rule as `stage`: rebuilt from the sources every run, so a resource the user
+    // deleted cannot survive here and reappear in the HAP.
+    if app_stage.exists() {
+        std::fs::remove_dir_all(&app_stage)
+            .map_err(|e| format!("clean {}: {e}", app_stage.display()))?;
+    }
     split_app_resources(&project_res, input.app, stage, &app_stage)?;
     // The project may keep an app-scope tree of its own (`app-resources/`). restool numbers
     // the app scope before the module, so every media file in it has to reach `app-stage`;
     // leaving them in the module tree shifts every later id by their count (measured
     // 2026-11-07 on clashbox: 8 media stayed behind and every id came out 8 low).
     if let Some(app_res) = app_resource_dir(input.project_dir) {
+        // The app scope also carries the element tables `module.json` references
+        // (`$string:app_name` is its label). Without them restool rejects the manifest with
+        // `The resource reference '$string:app_name' is not defined` — the app-scope tree a
+        // migrated project keeps is `app-resources/`, not the module's `resources/`.
+        let app_base = app_res.join("base");
+        if app_base.is_dir() {
+            for entry in std::fs::read_dir(&app_base).into_iter().flatten().flatten() {
+                let path = entry.path();
+                if !path.is_dir() || entry.file_name() == "media" {
+                    continue;
+                }
+                copy_dir_recursive(&path, &app_stage.join("base").join(entry.file_name()))?;
+            }
+        }
         let app_media = app_res.join("base/media");
         if app_media.is_dir() {
             copy_dir_recursive(&app_media, &app_stage.join("base/media"))?;
@@ -147,12 +307,14 @@ pub fn stage_resources(input: &ResCompileInput<'_>, stage: &Path) -> Result<(), 
     let main_pages = crate::translator::generate_main_pages(input.module);
     std::fs::write(profile_dir.join("main_pages.json"), main_pages)
         .map_err(|e| format!("write main_pages.json: {e}"))?;
-    fill_route_map(
+    write_route_map(
         stage,
-        input.project_dir,
-        &input.module.module.name,
+        input.module_dir,
+        &input.module.module,
         &input.app.app.bundle,
     )?;
+    write_form_config(stage, &input.module.module)?;
+    write_backup_config(stage, &input.module.module)?;
     Ok(())
 }
 
@@ -261,6 +423,15 @@ fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<(), String> {
         let from = entry.path();
         let to = dst.join(entry.file_name());
         if from.is_dir() {
+            // An empty directory is not a resource: restool reads `resources/<qualifier>/…`
+            // and rejects a directory with nothing under it (`Invalid qualifier key 'media'`).
+            // Coping it through fails a build that has nothing wrong with its resources.
+            let empty = std::fs::read_dir(&from)
+                .map(|mut entries| entries.next().is_none())
+                .unwrap_or(false);
+            if empty {
+                continue;
+            }
             copy_dir_recursive(&from, &to)?;
         } else {
             std::fs::copy(&from, &to).map_err(|e| format!("copy {}: {e}", from.display()))?;
@@ -808,7 +979,7 @@ fn config_stamp(text: &str) -> String {
 }
 
 /// Run restool with the staged resources. Returns the ResourceTable.txt path.
-pub fn compile(input: &ResCompileInput<'_>, stage: &Path) -> Result<PathBuf, String> {
+pub(crate) fn compile(input: &ResCompileInput<'_>, stage: &Path) -> Result<PathBuf, String> {
     // id_defined.json must exist with an empty record: restool treats a missing or
     // empty-object file as a config error, but accepts `{"record":[]}`.
     let ids_map = input.out_dir.join("ids_map");
@@ -881,8 +1052,9 @@ pub fn compile(input: &ResCompileInput<'_>, stage: &Path) -> Result<PathBuf, Str
 
 /// One-shot pipeline: stage the resources and run restool.
 /// Returns the compiled ResourceTable.txt path.
-pub fn run(
+pub(crate) fn run(
     project_dir: &Path,
+    module_dir: &Path,
     module: &ModuleConfig,
     app: &AppConfig,
     out_dir: &Path,
@@ -891,6 +1063,11 @@ pub fn run(
 ) -> Result<PathBuf, String> {
     std::fs::create_dir_all(out_dir).map_err(|e| format!("mkdir {}: {e}", out_dir.display()))?;
     let stage = out_dir.with_file_name("res-stage");
+    // Rebuilt from the sources on every run: a resource the user deleted would otherwise
+    // survive here and make restool fail on a directory that no longer exists upstream.
+    if stage.exists() {
+        std::fs::remove_dir_all(&stage).map_err(|e| format!("clean {}: {e}", stage.display()))?;
+    }
     std::fs::create_dir_all(&stage).map_err(|e| format!("mkdir {}: {e}", stage.display()))?;
 
     // module.json is the config restool validates resource refs against. Empty
@@ -911,9 +1088,15 @@ pub fn run(
             )
             .map(|entries| !entries.is_empty())
             .unwrap_or(false),
-            has_route_map: project_dir
-                .join("resources/base/profile/route_map.json")
-                .is_file(),
+            // Derived, not copied: a migrated project carries the route names in
+            // `hvolt.toml` and the manifest is generated, so the source file is not the
+            // signal — the table is.
+            has_route_map: !crate::build::deps::routes::route_entries(
+                Some(&module.module),
+                module_dir,
+            )
+            .map_err(|error| format!("module.json: {error}"))?
+            .is_empty(),
         },
     );
     let module_json_path = out_dir.join("module.json");
@@ -925,6 +1108,7 @@ pub fn run(
 
     let input = ResCompileInput {
         project_dir,
+        module_dir,
         app,
         module,
         module_json_path: &module_json_path,
@@ -962,6 +1146,10 @@ mod tests {
     fn main_pages_strips_ets_and_keeps_order() {
         let module = ModuleConfig {
             module: ModuleInfo {
+                router_map: Vec::new(),
+                main: None,
+                forms: Vec::new(),
+                backup: None,
                 src_entry: None,
                 name: "src".into(),
                 entry: "EntryAbility.ets".into(),

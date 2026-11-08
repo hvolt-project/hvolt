@@ -9,9 +9,9 @@ use crate::support::config::{AppConfig, ModuleConfig};
 /// every ability and the module's own entry. `loader.json`'s `compileEntry` (pages and
 /// router-map targets) and module.json's ability `srcEntry` are the reference's counterparts
 /// (`generate-loader-json.js`, `main.js`: `loadEntryObj`).
-fn compile_roots(cfg: Option<&ModuleConfig>, dir: &Path) -> Vec<String> {
+fn compile_roots(cfg: Option<&ModuleConfig>, dir: &Path) -> Result<Vec<String>, String> {
     let Some(cfg) = cfg else {
-        return Vec::new();
+        return Ok(Vec::new());
     };
     let module = &cfg.module;
     let mut roots: Vec<String> = module.routes.clone();
@@ -30,10 +30,14 @@ fn compile_roots(cfg: Option<&ModuleConfig>, dir: &Path) -> Vec<String> {
     if let Some(src_entry) = &module.src_entry {
         roots.push(src_entry.trim_start_matches("./").to_string());
     }
-    roots.extend(route_map_pages(dir));
+    roots.extend(
+        crate::build::deps::routes::route_entries(Some(module), dir)?
+            .into_iter()
+            .map(|route| route.page),
+    );
     roots.sort();
     roots.dedup();
-    roots
+    Ok(roots)
 }
 
 /// One `routerMap` entry, keyed the way the lowering pass looks a file up.
@@ -53,83 +57,30 @@ pub(crate) struct RouterMapEntry {
 
 /// Read one module's `routerMap`, publish it for the lowering pass, and return it.
 ///
-/// `route_map_pages` reads the same profile for the compile roots; this reads the rest of each
+/// `route_entries` reads the same profile for the compile roots; this reads the rest of each
 /// entry (`name`, `buildFunction`) — the pair `createNavigationInit` needs to register a global
 /// `@Builder` function under the name the router map gave it.
-pub(crate) fn router_map(dir: &Path, module: &str) -> Vec<RouterMapEntry> {
-    let mut entries = Vec::new();
-    for rel in [
-        "resources/base/profile/route_map.json",
-        "src/main/resources/base/profile/route_map.json",
-    ] {
-        let Ok(text) = std::fs::read_to_string(dir.join(rel)) else {
-            continue;
-        };
-        let Ok(json) = serde_json::from_str::<serde_json::Value>(&text) else {
-            continue;
-        };
-        for item in json["routerMap"].as_array().into_iter().flatten() {
-            let Some(source) = item["pageSourceFile"].as_str() else {
-                continue;
-            };
-            let Some(build_function) = item["buildFunction"].as_str() else {
-                continue;
-            };
-            if source.is_empty() || build_function.is_empty() {
-                continue;
-            }
-            let name = item["name"].as_str().unwrap_or_default();
-            entries.push(RouterMapEntry {
-                name: name.to_string(),
-                build_function: build_function.to_string(),
+pub(crate) fn router_map(
+    module: Option<&crate::support::config::ModuleInfo>,
+    module_dir: &Path,
+) -> Result<Vec<RouterMapEntry>, String> {
+    let entries: Vec<RouterMapEntry> =
+        crate::build::deps::routes::route_entries(module, module_dir)?
+            .into_iter()
+            .map(|route| RouterMapEntry {
+                name: route.name,
+                build_function: route.build_function,
                 page_source_file: format!(
-                    "{module}/{}",
-                    source.replace('\\', "/").trim_start_matches("./")
+                    "{}/src/main/ets/{}",
+                    module
+                        .map(|module| module.name.as_str())
+                        .unwrap_or_default(),
+                    route.page.replace('\\', "/")
                 ),
-            });
-        }
-        if !entries.is_empty() {
-            break;
-        }
-    }
+            })
+            .collect();
     crate::build::stage::process_ui_syntax::set_router_map(&entries);
-    entries
-}
-
-/// Module-relative pages `route_map.json` declares.
-///
-/// A router-map page is compiled whether or not another page imports it: the reference puts
-/// every `routerMap[].pageSourceFile` into `compileEntries` (measured on clashbox, 2026-11-06:
-/// 29 entries, 16 of them router-map pages). Both project shapes carry the profile — the flat
-/// layout at `<module>/resources/…`, the standard one at `<module>/src/main/resources/…` — so
-/// both are read.
-fn route_map_pages(dir: &Path) -> Vec<String> {
-    for rel in [
-        "resources/base/profile/route_map.json",
-        "src/main/resources/base/profile/route_map.json",
-    ] {
-        let Ok(text) = std::fs::read_to_string(dir.join(rel)) else {
-            continue;
-        };
-        let Ok(json) = serde_json::from_str::<serde_json::Value>(&text) else {
-            continue;
-        };
-        let mut pages = Vec::new();
-        for item in json["routerMap"].as_array().into_iter().flatten() {
-            if let Some(source) = item["pageSourceFile"].as_str() {
-                pages.push(
-                    source
-                        .strip_prefix("src/main/ets/")
-                        .unwrap_or(source)
-                        .to_string(),
-                );
-            }
-        }
-        if !pages.is_empty() {
-            return pages;
-        }
-    }
-    Vec::new()
+    Ok(entries)
 }
 
 /// Native (standalone, no-ohpm) build chain:
@@ -237,32 +188,46 @@ fn native_build(project_dir: &Path) -> Result<(AppConfig, SdkEnv), String> {
     let out_dir = project_dir.join("build/hvolt-out");
     let sdk_root =
         crate::sdk::manage::sdk_root().ok_or_else(|| "no SDK root resolved".to_string())?;
+    // A native module lives where its `[dependencies]` entry says (`path = "mylib"`), not at
+    // a fixed `libs/<name>`; `hvolt import` writes the former.
+    let native_names: Vec<(String, std::path::PathBuf)> = native
+        .iter()
+        .map(|(name, _)| {
+            let dir = app_config
+                .dependencies
+                .get(name)
+                .and_then(|dep| dep.path.as_deref())
+                .map(|path| project_dir.join(path))
+                .unwrap_or_else(|| project_dir.join("libs").join(name));
+            (name.clone(), dir)
+        })
+        .collect();
     let produced = crate::build::artifacts::native_compile::build_all(
         &sdk_root,
-        &native,
-        project_dir,
+        &native_names,
         &out_dir.join("libs"),
     )?;
     let built_native =
         build_module_native(&sdk_root, project_dir, &modules, &out_dir.join("libs"))?;
     if !built_native.is_empty() {
-        println!("✓ module native built: {}", built_native.len());
+        println!("✓ native lib(s) from <module>/cpp: {}", built_native.len());
     }
     let libs_dir = out_dir.join("libs");
     // The C++ runtime every native module links against. Without it a C++ module's exports
     // read `undefined` at import time (see `cxx_runtime`).
     if let Some(runtime) = crate::build::artifacts::native_compile::cxx_runtime(&sdk_root) {
         let abi_dir = libs_dir.join("arm64-v8a");
-        std::fs::create_dir_all(&abi_dir).map_err(|e| format!("mkdir {}: {e}", abi_dir.display()))?;
+        std::fs::create_dir_all(&abi_dir)
+            .map_err(|e| format!("mkdir {}: {e}", abi_dir.display()))?;
         let dest = abi_dir.join("libc++_shared.so");
         std::fs::copy(&runtime, &dest).map_err(|e| format!("copy {}: {e}", runtime.display()))?;
     }
     let prebuilt = collect_prebuilt_libs(project_dir, &modules, &libs_dir)?;
     if !prebuilt.is_empty() {
-        println!("✓ prebuilt libs copied: {}", prebuilt.len());
+        println!("✓ prebuilt lib(s) copied: {}", prebuilt.len());
     }
     if !produced.is_empty() {
-        println!("✓ native built: {} lib(s)", produced.len());
+        println!("✓ native lib(s) from libs/: {}", produced.len());
     }
 
     // 2) resources + module metadata under the same hvolt-out
@@ -286,6 +251,15 @@ fn native_build(project_dir: &Path) -> Result<(AppConfig, SdkEnv), String> {
         .map(|m| m.module.entry.clone())
         .unwrap_or_else(|| "EntryAbility.ets".to_string());
     let ets_dir = project_dir.join(&module_arg);
+    /// One staged module: name, dir, entry file, compile roots, is-HAR, declared `main`.
+    type Staged = (
+        String,
+        std::path::PathBuf,
+        String,
+        Vec<String>,
+        bool,
+        Option<String>,
+    );
     // Every ETS module in the project shares one merged abc: an import from the entry
     // module names a dependency module, so leaving it out makes the record unresolvable.
     // The entry module comes first, the rest follow in dependency order.
@@ -294,14 +268,15 @@ fn native_build(project_dir: &Path) -> Result<(AppConfig, SdkEnv), String> {
     // every ability and the module's own entry, plus whatever those import. The other modules
     // have their whole tree compiled, which is what the reference puts into `compileEntry` for
     // an HSP/HAR (`generate-loader-json.js`: `allowToCollectEtsFolder`).
-    let mut staged: Vec<(String, std::path::PathBuf, String, Vec<String>, bool)> = vec![(
+    let mut staged: Vec<Staged> = vec![(
         module_name.clone(),
         ets_dir.clone(),
         entry_file.clone(),
-        compile_roots(module_cfg.as_ref(), &ets_dir),
+        compile_roots(module_cfg.as_ref(), &ets_dir)?,
         module_cfg
             .as_ref()
             .is_some_and(|cfg| cfg.module.module_type == "har"),
+        module_cfg.as_ref().and_then(|cfg| cfg.module.main.clone()),
     )];
     for (name, cfg) in &modules {
         if name == &module_arg {
@@ -313,6 +288,7 @@ fn native_build(project_dir: &Path) -> Result<(AppConfig, SdkEnv), String> {
             cfg.module.entry.clone(),
             Vec::new(),
             cfg.module.module_type == "har",
+            cfg.module.main.clone(),
         ));
     }
     // The router map is a per-module profile; publish each one before any file is lowered, so a
@@ -322,8 +298,14 @@ fn native_build(project_dir: &Path) -> Result<(AppConfig, SdkEnv), String> {
     // directory the module was staged under: the lookup side builds its key from the recorded
     // source coordinate (`<module>/src/main/ets/<page>.ets`), and a staged directory can be
     // called `src`, which never matches it.
-    for (name, dir, _, _, _) in &staged {
-        router_map(dir, name);
+    for (_name, dir, _, _, _, _) in &staged {
+        // The table comes from the module's config when it declares one and from its
+        // `route_map.json` otherwise. The config is read by directory, not by declared name:
+        // a staged directory can be called `src` while the module is `entry`.
+        // A module without its own `hvolt.toml` still contributes whatever its
+        // `route_map.json` declares; a broken one is reported rather than skipped silently.
+        let cfg = crate::build::deps::routes::module_config(dir)?;
+        router_map(Some(&cfg.module), dir)?;
     }
     // `apiAvailable` is left untouched on a point version
     // (`process_available_statement.js::isPointVersion(originCompatibleSdkVersion)`), so the
@@ -333,15 +315,16 @@ fn native_build(project_dir: &Path) -> Result<(AppConfig, SdkEnv), String> {
     );
     let stage_refs: Vec<crate::build::ets_assemble::StageModule<'_>> = staged
         .iter()
-        .map(
-            |(name, dir, entry, entries, compile_har)| crate::build::ets_assemble::StageModule {
+        .map(|(name, dir, entry, entries, compile_har, main)| {
+            crate::build::ets_assemble::StageModule {
                 name,
                 dir,
                 entry_file: entry,
                 entries,
                 compile_har: *compile_har,
-            },
-        )
+                main: main.as_deref(),
+            }
+        })
         .collect();
     // `--compile-context-info` wants the wrapper shape the reference emits, not the raw
     // table: `{ compileEntries, pkgContextInfo }`.
@@ -357,7 +340,10 @@ fn native_build(project_dir: &Path) -> Result<(AppConfig, SdkEnv), String> {
         let wrapped = format!(
             "{{\"compileEntries\":[\"{entry_record}\"],\"hspPkgNames\":[],\"pkgContextInfo\":{pkg_context}}}"
         );
-        let _ = std::fs::write(&compile_context, wrapped);
+        // The path is handed to es2abc below; a failed write there would compile against a
+        // missing context file, so the failure has to surface here.
+        std::fs::write(&compile_context, wrapped)
+            .map_err(|e| format!("write {}: {e}", compile_context.display()))?;
     }
     // Third-party packages the app declares; their records are part of the same abc.
     let packages = crate::build::deps::npm::discover(&app_config, project_dir)?;
@@ -411,7 +397,7 @@ fn native_build(project_dir: &Path) -> Result<(AppConfig, SdkEnv), String> {
     // The installer and the launcher read `media/layered_image.json` verbatim: its
     // `$media:<name>` references have to be the compiled ids, which is what the
     // reference's packer substitutes before archiving.
-    resolve_media_references(&out_dir);
+    resolve_media_references(&out_dir)?;
 
     // 4) pack the unsigned HAP from hvolt-out
     let build_dir = project_dir.join("build");
@@ -428,15 +414,15 @@ fn native_build(project_dir: &Path) -> Result<(AppConfig, SdkEnv), String> {
 ///
 /// The launcher reads `media/layered_image.json` verbatim; with name references it
 /// renders a broken icon, while the reference packer ships compiled ids there.
-fn resolve_media_references(out_dir: &std::path::Path) {
+fn resolve_media_references(out_dir: &std::path::Path) -> Result<(), String> {
     let table_path = out_dir.join("res/ResourceTable.txt");
     let Ok(text) = std::fs::read_to_string(&table_path) else {
-        return;
+        return Ok(());
     };
     let ids = crate::build::compile::ets_resources::parse_table(&text);
     let media_dir = out_dir.join("resources/base/media");
     let Ok(entries) = std::fs::read_dir(&media_dir) else {
-        return;
+        return Ok(());
     };
     for entry in entries.flatten() {
         let path = entry.path();
@@ -468,9 +454,12 @@ fn resolve_media_references(out_dir: &std::path::Path) {
         }
         out.push_str(rest);
         if out != body {
-            let _ = std::fs::write(&path, out);
+            // The rewritten file is what gets packed: a silent failure here ships a
+            // `layered_image.json` still holding resource names, i.e. a broken icon.
+            std::fs::write(&path, out).map_err(|e| format!("write {}: {e}", path.display()))?;
         }
     }
+    Ok(())
 }
 
 fn native_install(target: &str, hap: &std::path::Path) -> Result<(), String> {
@@ -517,25 +506,104 @@ pub fn build_and_sign(project_dir: &Path) -> Result<(), String> {
 }
 
 /// Full pipeline: build + sign + push + launch. Used by `hvolt run`.
-/// Push/install failures get the attribution order, not just the raw line:
-/// signing trust → bundle update identity → profile validity → device constraint.
+/// Report a push/install failure.
+///
+/// The attribution order only helps once an install actually reached the device. An unsigned
+/// package or an absent device fails before that, and appending "check the certificate chain"
+/// to those sends the reader down the wrong path.
 pub(crate) fn report_push_failure(e: String) -> ! {
     eprintln!("✗ {}", e);
-    eprintln!("  → 归因顺序：签名信任(证书链是否被该设备/ROM 预置) → 包名更新身份(与已装版本签名是否一致) → Profile 时效(validity,UTC 秒) → 设备约束(空间/禁用)");
-    eprintln!("    运行时权限失败不在此列——那对应 API/模块声明/ACL，别用重签掩盖功能问题");
+    if e.contains("INSTALL_") || e.contains("failed to install") {
+        eprintln!(
+            "  → order to check: signature trust (is the chain preinstalled on this device) \
+             → bundle identity (does the installed version share this signature) → profile \
+             validity → device constraints (space / disabled package manager)"
+        );
+        eprintln!(
+            "    runtime permission failures are not in this list — they come from the API, \
+             module declarations or ACL, not from re-signing"
+        );
+    }
     std::process::exit(1);
 }
 
 pub fn run(project_dir: &Path, device: Option<&str>) {
+    // Without a signing config `run` cannot sign, and building first would only make the
+    // package `hvolt sign --local` just produced look stale — `run` → build → "older than the
+    // current build" → sign → run … Pushing what exists is the only path that terminates.
+    let has_signing = AppConfig::from_file(&project_dir.join("hvolt.toml"))
+        .map(|cfg| cfg.app.signing_for("default").is_some())
+        .unwrap_or(false);
+    if !has_signing {
+        match find_signed_hap(project_dir) {
+            Ok(hap) => {
+                // The package is only usable if the tree has not moved since it was signed;
+                // otherwise this would install the code the user just replaced, silently.
+                if sources_newer_than(project_dir, &hap) {
+                    eprintln!(
+                        "✗ {} predates the current sources. Re-sign with `hvolt sign --local`, \
+                         then `hvolt push`.",
+                        hap.display()
+                    );
+                    std::process::exit(1);
+                }
+                // Only the bundle name is needed here; building would rewrite the unsigned
+                // package and make this one stale again on the next `run`.
+                let bundle = AppConfig::from_file(&project_dir.join("hvolt.toml"))
+                    .map(|cfg| cfg.app.bundle)
+                    .unwrap_or_default();
+                push_package(&hap, device).unwrap_or_else(|e| report_push_failure(e));
+                launch(device, &bundle, "EntryAbility");
+                return;
+            }
+            Err(error) => {
+                eprintln!("✗ {error}");
+                if cfg!(feature = "agc-local") {
+                    eprintln!("  → run `hvolt build`, `hvolt sign`, then `hvolt push`.");
+                } else {
+                    // Name the whole chain: the reader may be at any step of it.
+                    eprintln!(
+                        "  → this build has no AppGallery Connect backend: `hvolt build`, \
+                         `hvolt sign --local`, then `hvolt push` (development boards and \
+                         emulators only), or add an [app.signing] table to hvolt.toml."
+                    );
+                }
+                std::process::exit(1);
+            }
+        }
+    }
+
     let (app_config, sdk_env) = native_build(project_dir).unwrap_or_else(|e| {
         eprintln!("✗ {}", e);
         std::process::exit(1);
     });
 
-    let signing = app_config.app.signing_for("default").unwrap_or_else(|| {
-        eprintln!("✗ No signing config. Run `hvolt sign` first.");
+    let Some(signing) = app_config.app.signing_for("default") else {
+        // `hvolt sign --local` writes a signed package but installs no config, so pointing
+        // at it alone was a loop: run → sign --local → run → the same error. Pushing the
+        // package it produced is what breaks that loop.
+        //
+        // The error must not be reduced to "no signed package": `find_signed_hap` also
+        // refuses a package that predates the build it just made, and the user needs to hear
+        // "re-sign" rather than "you have nothing".
+        match find_signed_hap(project_dir) {
+            Ok(hap) => {
+                push_package(&hap, device).unwrap_or_else(|e| report_push_failure(e));
+                return;
+            }
+            Err(error) => eprintln!("✗ {error}"),
+        }
+        if cfg!(feature = "agc-local") {
+            eprintln!("  → run `hvolt build`, `hvolt sign`, then `hvolt push`.");
+        } else {
+            eprintln!(
+                "  → this build has no AppGallery Connect backend: `hvolt build`, \
+                 `hvolt sign --local`, then `hvolt push` (development boards and emulators \
+                 only), or add an [app.signing] table to hvolt.toml."
+            );
+        }
         std::process::exit(1);
-    });
+    };
     if signing.passwords_look_encoded() {
         eprintln!(
             "✗ Signing password looks DevEco-encoded (hex), not plaintext — `hvolt run` needs a \
@@ -699,6 +767,68 @@ fn launch(device: Option<&str>, bundle: &str, entry: &str) {
 /// (`<module>-signed.hap`) and `hvolt build` copies the signed result to
 /// `output/`; both are checked, newest by mtime wins, `output/` first so the
 /// published artifact is preferred when both exist.
+/// Whether any source file is newer than `package`.
+///
+/// `run` without a signing config cannot rebuild: rebuilding would rewrite the unsigned
+/// package and make the signed one look stale on the next call. It therefore pushes the
+/// existing package — and must know when that package no longer matches the tree.
+pub(crate) fn sources_newer_than(project_dir: &std::path::Path, package: &std::path::Path) -> bool {
+    let Ok(package_at) = package.metadata().and_then(|meta| meta.modified()) else {
+        return false;
+    };
+    let mut newest = None;
+    let mut stack = vec![project_dir.to_path_buf()];
+    while let Some(dir) = stack.pop() {
+        let Ok(entries) = std::fs::read_dir(&dir) else {
+            continue;
+        };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let name = path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or("");
+            // Build output is not a source; anything else is.
+            if name == "build" || name == "output" || name == ".git" || name == "oh_modules" {
+                continue;
+            }
+            if path.is_dir() {
+                stack.push(path);
+                continue;
+            }
+            if let Ok(modified) = path.metadata().and_then(|meta| meta.modified()) {
+                newest = Some(newest.map_or(modified, |newest: std::time::SystemTime| {
+                    newest.max(modified)
+                }));
+            }
+        }
+    }
+    newest.is_some_and(|newest| newest > package_at)
+}
+
+/// The newest `*-unsigned.hap` a build produced, for a caller that has to explain why the
+/// signed one is missing.
+pub(crate) fn find_unsigned_hap(project_dir: &std::path::Path) -> Option<std::path::PathBuf> {
+    let mut found = Vec::new();
+    for dir in [project_dir.join("output"), project_dir.join("build")] {
+        let Ok(entries) = std::fs::read_dir(&dir) else {
+            continue;
+        };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let name = path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or("");
+            if name.ends_with("-unsigned.hap") {
+                found.push(path);
+            }
+        }
+    }
+    found.sort_by_key(|path| path.metadata().and_then(|meta| meta.modified()).ok());
+    found.pop()
+}
+
 pub fn find_signed_hap(project_dir: &std::path::Path) -> Result<std::path::PathBuf, String> {
     let mut cands: Vec<std::path::PathBuf> = Vec::new();
     for dir in ["output", "build"] {
@@ -723,10 +853,54 @@ pub fn find_signed_hap(project_dir: &std::path::Path) -> Result<std::path::PathB
             .ok()
             .cmp(&a.metadata().and_then(|m| m.modified()).ok())
     });
-    cands
-        .into_iter()
-        .next()
-        .ok_or_else(|| "no *-signed.hap in output/ or build/ — run `hvolt build` first".to_string())
+    if let Some(found) = cands.into_iter().next() {
+        // A signed package older than the newest unsigned one was built from an earlier
+        // tree; pushing it installs code the user already changed, with no output saying so.
+        let newest_unsigned = find_unsigned_hap(project_dir);
+        let signed_at = found.metadata().and_then(|meta| meta.modified()).ok();
+        let unsigned_at = newest_unsigned
+            .as_ref()
+            .and_then(|path| path.metadata().and_then(|meta| meta.modified()).ok());
+        if let (Some(signed_at), Some(unsigned_at), Some(unsigned)) =
+            (signed_at, unsigned_at, newest_unsigned.as_ref())
+        {
+            if signed_at < unsigned_at {
+                // Re-signing alone does not help: it would stamp a new mtime onto the same
+                // pre-edit package. The message has to start at `build`.
+                return Err(format!(
+                    "{} is older than {}: run `hvolt build` and then `hvolt sign --local` \
+                     (or add an [app.signing] table) so the package matches the sources.",
+                    found.display(),
+                    unsigned.display()
+                ));
+            }
+        }
+        // Compare the sources against the *build*, not against the signature: re-signing
+        // refreshes the signed mtime without rebuilding, so a signed-vs-sources check passes
+        // exactly when the package is stale.
+        if let Some(unsigned) = newest_unsigned.as_ref() {
+            if sources_newer_than(project_dir, unsigned) {
+                return Err(format!(
+                    "{} predates the current sources: run `hvolt build` and then \
+                     `hvolt sign --local`.",
+                    unsigned.display()
+                ));
+            }
+        }
+        return Ok(found);
+    }
+    // A build with no `[app.signing]` produces `*-unsigned.hap` only; telling that user to
+    // "run hvolt build" sends them round the loop they just finished.
+    Err(match find_unsigned_hap(project_dir) {
+        // `build` first: signing an unsigned package that predates the sources produces a
+        // package whose mtime is new and whose code is old.
+        Some(unsigned) => format!(
+            "{} is unsigned: run `hvolt build`, then `hvolt sign --local` (development \
+             boards), then `hvolt push` — or add an [app.signing] table and build again",
+            unsigned.display()
+        ),
+        None => "no *-signed.hap in output/ or build/ — run `hvolt build` first".to_string(),
+    })
 }
 
 #[cfg(test)]
