@@ -11,9 +11,9 @@
 
 pub(crate) mod agc;
 pub(crate) mod build;
-pub(crate) mod deps;
 pub(crate) mod config_skill;
 pub(crate) mod deploy;
+pub(crate) mod deps;
 pub(crate) mod device;
 pub(crate) mod project;
 pub(crate) mod sdk;

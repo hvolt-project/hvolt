@@ -218,8 +218,11 @@ mod tests {
         let root = std::env::temp_dir().join(format!("hvolt-imports-{}", std::process::id()));
         let _ = fs::remove_dir_all(&root);
         fs::create_dir_all(&root).expect("create root");
-        fs::write(root.join("Registry.generated.ets"), "export function registerAll(): void {}\n")
-            .expect("write generated");
+        fs::write(
+            root.join("Registry.generated.ets"),
+            "export function registerAll(): void {}\n",
+        )
+        .expect("write generated");
         fs::write(
             root.join("Main.ets"),
             "import { registerAll } from './Registry.generated';\n",

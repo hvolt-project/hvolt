@@ -1,4 +1,3 @@
-
 //! ets-assemble: compile an `.ets` source tree into a merged `modules.abc`.
 //!
 //! Pages (`@Component` files) go through the full transpile pass; every other
@@ -596,7 +595,7 @@ pub fn assemble_packages(
                 {
                     let lowered = crate::build::lower::ets_transpile::transpile(&src, &opts)
                         .map_err(|e| format!("{}: {e}", f.display()))?;
-                    check_lowered(&rel, &lowered);
+                    check_lowered(rel, &lowered);
                     lowered
                 }
             } else {
@@ -607,7 +606,7 @@ pub fn assemble_packages(
                 {
                     let lowered = crate::build::lower::ets_plain::lower(&src, &kits)
                         .map_err(|e| format!("{}: {e}", f.display()))?;
-                    check_lowered(&rel, &lowered);
+                    check_lowered(rel, &lowered);
                     lowered
                 }
             };

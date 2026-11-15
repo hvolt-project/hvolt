@@ -17,7 +17,11 @@ pub(crate) fn rewrite_chain_blocks(source: &str) -> String {
     while i + 1 < tokens.len() {
         let head = &tokens[i];
         let is_component = head.kind == Kind::Ident
-            && head.text.chars().next().is_some_and(|c| c.is_ascii_uppercase())
+            && head
+                .text
+                .chars()
+                .next()
+                .is_some_and(|c| c.is_ascii_uppercase())
             && tokens[i + 1].kind == Kind::Punct
             && tokens[i + 1].text == "(";
         if !is_component {
@@ -45,7 +49,10 @@ pub(crate) fn rewrite_chain_blocks(source: &str) -> String {
             }
             break;
         }
-        if cursor >= tokens.len() || tokens[cursor].kind != Kind::Punct || tokens[cursor].text != "{" {
+        if cursor >= tokens.len()
+            || tokens[cursor].kind != Kind::Punct
+            || tokens[cursor].text != "{"
+        {
             i += 1;
             continue;
         }
@@ -133,7 +140,8 @@ mod tests {
 
     #[test]
     fn a_chain_block_moves_behind_the_component_call() {
-        let src = "Column()\n  .width(10)\n  .justifyContent(FlexAlign.Center) {\n    Text('x')\n  }\n";
+        let src =
+            "Column()\n  .width(10)\n  .justifyContent(FlexAlign.Center) {\n    Text('x')\n  }\n";
         let out = rewrite_chain_blocks(src);
         assert_eq!(
             out,

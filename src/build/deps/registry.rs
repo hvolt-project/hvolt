@@ -44,11 +44,17 @@ pub fn resolve_version(registry: &str, name: &str, range: &str) -> Result<String
         .ok_or_else(|| format!("dependency '{name}': registry document has no versions"))?;
     let mut best: Option<(Vec<u32>, String)> = None;
     for key in versions.keys() {
-        let Some(parsed) = parse_version(key) else { continue };
+        let Some(parsed) = parse_version(key) else {
+            continue;
+        };
         if !satisfies(&parsed, range) {
             continue;
         }
-        if best.as_ref().map(|(current, _)| &parsed > current).unwrap_or(true) {
+        if best
+            .as_ref()
+            .map(|(current, _)| &parsed > current)
+            .unwrap_or(true)
+        {
             best = Some((parsed, key.clone()));
         }
     }
@@ -88,7 +94,11 @@ fn release_of(registry: &str, name: &str, version: &str) -> Result<Release, Stri
         .and_then(|v| v.as_str())
         .map(|v| v.to_string())
         .unwrap_or_default();
-    Ok(Release { version: version.to_string(), tarball, integrity })
+    Ok(Release {
+        version: version.to_string(),
+        tarball,
+        integrity,
+    })
 }
 
 /// Makes sure one release sits in the package cache, fetching it when it is not there yet.
@@ -114,7 +124,10 @@ pub fn ensure(registry: &str, name: &str, version: &str) -> Result<PathBuf, Stri
     let bytes = download(&release.tarball, name)?;
     verify(&release, &bytes, name)?;
     unpack(&bytes, &dir, name)?;
-    println!("dependency {name}@{resolved}: fetched {directory}", directory = dir.display());
+    println!(
+        "dependency {name}@{resolved}: fetched {directory}",
+        directory = dir.display()
+    );
     if !has_package(&dir) {
         return Err(format!(
             "dependency '{name}': unpacked {version} into {} but no oh-package.json5 is there",
@@ -126,7 +139,10 @@ pub fn ensure(registry: &str, name: &str, version: &str) -> Result<PathBuf, Stri
 
 /// Whether a version names one release rather than a range.
 fn is_exact(version: &str) -> bool {
-    !version.is_empty() && version.chars().all(|c| c.is_ascii_digit() || c == char::from(46u8))
+    !version.is_empty()
+        && version
+            .chars()
+            .all(|c| c.is_ascii_digit() || c == char::from(46u8))
 }
 
 /// Held while one release is being fetched.
@@ -159,7 +175,11 @@ fn acquire(dir: &Path, name: &str) -> Result<FetchLock, String> {
     }
     let started = Instant::now();
     loop {
-        match fs::OpenOptions::new().write(true).create_new(true).open(&path) {
+        match fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&path)
+        {
             Ok(mut file) => {
                 use std::io::Write;
                 let _ = writeln!(file, "{}", std::process::id());
@@ -230,7 +250,9 @@ pub fn sweep_leftovers() -> Result<usize, String> {
                     .map(|age| age > Duration::from_secs(600))
                     .unwrap_or(false);
                 let tree = path.with_file_name(
-                    path.file_stem().and_then(|s| s.to_str()).unwrap_or_default(),
+                    path.file_stem()
+                        .and_then(|s| s.to_str())
+                        .unwrap_or_default(),
                 );
                 if stale {
                     if path.is_dir() {
@@ -306,7 +328,10 @@ fn unpack(bytes: &[u8], dir: &Path, name: &str) -> Result<(), String> {
     let staging = dir.with_extension("unpacking");
     let _ = fs::remove_dir_all(&staging);
     fs::create_dir_all(&staging).map_err(|e| {
-        format!("dependency '{name}': cannot create {}: {e}", staging.display())
+        format!(
+            "dependency '{name}': cannot create {}: {e}",
+            staging.display()
+        )
     })?;
     for entry in entries {
         let mut entry = entry.map_err(|e| format!("dependency '{name}': bad tar entry: {e}"))?;
@@ -314,7 +339,9 @@ fn unpack(bytes: &[u8], dir: &Path, name: &str) -> Result<(), String> {
             .path()
             .map_err(|e| format!("dependency '{name}': bad tar path: {e}"))?
             .to_path_buf();
-        let Some(rest) = strip_package_prefix(&path) else { continue };
+        let Some(rest) = strip_package_prefix(&path) else {
+            continue;
+        };
         if rest.as_os_str().is_empty() {
             continue;
         }
@@ -330,19 +357,28 @@ fn unpack(bytes: &[u8], dir: &Path, name: &str) -> Result<(), String> {
         let target = staging.join(&rest);
         if let Some(parent) = target.parent() {
             fs::create_dir_all(parent).map_err(|e| {
-                format!("dependency '{name}': cannot create {}: {e}", parent.display())
+                format!(
+                    "dependency '{name}': cannot create {}: {e}",
+                    parent.display()
+                )
             })?;
         }
-        entry
-            .unpack(&target)
-            .map_err(|e| format!("dependency '{name}': cannot write {}: {e}", target.display()))?;
+        entry.unpack(&target).map_err(|e| {
+            format!(
+                "dependency '{name}': cannot write {}: {e}",
+                target.display()
+            )
+        })?;
     }
     if dir.exists() {
         let _ = fs::remove_dir_all(dir);
     }
     if let Some(parent) = dir.parent() {
         fs::create_dir_all(parent).map_err(|e| {
-            format!("dependency '{name}': cannot create {}: {e}", parent.display())
+            format!(
+                "dependency '{name}': cannot create {}: {e}",
+                parent.display()
+            )
         })?;
     }
     fs::rename(&staging, dir).map_err(|e| {
@@ -386,30 +422,42 @@ fn satisfies(version: &[u32], range: &str) -> bool {
         return true;
     }
     if let Some(rest) = range.strip_prefix('^') {
-        let Some(base) = parse_version(rest) else { return false };
+        let Some(base) = parse_version(rest) else {
+            return false;
+        };
         if version < base.as_slice() {
             return false;
         }
         return version[0] == base[0] && (base[0] > 0 || version[1] == base[1]);
     }
     if let Some(rest) = range.strip_prefix('~') {
-        let Some(base) = parse_version(rest) else { return false };
+        let Some(base) = parse_version(rest) else {
+            return false;
+        };
         return version >= base.as_slice() && version[0] == base[0] && version[1] == base[1];
     }
     if let Some(rest) = range.strip_prefix(">=") {
-        let Some(base) = parse_version(rest) else { return false };
+        let Some(base) = parse_version(rest) else {
+            return false;
+        };
         return version >= base.as_slice();
     }
     if let Some(rest) = range.strip_prefix("<=") {
-        let Some(base) = parse_version(rest) else { return false };
+        let Some(base) = parse_version(rest) else {
+            return false;
+        };
         return version <= base.as_slice();
     }
     if let Some(rest) = range.strip_prefix('>') {
-        let Some(base) = parse_version(rest) else { return false };
+        let Some(base) = parse_version(rest) else {
+            return false;
+        };
         return version > base.as_slice();
     }
     if let Some(rest) = range.strip_prefix('<') {
-        let Some(base) = parse_version(rest) else { return false };
+        let Some(base) = parse_version(rest) else {
+            return false;
+        };
         return version < base.as_slice();
     }
     match parse_version(range) {
@@ -451,7 +499,10 @@ mod tests {
         let refused = verify(&release, b"not the bytes that were signed", "demo");
         assert!(refused.is_err(), "a wrong digest must not pass");
         let message = refused.unwrap_err();
-        assert!(message.contains("integrity mismatch"), "unexpected message: {message}");
+        assert!(
+            message.contains("integrity mismatch"),
+            "unexpected message: {message}"
+        );
     }
 
     #[test]

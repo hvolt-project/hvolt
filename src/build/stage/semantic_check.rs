@@ -19,11 +19,11 @@
 use std::collections::HashSet;
 
 use oxc_allocator::Allocator;
+use oxc_ast::ast::{Class, ClassElement, MethodDefinitionKind, Program, PropertyKey};
+use oxc_ast_visit::Visit;
 use oxc_parser::Parser;
 use oxc_semantic::SemanticBuilder;
 use oxc_span::SourceType;
-use oxc_ast::ast::{Class, ClassElement, MethodDefinitionKind, Program, PropertyKey};
-use oxc_ast_visit::Visit;
 
 /// One problem, in the shape the build prints.
 pub(crate) struct Diagnostic {
@@ -39,25 +39,87 @@ pub(crate) struct Diagnostic {
 /// whole so it can be read as "what the environment supplies", not "what this pass skips".
 const AMBIENT: &[&str] = &[
     // JavaScript and TypeScript built-ins.
-    "console", "JSON", "Math", "Date", "Array", "Object", "String", "Number", "Boolean", "RegExp",
-    "Promise", "Map", "Set", "WeakMap", "WeakSet", "Symbol", "Error", "TypeError", "RangeError",
-    "Function", "globalThis", "undefined", "NaN", "Infinity", "parseInt", "parseFloat", "isNaN",
-    "isFinite", "encodeURIComponent", "decodeURIComponent", "encodeURI", "decodeURI",
-    "setTimeout", "clearTimeout", "setInterval", "clearInterval", "queueMicrotask",
-    "structuredClone", "require", "exports", "module",
+    "console",
+    "JSON",
+    "Math",
+    "Date",
+    "Array",
+    "Object",
+    "String",
+    "Number",
+    "Boolean",
+    "RegExp",
+    "Promise",
+    "Map",
+    "Set",
+    "WeakMap",
+    "WeakSet",
+    "Symbol",
+    "Error",
+    "TypeError",
+    "RangeError",
+    "Function",
+    "globalThis",
+    "undefined",
+    "NaN",
+    "Infinity",
+    "parseInt",
+    "parseFloat",
+    "isNaN",
+    "isFinite",
+    "encodeURIComponent",
+    "decodeURIComponent",
+    "encodeURI",
+    "decodeURI",
+    "setTimeout",
+    "clearTimeout",
+    "setInterval",
+    "clearInterval",
+    "queueMicrotask",
+    "structuredClone",
+    "require",
+    "exports",
+    "module",
     // ArkTS and ArkUI runtime entry points.
-    "AppStorage", "AppStorageV2", "LocalStorage", "PersistentStorage", "PersistenceV2",
-    "Environment", "animateTo", "animateToImmediately", "getContext", "getUIContext",
-    "promptAction", "router", "measureText", "getInspectorByKey", "getInspectorTree",
-    "sendEventByKey", "focusControl", "cursorControl", "font", "vpx2px", "px2vp", "vp2px",
-    "print", "getColorSync", "getResourcePath", "getHostContext",
+    "AppStorage",
+    "AppStorageV2",
+    "LocalStorage",
+    "PersistentStorage",
+    "PersistenceV2",
+    "Environment",
+    "animateTo",
+    "animateToImmediately",
+    "getContext",
+    "getUIContext",
+    "promptAction",
+    "router",
+    "measureText",
+    "getInspectorByKey",
+    "getInspectorTree",
+    "sendEventByKey",
+    "focusControl",
+    "cursorControl",
+    "font",
+    "vpx2px",
+    "px2vp",
+    "vp2px",
+    "print",
+    "getColorSync",
+    "getResourcePath",
+    "getHostContext",
     // Named routes and builders the runtime registers; the SDK supplies them, not the file.
-    "registerNamedRoute", "registerBuilder", "registerStyle", "registerExtend",
-    "getUINativeModule", "makeBuilderParameterProxy", "canIUse", "getContext",
+    "registerNamedRoute",
+    "registerBuilder",
+    "registerStyle",
+    "registerExtend",
+    "getUINativeModule",
+    "makeBuilderParameterProxy",
+    "canIUse",
+    "getContext",
 ];
 
 fn is_ambient(name: &str) -> bool {
-    AMBIENT.iter().any(|known| *known == name)
+    AMBIENT.contains(&name)
 }
 
 /// Whether the name is one this pass reports on at all.
@@ -155,78 +217,6 @@ pub(crate) fn enabled() -> bool {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn a_used_but_never_imported_name_is_reported() {
-        let source = "function run(): string {\n  return missingHelper(1);\n}\n";
-        let found = check_file("demo.ets", source);
-        assert_eq!(found.len(), 1, "expected one diagnostic");
-        assert!(found[0].message.contains("missingHelper"));
-        assert_eq!(found[0].line, 2);
-    }
-
-    #[test]
-    fn an_imported_name_is_quiet() {
-        let source = "import { helper } from './helper';\nfunction run(): string {\n  return helper();\n}\n";
-        assert!(check_file("demo.ets", source).is_empty());
-    }
-
-    #[test]
-    fn a_declared_local_is_quiet() {
-        let source = "function run(): number {\n  const total = 2;\n  return total;\n}\n";
-        assert!(check_file("demo.ets", source).is_empty());
-    }
-
-    #[test]
-    fn uppercase_names_are_left_to_the_sdk() {
-        // `Text` is supplied ambiently by the SDK, so it must not be reported.
-        let source = "const view = Text('hi');\n";
-        assert!(check_file("demo.ets", source).is_empty());
-    }
-
-    #[test]
-    fn the_environment_supplies_its_own_names() {
-        let source = "function run(): void {\n  console.log(JSON.stringify({}));\n}\n";
-        assert!(check_file("demo.ets", source).is_empty());
-    }
-
-    #[test]
-    fn a_method_named_like_a_state_accessor_is_reported() {
-        // `@State x` lowers to `get x()` / `set x()` beside a `__x` field, so a hand-written
-        // method with the same name lands in the same class body. hvigor rejects that file with
-        // `Duplicate identifier`; this check has to agree.
-        let source = "class Page {\n  private __sdkState: string;\n  get sdkState() { return this.__sdkState; }\n  set sdkState(v: string) { this.__sdkState = v; }\n  sdkState(): string { return 'disk'; }\n}\n";
-        let found = check_file("demo.ts", source);
-        assert_eq!(found.len(), 1, "expected one collision"); 
-        assert!(found[0].message.contains("sdkState"), "message: {}", found[0].message);
-    }
-
-    #[test]
-    fn a_getter_and_setter_pair_is_quiet() {
-        // One accessor pair is one member; TypeScript allows it and hvigor accepts it.
-        let source = "class Page {\n  private _v: string;\n  get v() { return this._v; }\n  set v(next: string) { this._v = next; }\n}\n";
-        assert!(check_file("demo.ts", source).is_empty());
-    }
-
-    #[test]
-    fn overloaded_methods_are_quiet() {
-        // Overload signatures share a name by design, and hvigor accepts them.
-        let source = "class Page {\n  pick(v: number): number;\n  pick(v: number): number { return v; }\n}\n";
-        assert!(check_file("demo.ts", source).is_empty());
-    }
-
-    #[test]
-    fn a_file_the_parser_rejects_is_skipped() {
-        // A decorator form the TypeScript parser does not accept must not become a name report.
-        let source = "@Entry\n@Component\nstruct Page {\n  build() { nonsense() }\n}\n";
-        let found = check_file("demo.ets", source);
-        assert!(found.is_empty(), "unparsable files are skipped, got {found:?}", found = found.len());
-    }
-}
-
 /// Runs the pass over a project tree.
 ///
 /// Returns the diagnostics, plus how many sources were read and how many were skipped because a
@@ -314,7 +304,10 @@ fn lower_source(
     file: &str,
     source: &str,
     kit_dirs: &[std::path::PathBuf],
-    kits: &std::collections::BTreeMap<String, std::collections::BTreeMap<String, crate::build::stage::process_import::KitEntry>>,
+    kits: &std::collections::BTreeMap<
+        String,
+        std::collections::BTreeMap<String, crate::build::stage::process_import::KitEntry>,
+    >,
 ) -> Result<String, String> {
     if kit_dirs.is_empty() {
         return Err("no kit configuration".to_string());
@@ -420,4 +413,85 @@ fn imports_name(source: &str, diagnostic: &Diagnostic) -> bool {
         }
     }
     false
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_used_but_never_imported_name_is_reported() {
+        let source = "function run(): string {\n  return missingHelper(1);\n}\n";
+        let found = check_file("demo.ets", source);
+        assert_eq!(found.len(), 1, "expected one diagnostic");
+        assert!(found[0].message.contains("missingHelper"));
+        assert_eq!(found[0].line, 2);
+    }
+
+    #[test]
+    fn an_imported_name_is_quiet() {
+        let source =
+            "import { helper } from './helper';\nfunction run(): string {\n  return helper();\n}\n";
+        assert!(check_file("demo.ets", source).is_empty());
+    }
+
+    #[test]
+    fn a_declared_local_is_quiet() {
+        let source = "function run(): number {\n  const total = 2;\n  return total;\n}\n";
+        assert!(check_file("demo.ets", source).is_empty());
+    }
+
+    #[test]
+    fn uppercase_names_are_left_to_the_sdk() {
+        // `Text` is supplied ambiently by the SDK, so it must not be reported.
+        let source = "const view = Text('hi');\n";
+        assert!(check_file("demo.ets", source).is_empty());
+    }
+
+    #[test]
+    fn the_environment_supplies_its_own_names() {
+        let source = "function run(): void {\n  console.log(JSON.stringify({}));\n}\n";
+        assert!(check_file("demo.ets", source).is_empty());
+    }
+
+    #[test]
+    fn a_method_named_like_a_state_accessor_is_reported() {
+        // `@State x` lowers to `get x()` / `set x()` beside a `__x` field, so a hand-written
+        // method with the same name lands in the same class body. hvigor rejects that file with
+        // `Duplicate identifier`; this check has to agree.
+        let source = "class Page {\n  private __sdkState: string;\n  get sdkState() { return this.__sdkState; }\n  set sdkState(v: string) { this.__sdkState = v; }\n  sdkState(): string { return 'disk'; }\n}\n";
+        let found = check_file("demo.ts", source);
+        assert_eq!(found.len(), 1, "expected one collision");
+        assert!(
+            found[0].message.contains("sdkState"),
+            "message: {}",
+            found[0].message
+        );
+    }
+
+    #[test]
+    fn a_getter_and_setter_pair_is_quiet() {
+        // One accessor pair is one member; TypeScript allows it and hvigor accepts it.
+        let source = "class Page {\n  private _v: string;\n  get v() { return this._v; }\n  set v(next: string) { this._v = next; }\n}\n";
+        assert!(check_file("demo.ts", source).is_empty());
+    }
+
+    #[test]
+    fn overloaded_methods_are_quiet() {
+        // Overload signatures share a name by design, and hvigor accepts them.
+        let source = "class Page {\n  pick(v: number): number;\n  pick(v: number): number { return v; }\n}\n";
+        assert!(check_file("demo.ts", source).is_empty());
+    }
+
+    #[test]
+    fn a_file_the_parser_rejects_is_skipped() {
+        // A decorator form the TypeScript parser does not accept must not become a name report.
+        let source = "@Entry\n@Component\nstruct Page {\n  build() { nonsense() }\n}\n";
+        let found = check_file("demo.ets", source);
+        assert!(
+            found.is_empty(),
+            "unparsable files are skipped, got {found:?}",
+            found = found.len()
+        );
+    }
 }

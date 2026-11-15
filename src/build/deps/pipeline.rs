@@ -152,8 +152,8 @@ fn build_module_native(
             "Debug",
         )?;
         if let Err(e) = crate::build::artifacts::native_compile::strip(sdk_root, &built) {
-        println!("  (strip skipped: {e})");
-    }
+            println!("  (strip skipped: {e})");
+        }
         for entry in std::fs::read_dir(&built).into_iter().flatten().flatten() {
             let path = entry.path();
             if path.extension().is_none_or(|ext| ext != "so") {
@@ -331,8 +331,8 @@ fn native_build(project_dir: &Path, product: Option<&str>) -> Result<(AppConfig,
             }
             for dir in dirs {
                 if let Err(e) = crate::build::artifacts::native_compile::strip(&sdk_root, &dir) {
-        println!("  (strip skipped: {e})");
-    }
+                    println!("  (strip skipped: {e})");
+                }
             }
         }
         // The C++ runtime every native module links against. Without it a C++ module's exports
@@ -638,7 +638,10 @@ fn native_build(project_dir: &Path, product: Option<&str>) -> Result<(AppConfig,
         // A step that claimed artefacts narrows the pack set to them; a step that claimed
         // nothing leaves the directory as the whole input, which is the old behaviour.
         if !emitted.is_empty() {
-            println!("  steps emitted {} file(s), packing only those", emitted.len());
+            println!(
+                "  steps emitted {} file(s), packing only those",
+                emitted.len()
+            );
         }
     }
 

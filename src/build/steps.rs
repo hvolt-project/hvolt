@@ -131,10 +131,7 @@ fn resolve(root: &Path, rel: &str) -> Result<PathBuf, String> {
     Ok(root.join(candidate))
 }
 
-fn register_functions(
-    engine: &mut Engine,
-    ctx: &StepContext,
-) -> Rc<RefCell<Vec<String>>> {
+fn register_functions(engine: &mut Engine, ctx: &StepContext) -> Rc<RefCell<Vec<String>>> {
     let project_dir = ctx.project_dir.to_path_buf();
     let out_dir = ctx.out_dir.to_path_buf();
     let module = ctx.module.to_string();
@@ -155,10 +152,13 @@ fn register_functions(
 
     // File operations, all project-root relative.
     let root = project_dir.clone();
-    engine.register_fn("read", move |path: &str| -> Result<String, Box<EvalAltResult>> {
-        let full = resolve(&root, path).map_err(err)?;
-        std::fs::read_to_string(&full).map_err(|e| err(format!("{}: {}", path, e)))
-    });
+    engine.register_fn(
+        "read",
+        move |path: &str| -> Result<String, Box<EvalAltResult>> {
+            let full = resolve(&root, path).map_err(err)?;
+            std::fs::read_to_string(&full).map_err(|e| err(format!("{}: {}", path, e)))
+        },
+    );
     let root = project_dir.clone();
     engine.register_fn(
         "write",
@@ -182,40 +182,49 @@ fn register_functions(
         resolve(&root, path).map(|p| p.is_dir()).unwrap_or(false)
     });
     let root = project_dir.clone();
-    engine.register_fn("list", move |path: &str| -> Result<rhai::Array, Box<EvalAltResult>> {
-        let full = resolve(&root, path).map_err(err)?;
-        let mut names: Vec<String> = Vec::new();
-        for entry in std::fs::read_dir(&full).map_err(|e| err(format!("{}: {}", path, e)))? {
-            let entry = entry.map_err(|e| err(format!("{}: {}", path, e)))?;
-            names.push(entry.file_name().to_string_lossy().to_string());
-        }
-        names.sort();
-        // A plain Vec<String> is not a rhai array: the engine prints it as an opaque Rust
-        // value and `for name in list(..)` fails. Convert element by element.
-        Ok(names.into_iter().map(Dynamic::from).collect())
-    });
+    engine.register_fn(
+        "list",
+        move |path: &str| -> Result<rhai::Array, Box<EvalAltResult>> {
+            let full = resolve(&root, path).map_err(err)?;
+            let mut names: Vec<String> = Vec::new();
+            for entry in std::fs::read_dir(&full).map_err(|e| err(format!("{}: {}", path, e)))? {
+                let entry = entry.map_err(|e| err(format!("{}: {}", path, e)))?;
+                names.push(entry.file_name().to_string_lossy().to_string());
+            }
+            names.sort();
+            // A plain Vec<String> is not a rhai array: the engine prints it as an opaque Rust
+            // value and `for name in list(..)` fails. Convert element by element.
+            Ok(names.into_iter().map(Dynamic::from).collect())
+        },
+    );
     let root = project_dir.clone();
-    engine.register_fn("mkdir", move |path: &str| -> Result<bool, Box<EvalAltResult>> {
-        let full = resolve(&root, path).map_err(err)?;
-        if full.exists() {
-            return Ok(false);
-        }
-        std::fs::create_dir_all(&full).map_err(|e| err(format!("{}: {}", path, e)))?;
-        Ok(true)
-    });
+    engine.register_fn(
+        "mkdir",
+        move |path: &str| -> Result<bool, Box<EvalAltResult>> {
+            let full = resolve(&root, path).map_err(err)?;
+            if full.exists() {
+                return Ok(false);
+            }
+            std::fs::create_dir_all(&full).map_err(|e| err(format!("{}: {}", path, e)))?;
+            Ok(true)
+        },
+    );
     let root = project_dir.clone();
-    engine.register_fn("remove", move |path: &str| -> Result<bool, Box<EvalAltResult>> {
-        let full = resolve(&root, path).map_err(err)?;
-        if !full.exists() {
-            return Ok(false);
-        }
-        if full.is_dir() {
-            std::fs::remove_dir_all(&full).map_err(|e| err(format!("{}: {}", path, e)))?;
-        } else {
-            std::fs::remove_file(&full).map_err(|e| err(format!("{}: {}", path, e)))?;
-        }
-        Ok(true)
-    });
+    engine.register_fn(
+        "remove",
+        move |path: &str| -> Result<bool, Box<EvalAltResult>> {
+            let full = resolve(&root, path).map_err(err)?;
+            if !full.exists() {
+                return Ok(false);
+            }
+            if full.is_dir() {
+                std::fs::remove_dir_all(&full).map_err(|e| err(format!("{}: {}", path, e)))?;
+            } else {
+                std::fs::remove_file(&full).map_err(|e| err(format!("{}: {}", path, e)))?;
+            }
+            Ok(true)
+        },
+    );
 
     // Path helpers. These stay lexical: they never touch the filesystem.
     engine.register_fn("join", |a: &str, b: &str| -> String {
@@ -262,7 +271,8 @@ fn register_functions(
             if let Some(parent) = target.parent() {
                 std::fs::create_dir_all(parent).map_err(|e| err(format!("{}: {}", out, e)))?;
             }
-            let file = std::fs::File::create(&target).map_err(|e| err(format!("{}: {}", out, e)))?;
+            let file =
+                std::fs::File::create(&target).map_err(|e| err(format!("{}: {}", out, e)))?;
             let mut writer = zip::ZipWriter::new(file);
             let options = zip::write::SimpleFileOptions::default()
                 .compression_method(zip::CompressionMethod::Deflated);
@@ -271,13 +281,18 @@ fn register_functions(
                 let name = entry.to_string();
                 let full = resolve(&zip_root, &name).map_err(err)?;
                 let data = std::fs::read(&full).map_err(|e| err(format!("{}: {}", name, e)))?;
-                writer.start_file(name.clone(), options)
+                writer
+                    .start_file(name.clone(), options)
                     .map_err(|e| err(format!("{}: {}", name, e)))?;
                 use std::io::Write;
-                writer.write_all(&data).map_err(|e| err(format!("{}: {}", name, e)))?;
+                writer
+                    .write_all(&data)
+                    .map_err(|e| err(format!("{}: {}", name, e)))?;
                 written += 1;
             }
-            writer.finish().map_err(|e| err(format!("{}: {}", out, e)))?;
+            writer
+                .finish()
+                .map_err(|e| err(format!("{}: {}", out, e)))?;
             Ok(written)
         },
     );
@@ -351,7 +366,10 @@ mod tests {
         );
         assert!(ok.is_ok(), "{:?}", ok);
         assert_eq!(ok.unwrap(), vec!["build/out.txt".to_string()]);
-        assert_eq!(std::fs::read_to_string(root.join("build/out.txt")).unwrap(), "hi");
+        assert_eq!(
+            std::fs::read_to_string(root.join("build/out.txt")).unwrap(),
+            "hi"
+        );
         let _ = std::fs::remove_dir_all(&root);
     }
 

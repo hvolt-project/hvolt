@@ -169,10 +169,8 @@ pub fn discover(app: &AppConfig, project_dir: &Path) -> Result<Vec<Package>, Str
         // A registry dependency is fetched into the package cache on first use; the reference
         // does this with ohpm, which needs node, so hvolt does it itself. Both outcomes are
         // printed, so a second build can be told apart from a first one by its log alone.
-        if dep.path.is_none() {
-            if dir.is_dir() {
-                println!("dependency {name}: cache hit at {}", dir.display());
-            }
+        if dep.path.is_none() && dir.is_dir() {
+            println!("dependency {name}: cache hit at {}", dir.display());
         }
         if !dir.is_dir() && dep.path.is_none() {
             let registry = dep.registry.as_deref().unwrap_or("default");

@@ -127,7 +127,10 @@ pub(crate) fn list() {
         }
     };
     if found.is_empty() {
-        println!("dependencies: cache is empty at {}", npm_cache::root().display());
+        println!(
+            "dependencies: cache is empty at {}",
+            npm_cache::root().display()
+        );
         return;
     }
     let mut total = 0;
@@ -164,7 +167,10 @@ pub(crate) fn verify() {
     if bad == 0 {
         println!("✓ {} package(s) intact", found.len());
     } else {
-        println!("{bad} of {} package(s) incomplete; rerun the build to fetch them again", found.len());
+        println!(
+            "{bad} of {} package(s) incomplete; rerun the build to fetch them again",
+            found.len()
+        );
         crate::support::cli_exit(1);
     }
 }
@@ -199,6 +205,10 @@ pub(crate) fn prune(act: bool) {
     } else if act {
         println!("removed {} package(s), {}", found.len(), human(total));
     } else {
-        println!("{} package(s), {} — rerun with --yes to remove", found.len(), human(total));
+        println!(
+            "{} package(s), {} — rerun with --yes to remove",
+            found.len(),
+            human(total)
+        );
     }
 }

@@ -59,8 +59,7 @@ pub fn run_with(
     let compatible_api =
         crate::build::deps::sdk_facts::compatible_api(&app.app.compatible_sdk_version)
             .unwrap_or_default();
-    let facts =
-        crate::build::deps::sdk_facts::SdkFacts::detect(&sdk_root, compatible_api)?;
+    let facts = crate::build::deps::sdk_facts::SdkFacts::detect(&sdk_root, compatible_api)?;
     let build_mode = "debug";
 
     let res_dir = out_dir.join("res");

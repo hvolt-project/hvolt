@@ -408,7 +408,6 @@ fn find_emulator() -> Option<PathBuf> {
     None
 }
 
-
 // ─── SDK version management ────────────────────────────────────────
 
 /// An installed SDK version discovered on disk
@@ -536,7 +535,6 @@ fn parse_sdk_pkg(dir: &Path) -> Option<InstalledSdk> {
         components,
     })
 }
-
 
 /// Build the `sdk-ohos/<api>/` view from a version directory's own components.
 ///
