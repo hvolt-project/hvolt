@@ -3,6 +3,21 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
+/// What to do with the package cache.
+#[derive(Subcommand)]
+pub enum DepsCommand {
+    /// List installed packages with their sizes
+    List,
+    /// Re-check that every installed package still has its manifest
+    Verify,
+    /// Remove installed packages (and stale locks/unpack directories)
+    Prune {
+        /// actually delete; without it the command only reports
+        #[arg(long)]
+        yes: bool,
+    },
+}
+
 // `concat!` accepts literals only, so the SDK stamp below cannot reference
 // `config::SDK_PLATFORM_VERSION`; `version_stamp_matches_the_config_constant` reads this file
 // and fails the suite when the two drift.
@@ -72,12 +87,15 @@ pub enum Command {
         is provided by a backend that is not part of this source tree; a build\n\
         configured with it (cargo feature `agc-local`) enables `hvolt sign` without\n\
         `--local` and the `hvolt agc` commands. Without it those commands explain\n\
-        that the backend is missing."
+        that the backend is missing.\n\
+        \n\
+        `hvolt sign --release` asks the backend for a release profile (release\n\
+        certificate and a p7b with type \"release\") and writes it to signing/release/."
     )]
     Sign {
         /// Sign this package file instead of the package the project build produced.
-        /// The result stays in the package's own directory as `<name>-signed.hap`
-        /// (an input ending in `-unsigned` becomes `-signed`).
+        /// The result stays in the package's own directory as `<name>-signed.<ext>`
+        /// (an input ending in `-unsigned` becomes `-signed`; the extension is kept).
         #[arg(value_name = "HAP")]
         hap: Option<PathBuf>,
         /// Signing key store (p12). Giving materials switches from the localSign test
@@ -106,6 +124,11 @@ pub enum Command {
         /// (dev boards / emulators / source-built ROMs; NOT retail devices)
         #[arg(long)]
         local: bool,
+        /// Remote signing: provision a release profile instead of the debug one.
+        /// Writes `signing/release/release.{p12,csr,p7b,cer}` and points
+        /// `[app.signing.default]` at them. Requires the AGC backend.
+        #[arg(long)]
+        release: bool,
         /// localSign apl level (normal|system_basic|system_core)
         #[arg(long, default_value = "normal", value_parser = ["normal", "system_basic", "system_core"])]
         apl: String,
@@ -113,14 +136,16 @@ pub enum Command {
         #[arg(long, default_value = "release", value_parser = ["debug", "release"])]
         flavor: String,
     },
-    /// Push signed.hap to device (default: newest output/*-signed.hap)
+    /// Push the project's signed packages to a device, in bundle order: the entry HAP first,
+    /// then each shared package (`.hsp`). Default: the newest signed packages in output/ or
+    /// build/.
     Push {
         /// Device address (e.g. 192.168.1.100:38565 or serial number)
         device: Option<String>,
         /// Target device (same as positional; for flag-style muscle memory)
         #[arg(short = 'd', long = "device", value_name = "DEVICE")]
         device_flag: Option<String>,
-        /// Install this package file instead of output/*-signed.hap
+        /// Install this one package file instead of the project's signed packages
         #[arg(long, value_name = "FILE")]
         hap: Option<PathBuf>,
     },
@@ -354,7 +379,7 @@ pub enum Command {
         (see lsp/DESIGN.md). Consumed by an editor extension, not by hand:\n\
         \n\
         \x20 VS Code (or any LSP client) spawns `hvolt lsp --stdio`.\n\
-        \x20 Requires an installed SDK (hvolt sdk download) and Node.js."
+        \x20 Requires an installed SDK (hvolt sdk download) and a Node.js runtime on PATH."
     )]
     Lsp {
         /// Speak LSP on stdin/stdout (the only supported transport)
@@ -383,6 +408,25 @@ pub enum Command {
         #[arg(short, long)]
         device: Option<String>,
     },
+    /// Run one shell command on the device and print its output
+    Shell {
+        /// Command to run (joined with spaces)
+        #[arg(trailing_var_arg = true, required = true)]
+        command: Vec<String>,
+        /// Target device (default: configured target)
+        #[arg(short = 'd', long)]
+        device: Option<String>,
+    },
+
+    /// Launch an installed bundle: `<bundle>` or `<bundle>/<ability>`
+    Start {
+        /// `<bundle>` or `<bundle>/<ability>` (default ability: EntryAbility)
+        target: String,
+        /// Target device (default: configured target)
+        #[arg(short = 'd', long)]
+        device: Option<String>,
+    },
+
     /// ArkUI layout tree dump (uitest dumpLayout)
     Ui {
         #[command(subcommand)]
@@ -421,10 +465,33 @@ pub enum Command {
         #[arg(short = 'd', long = "device", value_name = "ADDR")]
         device: Option<String>,
     },
+    /// Inspect the package cache registry dependencies are installed into
+    Deps {
+        #[command(subcommand)]
+        action: DepsCommand,
+    },
+
     /// File transfer with the device
     File {
         #[command(subcommand)]
         action: FileAction,
+    },
+    /// Fault logs: the crash records HiviewDFX keeps on the device (jscrash / cppcrash)
+    FaultLog {
+        /// Only records whose file name contains this (typically a bundle name)
+        bundle: Option<String>,
+        /// Fetch this exact record instead of the newest one
+        #[arg(short, long)]
+        name: Option<String>,
+        /// List the records instead of printing the newest one
+        #[arg(short, long)]
+        list: bool,
+        /// Write the record here instead of printing it
+        #[arg(short, long)]
+        out: Option<String>,
+        /// Target device (default: configured target)
+        #[arg(short = 'd', long)]
+        device: Option<String>,
     },
     /// Uninstall an app from the device
     Uninstall {
@@ -465,7 +532,7 @@ pub enum Command {
         #[command(subcommand)]
         action: AgcAction,
     },
-    /// Manage hvolt configuration (sdk_path, node_home, device_*; see `config get`)
+    /// Manage hvolt configuration (sdk_path, device_*; see `config get`)
     Config {
         #[command(subcommand)]
         action: ConfigAction,
@@ -502,7 +569,17 @@ pub enum SkillAction {
 #[derive(Subcommand)]
 pub enum AgcAction {
     /// Login to Huawei AppGallery Connect (opens browser)
-    Login,
+    Login {
+        /// Print the authorization URL and exit; the caller opens the browser itself
+        #[arg(long)]
+        print_url: bool,
+        /// Complete the login from the callback URL the browser ended on
+        #[arg(long)]
+        callback: Option<String>,
+        /// Wait for the browser callback on this port and finish the login
+        #[arg(long)]
+        wait: Option<u16>,
+    },
     /// List or delete certificates
     Certs {
         #[command(subcommand)]
@@ -713,6 +790,9 @@ pub enum FileAction {
         /// Target device (default: configured target)
         #[arg(short = 'd', long)]
         device: Option<String>,
+        /// Write into this bundle's sandbox (same as `hdc file send -b`)
+        #[arg(short = 'b', long)]
+        bundle: Option<String>,
     },
     /// Copy a file from the device
     Recv {

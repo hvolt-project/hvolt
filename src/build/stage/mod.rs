@@ -38,5 +38,6 @@ pub(crate) mod process_import;
 #[allow(non_snake_case)] // the module name is the reference's file name
 pub(crate) mod process_struct_componentV2;
 pub(crate) mod process_ui_syntax;
+pub(crate) mod semantic_check;
 pub(crate) mod utils;
 pub(crate) mod validate_ui_syntax;

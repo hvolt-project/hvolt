@@ -21,6 +21,8 @@ pub fn output_dir(project_dir: &Path, product: &str) -> PathBuf {
 }
 
 /// Sign the unsigned HAP in process (`native_sign`), localSign identity.
+/// Sign every unsigned package a build produced: the entry HAPs first, then the shared
+/// packages (`.hsp`). A single-package build signs exactly one file, as before.
 #[allow(clippy::too_many_arguments)] // mirrors the signing CLI surface 1:1
 pub fn sign_app(
     _sdk: &crate::sdk::manage::SdkEnv,
@@ -34,20 +36,10 @@ pub fn sign_app(
     profile: &str,
     sign_alg: &str,
 ) -> Result<(), String> {
-    let unsigned = find_unsigned_hap(&project_dir.join("build"))?;
+    let unsigned = find_unsigned_packages(&project_dir.join("build"))?;
     let output_dir = output_dir(project_dir, product);
     fs::create_dir_all(&output_dir)
         .map_err(|e| format!("create {}: {}", output_dir.display(), e))?;
-    let output_name = unsigned
-        .file_name()
-        .unwrap_or_default()
-        .to_string_lossy()
-        .replace("-unsigned", "-signed");
-    let hap_path = output_dir.join(&*output_name);
-
-    if !unsigned.exists() {
-        return Err(format!("unsigned HAP not found: {}", unsigned.display()));
-    }
 
     // Check certificate expiration before signing
     let abs_certpath = if Path::new(certpath).is_absolute() {
@@ -69,29 +61,42 @@ pub fn sign_app(
         }
     }
 
-    println!("  Signing HAP...");
-    native_sign::sign_package(
-        &LocalSign {
-            store_file: Path::new(store_file),
-            store_password,
-            key_alias,
-            key_password,
-            cert_chain: Path::new(certpath),
-            profile: Path::new(profile),
-            sign_alg,
-        },
-        &unsigned,
-        &hap_path,
-    )?;
-
-    println!(
-        "  ✓ {} ({:.1} KB)",
-        output_name,
-        hap_path
-            .metadata()
-            .map(|m| m.len() as f64 / 1024.0)
-            .unwrap_or(0.0)
-    );
+    let materials = LocalSign {
+        store_file: Path::new(store_file),
+        store_password,
+        key_alias,
+        key_password,
+        cert_chain: Path::new(certpath),
+        profile: Path::new(profile),
+        sign_alg,
+    };
+    for in_path in &unsigned {
+        // The package keeps its own extension: `<stem>-unsigned.<ext>` → `<stem>-signed.<ext>`
+        // (`.hap` and `.hsp` alike).
+        let out_name = signed_sibling(in_path)
+            .file_name()
+            .unwrap_or_default()
+            .to_string_lossy()
+            .to_string();
+        let out_path = output_dir.join(&out_name);
+        if !in_path.exists() {
+            return Err(format!("unsigned package not found: {}", in_path.display()));
+        }
+        println!(
+            "  Signing {}...",
+            in_path.file_name().unwrap_or_default().to_string_lossy()
+        );
+        native_sign::sign_package(&materials, in_path, &out_path)
+            .map_err(|e| format!("sign {}: {e}", in_path.display()))?;
+        println!(
+            "  ✓ {} ({:.1} KB)",
+            out_name,
+            out_path
+                .metadata()
+                .map(|m| m.len() as f64 / 1024.0)
+                .unwrap_or(0.0)
+        );
+    }
     Ok(())
 }
 
@@ -144,7 +149,7 @@ pub struct Materials<'a> {
 
 /// Sign a package the caller points at with the materials the caller named.
 ///
-/// The result stays in the package's own directory as `<name>-signed.hap`. A package that is
+/// The result stays in the package's own directory as `<name>-signed.<ext>`. A package that is
 /// already signed is refused; one that merely carries the signed *name* is not, which is why
 /// the check reads the archive instead of the file name.
 pub fn sign_file(
@@ -175,8 +180,14 @@ pub fn sign_file(
     // result goes to a sibling temp file and replaces the input only after it is complete.
     let same_path = in_path == out_path;
     let write_to = if same_path {
+        // Keep the package's own extension in the temp name: the signer validates the input
+        // suffix and a `.hsp` written to a `.hap` temp file is the wrong kind of package.
+        let extension = in_path
+            .extension()
+            .and_then(|extension| extension.to_str())
+            .unwrap_or("hap");
         in_path.with_file_name(format!(
-            "{}.hvolt-tmp.hap",
+            "{}.hvolt-tmp.{extension}",
             in_path.file_stem().unwrap_or_default().to_string_lossy()
         ))
     } else {
@@ -211,43 +222,94 @@ pub fn sign_file(
     Ok(out_path)
 }
 
-/// `<dir>/<name>-unsigned.hap` → `<dir>/<name>-signed.hap`; any other name gains `-signed`.
+/// `<dir>/<name>-unsigned.<ext>` → `<dir>/<name>-signed.<ext>`; any other name gains `-signed`.
 ///
-/// One rule for every input: drop an existing `-unsigned`/`-signed` marker, then emit the
-/// signed name. An input that already carries the signed name therefore maps onto itself; the
-/// caller writes through a temp file in that case, so the input is never truncated.
+/// The extension is kept verbatim: a `.hsp` stays a `.hsp` and a `.hqf` stays a `.hqf`, so the
+/// signed file is recognized by everything downstream that dispatches on the suffix. One rule
+/// for every input: drop an existing `-unsigned`/`-signed` marker, then emit the signed name. An
+/// input that already carries the signed name therefore maps onto itself; the caller writes
+/// through a temp file in that case, so the input is never truncated.
 pub fn signed_sibling(in_path: &Path) -> PathBuf {
     let name = in_path
         .file_name()
         .unwrap_or_default()
         .to_string_lossy()
         .to_string();
-    let stem = name.strip_suffix(".hap").unwrap_or(&name);
+    // Split on the last dot; a dotfile (no stem before the dot) keeps the whole name.
+    let (stem, extension) = match name.rsplit_once('.') {
+        Some((stem, extension)) if !stem.is_empty() && !extension.is_empty() => {
+            (stem, format!(".{extension}"))
+        }
+        _ => (name.as_str(), String::new()),
+    };
     let stem = stem
         .strip_suffix("-unsigned")
         .or_else(|| stem.strip_suffix("-signed"))
         .unwrap_or(stem);
-    in_path.with_file_name(format!("{}-signed.hap", stem))
+    in_path.with_file_name(format!("{}-signed{}", stem, extension))
 }
 
+/// The single unsigned HAP a build produced, for callers that predate the multi-package split.
+///
+/// The remote (AppGallery Connect) chain lives outside this tree (`agc-local/sign_remote.rs`)
+/// and still asks for one package; keeping this name means the private overlay and the CI secret
+/// do not have to move together for a rename. New code uses [`find_unsigned_packages`].
+#[cfg_attr(not(feature = "agc-local"), allow(dead_code))] // read by the optional backend only
 pub(crate) fn find_unsigned_hap(build_dir: &Path) -> Result<PathBuf, String> {
-    // Native (standalone) chain only: packed `<module>-unsigned.hap` sits in
-    // the build root. No foreign layout is recognized.
+    find_unsigned_packages(build_dir)?
+        .into_iter()
+        .find(|path| {
+            path.extension()
+                .and_then(|extension| extension.to_str())
+                .map(|extension| extension.eq_ignore_ascii_case("hap"))
+                .unwrap_or(false)
+        })
+        .ok_or_else(|| format!("unsigned HAP not found under {}", build_dir.display()))
+}
+
+/// Every unsigned package a build produced, in signing order: the entry HAPs first, then the
+/// shared packages (`.hsp`).
+///
+/// Native (standalone) chain only: packed `<module>-unsigned.<hap|hsp>` sits in the build root.
+/// No foreign layout is recognized.
+pub(crate) fn find_unsigned_packages(build_dir: &Path) -> Result<Vec<PathBuf>, String> {
+    fn extension_of(path: &Path) -> String {
+        path.extension()
+            .and_then(|extension| extension.to_str())
+            .unwrap_or_default()
+            .to_ascii_lowercase()
+    }
+    let mut found: Vec<PathBuf> = Vec::new();
     if let Ok(entries) = fs::read_dir(build_dir) {
         for entry in entries.flatten() {
             let path = entry.path();
-            if path.is_file() {
-                let name = path.file_name().unwrap_or_default().to_string_lossy();
-                if name.ends_with("-unsigned.hap") {
-                    return Ok(path);
-                }
+            if !path.is_file() {
+                continue;
+            }
+            let name = path.file_name().unwrap_or_default().to_string_lossy();
+            if name.ends_with("-unsigned.hap") || name.ends_with("-unsigned.hsp") {
+                found.push(path);
             }
         }
     }
-    Err(format!(
-        "unsigned HAP not found under {}",
-        build_dir.display()
-    ))
+    if found.is_empty() {
+        return Err(format!(
+            "unsigned package not found under {}",
+            build_dir.display()
+        ));
+    }
+    // Entry HAP before shared HSP; name order keeps the result deterministic within a kind.
+    found.sort_by(|left, right| {
+        let rank = |path: &PathBuf| match extension_of(path).as_str() {
+            "hap" => 0u8,
+            "hsp" => 1,
+            _ => 2,
+        };
+        rank(left)
+            .cmp(&rank(right))
+            .then_with(|| left.file_name().cmp(&right.file_name()))
+    });
+    Ok(found)
 }
 
 /// Whether a certificate file is still valid, read without an external process.
@@ -311,5 +373,25 @@ mod request_tests {
     fn signed_sibling_marks_a_plain_package() {
         let out = signed_sibling(Path::new("/tmp/app.hap"));
         assert_eq!(out, Path::new("/tmp/app-signed.hap"));
+    }
+
+    /// Every package kind keeps its extension: the signed sibling is dispatched on by suffix
+    /// downstream, and a `.hsp` emitted as `.hap` is not installable under that name.
+    #[test]
+    fn signed_sibling_keeps_the_extension_of_every_package_kind() {
+        for (input, want) in [
+            ("/tmp/app-unsigned.hap", "/tmp/app-signed.hap"),
+            ("/tmp/app-unsigned.hsp", "/tmp/app-signed.hsp"),
+            ("/tmp/app-unsigned.hqf", "/tmp/app-signed.hqf"),
+            ("/tmp/app.hsp", "/tmp/app-signed.hsp"),
+            ("/tmp/app.hqf", "/tmp/app-signed.hqf"),
+            ("/tmp/app-signed.hsp", "/tmp/app-signed.hsp"),
+        ] {
+            assert_eq!(
+                signed_sibling(Path::new(input)),
+                Path::new(want),
+                "input {input}"
+            );
+        }
     }
 }

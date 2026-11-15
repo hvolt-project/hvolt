@@ -43,19 +43,19 @@ pub(crate) fn sdk(action: SdkAction) {
         } => {
             crate::sdk::manage::download_sdk(&version, &components, dry_run).unwrap_or_else(|e| {
                 eprintln!("✗ Failed to download SDK: {}", e);
-                std::process::exit(1);
+                crate::support::cli_exit(1);
             });
         }
         crate::support::cli::SdkAction::Import { path } => {
             crate::sdk::manage::import_sdk(&path).unwrap_or_else(|e| {
                 eprintln!("✗ Failed to import SDK: {}", e);
-                std::process::exit(1);
+                crate::support::cli_exit(1);
             });
         }
         crate::support::cli::SdkAction::Use { version } => {
             crate::sdk::manage::use_version(&version).unwrap_or_else(|e| {
                 eprintln!("✗ Failed to switch SDK version: {}", e);
-                std::process::exit(1);
+                crate::support::cli_exit(1);
             });
         }
         crate::support::cli::SdkAction::Remove { version, yes } => {
@@ -65,11 +65,11 @@ pub(crate) fn sdk(action: SdkAction) {
                     version
                 );
                 eprintln!("  confirm with: hvolt sdk remove {} --yes", version);
-                std::process::exit(2);
+                crate::support::cli_exit(2);
             }
             crate::sdk::manage::remove_version(&version).unwrap_or_else(|e| {
                 eprintln!("✗ Failed to remove SDK version: {}", e);
-                std::process::exit(1);
+                crate::support::cli_exit(1);
             });
         }
     }

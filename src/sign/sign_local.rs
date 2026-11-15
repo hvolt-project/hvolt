@@ -425,8 +425,9 @@ pub fn sign(project_dir: &Path, apl: &str, kind: ProfileKind) -> Result<(), Stri
 
 /// localSign a package the caller points at, bound to that package's own bundle.
 ///
-/// The output sits beside the input (`<name>-signed.hap`); `output/` and the project's own
-/// unsigned package are not involved, so a bare package can be signed without a build.
+/// The output sits beside the input (`<name>-signed.<ext>`, the extension kept); `output/` and
+/// the project's own unsigned package are not involved, so a bare package can be signed without
+/// a build.
 pub fn sign_external(
     hap: &Path,
     apl: &str,

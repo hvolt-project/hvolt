@@ -7,13 +7,13 @@ pub(crate) fn config(action: ConfigAction) {
         crate::support::cli::ConfigAction::Set { key, value } => {
             crate::sdk::manage::config_set(&key, &value).unwrap_or_else(|e| {
                 eprintln!("✗ {}", e);
-                std::process::exit(1);
+                crate::support::cli_exit(1);
             });
         }
         crate::support::cli::ConfigAction::Unset { key } => {
             crate::sdk::manage::config_unset(&key).unwrap_or_else(|e| {
                 eprintln!("✗ {}", e);
-                std::process::exit(1);
+                crate::support::cli_exit(1);
             });
         }
     }
@@ -38,7 +38,7 @@ pub(crate) fn skill(action: SkillAction) {
             if !crate::support::skill::print_skill(&name) {
                 eprintln!("✗ unknown skill: {}", name);
                 eprintln!("  available: {}", crate::support::skill::ids().join(", "));
-                std::process::exit(1);
+                crate::support::cli_exit(1);
             }
         }
     }

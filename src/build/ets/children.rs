@@ -129,6 +129,7 @@ pub(crate) fn rewrite_builders_with_locals(
     builder_names: &[String],
     locals: &[String],
 ) -> String {
+    let source = &super::arkui::rewrite_chain_blocks(source);
     rewrite_builders_with_shifts(source, builder_names, locals).0
 }
 
@@ -143,6 +144,8 @@ pub(crate) fn rewrite_builders_with_shifts(
     builder_names: &[String],
     locals: &[String],
 ) -> (String, Vec<(usize, usize)>) {
+    // Property chains whose trailing block the parser rejects; see `ets::arkui`.
+    let source = &super::arkui::rewrite_chain_blocks(source);
     let mut takes_children: HashSet<&str> = HashSet::new();
     for name in crate::build::ets_compile::builtin_component_names() {
         takes_children.insert(name.as_str());

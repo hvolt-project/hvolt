@@ -23,13 +23,13 @@ pub(crate) fn uninstall(bundle: Option<String>, device: Option<String>) {
         let c = crate::support::config::AppConfig::from_file(std::path::Path::new("hvolt.toml"))
             .unwrap_or_else(|e| {
                 eprintln!("✗ {} — pass the bundle name explicitly", e);
-                std::process::exit(1);
+                crate::support::cli_exit(1);
             });
         c.app.bundle
     });
     if let Err(e) = crate::device::devtools::uninstall(&b, device.as_deref()) {
         eprintln!("✗ {}", e);
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     }
 }
 
@@ -41,7 +41,7 @@ pub(crate) fn hap(sub: HapCommand) {
                 None => crate::project::check::find_signed_hap(std::path::Path::new("."))
                     .unwrap_or_else(|e| {
                         eprintln!("✗ {}", e);
-                        std::process::exit(1);
+                        crate::support::cli_exit(1);
                     }),
             };
             match crate::project::hap::hap_info(&p) {
@@ -50,7 +50,7 @@ pub(crate) fn hap(sub: HapCommand) {
                 }
                 Err(e) => {
                     eprintln!("✗ {}", e);
-                    std::process::exit(1);
+                    crate::support::cli_exit(1);
                 }
             }
         }

@@ -11,6 +11,7 @@
 
 pub(crate) mod agc;
 pub(crate) mod build;
+pub(crate) mod deps;
 pub(crate) mod config_skill;
 pub(crate) mod deploy;
 pub(crate) mod device;
@@ -19,10 +20,17 @@ pub(crate) mod sdk;
 pub(crate) mod sign;
 
 use crate::support::cli::Command;
+use crate::support::cli::DepsCommand;
 
 /// Hand one parsed subcommand to its family module; each handler owns its exit codes.
 pub(crate) fn dispatch(command: Command) {
     match command {
+        Command::Deps { action } => match action {
+            DepsCommand::List => deps::list(),
+            DepsCommand::Verify => deps::verify(),
+            DepsCommand::Prune { yes } => deps::prune(yes),
+        },
+
         Command::Init { name } => project::init(name),
         Command::Migrate { from, out, dry_run } => project::migrate(from, out, dry_run),
         Command::Dep { action } => project::dep(action),
@@ -30,6 +38,7 @@ pub(crate) fn dispatch(command: Command) {
         Command::Sign {
             hap,
             local,
+            release,
             apl,
             flavor,
             p12,
@@ -42,6 +51,7 @@ pub(crate) fn dispatch(command: Command) {
         } => sign::sign(
             hap,
             local,
+            release,
             apl,
             flavor,
             p12,
@@ -136,6 +146,8 @@ pub(crate) fn dispatch(command: Command) {
             device,
             device_pos,
         } => device::screenshot(out, device.or(device_pos)),
+        Command::Start { target, device } => device::start(target, device),
+        Command::Shell { command, device } => device::shell(command.join(" "), device),
         Command::Ui { action } => device::ui(action),
         Command::Log {
             level,
@@ -160,6 +172,19 @@ pub(crate) fn dispatch(command: Command) {
             device.or(device_pos),
         ),
         Command::File { action } => device::file(action),
+        Command::FaultLog {
+            bundle,
+            name,
+            list,
+            out,
+            device,
+        } => device::faultlog(
+            bundle.as_deref(),
+            name.as_deref(),
+            list,
+            out.as_deref(),
+            device.as_deref(),
+        ),
         Command::Uninstall { bundle, device } => deploy::uninstall(bundle, device),
         Command::Doctor { product } => project::doctor(product),
         Command::ExportReport { ts_root } => project::export_report(ts_root),

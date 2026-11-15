@@ -26,6 +26,11 @@ pub struct PackInput<'a> {
     pub compile_sdk_version: &'a str,
     pub api_release_type: &'a str,
     pub ids: &'a crate::build::compile::ets_resources::ResourceTable,
+    /// `module.dependencies` of the module.json this digest mirrors.
+    ///
+    /// pack.info has no place for it, but the digest is rendered from the same manifest, so the
+    /// table is passed through rather than invented here.
+    pub dependencies: &'a [(String, u32)],
 }
 
 /// `summary.app.version`, with `build` only when the project declares one.
@@ -56,6 +61,7 @@ pub fn render(input: &PackInput<'_>) -> Value {
         // pack.info's digest reads abilities/mainAbility/label; the route table does not
         // reach it.
         has_route_map: false,
+        dependencies: input.dependencies,
     });
     let manifest_module = &manifest["module"];
 
@@ -85,6 +91,37 @@ pub fn render(input: &PackInput<'_>) -> Value {
         .unwrap_or(true);
 
     let version = &input.app.app;
+    // A shared package carries no ability, so hvigor's digest has neither `mainAbility` nor
+    // `abilities` for it (`.scratch/multi-module/truth/shared/pack.info`), while an entry
+    // package carries both. The keys are written in the reference's order
+    // (`truth/entry/pack.info`: `mainAbility`, `deviceType`, `abilities`, `distro`, `apiVersion`)
+    // so a single-module package keeps the byte shape it had.
+    let mut summary_module = serde_json::Map::new();
+    if !input.module.module.is_hsp() {
+        summary_module.insert("mainAbility".into(), json!(main_ability));
+    }
+    summary_module.insert("deviceType".into(), device_types);
+    if !input.module.module.is_hsp() {
+        summary_module.insert("abilities".into(), json!(abilities));
+    }
+    summary_module.insert(
+        "distro".into(),
+        json!({
+            "moduleType": module_type,
+            "installationFree": installation_free,
+            "deliveryWithInstall": delivery,
+            "moduleName": input.module_name,
+        }),
+    );
+    // pack.info carries the plain API levels; the encoded forms live in module.json.
+    summary_module.insert(
+        "apiVersion".into(),
+        json!({
+            "compatible": version.compatible_api_level(),
+            "releaseType": input.api_release_type,
+            "target": version.target_api_level(),
+        }),
+    );
     json!({
         "summary": {
             "app": {
@@ -92,26 +129,7 @@ pub fn render(input: &PackInput<'_>) -> Value {
                 "bundleType": version.bundle_type,
                 "version": version_block(version),
             },
-            "modules": [
-                {
-                    "mainAbility": main_ability,
-                    "deviceType": device_types,
-                    "abilities": abilities,
-                    "distro": {
-                        "moduleType": module_type,
-                        "installationFree": installation_free,
-                        "deliveryWithInstall": delivery,
-                        "moduleName": input.module_name,
-                    },
-                    // pack.info carries the plain API levels; the encoded forms live in
-                    // module.json.
-                    "apiVersion": {
-                        "compatible": version.compatible_api_level(),
-                        "releaseType": input.api_release_type,
-                        "target": version.target_api_level(),
-                    }
-                }
-            ]
+            "modules": [Value::Object(summary_module)]
         },
         "packages": [
             {
@@ -209,6 +227,7 @@ color start_window_background 0x01000009
             compile_sdk_version: "26.0.0.23",
             api_release_type: "Beta1",
             ids: &ids,
+            dependencies: &[],
         });
         assert_eq!(
             out["summary"]["app"]["bundleName"],
@@ -238,8 +257,42 @@ color start_window_background 0x01000009
             compile_sdk_version: "26.0.0.23",
             api_release_type: "Beta1",
             ids: &ids,
+            dependencies: &[],
         });
         assert_eq!(out["packages"][0]["name"], "src-default");
         assert_eq!(out["packages"][0]["moduleType"], "entry");
+    }
+
+    /// A shared package's digest has no ability: `moduleType` is `shared` (not `hsp`) and the
+    /// `mainAbility`/`abilities` keys are absent (`truth/shared/pack.info`).
+    #[test]
+    fn a_shared_package_digest_has_no_ability() {
+        let a = app();
+        let mut m = module();
+        m.module.name = "shared".into();
+        m.module.module_type = "shared".into();
+        m.module.entry = "Index.ets".into();
+        m.module.routes = Vec::new();
+        let ids = ids();
+        let out = render(&PackInput {
+            has_insight_intent: false,
+            virtual_machine: "",
+            module_name: "shared",
+            module: &m,
+            app: &a,
+            product: "default",
+            build_mode: "debug",
+            compile_sdk_version: "26.0.0.23",
+            api_release_type: "Beta1",
+            ids: &ids,
+            dependencies: &[],
+        });
+        let digest = &out["summary"]["modules"][0];
+        assert!(digest.get("mainAbility").is_none(), "{digest}");
+        assert!(digest.get("abilities").is_none(), "{digest}");
+        assert_eq!(digest["distro"]["moduleType"], "shared");
+        assert_eq!(out["packages"][0]["moduleType"], "shared");
+        assert_eq!(out["packages"][0]["name"], "shared-default");
+        assert_eq!(out["packages"].as_array().map(Vec::len), Some(1));
     }
 }

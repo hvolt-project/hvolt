@@ -69,19 +69,22 @@ mod tests {
         assert_eq!(bytecode_version(31), None);
     }
 
-    /// Re-measures the table against the installed SDK; skips when either the SDK's script or
-    /// Node is missing, since the point is to compare the table with the toolchain.
+    /// Re-measures the table against the installed SDK by running the SDK's own ts2abc.js.
+    /// Skips when the SDK's script or a node on PATH is missing: this is the only place left
+    /// that spawns Node at all, and it is a test, not a build step.
     #[test]
     fn the_table_matches_the_installed_sdk() {
         let env = match crate::sdk::manage::detect("") {
             Ok(env) => env,
             Err(_) => return,
         };
-        let node = crate::sdk::manage::node_bin(&env.node_home);
-        if !node.is_file() {
-            println!("skip: no node at {}", node.display());
-            return;
-        }
+        let node = match crate::support::platform::on_path("node") {
+            Some(found) => found,
+            None => {
+                println!("skip: no node on PATH");
+                return;
+            }
+        };
         let platform = crate::build::deps::sdk_facts::platform_root(&env.ohos_sdk);
         let script = platform.join("ets/build-tools/ets-loader/bin/ark/ts2abc.js");
         if !script.is_file() {

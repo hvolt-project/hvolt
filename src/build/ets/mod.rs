@@ -19,6 +19,7 @@ pub(crate) mod api_available;
 // The rules moved to the stage tree; these names stay because `ets_compile` and
 // `build/lower/ets_component` (both outside this refactor's write scope) address them here.
 pub(crate) use crate::build::stage::process_component_build as build_body;
+pub(crate) mod arkui;
 pub(crate) mod children;
 pub(crate) mod comments;
 pub(crate) mod context;
