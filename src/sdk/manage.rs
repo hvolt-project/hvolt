@@ -10,7 +10,6 @@ pub struct SdkEnv {
     /// Root of the resolved HarmonyOS SDK. Everything hvolt compiles with
     /// (es2abc, restool, the ArkTS declaration files) lives under it.
     pub ohos_sdk: PathBuf,
-    pub node_home: PathBuf,
     pub emulator: Option<PathBuf>,
 }
 
@@ -23,8 +22,6 @@ use serde::{Deserialize, Serialize};
 pub(crate) struct GlobalConfig {
     #[serde(default)]
     sdk_path: String,
-    #[serde(default)]
-    node_home: String,
     /// Persistent install target (device serial or ip:port), recorded by
     /// `hvolt device connect`. Used by push/run when no explicit device given.
     #[serde(default)]
@@ -124,14 +121,6 @@ pub fn config_get() {
         }
     );
     println!(
-        "  node_home = {}",
-        if cfg.node_home.is_empty() {
-            "(not set)"
-        } else {
-            &cfg.node_home
-        }
-    );
-    println!(
         "  device_target = {}",
         if cfg.device_target.is_empty() {
             "(not set)"
@@ -169,7 +158,6 @@ pub fn config_get() {
 /// the error text and the match arms had drifted into two different sets)
 pub const CONFIG_KEYS: &[&str] = &[
     "sdk_path",
-    "node_home",
     "sdk_support_version",
     "device_target",
     "device_host",
@@ -178,9 +166,14 @@ pub const CONFIG_KEYS: &[&str] = &[
 
 fn unknown_key(key: &str) -> String {
     format!(
-        "Unknown config key '{}'. Valid: {}",
+        "Unknown config key '{}'. Valid: {}{}",
         key,
-        CONFIG_KEYS.join(", ")
+        CONFIG_KEYS.join(", "),
+        if key == "node_home" {
+            " — 'node_home' was removed: hvolt no longer depends on Node.js"
+        } else {
+            ""
+        }
     )
 }
 
@@ -189,7 +182,6 @@ pub fn config_set(key: &str, value: &str) -> Result<(), String> {
     let mut cfg = load_global_config_checked()?;
     match key {
         "sdk_path" => cfg.sdk_path = value.to_string(),
-        "node_home" => cfg.node_home = value.to_string(),
         "sdk_support_version" => cfg.sdk_support_version = value.to_string(),
         "device_host" => cfg.device_host = value.to_string(),
         "device_hdc" => cfg.device_hdc = value.to_string(),
@@ -205,7 +197,6 @@ pub fn config_unset(key: &str) -> Result<(), String> {
     let mut cfg = load_global_config_checked()?;
     match key {
         "sdk_path" => cfg.sdk_path = String::new(),
-        "node_home" => cfg.node_home = String::new(),
         "sdk_support_version" => cfg.sdk_support_version = String::new(),
         "device_host" => cfg.device_host = String::new(),
         "device_hdc" => cfg.device_hdc = String::new(),
@@ -233,7 +224,6 @@ pub fn show_info() {
         Ok(env) => {
             println!();
             println!("Resolved SDK: {}", env.ohos_sdk.display());
-            println!("  node:     {}", env.node_home.display());
         }
         Err(e) => {
             // "no build chain" must not read as "no SDK": show
@@ -265,24 +255,24 @@ pub fn set_sdk(path: &str, global: bool) {
     let p = Path::new(path);
     if !p.exists() {
         eprintln!("✗ Path not found: {}", path);
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     }
     if global {
         let mut cfg = load_global_config_checked().unwrap_or_else(|e| {
             eprintln!("✗ {}", e);
-            std::process::exit(1);
+            crate::support::cli_exit(1);
         });
         cfg.sdk_path = path.to_string();
         save_global_config(&cfg).unwrap_or_else(|e| {
             eprintln!("✗ {}", e);
-            std::process::exit(1);
+            crate::support::cli_exit(1);
         });
         println!("✓ Global SDK set to: {}", path);
     } else {
         let toml_path = Path::new(".").join("hvolt.toml");
         if !toml_path.exists() {
             eprintln!("✗ No hvolt.toml in current directory. Use --global or run from a project.");
-            std::process::exit(1);
+            crate::support::cli_exit(1);
         }
         let content = fs::read_to_string(&toml_path).unwrap_or_default();
         let new_content = if content.contains("sdk_path") {
@@ -294,7 +284,7 @@ pub fn set_sdk(path: &str, global: bool) {
         };
         fs::write(&toml_path, new_content).unwrap_or_else(|e| {
             eprintln!("✗ write hvolt.toml: {}", e);
-            std::process::exit(1);
+            crate::support::cli_exit(1);
         });
         println!("✓ Project SDK set to: {}", path);
     }
@@ -304,11 +294,9 @@ pub fn set_sdk(path: &str, global: bool) {
 
 pub fn detect(sdk_path_override: &str) -> Result<SdkEnv, String> {
     let ohos_sdk = find_ohos_sdk(sdk_path_override)?;
-    let (node_home, emulator) = find_tools(&ohos_sdk)?;
     Ok(SdkEnv {
         ohos_sdk,
-        node_home,
-        emulator,
+        emulator: find_emulator(),
     })
 }
 
@@ -413,72 +401,13 @@ fn find_ohos_sdk(toml_override: &str) -> Result<PathBuf, String> {
             .into(),
     )
 }
-/// Tool paths resolved from an installed OpenHarmony SDK: (node, emulator).
-/// External build tools and a JDK are deliberately absent — hvolt compiles,
-/// signs and talks to the device with its own implementation.
-type ToolPaths = (PathBuf, Option<PathBuf>);
-
-fn find_tools(_ohos_sdk: &Path) -> Result<ToolPaths, String> {
-    // hvolt builds with its own chain: no external build tool, no JDK, no hdc binary.
-    // Node is still resolved because the language server and the emulator
-    // wrapper are Node programs.
-    let node_home = find_node()?;
-    Ok((node_home, None))
+/// hvolt resolves no external toolchain from the SDK: build, sign and device access are
+/// its own implementation, and none of them needs Node.js. The emulator handle stays
+/// `None` until there is an emulator backend that is not a Node wrapper.
+fn find_emulator() -> Option<PathBuf> {
+    None
 }
 
-/// Resolve the actual node binary from a node_home. node_home has TWO
-/// legitimate shapes: install root (…/node-v20/bin/node) or the bin dir
-/// itself (PATH discovery returns parent-of-binary, e.g. /opt/homebrew/bin).
-/// Probers must not guess a third shape — doctor's unconditional
-/// home.join("bin/node") produced /opt/homebrew/bin/bin/node false
-/// negatives on the most common macOS install.
-pub(crate) fn node_bin(home: &std::path::Path) -> std::path::PathBuf {
-    for cand in [
-        home.join("bin").join("node"),
-        home.join("node"),
-        home.join("bin").join("node.exe"),
-        home.join("node.exe"),
-    ] {
-        if cand.exists() {
-            return cand;
-        }
-    }
-    home.join("bin").join("node") // nothing found: report the canonical shape
-}
-
-/// Find Node.js home: hvolt config → NODE_HOME env → PATH which
-pub(crate) fn find_node() -> Result<PathBuf, String> {
-    // node_home semantics: the directory from which apply_tool_path can
-    // locate the binary — either root/bin/node (posix) or root/node.exe
-    // (Windows layouts: pi-node\current, nodejs install dir). tool_bin_dir
-    // resolves either, so validity = "binary findable under this root".
-    let node_ok = |p: &Path| {
-        crate::support::platform::find_in_dirs("node", [p.join("bin"), p.to_path_buf()]).is_some()
-    };
-    let cfg = load_global_config();
-    if !cfg.node_home.is_empty() {
-        let p = Path::new(&cfg.node_home);
-        if node_ok(p) {
-            return Ok(p.to_path_buf());
-        }
-    }
-    if let Ok(val) = std::env::var("NODE_HOME") {
-        if !val.is_empty() {
-            let p = Path::new(&val);
-            if node_ok(p) {
-                return Ok(p.to_path_buf());
-            }
-        }
-    }
-    if let Some(np) = crate::support::platform::on_path("node") {
-        // node.exe lives IN its home on Windows; posix /usr/bin/node too
-        // (npm side-by-side). parent-of-binary is the correct root here.
-        if let Some(parent) = np.parent() {
-            return Ok(parent.to_path_buf());
-        }
-    }
-    Err("Node.js not found. Install it with your package manager — `scoop install nodejs-lts` (Windows) or `brew install node@20` (macOS) — or set NODE_HOME / `hvolt config set node_home <path>`".into())
-}
 
 // ─── SDK version management ────────────────────────────────────────
 
