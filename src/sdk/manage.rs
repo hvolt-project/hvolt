@@ -537,6 +537,54 @@ fn parse_sdk_pkg(dir: &Path) -> Option<InstalledSdk> {
     })
 }
 
+
+/// Build the `sdk-ohos/<api>/` view from a version directory's own components.
+///
+/// `create_ohos_view` takes the remote component list, which an imported SDK does not
+/// carry; this walks what the version directory actually holds instead.
+fn create_view_from_dir(
+    view_dir: &Path,
+    version_dir: &Path,
+    pkg: &InstalledSdk,
+) -> Result<(), String> {
+    fs::create_dir_all(view_dir).map_err(|e| format!("mkdir {}: {}", view_dir.display(), e))?;
+    for name in &pkg.components {
+        let src = version_dir.join("openharmony").join(name);
+        if !src.is_dir() {
+            continue;
+        }
+        let dst = view_dir.join(name);
+        match dst.symlink_metadata() {
+            Ok(md) if md.file_type().is_symlink() => {
+                let _ = fs::remove_file(&dst);
+            }
+            Ok(_) => continue, // a real dir the user put there stays
+            Err(_) => {}
+        }
+        #[cfg(unix)]
+        std::os::unix::fs::symlink(&src, &dst)
+            .map_err(|e| format!("link {}: {}", dst.display(), e))?;
+    }
+    let doc = serde_json::json!({
+        "meta": { "version": "1.0.0" },
+        "data": {
+            "apiVersion": pkg.api_version,
+            "displayName": pkg.display_name,
+            "path": pkg.api_version,
+            "platformVersion": pkg.platform_version,
+            "releaseType": pkg.release_type,
+            "stage": pkg.release_type,
+            "version": pkg.platform_version
+        }
+    });
+    fs::write(
+        view_dir.join("sdk-pkg.json"),
+        serde_json::to_string_pretty(&doc).map_err(|e| format!("serialize view: {}", e))?,
+    )
+    .map_err(|e| format!("write view sdk-pkg.json: {}", e))?;
+    Ok(())
+}
+
 /// Find the DevEco Studio SDK root directory (parent of version dirs).
 pub(crate) fn sdk_root() -> Option<PathBuf> {
     // 1. Global config sdk_path
@@ -1283,6 +1331,16 @@ pub fn import_sdk(from_path: &str) -> Result<(), String> {
     // to point to a directory containing a `default/` subdirectory.
     let sdk_root = user_sdk;
     ensure_default_symlink(&sdk_root, &target_dir)?;
+
+    // OpenHarmony runtime builds read the store's sibling `sdk-ohos/<api>/` view, which
+    // `sdk download` creates. An imported SDK has to get the same view, or those builds
+    // fail with `sdk-ohos` missing.
+    if let (Some(parent), Some(pkg)) = (sdk_root.parent(), parse_sdk_pkg(&target_dir)) {
+        let view = parent.join("sdk-ohos").join(&pkg.api_version);
+        if let Err(e) = create_view_from_dir(&view, &target_dir, &pkg) {
+            eprintln!("  \u{26a0} OpenHarmony runtime view not created: {}", e);
+        }
+    }
 
     let mut cfg = load_global_config_checked()?;
     cfg.sdk_path = sdk_root.to_string_lossy().to_string();
