@@ -62,7 +62,9 @@ pub fn supported_flags() -> Result<std::collections::HashSet<String>, String> {
     let mut set = std::collections::HashSet::new();
     for line in out.lines() {
         let t = line.trim_start();
-        let Some(rest) = t.strip_prefix("--") else { continue };
+        let Some(rest) = t.strip_prefix("--") else {
+            continue;
+        };
         let name = rest
             .split(|c: char| c == ':' || c == ' ' || c == '=' || c == '\t')
             .next()
