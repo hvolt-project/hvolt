@@ -18,6 +18,7 @@ fn library_path() -> Result<std::path::PathBuf, String> {
     if let Ok(p) = std::env::var("HVOLT_ES2ABC_LIB") {
         return Ok(p.into());
     }
+    #[allow(unsafe_code)]
     let mut info: libc::Dl_info = unsafe { std::mem::zeroed() };
     let here = self_symbol() as *const libc::c_void;
     // SAFETY: dladdr on our own symbol only fills `info`.

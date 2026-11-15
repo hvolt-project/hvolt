@@ -46,6 +46,7 @@ pub fn sdk_es2abc() -> Result<PathBuf, String> {
 }
 
 /// Locate the launcher under any of the host-specific layouts, in probe order.
+#[cfg(not(feature = "ohos"))]
 fn es2abc_under(ark: &std::path::Path) -> Option<PathBuf> {
     for sub in ["build-win", "build-mac", "build"] {
         for name in crate::support::platform::exe_names("es2abc") {
