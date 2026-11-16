@@ -4,6 +4,11 @@ target/
 # Python build output
 dist/
 *.egg-info/
+__pycache__/
+*.pyc
+
+# Object files: the C-side probes leave these behind
+*.o
 
 # Generated HarmonyOS projects (for testing)
 # Anchored: an unanchored `build/` also matched `src/build/`, which is the compiler's own
