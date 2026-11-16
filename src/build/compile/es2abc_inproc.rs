@@ -57,10 +57,11 @@ fn self_symbol() -> *const u8 {
 /// The merge argv mirrors the SDK's ets-loader, which drives the commercial es2abc;
 /// the open-source library behind libes2abc.so carries a different option set, so the
 /// caller drops what this returns absent instead of guessing from a version string.
-pub fn supported_flags() -> Result<std::collections::HashSet<String>, String> {
-    let (code, out) = run(&["--help".to_string()])?;
+/// The option names in `es2abc --help` output: one per line, introduced by `--`, ended by a
+/// separator or the end of the line.
+fn parse_flags(help: &str) -> std::collections::HashSet<String> {
     let mut set = std::collections::HashSet::new();
-    for line in out.lines() {
+    for line in help.lines() {
         let t = line.trim_start();
         let Some(rest) = t.strip_prefix("--") else {
             continue;
@@ -73,6 +74,12 @@ pub fn supported_flags() -> Result<std::collections::HashSet<String>, String> {
             set.insert(format!("--{name}"));
         }
     }
+    set
+}
+
+pub fn supported_flags() -> Result<std::collections::HashSet<String>, String> {
+    let (code, out) = run(&["--help".to_string()])?;
+    let set = parse_flags(&out);
     if set.is_empty() {
         return Err(format!(
             "es2abc --help produced no options (exit {code}): {}",
@@ -138,4 +145,25 @@ pub fn run(args: &[String]) -> Result<(i32, String), String> {
     let output = capture.map(|c| c.finish()).unwrap_or_default();
 
     Ok((code, output))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_flags;
+
+    #[test]
+    fn flags_split_on_each_separator() {
+        let help = "  --opt=value\n  --flag: text\n  --plain\nnot-a-flag --also-not\n";
+        let set = parse_flags(help);
+        assert!(set.contains("--opt"));
+        assert!(set.contains("--flag"));
+        assert!(set.contains("--plain"));
+        // Only a leading `--` counts: an option named mid-line is prose, not a flag.
+        assert_eq!(set.len(), 3);
+    }
+
+    #[test]
+    fn empty_help_yields_no_flags() {
+        assert!(parse_flags("").is_empty());
+    }
 }

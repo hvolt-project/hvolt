@@ -3101,6 +3101,7 @@ mod tests {
     /// SDK carries `build-mac`, a Linux one carries plain `build`; a resolver that assumes
     /// `build-mac` makes every Linux release build fail at `es2abc not found`.
     #[test]
+    #[cfg(not(feature = "ohos"))]
     fn es2abc_resolves_under_each_host_layout() {
         for sub in ["build-win", "build-mac", "build"] {
             let dir =
@@ -3120,6 +3121,7 @@ mod tests {
 
     /// An SDK with no launcher reports the path it searched instead of a bare "not found".
     #[test]
+    #[cfg(not(feature = "ohos"))]
     fn es2abc_absent_reports_the_probed_root() {
         let dir = std::env::temp_dir().join(format!("hvolt-es2abc-empty-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
