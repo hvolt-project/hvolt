@@ -40,7 +40,7 @@ class ResourceAudit extends ViewPU {
 			Column.create();
 		}, Column);
 		this.observeComponentCreation2((elmtId, isInitialRender) => {
-			Text.create({ "id": 16777222, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+			Text.create({ "id": 16777219, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
 		}, Text);
 		Text.pop();
 		this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -52,7 +52,7 @@ class ResourceAudit extends ViewPU {
 		Text.pop();
 		this.observeComponentCreation2((elmtId, isInitialRender) => {
 			Text.create(this.caption);
-			Text.fontColor({ "id": 16777223, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+			Text.fontColor({ "id": 16777220, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
 		}, Text);
 		Text.pop();
 		Column.pop();

@@ -62,12 +62,12 @@ const LIST_ITEM_HEIGHT: number = 64;
 const TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE: string = '16fp';
 // ../../common/datasources/ProxyData
 class ProxyItem {
-  name: string = ''
-  latency: number = 0
-  type: string = ''
-  id: string = ''
-  g: string = ''
-  isShowFavoriteProxy: boolean = false
+    name: string = ''
+    latency: number = 0
+    type: string = ''
+    id: string = ''
+    g: string = ''
+    isShowFavoriteProxy: boolean = false
 }
 class ProxyItemDataSource implements IDataSource {
 	private listeners: DataChangeListener[] = [];
@@ -109,8 +109,8 @@ class ProxyGroupItemDataSource {
 }
 // proxy_core
 interface Profile {
-  id: string
-  name: string
+    id: string
+    name: string
 }
 enum ProxySort {
 	Default = 0,
@@ -119,8 +119,8 @@ enum ProxySort {
 }
 // ../../entryability/AppState
 enum ProxyCardSize {
-  Small = 0,
-  Large = 1
+    Small = 0,
+    Large = 1
 }
 enum ProxyGroupType {
 	List = 0,
@@ -148,23 +148,23 @@ class AppState {
 }
 // ../../common/utils/Animation
 class customAnimationUtil {
-  static isScaleTranFast(index: number, config: UIConfig): TransitionEffect {
-    return TransitionEffect.OPACITY.animation({ duration: 100 })
-  }
+    static isScaleTranFast(index: number, config: UIConfig): TransitionEffect {
+        return TransitionEffect.OPACITY.animation({ duration: 100 })
+    }
 
-  static isClickEffect(config: UIConfig): ClickEffect {
-    return { level: ClickEffectLevel.LIGHT }
-  }
+    static isClickEffect(config: UIConfig): ClickEffect {
+        return { level: ClickEffectLevel.LIGHT }
+    }
 }
 // ../../common/utils/VibratorUtil
 class customVibrator {
-  static vibratorTriggerOfHapticClockTimer(): void {
-  }
+    static vibratorTriggerOfHapticClockTimer(): void {
+    }
 }
 // ../../entryability/ClashViewModel
 class ClashViewModel {
-  static testDelay(name: string): void {
-  }
+    static testDelay(name: string): void {
+    }
 }
 // ../Start/Popup
 const PopTips: string[] = ['', '', '']
@@ -180,14 +180,14 @@ function PopupBuilder(ctx: object, tip: string, onClose: () => void, parent = nu
 }
 // ../../common/breakpoint/BreakPoint
 function ListGutter(widthBp: number, heightBp: number): Dimension {
-  return 0
+    return 0
 }
 function ProxyListLanes(widthBp: number, heightBp: number): number {
 	return 1;
 }
 // xb_components
 interface ToastOptions {
-  message: ResourceStr
+    message: ResourceStr
 }
 class Xb_ToastUtil {
 	static showToast(options: ToastOptions): void {}
@@ -317,7 +317,7 @@ class ProxyGroupItem extends ViewPU {
         this.__isPXSecScreen = this.initializeConsume("isPXSecScreen", "isPXSecScreen");
         this.ProxyDialogController = new CustomDialogController({
     builder: () => {
-        let jsDialog = new ProxyCustomDialog(this, {
+                let jsDialog = new ProxyCustomDialog(this, {
       cancel: () => {
         this.onCancel()
       },
@@ -325,12 +325,12 @@ class ProxyGroupItem extends ViewPU {
         this.onAccept()
       },
     }, undefined, -1, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 368, col: 14 });
-        jsDialog.setController(this.
-        /** 速度与延迟区别弹窗 */
-        ProxyDialogController);
-        ViewPU.create(jsDialog);
-        let paramsLambda = () => {
-            return {
+                jsDialog.setController(this.
+                /** 速度与延迟区别弹窗 */
+                ProxyDialogController);
+                ViewPU.create(jsDialog);
+                let paramsLambda = () => {
+                    return {
       cancel: () => {
         this.onCancel()
       },
@@ -338,9 +338,9 @@ class ProxyGroupItem extends ViewPU {
         this.onAccept()
       },
     };
-        };
-        jsDialog.paramsGenerator_ = paramsLambda;
-    },
+                };
+                jsDialog.paramsGenerator_ = paramsLambda;
+            },
     alignment: DialogAlignment.Center,
     customStyle: false,
     cornerRadius: 32,
@@ -685,7 +685,12 @@ class ProxyGroupItem extends ViewPU {
         this.__curOffsetRemain.set(newValue);
     }
     // px外屏
-    private __isPXSecScreen: ObservedPropertyAbstractPU<boolean>;
+    private __isPXSecScreen: ObservedPropertyAbstractPU<boolean
+    /**
+     * XXX 当前手指触摸的ListItem的对应 `this.configList` 中的 `configId`
+     *    List的长按菜单中的响应都是根据这个的对象中的属性来处理的，是个不稳定因素
+     */
+    >;
     get isPXSecScreen() {
         return this.__isPXSecScreen.get();
     }
@@ -693,9 +698,9 @@ class ProxyGroupItem extends ViewPU {
         this.__isPXSecScreen.set(newValue);
     }
     /**
-   * XXX 当前手指触摸的ListItem的对应 `this.configList` 中的 `configId`
-   *    List的长按菜单中的响应都是根据这个的对象中的属性来处理的，是个不稳定因素
-   */
+     * XXX 当前手指触摸的ListItem的对应 `this.configList` 中的 `configId`
+     *    List的长按菜单中的响应都是根据这个的对象中的属性来处理的，是个不稳定因素
+     */
     public static currentTouchProxyData: ProxyItem = {
     name: '',
     latency: 0,
@@ -722,9 +727,9 @@ class ProxyGroupItem extends ViewPU {
             List.lanes(this.ProxyGroupItemSelected === ProxyCardSize.Large ? 0 : ProxyListLanes(this.widthBp, this.heightBp), ListGutter(this.widthBp, this.heightBp));
             __List__ListStyle();
             List.nestedScroll({
-      scrollForward: this.isPXSecScreen ? NestedScrollMode.SELF_FIRST: NestedScrollMode.PARENT_FIRST,
-      scrollBackward: this.isPXSecScreen ? NestedScrollMode.SELF_FIRST:NestedScrollMode.SELF_FIRST
-    });
+                scrollForward: this.isPXSecScreen ? NestedScrollMode.SELF_FIRST: NestedScrollMode.PARENT_FIRST,
+                scrollBackward: this.isPXSecScreen ? NestedScrollMode.SELF_FIRST:NestedScrollMode.SELF_FIRST
+            });
             List.contentEndOffset(this.isPXSecScreen ? 65 : this.appConfig.proxyGroupType === ProxyGroupType.List ? 10 : CONTENT_END_OFFSET_150);
         }, List);
             {
@@ -848,43 +853,43 @@ class ProxyGroupItem extends ViewPU {
     }
     /** 速度与延迟区别弹窗 */
     private ProxyDialogController: CustomDialogController | null;
-async aboutToAppear(): Promise<void> {
-    hilog.info(0xB000, componentName, `ProxySort #ProxyGroupItem 代理节点：%{public}s`, JSON.stringify(this.proxyitems))
-    // 进入时排序
-    this.onSortChange()
-  }
-onSortChange() {
-    if (!this.proxyitems) {
-      console.error(`ProxySort 节点数据不存在`)
-      return
+    async aboutToAppear(): Promise<void> {
+        hilog.info(0xB000, componentName, `ProxySort #ProxyGroupItem 代理节点：%{public}s`, JSON.stringify(this.proxyitems))
+        // 进入时排序
+        this.onSortChange()
     }
-    this.proxyLazyItems.clear()
-    if (this.appConfig.proxySort == ProxySort.Default) {
-      this.proxyLazyItems.DefaultSortItems(this.proxyitems)
-    } else if (this.appConfig.proxySort == ProxySort.Title) {
-      this.proxyLazyItems.NameSortItems(this.proxyitems)
-    } else if (this.appConfig.proxySort == ProxySort.Delay) {
-      this.proxyLazyItems.LatencySortItems(this.proxyitems)
-      hilog.info(0xFF00, "ProxySort ProxyPageLatencyTag", "延迟排序成功 %{public}s", this.appConfig.proxySort)
+    onSortChange() {
+        if (!this.proxyitems) {
+            console.error(`ProxySort 节点数据不存在`)
+            return
+        }
+        this.proxyLazyItems.clear()
+        if (this.appConfig.proxySort == ProxySort.Default) {
+            this.proxyLazyItems.DefaultSortItems(this.proxyitems)
+        } else if (this.appConfig.proxySort == ProxySort.Title) {
+            this.proxyLazyItems.NameSortItems(this.proxyitems)
+        } else if (this.appConfig.proxySort == ProxySort.Delay) {
+            this.proxyLazyItems.LatencySortItems(this.proxyitems)
+            hilog.info(0xFF00, "ProxySort ProxyPageLatencyTag", "延迟排序成功 %{public}s", this.appConfig.proxySort)
+        }
+        console.log(`ProxySort 排序类型：${this.appConfig.proxySort}, 节点数量：${this.proxyLazyItems.totalCount()}个`)
+        this.needChangeSort = false
     }
-    console.log(`ProxySort 排序类型：${this.appConfig.proxySort}, 节点数量：${this.proxyLazyItems.totalCount()}个`)
-    this.needChangeSort = false
-  }
-/** 将 字符串ID 转换为 HashID 用于 restoreId */
-  getRestoreId(index: number, id?: string): number {
-    if (id) {
-      let hash = 0;
-      for (let i = 0; i < id.length; i++) {
-        const char = id.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash |= 0; // Convert to 32bit integer
-      }
+    /** 将 字符串ID 转换为 HashID 用于 restoreId */
+    getRestoreId(index: number, id?: string): number {
+        if (id) {
+            let hash = 0;
+            for (let i = 0; i < id.length; i++) {
+                const char = id.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash |= 0; // Convert to 32bit integer
+            }
 
-      return hash;
-    }
+            return hash;
+        }
 
-    return index
-  }
+        return index
+    }
     /**
    * 半模态窗口测速网站
    */
@@ -895,7 +900,7 @@ onSortChange() {
             Row.height('100%');
             Row.alignItems(VerticalAlign.Center);
             Row.justifyContent(FlexAlign.Center);
-            Row.backgroundColor(({ "id": 16777230, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }));
+            Row.backgroundColor(({ "id": 16777227, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }));
         }, Row);
             this.observeComponentCreation2((elmtId, isInitialRender) => {
                 Column.create();
@@ -910,25 +915,25 @@ onSortChange() {
             Column.pop();
         Row.pop();
     }
-//半模态网络测速 end
+    //半模态网络测速 end
 
-  onCancel() {
-    console.info('Callback when the first button is clicked')
-  }
-onAccept() {
-    console.info('Callback when the second button is clicked')
-  }
-existApp() {
-    console.info('Click the callback in the blank area')
-  }
+    onCancel() {
+        console.info('Callback when the first button is clicked')
+    }
+    onAccept() {
+        console.info('Callback when the second button is clicked')
+    }
+    existApp() {
+        console.info('Click the callback in the blank area')
+    }
     private OnProxyChange: ((item: ProxyItem) => void);
     // 长按菜单 start
     // 长按菜单相关
   MyMenu(item: ProxyItem, parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Menu.create();
-            Menu.menuItemDivider({ color: { "id": 16777231, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, strokeWidth: LengthMetrics.vp(1) });
-            Menu.backgroundColor({ "id": 16777230, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+            Menu.menuItemDivider({ color: { "id": 16777228, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, strokeWidth: LengthMetrics.vp(1) });
+            Menu.backgroundColor({ "id": 16777227, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
             Menu.borderRadius(BORDER_RADIUS_20);
             Menu.clickEffect(customAnimationUtil.isClickEffect(ObservedObject.GetRawObject(this.uiConfig)));
         }, Menu);
@@ -977,7 +982,7 @@ existApp() {
                 if (this.appConfig.clashCore === ClashCore.mihomo) {
                     this.ifElseBranchUpdateFunction(0, () => {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
-                            MenuItem.create({ symbolStartIcon: startIconModifier1, content: { "id": 16777226, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } });
+                            MenuItem.create({ symbolStartIcon: startIconModifier1, content: { "id": 16777222, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } });
                             MenuItem.onClick(() => {
             ClashViewModel.testDelay(item.name)
           });
@@ -994,44 +999,43 @@ existApp() {
             If.pop();
         Menu.pop();
     }
-// 长按菜单end
 
-  selectProxy(item: ProxyItem) {
-    if (!this.disabled) {
-      // 选中态由内核成功事件统一发布，避免 RPC 尚未完成时显示假选中。
-      this.OnProxyChange(item)
+    selectProxy(item: ProxyItem) {
+        if (!this.disabled) {
+            // 选中态由内核成功事件统一发布，避免 RPC 尚未完成时显示假选中。
+            this.OnProxyChange(item)
+        }
     }
-  }
     public proxyListLongPressCtxMenuForFavorite: LongPressContextMenuItem;
     public proxyListLongPressCtxMenuForUnFavorite: LongPressContextMenuItem;
-/**
-   * 收藏配置
-   */
-  private favoriteProxy(): void {
-    // 收藏节点 & 判断是否已经收藏
-    const p = ProxyGroupItem.currentTouchProxyData
-    console.debug(`FavoriteProxy [ProxyPage] 当前ProxyItem信息：${JSON.stringify(p)}`);
-    if (AppState.fetchFavoriteProxys(this.favoriteProxys, this.proxyGroups.getAllData()).length < 6) {
-      Xb_ToastUtil.showToast({ message: { "id": 16777220, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } })
-      this.favoriteProxys.set(p.g + '|' + p.name, this.appConfig.currentProfileId ?? "")
-      this.favoriteProxys.forEach((value, key) => {
-          console.debug(`FavoriteProxy [ProxyPage] favoriteProxys收藏信息：${key}: ${value}`);
-        });
-    } else {
-      Xb_ToastUtil.showToast({ message: { "id": 16777227, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } })
+    /**
+     * 收藏配置
+     */
+    private favoriteProxy(): void {
+        // 收藏节点 & 判断是否已经收藏
+        const p = ProxyGroupItem.currentTouchProxyData
+        console.debug(`FavoriteProxy [ProxyPage] 当前ProxyItem信息：${JSON.stringify(p)}`);
+        if (AppState.fetchFavoriteProxys(this.favoriteProxys, this.proxyGroups.getAllData()).length < 6) {
+            Xb_ToastUtil.showToast({ message: { "id": 16777216, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } })
+            this.favoriteProxys.set(p.g + '|' + p.name, this.appConfig.currentProfileId ?? "")
+            this.favoriteProxys.forEach((value, key) => {
+                    console.debug(`FavoriteProxy [ProxyPage] favoriteProxys收藏信息：${key}: ${value}`);
+                });
+        } else {
+            Xb_ToastUtil.showToast({ message: { "id": 16777224, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } })
+        }
     }
-  }
-/**
-   * 取消收藏配置
-   */
-  private cancelFavoriteProxy(): void {
-    Xb_ToastUtil.showToast({ message: { "id": 16777229, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } })
-    const p = ProxyGroupItem.currentTouchProxyData
-    this.favoriteProxys.delete(p.g + '|' + p.name)
-    this.favoriteProxys.forEach((value, key) => {
-      console.debug(`FavoriteProxy [ProxyPage] favoriteProxys收藏信息：${key}: ${value}`);
-    });
-  }
+    /**
+     * 取消收藏配置
+     */
+    private cancelFavoriteProxy(): void {
+        Xb_ToastUtil.showToast({ message: { "id": 16777226, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } })
+        const p = ProxyGroupItem.currentTouchProxyData
+        this.favoriteProxys.delete(p.g + '|' + p.name)
+        this.favoriteProxys.forEach((value, key) => {
+            console.debug(`FavoriteProxy [ProxyPage] favoriteProxys收藏信息：${key}: ${value}`);
+        });
+    }
     rerender() {
         this.updateDirtyElements();
     }
@@ -1102,29 +1106,29 @@ class ProxyCustomDialog extends ViewPU {
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.backgroundColor({ "id": 16777230, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+            Column.backgroundColor({ "id": 16777227, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
             Column.padding({
-      left: 24,
-      right: 24,
-      top: 16,
-      bottom: 16
-    });
+                left: 24,
+                right: 24,
+                top: 16,
+                bottom: 16
+            });
         }, Column);
             this.observeComponentCreation2((elmtId, isInitialRender) => {
-                Text.create({ "id": 16777223, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+                Text.create({ "id": 16777219, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
                 Text.fontSize(20);
                 Text.padding({ bottom: 15 });
                 Text.fontWeight(700);
             }, Text);
             Text.pop();
             this.observeComponentCreation2((elmtId, isInitialRender) => {
-                Text.create({ "id": 16777224, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+                Text.create({ "id": 16777220, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
                 Text.fontSize(16);
                 Text.padding({ bottom: 8 });
             }, Text);
             Text.pop();
             this.observeComponentCreation2((elmtId, isInitialRender) => {
-                Button.createWithLabel({ "id": 16777225, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+                Button.createWithLabel({ "id": 16777221, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
                 Button.fontSize(16);
                 Button.width('100%');
                 Button.onClick(() => {
@@ -1148,10 +1152,10 @@ class ProxyCustomDialog extends ViewPU {
  * 长按菜单参数
  */
 interface LongPressContextMenuItem {
-  symbolStartIcon?: SymbolGlyphModifier,
-  symbolEndIcon?: SymbolGlyphModifier,
-  content: ResourceStr
-  callback : Callback<void>
+    symbolStartIcon?: SymbolGlyphModifier,
+    symbolEndIcon?: SymbolGlyphModifier,
+    content: ResourceStr
+    callback : Callback<void>
 }
 // list公用样式
 function __List__ListStyle(): void {
@@ -1166,7 +1170,7 @@ function __List__ListStyle(): void {
 function __ListItem__ListItemStyle(): void {
     ListItem.width('100%');
     ListItem.borderRadius(BORDER_RADIUS_20);
-    ListItem.backgroundColor({ "id": 16777230, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+    ListItem.backgroundColor({ "id": 16777227, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
 }
 export default ProxyGroupItem;
 class ProxyGroupItemPage extends ViewPU {

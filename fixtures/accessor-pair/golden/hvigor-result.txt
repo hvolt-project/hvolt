@@ -1,0 +1,6 @@
+fixture: accessor-pair
+question: get/set 同名（一个访问器对）是否被接受？
+ran:    2026-11-12，mac 侧 hvigorw assembleHap
+result:  BUILD SUCCESSFUL in 2 s 570 ms
+conclusion:
+  get/set 成对算同一个成员，合法。重名规则不得对它报错。

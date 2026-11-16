@@ -1,0 +1,11 @@
+{
+  "entry": {
+    "packageName": "entry",
+    "bundleName": "",
+    "moduleName": "",
+    "version": "",
+    "entryPath": "src/main/",
+    "isSO": false,
+    "dependencyAlias": ""
+  }
+}

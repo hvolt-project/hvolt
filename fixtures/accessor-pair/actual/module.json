@@ -1,0 +1,55 @@
+{
+  "app": {
+    "bundleName": "com.example.demo",
+    "vendor": "example",
+    "versionCode": 1000000,
+    "versionName": "1.0.0",
+    "icon": "$media:layered_image",
+    "label": "$string:app_name",
+    "apiReleaseType": "Release1",
+    "targetAPIVersion": 60000020,
+    "minAPIVersion": 50005017,
+    "appEnvironments": [],
+    "bundleType": "app",
+    "debug": true
+  },
+  "module": {
+    "name": "entry",
+    "type": "entry",
+    "mainElement": "EntryAbility",
+    "pages": "$profile:main_pages",
+    "deviceTypes": [
+      "phone",
+      "tablet",
+      "2in1",
+      "car"
+    ],
+    "deliveryWithInstall": true,
+    "installationFree": false,
+    "abilities": [
+      {
+        "name": "EntryAbility",
+        "srcEntry": "./ets/EntryAbility.ets",
+        "icon": "$media:layered_image",
+        "label": "$string:EntryAbility_label",
+        "startWindowIcon": "$media:startIcon",
+        "startWindowBackground": "$color:start_window_background",
+        "exported": true,
+        "description": "$string:EntryAbility_desc",
+        "skills": [
+          {
+            "actions": [
+              "action.system.home"
+            ],
+            "entities": [
+              "entity.system.home"
+            ]
+          }
+        ]
+      }
+    ],
+    "dependencies": [],
+    "virtualMachine": "ark12.0.6.0",
+    "description": "$string:module_desc"
+  }
+}

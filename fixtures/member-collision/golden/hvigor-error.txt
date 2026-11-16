@@ -1,0 +1,18 @@
+fixture: member-collision
+question: 同一 struct 内 @State 字段与同名方法、以及调用点 this.X() 而 X 是字符串，
+          hvigor 在编译期怎么处理？
+ran:    2026-11-12 20:5x，mac 侧 DevEco hvigorw --mode module -p module=entry@default
+        -p product=default assembleHap --no-daemon，输入 fixtures/member-collision/project
+result:  COMPILE RESULT:FAIL {ERROR:5}，BUILD FAILED in 3 s 52 ms，无产物
+
+errors:
+  10505001 ArkTS Compiler Error  Duplicate identifier 'sdkState'.  Index.ets:7:18
+  10505001 ArkTS Compiler Error  Duplicate identifier 'sdkState'.  Index.ets:9:11
+  10505001 ArkTS Compiler Error  Duplicate identifier 'sdkState'.  Index.ets:9:11
+  10505001 ArkTS Compiler Error  This expression is not callable.
+                                 Type 'String' has no call signatures.  Index.ets:15:17
+
+conclusion:
+  hvigor 在 CompileArkTS 阶段就拒绝，不会产出 entry-unsigned.hap。
+  hvolt 当前对这一形态零诊断、照出绿包 —— 这是与 hvigor 的行为差异，不是「规范未规定」。
+  对齐需要两条规则：①同类内成员重名 → Duplicate identifier；②调用点为数据成员 → not callable。

@@ -25,11 +25,11 @@ class SameNameWithResource extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-describe(): string {
-    const label = 'x'
-    const info: Info = { label: label, icon: { "id": 16777216, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } }
-    return info.label
-  }
+    describe(): string {
+        const label = 'x'
+        const info: Info = { label: label, icon: { "id": 16777218, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } }
+        return info.label
+    }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();

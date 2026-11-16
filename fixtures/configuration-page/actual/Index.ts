@@ -89,7 +89,7 @@ import { LengthMetrics } from '@ohos:arkui.node';
 import { SymbolGlyphModifier } from '@ohos:arkui.modifier';
 import hilog from '@ohos:hilog';
 import type { Callback } from '@ohos:base';
-import type harmonyShare from '@hms:collaboration.harmonyShare';
+import type { harmonyShare } from '@kit.ShareKit';
 import utd from '@ohos:data.uniformTypeDescriptor';
 import type common from '@ohos:app.ability.common';
 import type { Context } from '@ohos:abilityAccessCtrl';
@@ -120,15 +120,15 @@ const BIND_SHEET_TITLE_CONTAINER_HEIGHT: number = 40;
 const icon_tertiary: ResourceColor = '#99000000'
 // proxy_core
 enum ProfileType {
-  Url = 0,
-  File = 1,
-  Manual = 2
+    Url = 0,
+    File = 1,
+    Manual = 2
 }
 // ../common/entity/PageArgumentEntity
 class SubscriptionInfo {
-  upload: number = 0
-  download: number = 0
-  total: number = 0
+    upload: number = 0
+    download: number = 0
+    total: number = 0
 }
 class ConfigData {
 	configId: string = '';
@@ -145,9 +145,9 @@ class ConfigData {
 const NewConfigData: ConfigData = new ConfigData();
 // ../entryability/AppState
 class AppConfig {
-  currentProfileId: string | null = null
-  currentProfileName: string | undefined = undefined
-  currentProxyName: string | undefined = undefined
+    currentProfileId: string | null = null
+    currentProfileName: string | undefined = undefined
+    currentProxyName: string | undefined = undefined
 }
 class UIConfig {
 	ShowConfigPop: boolean = false;
@@ -162,9 +162,9 @@ class UIConfig {
 }
 // ../common/EventHub
 enum EventKey {
-  AddConfig = 'AddConfig',
-  LoadConfigStr = 'LoadConfigStr',
-  FetchProfile = 'FetchProfile'
+    AddConfig = 'AddConfig',
+    LoadConfigStr = 'LoadConfigStr',
+    FetchProfile = 'FetchProfile'
 }
 class EventHub {
 	static on(key: EventKey, callback: () => void): void {}
@@ -173,14 +173,14 @@ class EventHub {
 }
 // ../common/utils/ResourceStringUtil, ../common/utils/TimeConvertUtil
 function getResourceString(res: Resource, parent: Object): string {
-  return ''
+    return ''
 }
 function convertTime(seconds: number): string {
 	return '';
 }
 // ../common/breakpoint/BreakPoint
 function ListGutter(widthBp: WidthBreakpoint, heightBp: HeightBreakpoint): Dimension {
-  return 0
+    return 0
 }
 function ListLanes(widthBp: WidthBreakpoint, heightBp: HeightBreakpoint): number {
 	return 1;
@@ -193,7 +193,7 @@ function TabContentTitleMargin(widthBp: WidthBreakpoint, heightBp: HeightBreakpo
 }
 // ../common/utils/Animation
 class isON {
-  toggleAnim: boolean = false
+    toggleAnim: boolean = false
 }
 class customAnimationUtil {
 	static isOpacity(config: UIConfig): TransitionEffect {
@@ -211,13 +211,13 @@ class customAnimationUtil {
 }
 // ../common/utils/VibratorUtil
 class customVibrator {
-  static vibratorTriggerOfHapticClockTimer(): void {
-  }
+    static vibratorTriggerOfHapticClockTimer(): void {
+    }
 }
 // ../entryability/ClashViewModel
 class SocketProxy {
-  async reset(): Promise<void> {
-  }
+    async reset(): Promise<void> {
+    }
 }
 class ClashViewModel {
 	static socketProxy: SocketProxy = new SocketProxy();
@@ -227,13 +227,13 @@ class ClashViewModel {
 }
 // xb_components
 interface ShareData {
-  utd: utd.UniformDataType
-  content: string
-  thumbnailUri: string
-  title: ResourceStr
-  description: string
-  label: string
-  uri: string
+    utd: utd.UniformDataType
+    content: string
+    thumbnailUri: string
+    title: ResourceStr
+    description: string
+    label: string
+    uri: string
 }
 interface ToastOptions {
 	message: ResourceStr;
@@ -750,10 +750,10 @@ class CustomConfirmDialog extends ViewPU {
  * 长按菜单参数
  */
 interface LongPressContextMenuItem {
-  symbolStartIcon?: SymbolGlyphModifier,
-  symbolEndIcon?: SymbolGlyphModifier,
-  content: ResourceStr
-  callback : Callback<void>
+    symbolStartIcon?: SymbolGlyphModifier,
+    symbolEndIcon?: SymbolGlyphModifier,
+    content: ResourceStr
+    callback : Callback<void>
 }
 const componentName: string = 'ConfigurationPage';
 class ConfigurationPage extends ViewPU {
@@ -827,19 +827,19 @@ class ConfigurationPage extends ViewPU {
         this.configListLongPressCtxMenuForUnFavorite = {
     symbolStartIcon: new SymbolGlyphModifier({ "id": 125831521, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' })
       .fontSize(TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE).fontColor([{ "id": 125831041, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }]),
-    content: { "id": 16777242, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, callback: () => { this.cancelFavoriteConfig() }
+    content: { "id": 16777239, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, callback: () => { this.cancelFavoriteConfig() }
   };
         this.configListLongPressCtxMenuForFavorite = {
     symbolStartIcon: new SymbolGlyphModifier({ "id": 125831520, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' })
       .fontSize(TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE).fontColor([{ "id": 125830982, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }]),
-    content: { "id": 16777221, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, callback: () => { this.favoriteConfig() }
+    content: { "id": 16777217, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, callback: () => { this.favoriteConfig() }
   };
         this.configCustomDialogController = new CustomDialogController({
     builder: () => {
-        let jsDialog = new CustomConfirmDialog(this, {
-      title: { "id": 16777232, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
-      cancelText: { "id": 16777231, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
-      confirmText: { "id": 16777220, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
+                let jsDialog = new CustomConfirmDialog(this, {
+      title: { "id": 16777229, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
+      cancelText: { "id": 16777228, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
+      confirmText: { "id": 16777216, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
       cancelButtonBackgroundColor: Color.Transparent,
       // 不可以使用`@Consume`注解的变量
       // confirmButtonBackgroundColor: this.icon_emphasize,
@@ -849,19 +849,19 @@ class ConfigurationPage extends ViewPU {
       },
       confirm: () => {
         this.isEnableIndexForegroundBlur = false
-        Xb_ToastUtil.showToast({ message: { "id": 16777227, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } })
+        Xb_ToastUtil.showToast({ message: { "id": 16777224, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } })
       }
     }, undefined, -1, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 727, col: 14 });
-        jsDialog.setController(this.
-        /* 自定义弹框 */
-        // 配置是否保存弹框 Controller定义
-        configCustomDialogController);
-        ViewPU.create(jsDialog);
-        let paramsLambda = () => {
-            return {
-      title: { "id": 16777232, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
-      cancelText: { "id": 16777231, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
-      confirmText: { "id": 16777220, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
+                jsDialog.setController(this.
+                /* 自定义弹框 */
+                // 配置是否保存弹框 Controller定义
+                configCustomDialogController);
+                ViewPU.create(jsDialog);
+                let paramsLambda = () => {
+                    return {
+      title: { "id": 16777229, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
+      cancelText: { "id": 16777228, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
+      confirmText: { "id": 16777216, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
       cancelButtonBackgroundColor: Color.Transparent,
       // 不可以使用`@Consume`注解的变量
       // confirmButtonBackgroundColor: this.icon_emphasize,
@@ -871,19 +871,19 @@ class ConfigurationPage extends ViewPU {
       },
       confirm: () => {
         this.isEnableIndexForegroundBlur = false
-        Xb_ToastUtil.showToast({ message: { "id": 16777227, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } })
+        Xb_ToastUtil.showToast({ message: { "id": 16777224, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } })
       }
     };
-        };
-        jsDialog.paramsGenerator_ = paramsLambda;
-    },
+                };
+                jsDialog.paramsGenerator_ = paramsLambda;
+            },
     cancel: () => {
       this.isEnableIndexForegroundBlur = false
     },
     autoCancel: true,
     alignment: DialogAlignment.Center,
     width: 328,
-    backgroundColor: { "id": 16777251, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
+    backgroundColor: { "id": 16777248, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
   }, this);
         this.setInitiallyProvidedValue(params);
         this.declareWatch("appConfig", this.onChangeConfig);
@@ -1289,8 +1289,8 @@ class ConfigurationPage extends ViewPU {
         this.__curYOffset.set(newValue);
     }
     /**
-   * 配置页面内长按触摸项
-   */
+     * 配置页面内长按触摸项
+     */
     private __currentTouchConfigData: ObservedPropertyAbstractPU<ConfigData>;
     get currentTouchConfigData() {
         return this.__currentTouchConfigData.get();
@@ -1319,62 +1319,62 @@ class ConfigurationPage extends ViewPU {
             Stack.height('100%');
             Stack.alignContent(Alignment.Top);
             Stack.bindSheet({ value: this.isShowConfigAddBindSheet, changeEvent: newValue => { this.isShowConfigAddBindSheet = newValue; } }, { builder: () => { this.ConfigAddBindSheetBuilder.call(this) } }, {
-      detents: [BIND_SHEET_CONTAINER_HEIGHT, SheetSize.LARGE,], // SheetSize.LARGE
-      backgroundColor: { "id": 16777248, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
-      showClose: this.isShowQRCode ? false : true,
-      dragBar: false,
-      preferType: SheetType.CENTER,
-      scrollSizeMode: ScrollSizeMode.CONTINUOUS,
-      // width: ('100%'),
-      /**
-       * 半模态页面显示（动画开始前）回调函数
-       *    目前`通过URL(链接)导入`和`长按配置编辑`是用的同一个页面，
-       *    这里主要是用来处理拉起`bindSheet`之后可以等`bindSheet`渲染完毕之后正确传入路由信息
-       */
-      onWillAppear: () => {
-        hilog.info(0xC020, componentName, `#button#bindSheet#onWillAppear() executed`)
-        this.isEnableIndexForegroundBlur = true
-        this.onForwardChange()
-      },
-      // 半模态页面交互式关闭回调函数
-      onWillDismiss: async (dismissSheet: DismissSheetAction) => {
-        // 在二级路由页面内只能通过点击关闭按钮才能关掉bindSheet
-        if (this.configAddPageInfos.size() <= 0 || (dismissSheet.reason === DismissReason.CLOSE_BUTTON)) {
-          dismissSheet.dismiss()
-          this.isShowConfigAddBindSheet = false
-          if (!this.isConfigDownloading) {
-            this.isEnableIndexForegroundBlur = false
-          }
-          this.configAddPageInfos.clear(true)
-          hilog.info(0xC020, componentName,
-            `#button#bindSheet#onWillDismiss()#关闭配置添加按钮的bindSheet：DismissSheetAction.dismiss()`)
-        }
-      },
-      onWillDisappear: async () => {},
-      onDisappear: () => {
-        Xb_PreferenceUtil.save().then(() => {
-          hilog.debug(0xC020, componentName,
-            `#button#bindSheet#onWillDismiss()#关闭配置添加按钮的bindSheet：DismissSheetAction.dismiss() ConfigSort Xb_PreferenceUtil 首选项保存成功`)
-        }).catch((err: BusinessError) => {
-          hilog.error(0xC020, componentName,
-            `#button#bindSheet#onWillDismiss()#关闭配置添加按钮的bindSheet：DismissSheetAction.dismiss() ConfigSort Xb_PreferenceUtil 首选项保存失败，message：${err.message}`)
-        })
-        setTimeout(() => {
-          // 关闭背景模糊 TODO 此处添加是为了修复添加配置关闭半模态背景模糊未能正常关闭
-          if (!this.isConfigDownloading) {
-            this.isEnableIndexForegroundBlur = false
-          }
-        })
-        this.isNewConfig = false
-        this.showSort = false
-        this.onForwardChange()
-        this.configStr = ''  // 置空配置文本
-      },
-      // onWillSpringBackWhenDismiss: (springBack: SpringBackAction) => {
-      //   springBack.springBack()
-      // },
-      onWillSpringBackWhenDismiss: () => {} // 注册回调，防止反向回弹
-    });
+                detents: [BIND_SHEET_CONTAINER_HEIGHT, SheetSize.LARGE,],
+                backgroundColor: { "id": 16777245, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
+                showClose: this.isShowQRCode ? false : true,
+                dragBar: false,
+                preferType: SheetType.CENTER,
+                scrollSizeMode: ScrollSizeMode.CONTINUOUS,
+                // width: ('100%'),
+                /**
+                 * 半模态页面显示（动画开始前）回调函数
+                 *    目前`通过URL(链接)导入`和`长按配置编辑`是用的同一个页面，
+                 *    这里主要是用来处理拉起`bindSheet`之后可以等`bindSheet`渲染完毕之后正确传入路由信息
+                 */
+                onWillAppear: () => {
+                  hilog.info(0xC020, componentName, `#button#bindSheet#onWillAppear() executed`)
+                  this.isEnableIndexForegroundBlur = true
+                  this.onForwardChange()
+                },
+                // 半模态页面交互式关闭回调函数
+                onWillDismiss: async (dismissSheet: DismissSheetAction) => {
+                  // 在二级路由页面内只能通过点击关闭按钮才能关掉bindSheet
+                  if (this.configAddPageInfos.size() <= 0 || (dismissSheet.reason === DismissReason.CLOSE_BUTTON)) {
+                    dismissSheet.dismiss()
+                    this.isShowConfigAddBindSheet = false
+                    if (!this.isConfigDownloading) {
+                      this.isEnableIndexForegroundBlur = false
+                    }
+                    this.configAddPageInfos.clear(true)
+                    hilog.info(0xC020, componentName,
+                      `#button#bindSheet#onWillDismiss()#关闭配置添加按钮的bindSheet：DismissSheetAction.dismiss()`)
+                  }
+                },
+                onWillDisappear: async () => {},
+                onDisappear: () => {
+                  Xb_PreferenceUtil.save().then(() => {
+                    hilog.debug(0xC020, componentName,
+                      `#button#bindSheet#onWillDismiss()#关闭配置添加按钮的bindSheet：DismissSheetAction.dismiss() ConfigSort Xb_PreferenceUtil 首选项保存成功`)
+                  }).catch((err: BusinessError) => {
+                    hilog.error(0xC020, componentName,
+                      `#button#bindSheet#onWillDismiss()#关闭配置添加按钮的bindSheet：DismissSheetAction.dismiss() ConfigSort Xb_PreferenceUtil 首选项保存失败，message：${err.message}`)
+                  })
+                  setTimeout(() => {
+                    // 关闭背景模糊 TODO 此处添加是为了修复添加配置关闭半模态背景模糊未能正常关闭
+                    if (!this.isConfigDownloading) {
+                      this.isEnableIndexForegroundBlur = false
+                    }
+                  })
+                  this.isNewConfig = false
+                  this.showSort = false
+                  this.onForwardChange()
+                  this.configStr = ''  // 置空配置文本
+                },
+                // onWillSpringBackWhenDismiss: (springBack: SpringBackAction) => {
+                //   springBack.springBack()
+                // },
+                onWillSpringBackWhenDismiss: () => {} // 注册回调，防止反向回弹
+            });
         }, Stack);
             this.observeComponentCreation2((elmtId, isInitialRender) => {
                 If.create();
@@ -1384,7 +1384,7 @@ class ConfigurationPage extends ViewPU {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             Row.create();
                             Row.zIndex(1);
-                            Row.backgroundColor({ "id": 16777248, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+                            Row.backgroundColor({ "id": 16777245, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
                             Row.height(this.curYOffset < 0 ? TAB_CONTENT_TITLE_HEIGHT - this.curYOffset : TAB_CONTENT_TITLE_HEIGHT);
                             Row.position({ x: 0, y: this.isRolling && this.isSmallSquareScreen && !this.windowMode ? this.heightTop : 0 });
                             Row.alignItems(this.windowMode ? VerticalAlign.Top : VerticalAlign.Center);
@@ -1394,7 +1394,7 @@ class ConfigurationPage extends ViewPU {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     if (isInitialRender) {
                                         let componentCall = new TopBar(this, {
-            title: getResourceString({ "id": 16777223, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, this),
+            title: getResourceString({ "id": 16777219, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, this),
             titleFontSize: this.curYOffset < 0 ? TAB_CONTENT_TITLE_FONT_SIZE - this.curYOffset / 100 : TAB_CONTENT_TITLE_FONT_SIZE,
             icons: [{ "id": 125831440, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, { "id": 125831551, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }],
             iconSize: this.windowMode ? 18 : (this.curYOffset < 0 ? 24 - this.curYOffset / 100 : 24),
@@ -1413,7 +1413,7 @@ class ConfigurationPage extends ViewPU {
                                         ViewPU.create(componentCall);
                                         let paramsLambda = () => {
                                             return {
-            title: getResourceString({ "id": 16777223, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, this),
+            title: getResourceString({ "id": 16777219, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, this),
             titleFontSize: this.curYOffset < 0 ? TAB_CONTENT_TITLE_FONT_SIZE - this.curYOffset / 100 : TAB_CONTENT_TITLE_FONT_SIZE,
             icons: [{ "id": 125831440, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, { "id": 125831551, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }],
             iconSize: this.windowMode ? 18 : (this.curYOffset < 0 ? 24 - this.curYOffset / 100 : 24),
@@ -1433,7 +1433,7 @@ class ConfigurationPage extends ViewPU {
                                         componentCall.paramsGenerator_ = paramsLambda;
                                     }
                                     else {
-                                        this.updateStateVarsOfChildByElmtId(elmtId, { title: getResourceString({ "id": 16777223, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, this), titleFontSize: this.curYOffset < 0 ? TAB_CONTENT_TITLE_FONT_SIZE - this.curYOffset / 100 : TAB_CONTENT_TITLE_FONT_SIZE, icons: [{ "id": 125831440, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, { "id": 125831551, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }], iconSize: this.windowMode ? 18 : (this.curYOffset < 0 ? 24 - this.curYOffset / 100 : 24) });
+                                        this.updateStateVarsOfChildByElmtId(elmtId, { title: getResourceString({ "id": 16777219, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, this), titleFontSize: this.curYOffset < 0 ? TAB_CONTENT_TITLE_FONT_SIZE - this.curYOffset / 100 : TAB_CONTENT_TITLE_FONT_SIZE, icons: [{ "id": 125831440, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, { "id": 125831551, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }], iconSize: this.windowMode ? 18 : (this.curYOffset < 0 ? 24 - this.curYOffset / 100 : 24) });
                                     }
                                 }, { name: "TopBar" });
                             }
@@ -1454,7 +1454,7 @@ class ConfigurationPage extends ViewPU {
                 Stack.create({ alignContent: this.stackAlignContentAlignment });
                 // 标题栏 END
                 // 主体 START
-                Stack.backgroundColor({ "id": 16777248, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+                Stack.backgroundColor({ "id": 16777245, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
                 // 标题栏 END
                 // 主体 START
                 Stack.width('100%');
@@ -1473,15 +1473,15 @@ class ConfigurationPage extends ViewPU {
                             {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     if (isInitialRender) {
-                                        let componentCall = new Nothing(this, { name: { "id": 16777223, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 472, col: 11 });
+                                        let componentCall = new Nothing(this, { name: { "id": 16777219, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 472, col: 11 });
                                         ViewPU.create(componentCall);
                                         let paramsLambda = () => {
-                                            return { name: { "id": 16777223, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } };
+                                            return { name: { "id": 16777219, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } };
                                         };
                                         componentCall.paramsGenerator_ = paramsLambda;
                                     }
                                     else {
-                                        this.updateStateVarsOfChildByElmtId(elmtId, { name: { "id": 16777223, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } });
+                                        this.updateStateVarsOfChildByElmtId(elmtId, { name: { "id": 16777219, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } });
                                     }
                                 }, { name: "Nothing" });
                             }
@@ -1542,9 +1542,9 @@ class ConfigurationPage extends ViewPU {
               });
                                         // 配置列表 START
                                         List.padding({
-                left: TabContentTitleMargin(this.widthBp, this.heightBp),
-                right: TabContentTitleMargin(this.widthBp, this.heightBp),
-              });
+                                            left: TabContentTitleMargin(this.widthBp, this.heightBp),
+                                            right: TabContentTitleMargin(this.widthBp, this.heightBp),
+                                        });
                                         // 配置列表 START
                                         List.contentEndOffset(this.isPXSecScreen? 65 : CONTENT_END_OFFSET_150);
                                         // 配置列表 START
@@ -1555,9 +1555,9 @@ class ConfigurationPage extends ViewPU {
                                         List.chainAnimation(true);
                                         // 配置列表 START
                                         List.nestedScroll({
-                scrollForward: NestedScrollMode.PARENT_FIRST,
-                scrollBackward: NestedScrollMode.SELF_FIRST
-              });
+                                            scrollForward: NestedScrollMode.PARENT_FIRST,
+                                            scrollBackward: NestedScrollMode.SELF_FIRST
+                                        });
                                     }, List);
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             ForEach.create();
@@ -1575,7 +1575,7 @@ class ConfigurationPage extends ViewPU {
                                                     const itemCreation2 = (elmtId, isInitialRender) => {
                                                         ListItem.create(deepRenderFunction, true);
                                                         ListItem.width('100%');
-                                                        ListItem.backgroundColor({ "id": 16777249, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+                                                        ListItem.backgroundColor({ "id": 16777246, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
                                                         ListItem.clickEffect(customAnimationUtil.isClickEffect(ObservedObject.GetRawObject(this.uiConfig)));
                                                         ListItem.borderRadius(BORDER_RADIUS_20);
                                                         ListItem.hoverEffect(HoverEffect.Scale);
@@ -1673,7 +1673,7 @@ class ConfigurationPage extends ViewPU {
                                                                     Row.create();
                                                                 }, Row);
                                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                                        Text.create({ "id": 16777245, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+                                                                        Text.create({ "id": 16777242, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
                                                                         Text.fontColor({ "id": 125830983, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
                                                                         Text.fontSize(14);
                                                                     }, Text);
@@ -1750,8 +1750,8 @@ class ConfigurationPage extends ViewPU {
                                                                     Radio.create({ value: 'radio' + index, group: 'configGroup'});
                                                                     Radio.checked(item.configId === this.appConfig.currentProfileId);
                                                                     Radio.radioStyle({
-                            checkedBackgroundColor: this.icon_emphasize,
-                          });
+                                                                        checkedBackgroundColor: this.icon_emphasize,
+                                                                    });
                                                                     Radio.hitTestBehavior(HitTestMode.None);
                                                                 }, Radio);
                                                             // 进度条 & 单选框
@@ -1833,67 +1833,67 @@ class ConfigurationPage extends ViewPU {
     /* 自定义弹框 */
     // 配置是否保存弹框 Controller定义
     private configCustomDialogController: CustomDialogController | null;
-/**
-   * ContextMenu列表项集合
-   */
-  configListLongPressCtxMenus(item: ConfigData): Array<LongPressContextMenuItem> {
-    return [
-      { symbolStartIcon: new SymbolGlyphModifier({ "id": 125831624, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }).fontSize(TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE).fontColor([{ "id": 125830982, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }]),
-        content: { "id": 16777224, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
-        callback: () => {
+    /**
+     * ContextMenu列表项集合
+     */
+    configListLongPressCtxMenus(item: ConfigData): Array<LongPressContextMenuItem> {
+        return [
+            { symbolStartIcon: new SymbolGlyphModifier({ "id": 125831624, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }).fontSize(TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE).fontColor([{ "id": 125830982, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }]),
+                content: { "id": 16777220, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
+                callback: () => {
          this.isShowQRCode = false
          this.isNewConfig = false
          this.editConfig()
-        }
-      },
-      ...(!item.disableUpdate ? [
-        { symbolStartIcon: new SymbolGlyphModifier({ "id": 125831551, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' })
-          .fontSize(TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE).fontColor([{ "id": 125830982, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }]),
-          content: { "id": 16777244, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, callback: () => { this.updateConfig(this.currentTouchConfigData.configId) }
-        } as LongPressContextMenuItem] : []),
-      ...(this.currentTouchConfigData.sourceType === ProfileType.Url ? [
-        { symbolStartIcon: new SymbolGlyphModifier({ "id": 125831499, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' })
-        .fontSize(TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE).fontColor([{ "id": 125830982, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }]),
-        content: { "id": 16777240, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, callback: () => { this.shareConfigUrl() }
-      } as LongPressContextMenuItem ] : []),
-      // 二维码分享
-      { symbolStartIcon: new SymbolGlyphModifier({ "id": 125831600, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' })
+                }
+            },
+            ...(!item.disableUpdate ? [
+                { symbolStartIcon: new SymbolGlyphModifier({ "id": 125831551, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' })
+                    .fontSize(TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE).fontColor([{ "id": 125830982, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }]),
+                    content: { "id": 16777241, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, callback: () => { this.updateConfig(this.currentTouchConfigData.configId) }
+                } as LongPressContextMenuItem] : []),
+            ...(this.currentTouchConfigData.sourceType === ProfileType.Url ? [
+                { symbolStartIcon: new SymbolGlyphModifier({ "id": 125831499, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' })
+                .fontSize(TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE).fontColor([{ "id": 125830982, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }]),
+                content: { "id": 16777237, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, callback: () => { this.shareConfigUrl() }
+            } as LongPressContextMenuItem ] : []),
+            // 二维码分享
+            { symbolStartIcon: new SymbolGlyphModifier({ "id": 125831600, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' })
        .fontSize(TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE).fontColor([{ "id": 125830982, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }]),
-       content: { "id": 16777237, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, callback: ()=>{ this.generateQRcode() }
+       content: { "id": 16777234, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, callback: ()=>{ this.generateQRcode() }
      },
-      // 导出配置文件
-      { symbolStartIcon: new SymbolGlyphModifier({ "id": 125831910, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' })
-        .fontSize(TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE).fontColor([{ "id": 125830982, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }]),
-        content: { "id": 16777233, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, callback: () => { this.exportConfig() }
-      },
+            // 导出配置文件
+            { symbolStartIcon: new SymbolGlyphModifier({ "id": 125831910, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' })
+                .fontSize(TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE).fontColor([{ "id": 125830982, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }]),
+                content: { "id": 16777230, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, callback: () => { this.exportConfig() }
+            },
    /*  { symbolStartIcon: new SymbolGlyphModifier($r('sys.symbol.plus_square_on_square'))
-       .fontSize(TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE).fontColor([$r('sys.color.font_primary')]),
-       content: $r('app.string.create_copy'), callback: ()=>{ this.generateQRcode() }
-     },*/
-    ]
+             .fontSize(TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE).fontColor([$r('sys.color.font_primary')]),
+             content: $r('app.string.create_copy'), callback: ()=>{ this.generateQRcode() }
+         },*/
+        ]
 
-  }
+    }
     FloatAddButton(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.backdropBlur(this.uiConfig.isBlurr ? 30 : 0);
-            Row.backgroundColor(this.uiConfig.isBlurr ? { "id": 16777250, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } : { "id": 16777248, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+            Row.backgroundColor(this.uiConfig.isBlurr ? { "id": 16777247, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } : { "id": 16777245, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
             Row.borderRadius(30);
             Row.margin({ bottom: 20});
             Row.size({width: 50, height: 50});
             Row.justifyContent(FlexAlign.Center);
             Row.alignItems(VerticalAlign.Center);
             Row.shadow({
-      radius: 15,
-      offsetY: 4,
-      color: { "id": 16777252, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
-      type: ShadowType.COLOR
-    });
+                radius: 15,
+                offsetY: 4,
+                color: { "id": 16777249, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
+                type: ShadowType.COLOR
+            });
             Row.margin({
-      bottom: Xb_TabBarVertical(this.widthBp, this.heightBp) || this.uiConfig.tabStyle == 'custom' ? 15 : this.bottomRectHeight == 0 ? 85 : this.bottomRectHeight + 63.5,
-      right: 15,
-      left: 15,
-    });
+                bottom: Xb_TabBarVertical(this.widthBp, this.heightBp) || this.uiConfig.tabStyle == 'custom' ? 15 : this.bottomRectHeight == 0 ? 85 : this.bottomRectHeight + 63.5,
+                right: 15,
+                left: 15,
+            });
             Row.onClick(() => {
       // 新配置
       EventHub.sendEvent(EventKey.AddConfig)
@@ -1921,7 +1921,7 @@ class ConfigurationPage extends ViewPU {
         }, Scroll);
             this.observeComponentCreation2((elmtId, isInitialRender) => {
                 Menu.create();
-                Menu.backgroundColor({ "id": 16777249, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+                Menu.backgroundColor({ "id": 16777246, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
                 Menu.borderRadius(BORDER_RADIUS_20);
                 Menu.menuItemDivider({ strokeWidth: LengthMetrics.vp(.4), color: { "id": 125831013, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } });
                 Menu.width(200);
@@ -1998,7 +1998,7 @@ class ConfigurationPage extends ViewPU {
           symbolStartIcon: new SymbolGlyphModifier({ "id": 125831543, "type": 40000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' })
             .fontSize(TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE)
             .fontColor(['#E6E54E36']),
-          content: { "id": 16777231, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }
+          content: { "id": 16777228, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }
         });
                     // 遍历其他菜单 END
                     // 删除配置 文字红色 单独处理 START
@@ -2028,7 +2028,7 @@ class ConfigurationPage extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new ConfigAdd(this, {}, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 439, col: 7 });
+                                let componentCall = new ConfigAdd(this, {}, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 902, col: 7 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {};
@@ -2049,8 +2049,8 @@ class ConfigurationPage extends ViewPU {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
                                 let componentCall = new QRCodeDialog(this, {
-        theDialogTitle: { "id": 16777239, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
-        QRCodeParam: { // 二维码参数
+        theDialogTitle: { "id": 16777236, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
+        QRCodeParam: {
           // TODO PC端需适配
           url: this.currentTouchConfigData.configUrl,
           name: this.currentTouchConfigData.configName,
@@ -2065,12 +2065,12 @@ class ConfigurationPage extends ViewPU {
           this.isShowQRCode = false
           this.isShowConfigAddBindSheet = false
         },
-      }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 443, col: 7 });
+      }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 906, col: 7 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
-        theDialogTitle: { "id": 16777239, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
-        QRCodeParam: { // 二维码参数
+        theDialogTitle: { "id": 16777236, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
+        QRCodeParam: {
           // TODO PC端需适配
           url: this.currentTouchConfigData.configUrl,
           name: this.currentTouchConfigData.configName,
@@ -2090,7 +2090,7 @@ class ConfigurationPage extends ViewPU {
                                 componentCall.paramsGenerator_ = paramsLambda;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(elmtId, { theDialogTitle: { "id": 16777239, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, QRCodeParam: { // 二维码参数
+                                this.updateStateVarsOfChildByElmtId(elmtId, { theDialogTitle: { "id": 16777236, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, QRCodeParam: {
           // TODO PC端需适配
           url: this.currentTouchConfigData.configUrl,
           name: this.currentTouchConfigData.configName,
@@ -2118,7 +2118,7 @@ this.SortBuilder.bind(this)()
                                         if (isInitialRender) {
                                             let componentCall = new 
                                             // 文件导入的
-                                            ImportConfigFromFile(this, { configData: this.currentTouchConfigData }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 468, col: 9 });
+                                            ImportConfigFromFile(this, { configData: this.currentTouchConfigData }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 931, col: 9 });
                                             ViewPU.create(componentCall);
                                             let paramsLambda = () => {
                                                 return { configData: this.currentTouchConfigData };
@@ -2139,7 +2139,7 @@ this.SortBuilder.bind(this)()
                                         if (isInitialRender) {
                                             let componentCall = new 
                                             // URL导入的
-                                            ImportConfigFromURL(this, { configData: this.currentTouchConfigData }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 471, col: 9 });
+                                            ImportConfigFromURL(this, { configData: this.currentTouchConfigData }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 934, col: 9 });
                                             ViewPU.create(componentCall);
                                             let paramsLambda = () => {
                                                 return { configData: this.currentTouchConfigData };
@@ -2182,12 +2182,12 @@ this.SortBuilder.bind(this)()
                 Row.alignItems(VerticalAlign.Center);
                 Row.height(BIND_SHEET_TITLE_CONTAINER_HEIGHT + BIND_SHEET_DRAG_BAR_HEIGHT);
                 Row.padding({
-        left: NavigationListPadding(this.widthBp, this.heightBp),
-        right: NavigationListPadding(this.widthBp, this.heightBp)
-      });
+                    left: NavigationListPadding(this.widthBp, this.heightBp),
+                    right: NavigationListPadding(this.widthBp, this.heightBp)
+                });
             }, Row);
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                    Text.create({ "id": 16777241, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+                    Text.create({ "id": 16777238, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
                     globalThis.Context.animation({ duration: this.uiConfig.animationSpeed, curve: Curve.Ease });
                     Text.fontWeight(FontWeight.Bold);
                     Text.fontColor({ "id": 125830982, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
@@ -2201,9 +2201,9 @@ this.SortBuilder.bind(this)()
                 List.width('100%');
                 List.contentEndOffset(86);
                 List.padding({
-        left: NavigationListPadding(this.widthBp, this.heightBp),
-        right: NavigationListPadding(this.widthBp, this.heightBp)
-      });
+                    left: NavigationListPadding(this.widthBp, this.heightBp),
+                    right: NavigationListPadding(this.widthBp, this.heightBp)
+                });
             }, List);
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                     ForEach.create();
@@ -2228,7 +2228,7 @@ this.SortBuilder.bind(this)()
                             const itemCreation2 = (elmtId, isInitialRender) => {
                                 ListItem.create(deepRenderFunction, true);
                                 ListItem.width('100%');
-                                ListItem.backgroundColor({ "id": 16777249, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+                                ListItem.backgroundColor({ "id": 16777246, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
                                 ListItem.clickEffect(customAnimationUtil.isClickEffect(ObservedObject.GetRawObject(this.uiConfig)));
                                 ListItem.borderRadius(BORDER_RADIUS_20);
                                 ListItem.hoverEffect(HoverEffect.Scale);
@@ -2273,310 +2273,310 @@ this.SortBuilder.bind(this)()
             List.pop();
         Column.pop();
     }
-async aboutToAppear(): Promise<void> {
-    hilog.info(0xC000, componentName, `#aboutToAppear executed`)
-    // 初始化当前选中项数据
-    this.currentRadioConfigData = this.configList.find((data: ConfigData) => data.configId === this.appConfig.currentProfileId) ?? NewConfigData
-    // 初始化分享工具
-    Xb_Share.inputInfo(this.getUIContext())
-    // 注册打开添加配置弹窗事件
-    EventHub.on(EventKey.AddConfig, async () => {
-      this.isNewConfig = true
-      this.currentTouchConfigData = NewConfigData
-      this.isShowConfigAddBindSheet = true
-      this.isEnableIndexForegroundBlur = true
-      if (this.uiConfig.isVibrate) {
-        customVibrator.vibratorTriggerOfHapticClockTimer()
-      }
-    })
-  }
-async onDidBuild(): Promise<void> {
-    await this.openShare()
-  }
-async onIndexChange() {
-    if (this.configList.length !== 0 && this.tabCurrentPage === 2) {
-      await ClashViewModel.updateProfileConfig(null)
-      Xb_ToastUtil.showToast({ message: '更新所有配置成功' })
+    async aboutToAppear(): Promise<void> {
+        hilog.info(0xC000, componentName, `#aboutToAppear executed`)
+        // 初始化当前选中项数据
+        this.currentRadioConfigData = this.configList.find((data: ConfigData) => data.configId === this.appConfig.currentProfileId) ?? NewConfigData
+        // 初始化分享工具
+        Xb_Share.inputInfo(this.getUIContext())
+        // 注册打开添加配置弹窗事件
+        EventHub.on(EventKey.AddConfig, async () => {
+            this.isNewConfig = true
+            this.currentTouchConfigData = NewConfigData
+            this.isShowConfigAddBindSheet = true
+            this.isEnableIndexForegroundBlur = true
+            if (this.uiConfig.isVibrate) {
+                customVibrator.vibratorTriggerOfHapticClockTimer()
+            }
+        })
     }
-  }
-async loadConfig(item: ConfigData, needUpdated: boolean = true) {
-    hilog.info(0xC011, componentName, `EditConfig UpdateConfig #loadConfig#加载配置: configName is [${this.currentTouchConfigData.configName}] 是否需要更新：${needUpdated && !item.disableUpdate} 更新时间：${item.updateTime}`)
-    if (this.isLoading)
-      return
-    this.getUIContext().animateTo({
-      duration: this.uiConfig.animationSpeed,
-      iterations: 1,
-      playMode: PlayMode.Normal,
-      curve:Curve.Ease,
-    }, () => {
-      this.isLoading = true;
-    })
-    this.appConfig.currentProfileName = item.configName
-    this.appConfig.currentProfileId = item.configId
-    try {
-      if (needUpdated && !item.disableUpdate) {
-        ClashViewModel.updateProfileConfig(item.configId)
-      }
-      await ClashViewModel.socketProxy.reset()
-      await ClashViewModel.loadConfig(false, '配置页-加载')
-      hilog.info(0xC011, componentName, `EditConfig #loadConfig#更新并加载完成 configName is [${this.currentTouchConfigData.configName}]`)
-    } catch (e) {
-      console.debug("loadConfigList", e.message, JSON.stringify(e))
-      Xb_ToastUtil.showToast({message: `${getResourceString({ "id": 16777235, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, this)}` + (e.message || e), duration: 3000 })
+    async onDidBuild(): Promise<void> {
+        await this.openShare()
     }
-    this.getUIContext().animateTo({
-      duration: this.uiConfig.animationSpeed,
-      iterations: 1,
-      playMode: PlayMode.Normal,
-      curve:Curve.Ease,
-    }, () => {
-      this.isLoading = false;
-    })
-  }
-async onConfigListChange() {
-    hilog.info(0xC011, componentName, `EditConfig #onConfigListChange#配置列表长度: [${this.configList.length}]`)
-    if (!this.uiConfig.isFirstImportConfig || this.isClearData) {
-      hilog.info(0xC011, componentName, `EditConfig #onConfigListChange#设置数据清除: [${this.isClearData}]`)
-      this.isClearData = false
-      hilog.info(0xC011, componentName, `EditConfig #onConfigListChange#设置数据清除: [${this.isClearData}]`)
-      return
+    async onIndexChange() {
+        if (this.configList.length !== 0 && this.tabCurrentPage === 2) {
+            await ClashViewModel.updateProfileConfig(null)
+            Xb_ToastUtil.showToast({ message: '更新所有配置成功' })
+        }
     }
-    // 首次导入配置自动选中
-    if (this.configList.length === 1 && this.uiConfig.isFirstImportConfig) {
-      this.isON.toggleAnim = true
-      await this.loadConfig(this.configList[0])
-      this.uiConfig.isFirstImportConfig = false
-      hilog.info(0xC002, componentName,
-        `EditConfig #onConfigListChange: 首次导入：${this.uiConfig.isFirstImportConfig} configName is [${this.configList[0].configName}]`)
+    async loadConfig(item: ConfigData, needUpdated: boolean = true) {
+        hilog.info(0xC011, componentName, `EditConfig UpdateConfig #loadConfig#加载配置: configName is [${this.currentTouchConfigData.configName}] 是否需要更新：${needUpdated && !item.disableUpdate} 更新时间：${item.updateTime}`)
+        if (this.isLoading)
+            return
+        this.getUIContext().animateTo({
+            duration: this.uiConfig.animationSpeed,
+            iterations: 1,
+            playMode: PlayMode.Normal,
+            curve:Curve.Ease,
+        }, () => {
+            this.isLoading = true;
+        })
+        this.appConfig.currentProfileName = item.configName
+        this.appConfig.currentProfileId = item.configId
+        try {
+            if (needUpdated && !item.disableUpdate) {
+                ClashViewModel.updateProfileConfig(item.configId)
+            }
+            await ClashViewModel.socketProxy.reset()
+            await ClashViewModel.loadConfig(false, '配置页-加载')
+            hilog.info(0xC011, componentName, `EditConfig #loadConfig#更新并加载完成 configName is [${this.currentTouchConfigData.configName}]`)
+        } catch (e) {
+            console.debug("loadConfigList", e.message, JSON.stringify(e))
+            Xb_ToastUtil.showToast({message: `${getResourceString({ "id": 16777232, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, this)}` + (e.message || e), duration: 3000 })
+        }
+        this.getUIContext().animateTo({
+            duration: this.uiConfig.animationSpeed,
+            iterations: 1,
+            playMode: PlayMode.Normal,
+            curve:Curve.Ease,
+        }, () => {
+            this.isLoading = false;
+        })
     }
-  }
-aboutToDisappear(): void {
-    hilog.info(0xC000, componentName, `#aboutToDisappear executed`)
-    EventHub.off(EventKey.AddConfig)
-    this.configCustomDialogController = null
-    this.isEnableIndexForegroundBlur = false
-    hilog.info(0xC000, componentName, `#aboutToDisappear#置空[配置页\`bindSheet\`内提示是否删除配置信息的自定义弹框]`)
-    Xb_Share.immersiveDisablingListening('all')
-  }
-/**
-   * 收藏配置
-   */
-  private favoriteConfig(): void {
-    hilog.info(0xC010, componentName, `#favoriteConfig#收藏配置: configName is [${this.currentTouchConfigData.configName}]`)
-    if (this.favoriteProfiles.size <= 5) {
-      this.currentTouchConfigData.isFavorite = true
-      this.favoriteProfiles.set(this.currentTouchConfigData.configId, this.currentTouchConfigData.configName)
-      Xb_ToastUtil.showToast({ message: { "id": 16777222, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } })
-    } else {
-      Xb_ToastUtil.showToast({ message: { "id": 16777236, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } })
+    async onConfigListChange() {
+        hilog.info(0xC011, componentName, `EditConfig #onConfigListChange#配置列表长度: [${this.configList.length}]`)
+        if (!this.uiConfig.isFirstImportConfig || this.isClearData) {
+            hilog.info(0xC011, componentName, `EditConfig #onConfigListChange#设置数据清除: [${this.isClearData}]`)
+            this.isClearData = false
+            hilog.info(0xC011, componentName, `EditConfig #onConfigListChange#设置数据清除: [${this.isClearData}]`)
+            return
+        }
+        // 首次导入配置自动选中
+        if (this.configList.length === 1 && this.uiConfig.isFirstImportConfig) {
+            this.isON.toggleAnim = true
+            await this.loadConfig(this.configList[0])
+            this.uiConfig.isFirstImportConfig = false
+            hilog.info(0xC002, componentName,
+                `EditConfig #onConfigListChange: 首次导入：${this.uiConfig.isFirstImportConfig} configName is [${this.configList[0].configName}]`)
+        }
     }
-  }
-/**
-   * 取消收藏配置
-   */
-  private cancelFavoriteConfig(): void {
-    hilog.info(0xC010, componentName, `#favoriteConfig#取消收藏配置: configName is [${this.currentTouchConfigData.configName}]`)
-    this.currentTouchConfigData.isFavorite = false
-    this.favoriteProfiles.delete(this.currentTouchConfigData.configId)
-    Xb_ToastUtil.showToast({ message: { "id": 16777243, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } })
-  }
-/**
-   * 编辑配置
-   */
-  private editConfig(): void {
-    hilog.info(0xC011, componentName, `#editConfig#编辑配置: configName is [${this.currentTouchConfigData.configName}]`)
-    // 识别配置导入途径
-    this.isFromFile = this.currentTouchConfigData.configUrl.toLowerCase().startsWith('file://')
-    // 切换为二级界面
-    this.isNewConfig = false
-    // 赋值为false
-    this.currentTouchConfigData.isNewConfig = false
-    // 提前加载配置文本
-    EventHub.sendEvent(EventKey.LoadConfigStr)
-    // 显示半模态编辑弹窗
-    this.isShowConfigAddBindSheet = true
-  }
-/**更新配置*/
-  private async updateConfig(configId?: string): Promise<void> {
-    Xb_ToastUtil.showToast({message: { "id": 16777247, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }})
-    this.loadConfig(this.currentRadioConfigData, !this.currentRadioConfigData.disableUpdate)
-    if (configId) {
-      this.isRefreshing = false
-      // 使开关点击时不触发转场动画
-      this.isON.toggleAnim = true
-      await ClashViewModel.updateProfileConfig(configId)
-      hilog.info(0xC012, componentName, `#updateConfig#更新配置{单个}: configUrl is [${this.currentTouchConfigData.configUrl}], configId is [${this.currentTouchConfigData.configId}]`)
+    aboutToDisappear(): void {
+        hilog.info(0xC000, componentName, `#aboutToDisappear executed`)
+        EventHub.off(EventKey.AddConfig)
+        this.configCustomDialogController = null
+        this.isEnableIndexForegroundBlur = false
+        hilog.info(0xC000, componentName, `#aboutToDisappear#置空[配置页\`bindSheet\`内提示是否删除配置信息的自定义弹框]`)
+        Xb_Share.immersiveDisablingListening('all')
+    }
+    /**
+     * 收藏配置
+     */
+    private favoriteConfig(): void {
+        hilog.info(0xC010, componentName, `#favoriteConfig#收藏配置: configName is [${this.currentTouchConfigData.configName}]`)
+        if (this.favoriteProfiles.size <= 5) {
+            this.currentTouchConfigData.isFavorite = true
+            this.favoriteProfiles.set(this.currentTouchConfigData.configId, this.currentTouchConfigData.configName)
+            Xb_ToastUtil.showToast({ message: { "id": 16777218, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } })
+        } else {
+            Xb_ToastUtil.showToast({ message: { "id": 16777233, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } })
+        }
+    }
+    /**
+     * 取消收藏配置
+     */
+    private cancelFavoriteConfig(): void {
+        hilog.info(0xC010, componentName, `#favoriteConfig#取消收藏配置: configName is [${this.currentTouchConfigData.configName}]`)
+        this.currentTouchConfigData.isFavorite = false
+        this.favoriteProfiles.delete(this.currentTouchConfigData.configId)
+        Xb_ToastUtil.showToast({ message: { "id": 16777240, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } })
+    }
+    /**
+     * 编辑配置
+     */
+    private editConfig(): void {
+        hilog.info(0xC011, componentName, `#editConfig#编辑配置: configName is [${this.currentTouchConfigData.configName}]`)
+        // 识别配置导入途径
+        this.isFromFile = this.currentTouchConfigData.configUrl.toLowerCase().startsWith('file://')
+        // 切换为二级界面
+        this.isNewConfig = false
+        // 赋值为false
+        this.currentTouchConfigData.isNewConfig = false
+        // 提前加载配置文本
+        EventHub.sendEvent(EventKey.LoadConfigStr)
+        // 显示半模态编辑弹窗
+        this.isShowConfigAddBindSheet = true
+    }
+    /**更新配置*/
+    private async updateConfig(configId?: string): Promise<void> {
+        Xb_ToastUtil.showToast({message: { "id": 16777244, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }})
+        this.loadConfig(this.currentRadioConfigData, !this.currentRadioConfigData.disableUpdate)
+        if (configId) {
+            this.isRefreshing = false
+            // 使开关点击时不触发转场动画
+            this.isON.toggleAnim = true
+            await ClashViewModel.updateProfileConfig(configId)
+            hilog.info(0xC012, componentName, `#updateConfig#更新配置{单个}: configUrl is [${this.currentTouchConfigData.configUrl}], configId is [${this.currentTouchConfigData.configId}]`)
 
-    } else {
-      // 使开关点击时不触发转场动画
-      this.isON.toggleAnim = true
-      hilog.info(0xC012, componentName, `#updateConfig#更新配置{所有}`)
-      await ClashViewModel.updateProfileConfig(null)
-      this.isRefreshing = false
-      Xb_ToastUtil.showToast({message: { "id": 16777246, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }})
+        } else {
+            // 使开关点击时不触发转场动画
+            this.isON.toggleAnim = true
+            hilog.info(0xC012, componentName, `#updateConfig#更新配置{所有}`)
+            await ClashViewModel.updateProfileConfig(null)
+            this.isRefreshing = false
+            Xb_ToastUtil.showToast({message: { "id": 16777243, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }})
+        }
     }
-  }
-/**分享配置的URL*/
-  private async shareConfigUrl(): Promise<void> {
-    // 处理待分享数据 并调用系统分享接口 只有URL导入的配置才可以分享链接
-    let shareData = await this.getShareData('touch')
+    /**分享配置的URL*/
+    private async shareConfigUrl(): Promise<void> {
+        // 处理待分享数据 并调用系统分享接口 只有URL导入的配置才可以分享链接
+        let shareData = await this.getShareData('touch')
 
-    if (shareData) {
-      const context: common.UIAbilityContext = this.getUIContext().getHostContext() as common.UIAbilityContext;
-      Xb_Share.shareData = shareData
-      // 进行分享面板分享
-      try {
-        await Xb_Share.sharePlant(context)
-      } finally {
-        // TODO 现存问题，分享后的碰一碰，隔空投递的配置项会被覆盖。下面逻辑是临时解决办法
-        shareData = await this.getShareData('radio')
-        Xb_Share.shareData = shareData
-      }
+        if (shareData) {
+            const context: common.UIAbilityContext = this.getUIContext().getHostContext() as common.UIAbilityContext;
+            Xb_Share.shareData = shareData
+            // 进行分享面板分享
+            try {
+                await Xb_Share.sharePlant(context)
+            } finally {
+                // TODO 现存问题，分享后的碰一碰，隔空投递的配置项会被覆盖。下面逻辑是临时解决办法
+                shareData = await this.getShareData('radio')
+                Xb_Share.shareData = shareData
+            }
+        }
     }
-  }
-// TODO 待最低版本兼容为6.0后需绑定窗口ID
-  async onForwardChange() {
-    if (this.isForward && this.tabCurrentPage === 2) {
-      // 前台时注册碰一碰分享事件
-      Xb_Share.immersiveListening('all')
-      const capabilityRegistry: harmonyShare.SendCapabilityRegistry = {
-        windowId: this.mainWindowId
-      }
-    } else {
-      // 后台时解除
-      const capabilityRegistry: harmonyShare.SendCapabilityRegistry = {
-        windowId: this.mainWindowId
-      }
-      // 解除隔空投递、碰一碰 分享监听事件
-      Xb_Share.immersiveDisablingListening('all')
-      console.log(`onForwardChange 解除碰一碰事件`)
+    // TODO 待最低版本兼容为6.0后需绑定窗口ID
+    async onForwardChange() {
+        if (this.isForward && this.tabCurrentPage === 2) {
+            // 前台时注册碰一碰分享事件
+            Xb_Share.immersiveListening('all')
+            const capabilityRegistry: harmonyShare.SendCapabilityRegistry = {
+                windowId: this.mainWindowId
+            }
+        } else {
+            // 后台时解除
+            const capabilityRegistry: harmonyShare.SendCapabilityRegistry = {
+                windowId: this.mainWindowId
+            }
+            // 解除隔空投递、碰一碰 分享监听事件
+            Xb_Share.immersiveDisablingListening('all')
+            console.log(`onForwardChange 解除碰一碰事件`)
+        }
     }
-  }
-/**
-   *  @description 获取分享的数据
-   *  @param type touch | radio -> touch 长按选中的配置项，radio 当前选中的配置项
-   */
-  private async getShareData(type: 'touch' | 'radio' = 'radio'): Promise<ShareData> {
-    const currentConfigData = type === 'touch' ? this.currentTouchConfigData : this.currentRadioConfigData
+    /**
+     *  @description 获取分享的数据
+     *  @param type touch | radio -> touch 长按选中的配置项，radio 当前选中的配置项
+     */
+    private async getShareData(type: 'touch' | 'radio' = 'radio'): Promise<ShareData> {
+        const currentConfigData = type === 'touch' ? this.currentTouchConfigData : this.currentRadioConfigData
 
-    // 将背景图写入沙箱中并获取
-    const ctx: Context = this.getUIContext().getHostContext() as Context;
-    const filePath = ctx.filesDir + '/shared.jpg';
-    // 获取应用图标
-    try {
-      let file = fs.openSync(filePath, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
-      fs.writeSync(file.fd,
-        (ctx.resourceManager.getMediaContentSync({ "id": 16777255, "type": 20000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }.id) as Uint8Array).buffer);
-      fs.closeSync(file);
-      hilog.info(0xC014, componentName, `将背景图写入沙箱中并获取: ${filePath}`)
-    } catch (e) {
-      hilog.error(0xC014, componentName, `error: ${JSON.stringify(e)}`)
-    }
+        // 将背景图写入沙箱中并获取
+        const ctx: Context = this.getUIContext().getHostContext() as Context;
+        const filePath = ctx.filesDir + '/shared.jpg';
+        // 获取应用图标
+        try {
+            let file = fs.openSync(filePath, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
+            fs.writeSync(file.fd,
+                (ctx.resourceManager.getMediaContentSync({ "id": 16777255, "type": 20000, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }.id) as Uint8Array).buffer);
+            fs.closeSync(file);
+            hilog.info(0xC014, componentName, `将背景图写入沙箱中并获取: ${filePath}`)
+        } catch (e) {
+            hilog.error(0xC014, componentName, `error: ${JSON.stringify(e)}`)
+        }
 
-    // TODO 构造分享数据 AppLink 携带订阅 URL 完成 => 应用直达订阅分享
-    const shareData: ShareData = {
-      utd: utd.UniformDataType.HYPERLINK,
-      content: `${APP_LINKING}?configUrl=${currentConfigData.configUrl}&configName=${currentConfigData.configName}`,
-      thumbnailUri: fileUri.getUriFromPath(filePath),
-      title: { "id": 16777229, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
-      description: currentConfigData.configName,
-      label: '',
-      uri: ''
-    };
+        // TODO 构造分享数据 AppLink 携带订阅 URL 完成 => 应用直达订阅分享
+        const shareData: ShareData = {
+            utd: utd.UniformDataType.HYPERLINK,
+            content: `${APP_LINKING}?configUrl=${currentConfigData.configUrl}&configName=${currentConfigData.configName}`,
+            thumbnailUri: fileUri.getUriFromPath(filePath),
+            title: { "id": 16777226, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' },
+            description: currentConfigData.configName,
+            label: '',
+            uri: ''
+        };
 
-    hilog.info(0xC014, componentName, `碰一碰 - 分享的 configUrl: ${JSON.stringify(currentConfigData)}`)
+        hilog.info(0xC014, componentName, `碰一碰 - 分享的 configUrl: ${JSON.stringify(currentConfigData)}`)
 
-    return shareData
-  }
-/**
-   * @description 开启 隔空投递、碰一碰 分享监听
-   */
-  private async openShare() {
-    if (canIUse('SystemCapability.Collaboration.HarmonyShare')) {
-      const shareData = await this.getShareData('radio')
-      if (shareData) {
-        Xb_Share.shareData = shareData
-        // 隔空投递、碰一碰 分享监听
-        Xb_Share.immersiveListening('all')
+        return shareData
+    }
+    /**
+     * @description 开启 隔空投递、碰一碰 分享监听
+     */
+    private async openShare() {
+        if (canIUse('SystemCapability.Collaboration.HarmonyShare')) {
+            const shareData = await this.getShareData('radio')
+            if (shareData) {
+                Xb_Share.shareData = shareData
+                // 隔空投递、碰一碰 分享监听
+                Xb_Share.immersiveListening('all')
 
-        // Xb_ToastUtil.showToast({
-        //   message: '碰一碰，分享当前配置！📄',
-        //   duration: 3000
-        // })
-      }
-    } else {
-      Xb_ToastUtil.showToast({
-        message: '当前设备暂不支持系统分享功能！'
-      })
+                // Xb_ToastUtil.showToast({
+                //   message: '碰一碰，分享当前配置！📄',
+                //   duration: 3000
+                // })
+            }
+        } else {
+            Xb_ToastUtil.showToast({
+                message: '当前设备暂不支持系统分享功能！'
+            })
+        }
     }
-  }
-/**
-   * 生成配置的URL转成的二维码
-   *    1. URL & 二维码 导入的配置用对应URL生成二维码
-   *    2. 其他方式导入的配置不能生成二维码
-   */
-  private generateQRcode(): void {
-    this.isShowQRCode = true
-    this.isShowConfigAddBindSheet = true
-    hilog.info(0xC014, componentName, `#generateQRcode#生成二维码: configName is [${this.currentTouchConfigData.configName}]`)
-  }
-/**
-   * 导出配置文件
-   */
-  private async exportConfig(): Promise<void> {
-    hilog.info(0xC015, componentName, `#exportConfig #导出配置文件: configName is [${this.currentTouchConfigData.configName}]`)
-    const context = this.getUIContext().getHostContext()!
-    // 提取配置名称
-    const fileNameDotIndex = this.currentTouchConfigData.configName.lastIndexOf('.')
-    const fileName = (fileNameDotIndex == -1 || fileNameDotIndex == 0) ? this.currentTouchConfigData.configName : this.currentTouchConfigData.configName.slice(0, fileNameDotIndex)
-    console.debug(`待导出配置文件的 fileName: ${fileName}`)
-    const sandPath = context.filesDir + `/ClashBox/profiles/` + this.currentTouchConfigData.configId + '/config.yaml'
-    const sandUri = fileUri.getUriFromPath(sandPath)
-    const filePicker = new picker.DocumentViewPicker(context)
-    const options = new picker.DocumentSaveOptions()
-    options.newFileNames = [fileName]
-    options.fileSuffixChoices = ["'文档|.yaml'"]
-    options.pickerMode = picker.DocumentPickerMode.DOWNLOAD
-    const result = await filePicker.save(options)
-    const exportUri = fileUri.getUriFromPath(result[0] + `/${fileName}.yaml`)
-    console.debug(`待导出配置文件的 沙箱目录Uri: ${sandUri} 下载目录Uri: ${exportUri}`)
-    try {
-      // 导出至下载文件夹
-      fs.copy(sandUri, exportUri).then(() => {
-        console.info("Succeeded in copying.");
-        Xb_ToastUtil.showToast({ message: Xb_GetResourceString({ "id": 16777234, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, this) + `: ${result[0] + `/${fileName}.yaml`}`})
-      }).catch((err: BusinessError) => {
-        console.error(`Failed to copy. Code: ${err.code}, message: ${err.message}`);
-        Xb_ToastUtil.showToast({ message: `配置文件导出失败. Code: ${err.code}, message: ${err.message}`})
-      })
-    } catch (error) {
-      console.error(`配置文件导出失败，name：${error.name} message：${error.message}`)
-      Xb_ToastUtil.showToast({ message: `配置文件导出失败. Code: ${error.code}, message: ${error.message}`})
+    /**
+     * 生成配置的URL转成的二维码
+     *    1. URL & 二维码 导入的配置用对应URL生成二维码
+     *    2. 其他方式导入的配置不能生成二维码
+     */
+    private generateQRcode(): void {
+        this.isShowQRCode = true
+        this.isShowConfigAddBindSheet = true
+        hilog.info(0xC014, componentName, `#generateQRcode#生成二维码: configName is [${this.currentTouchConfigData.configName}]`)
     }
-  }
-/**删除配置*/
-  private async deleteConfig(): Promise<void> {
-    hilog.info(0xC016, componentName, `#deleteConfig#删除配置: configName is [${this.currentTouchConfigData.configName}]`)
-    await ClashViewModel.deleteProfile(this.currentTouchConfigData.configId)
-    this.appConfig.currentProxyName = undefined
-    this.appConfig.currentProfileName = undefined
-    this.favoriteProfiles.delete(this.currentTouchConfigData.configId)
-    // 加载配置
-    EventHub.sendEvent(EventKey.FetchProfile)
-    Xb_ToastUtil.showToast({ message: `${getResourceString({ "id": 16777228, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, this)}💔` })
-  }
-/**
-   * @description 监听选中的配置项变化
-   */
-  async onChangeConfig() {
-    // 选中项变更重新监听分享
-    try {
-      Xb_Share.immersiveDisablingListening('all')
-    } catch (e) {
-      hilog.error(0xC014, componentName, `选中项变更取消监听分享 - error: ${JSON.stringify(e)}`)
+    /**
+     * 导出配置文件
+     */
+    private async exportConfig(): Promise<void> {
+        hilog.info(0xC015, componentName, `#exportConfig #导出配置文件: configName is [${this.currentTouchConfigData.configName}]`)
+        const context = this.getUIContext().getHostContext()!
+        // 提取配置名称
+        const fileNameDotIndex = this.currentTouchConfigData.configName.lastIndexOf('.')
+        const fileName = (fileNameDotIndex == -1 || fileNameDotIndex == 0) ? this.currentTouchConfigData.configName : this.currentTouchConfigData.configName.slice(0, fileNameDotIndex)
+        console.debug(`待导出配置文件的 fileName: ${fileName}`)
+        const sandPath = context.filesDir + `/ClashBox/profiles/` + this.currentTouchConfigData.configId + '/config.yaml'
+        const sandUri = fileUri.getUriFromPath(sandPath)
+        const filePicker = new picker.DocumentViewPicker(context)
+        const options = new picker.DocumentSaveOptions()
+        options.newFileNames = [fileName]
+        options.fileSuffixChoices = ["'文档|.yaml'"]
+        options.pickerMode = picker.DocumentPickerMode.DOWNLOAD
+        const result = await filePicker.save(options)
+        const exportUri = fileUri.getUriFromPath(result[0] + `/${fileName}.yaml`)
+        console.debug(`待导出配置文件的 沙箱目录Uri: ${sandUri} 下载目录Uri: ${exportUri}`)
+        try {
+            // 导出至下载文件夹
+            fs.copy(sandUri, exportUri).then(() => {
+                console.info("Succeeded in copying.");
+                Xb_ToastUtil.showToast({ message: Xb_GetResourceString({ "id": 16777231, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, this) + `: ${result[0] + `/${fileName}.yaml`}`})
+            }).catch((err: BusinessError) => {
+                console.error(`Failed to copy. Code: ${err.code}, message: ${err.message}`);
+                Xb_ToastUtil.showToast({ message: `配置文件导出失败. Code: ${err.code}, message: ${err.message}`})
+            })
+        } catch (error) {
+            console.error(`配置文件导出失败，name：${error.name} message：${error.message}`)
+            Xb_ToastUtil.showToast({ message: `配置文件导出失败. Code: ${error.code}, message: ${error.message}`})
+        }
     }
-    await this.openShare()
-  }
+    /**删除配置*/
+    private async deleteConfig(): Promise<void> {
+        hilog.info(0xC016, componentName, `#deleteConfig#删除配置: configName is [${this.currentTouchConfigData.configName}]`)
+        await ClashViewModel.deleteProfile(this.currentTouchConfigData.configId)
+        this.appConfig.currentProxyName = undefined
+        this.appConfig.currentProfileName = undefined
+        this.favoriteProfiles.delete(this.currentTouchConfigData.configId)
+        // 加载配置
+        EventHub.sendEvent(EventKey.FetchProfile)
+        Xb_ToastUtil.showToast({ message: `${getResourceString({ "id": 16777225, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, this)}💔` })
+    }
+    /**
+     * @description 监听选中的配置项变化
+     */
+    async onChangeConfig() {
+        // 选中项变更重新监听分享
+        try {
+            Xb_Share.immersiveDisablingListening('all')
+        } catch (e) {
+            hilog.error(0xC014, componentName, `选中项变更取消监听分享 - error: ${JSON.stringify(e)}`)
+        }
+        await this.openShare()
+    }
     rerender() {
         this.updateDirtyElements();
     }
