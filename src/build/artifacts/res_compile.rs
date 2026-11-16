@@ -334,6 +334,49 @@ fn merge_element_table(from: &Path, to: &Path) -> Result<(), String> {
 
 /// Stage the resource tree restool compiles: the project's `resources/` plus a
 /// generated `profile/main_pages.json` (the reference injects it the same way).
+/// Write the `hvolt.toml` application name into the staged `string.json` as `app_name`.
+///
+/// `app.json` can only point `label` at a string resource, so the manifest alone cannot carry a
+/// literal. Doing it here keeps the toml the single place a project names itself: the entry is
+/// replaced when present and appended when not, and a product overlay still runs afterwards.
+fn inject_app_name(stage: &Path, name: &str) -> Result<(), String> {
+    if name.is_empty() {
+        return Ok(());
+    }
+    let dir = stage.join("base").join("element");
+    let path = dir.join("string.json");
+    let mut doc: serde_json::Value = if path.is_file() {
+        let text =
+            std::fs::read_to_string(&path).map_err(|e| format!("read {}: {e}", path.display()))?;
+        serde_json::from_str(&text).map_err(|e| format!("parse {}: {e}", path.display()))?
+    } else {
+        std::fs::create_dir_all(&dir).map_err(|e| format!("mkdir {}: {e}", dir.display()))?;
+        serde_json::json!({ "string": [] })
+    };
+    let Some(list) = doc.get_mut("string").and_then(|v| v.as_array_mut()) else {
+        return Err(format!(
+            "{} has no \"string\" array to write app_name into",
+            path.display()
+        ));
+    };
+    let mut replaced = false;
+    for entry in list.iter_mut() {
+        if entry.get("name").and_then(|v| v.as_str()) == Some("app_name") {
+            entry["value"] = serde_json::json!(name);
+            replaced = true;
+        }
+    }
+    if !replaced {
+        list.push(serde_json::json!({ "name": "app_name", "value": name }));
+    }
+    std::fs::write(
+        &path,
+        serde_json::to_string_pretty(&doc).map_err(|e| e.to_string())?,
+    )
+    .map_err(|e| format!("write {}: {e}", path.display()))?;
+    Ok(())
+}
+
 pub(crate) fn stage_resources(input: &ResCompileInput<'_>, stage: &Path) -> Result<(), String> {
     // Two layouts are valid: a migrated project keeps resources beside its module
     // (`entry/resources/`), a scaffolded one keeps them at the project root
@@ -352,6 +395,9 @@ pub(crate) fn stage_resources(input: &ResCompileInput<'_>, stage: &Path) -> Resu
         ));
     }
     copy_dir_recursive(&project_res, stage)?;
+    // The application name is a string resource (`app.json` label must be `$string:...`), so the
+    // toml value is written into the staged table instead of the project declaring it twice.
+    inject_app_name(stage, &input.app.app.name)?;
     // The selected product's directories are overlaid before the app scope is split out: an
     // icon or label a product redefines has to land in the same tree the split reads.
     overlay_product_resources(input, stage)?;
@@ -1643,6 +1689,24 @@ mod tests {
         ResCompileInput,
     };
     use crate::support::config::{Dependency, ModuleConfig, ModuleInfo, ResolvedProduct};
+
+    /// The application name comes from `hvolt.toml`, not from a copy in string.json.
+    #[test]
+    fn the_toml_name_replaces_the_staged_app_name() {
+        let root = std::env::temp_dir().join(format!("hvolt-appname-{}", std::process::id()));
+        let element = root.join("base").join("element");
+        std::fs::create_dir_all(&element).unwrap();
+        std::fs::write(
+            element.join("string.json"),
+            r#"{"string":[{"name":"app_name","value":"old"},{"name":"other","value":"keep"}]}"#,
+        )
+        .unwrap();
+        super::inject_app_name(&root, "New Name").unwrap();
+        let text = std::fs::read_to_string(element.join("string.json")).unwrap();
+        assert!(text.contains("New Name"), "{text}");
+        assert!(text.contains("keep"), "unrelated entries survive: {text}");
+        let _ = std::fs::remove_dir_all(&root);
+    }
 
     /// generate_main_pages (via stage) drops the .ets suffix and keeps order.
     #[test]
