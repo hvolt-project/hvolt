@@ -27,6 +27,33 @@ pub struct AppConfig {
     pub resolved: Option<ResolvedProduct>,
 }
 
+/// `[app.build]` — the table build hooks live under.
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+pub struct BuildFields {
+    /// Steps run after assembly and before packing, in table order.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub steps: Vec<BuildStep>,
+}
+
+/// One `[[app.build.steps]]` entry.
+///
+/// `kind` is a registry with one entry today: `run` executes the `.rhai` script at `path`
+/// (project-root relative). The field exists so later kinds do not need a config break.
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+pub struct BuildStep {
+    pub kind: String,
+    pub path: String,
+    /// When the step runs: `pre` before the ArkTS compile, `post` after assembly and before
+    /// packing (the default). A step that generates source has to be `pre` — a file written
+    /// after the compile pass never reaches the package.
+    #[serde(default = "default_step_phase")]
+    pub phase: String,
+}
+
+fn default_step_phase() -> String {
+    "post".to_string()
+}
+
 /// One `[products.<name>]` table.
 ///
 /// The override set is deliberately narrow: `bundle` / `name` / `version` / `version_code` /
@@ -44,6 +71,51 @@ pub struct ProductConfig {
     pub resources: ProductResources,
 }
 
+/// What `icon` accepts: a resource reference or a file path, or a foreground/background pair
+/// for the layered icon HarmonyOS uses.
+///
+/// `app.json` can only hold `$media:` references, so a path or a pair is a build input, not a
+/// manifest value: the build copies the files into `resources/base/media` and points the
+/// manifest at the result.
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+#[serde(untagged)]
+pub enum IconInput {
+    /// `$media:name` or a project-relative image path.
+    Ref(String),
+    /// `{ foreground = "...", background = "..." }`.
+    Layered {
+        foreground: String,
+        background: String,
+    },
+}
+
+impl Default for IconInput {
+    fn default() -> Self {
+        IconInput::Ref(default_icon())
+    }
+}
+
+impl IconInput {
+    /// The manifest value: the reference itself, or the layered icon the pair becomes.
+    pub fn reference(&self) -> &str {
+        match self {
+            IconInput::Ref(value) => value,
+            IconInput::Layered { .. } => "$media:layered_image",
+        }
+    }
+
+    /// The pair when one was given, plus the value as written for a `Ref`.
+    pub fn as_layers(&self) -> Option<(&str, &str)> {
+        match self {
+            IconInput::Layered {
+                foreground,
+                background,
+            } => Some((foreground, background)),
+            IconInput::Ref(_) => None,
+        }
+    }
+}
+
 /// The artifact-level identity fields a product may override.
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
 pub struct ProductApp {
@@ -58,7 +130,7 @@ pub struct ProductApp {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub vendor: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub icon: Option<String>,
+    pub icon: Option<IconInput>,
 }
 
 /// `[products.<name>.resources]`: resource directories this product overlays.
@@ -134,8 +206,8 @@ pub struct AppFields {
     pub build_version: String,
     #[serde(default = "default_vendor")]
     pub vendor: String,
-    #[serde(default = "default_icon")]
-    pub icon: String,
+    #[serde(default)]
+    pub icon: IconInput,
     /// SDK installation path. None = auto-detect from env / global config.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sdk_path: Option<String>,
@@ -164,6 +236,9 @@ pub struct AppFields {
     /// Module member directories (relative to project root).
     #[serde(default)]
     pub members: Vec<String>,
+    /// `[app.build]`: build-time hooks. Written as `[[app.build.steps]]` in hvolt.toml.
+    #[serde(default)]
+    pub build: BuildFields,
     /// Signing configs per product (keyed by product name).
     /// Supports legacy format `[app.signing]` (maps to "default") and new `[app.signing.default]`.
     #[serde(default, deserialize_with = "deserialize_signing")]
@@ -483,12 +558,23 @@ pub struct Skill {
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
 pub struct AbilityConfig {
     pub name: String,
+    /// Keys of an ability table this struct does not model, carried into module.json under the
+    /// same snake_case -> camelCase rule (e.g. `background_modes` -> `backgroundModes`).
+    #[serde(flatten)]
+    pub extra: std::collections::BTreeMap<String, toml::Value>,
     /// Source entry file (e.g. "EntryFormAbility.ets").
     pub entry: String,
     /// Resource reference for the ability label (e.g. "$string:My_label").
     /// Empty = generated from the ability name.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub label: String,
+    /// Resource reference for this ability's icon (`$media:...`). Empty = the app icon, which
+    /// is what the manifest schema calls the default ("can be left blank by default").
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub icon: String,
+    /// Resource reference for the start-window icon. Empty = this ability's icon.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub start_window_icon: String,
     /// Resource reference for the ability description. Empty = generated.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub description: String,
@@ -667,6 +753,14 @@ pub struct RouterMapDef {
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct ModuleInfo {
     pub name: String,
+    /// Keys of `[module]` this struct does not model, carried through to module.json.
+    ///
+    /// The manifest schema has 45 module fields and grows with each SDK, so the ones hvolt has
+    /// no behaviour for are kept verbatim instead of being dropped on parse. `render` merges
+    /// them under the same snake_case -> camelCase rule the modelled fields follow, and a
+    /// modelled field always wins.
+    #[serde(flatten)]
+    pub extra: std::collections::BTreeMap<String, toml::Value>,
     /// Page routes for main_pages.json.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub routes: Vec<String>,
@@ -765,6 +859,27 @@ pub struct ModuleInfo {
     pub abi_filters: Vec<String>,
 }
 
+impl ModuleInfo {
+    /// Whether the module is a shared package (HSP).
+    ///
+    /// DevEco spells the type `shared`; older hvolt projects spell it `hsp`, and the oracle
+    /// layout emitter accepts both (`scripts/oracle/emit-layout.py`, `HSP_TYPES`). Either way
+    /// hvigor builds the module with `hspTasks` and packages a `.hsp`.
+    pub fn is_hsp(&self) -> bool {
+        matches!(self.module_type.as_str(), "shared" | "hsp")
+    }
+
+    /// The package entry as a shared package declares it: `./Index.ets` at the module root,
+    /// i.e. relative to `src/main/` rather than to the source root (`src/main/ets/`).
+    ///
+    /// The reference's shared layout keeps its sources at `src/main/<rel>` (the oracle's
+    /// `emit_shared`), so `module.json`'s `srcEntry` is `./<entry>` and `pkgContextInfo`'s
+    /// `entryPath` is `src/main/<entry>` — not the `./ets/<entry>` an entry module writes.
+    pub fn shared_entry_path(&self) -> String {
+        format!("src/main/{}", self.entry.trim_start_matches("./"))
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct UriScheme {
     pub scheme: String,
@@ -850,7 +965,7 @@ impl AppConfig {
                 version_code: 0,
                 build_version: String::new(),
                 vendor: default_vendor(),
-                icon: default_icon(),
+                icon: IconInput::default(),
                 sdk_path: None,
                 sdk_version: default_sdk_version(),
                 compile_sdk_version: default_sdk_version(),
@@ -861,6 +976,7 @@ impl AppConfig {
                 products: default_products(),
                 runtime_os: default_runtime_os(),
                 members: vec!["src".into()],
+                build: BuildFields::default(),
             },
             products: BTreeMap::new(),
             default_product: None,
@@ -1138,6 +1254,7 @@ impl ModuleConfig {
         ModuleConfig {
             dependencies: BTreeMap::new(),
             module: ModuleInfo {
+                extra: Default::default(),
                 router_map: Vec::new(),
                 main: None,
                 forms: Vec::new(),
@@ -1364,6 +1481,24 @@ mod combination_tests {
 #[cfg(test)]
 mod runtime_predicate_tests {
     use super::{device_types_for_runtime, is_open_harmony};
+
+    /// Both spellings of the shared-package type select the HSP build path, and a shared
+    /// package's entry is declared relative to `src/main/` (`./Index.ets`), not to the source
+    /// root an entry module uses (`./ets/Index.ets`).
+    #[test]
+    fn shared_type_is_recognized_in_both_spellings() {
+        let mut info = super::ModuleConfig::default_entry().module;
+        info.module_type = "shared".into();
+        info.entry = "Index.ets".into();
+        assert!(info.is_hsp());
+        assert_eq!(info.shared_entry_path(), "src/main/Index.ets");
+        info.module_type = "hsp".into();
+        assert!(info.is_hsp());
+        info.module_type = "har".into();
+        assert!(!info.is_hsp());
+        info.module_type = String::new();
+        assert!(!info.is_hsp());
+    }
 
     /// The comparison is case-insensitive, matching how DevEco writes the field.
     #[test]

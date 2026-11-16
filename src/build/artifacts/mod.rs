@@ -4,6 +4,7 @@ pub(crate) mod export_check;
 pub(crate) mod hap_pack;
 pub(crate) mod id_check;
 pub(crate) mod insight_intent;
+pub(crate) mod module_check;
 pub(crate) mod module_json;
 pub(crate) mod native_compile;
 pub(crate) mod pack_info;

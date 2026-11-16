@@ -38,6 +38,14 @@ pub struct RenderInput<'a> {
     /// `can't find name in config file` while still creating an empty node — measured on
     /// clashbox 2026-11-08, where the packaged `route_map.json` was present but unreferenced.
     pub has_route_map: bool,
+    /// The modules this package depends on, as `module.dependencies` writes them:
+    /// `[(moduleName, versionCode)]`.
+    ///
+    /// hvigor derives the list from the module's `oh-package.json5` HSP dependencies; a HAP
+    /// that consumes a shared package names it here (`.scratch/multi-module/truth/entry/module.json`:
+    /// `[{"moduleName":"shared","versionCode":1000000}]`), while the shared package itself
+    /// declares an empty array.
+    pub dependencies: &'a [(String, u32)],
 }
 
 /// Resolve `$string:name` / `$media:name` / `$color:name` / `$profile:name` to its
@@ -48,12 +56,36 @@ fn res_id(ids: &ResourceTable, reference: &str) -> Option<u32> {
     ids.get(&(kind.to_string(), name.to_string())).copied()
 }
 
+/// The `module.dependencies` a package declares: every shared package (HSP) this project
+/// builds, except the module itself.
+///
+/// hvigor derives the same list from the module's `oh-package.json5` dependencies and stamps
+/// the app's `versionCode` on each entry (hvigor drops the `bundleName` an `oh-package.json5`
+/// carries); the truth for this project is
+/// `.scratch/multi-module/truth/entry/module.json`:
+/// `"dependencies":[{"moduleName":"shared","versionCode":1000000}]`. A shared package's own
+/// list is empty (`.scratch/multi-module/truth/shared/module.json`: `"dependencies":[]`).
+pub fn module_dependencies(
+    project_dir: &std::path::Path,
+    app: &AppConfig,
+    module: &ModuleConfig,
+) -> Vec<(String, u32)> {
+    let Ok((modules, _native)) = crate::translator::discover_modules(project_dir, app) else {
+        return Vec::new();
+    };
+    modules
+        .iter()
+        .filter(|(_, cfg)| cfg.module.is_hsp() && cfg.module.name != module.module.name)
+        .map(|(_, cfg)| (cfg.module.name.clone(), app.app.version_code()))
+        .collect()
+}
+
 /// The `app.*` block.
 fn app_block(
     app: &AppConfig,
-    ids: &ResourceTable,
+    _ids: &ResourceTable,
     build_mode: &str,
-    compile_sdk_version: &str,
+    _compile_sdk_version: &str,
     api_release_type: &str,
 ) -> Value {
     let appf = &app.app;
@@ -63,23 +95,14 @@ fn app_block(
         "vendor": appf.vendor,
         "versionCode": appf.version_code(),
         "versionName": appf.version,
-        "icon": appf.icon,
+        "icon": appf.icon.reference(),
         "label": "$string:app_name",
-        "apiReleaseType": api_release_type,
-        "compileSdkVersion": compile_sdk_version,
+        "apiReleaseType": release_type_with_stage(api_release_type),
         "targetAPIVersion": appf.target_api_version(),
         "minAPIVersion": appf.min_api_version(),
-        "compileSdkType": appf.compile_sdk_type(),
-        "targetMinorAPIVersion": 0,
-        "targetPatchAPIVersion": 0,
-        "minMinorAPIVersion": 0,
-        "minPatchAPIVersion": 0,
         "appEnvironments": [],
         "bundleType": appf.bundle_type,
-        "buildMode": build_mode,
         "debug": debug,
-        "iconId": res_id(ids, &appf.icon),
-        "labelId": res_id(ids, "$string:app_name"),
     });
     // hvigor records a build version only when the project declares one; the key is absent
     // otherwise, and an explicit `null` still counts as a different document.
@@ -87,6 +110,54 @@ fn app_block(
         app_json["buildVersion"] = json!(appf.build_version);
     }
     app_json
+}
+
+/// `background_modes` -> `backgroundModes`, the rule every modelled field already follows.
+fn camel(key: &str) -> String {
+    let mut out = String::with_capacity(key.len());
+    let mut upper = false;
+    for ch in key.chars() {
+        if ch == '_' {
+            upper = true;
+            continue;
+        }
+        if upper {
+            out.extend(ch.to_uppercase());
+            upper = false;
+        } else {
+            out.push(ch);
+        }
+    }
+    out
+}
+
+/// Merge the `[module]` keys this crate does not model into the rendered manifest.
+///
+/// Modelled fields win: their value already went through hvolt's own derivation, and an extra
+/// key of the same name would otherwise silently replace it.
+fn merge_extra(module: &mut Value, extra: &std::collections::BTreeMap<String, toml::Value>) {
+    let Ok(Value::Object(table)) = serde_json::to_value(extra) else {
+        return;
+    };
+    for (key, value) in table {
+        let field = camel(&key);
+        if module.get(&field).is_none() {
+            module[&field] = value;
+        }
+    }
+}
+
+/// The app.json schema wants `Release1`/`Beta1`/`Canary1`; the SDK reports the bare stage
+/// name (`Release`), and the bare form fails the pattern.
+fn release_type_with_stage(release_type: &str) -> String {
+    let trimmed = release_type.trim();
+    if trimmed.is_empty() {
+        return "Release1".to_string();
+    }
+    if trimmed.chars().last().is_some_and(|c| c.is_ascii_digit()) {
+        return trimmed.to_string();
+    }
+    format!("{trimmed}1")
 }
 
 /// What one ability contributes to the manifest, already resolved from config.
@@ -99,10 +170,12 @@ struct AbilitySpec<'a> {
     start_window_icon: &'a str,
     start_window_background: &'a str,
     skills: &'a [Skill],
+    /// Ability-table keys with no modelled behaviour; merged verbatim into the block.
+    extra: &'a std::collections::BTreeMap<String, toml::Value>,
 }
 
 /// One ability entry: name, source path, resource references and their ids.
-fn ability_block(spec: &AbilitySpec<'_>, ids: &ResourceTable, runtime_os: &str) -> Value {
+fn ability_block(spec: &AbilitySpec<'_>, _ids: &ResourceTable, runtime_os: &str) -> Value {
     let mut out = json!({
         "name": spec.name,
         "srcEntry": spec.src_entry,
@@ -112,9 +185,9 @@ fn ability_block(spec: &AbilitySpec<'_>, ids: &ResourceTable, runtime_os: &str) 
         "startWindowBackground": spec.start_window_background,
         "exported": true,
     });
+    merge_extra(&mut out, spec.extra);
     if let Some(desc) = spec.description {
         out["description"] = json!(desc);
-        out["descriptionId"] = json!(res_id(ids, desc));
     }
     if spec.skills.is_empty() {
         // A HarmonyOS build declares the home skill under `action.system.home`; the
@@ -134,10 +207,6 @@ fn ability_block(spec: &AbilitySpec<'_>, ids: &ResourceTable, runtime_os: &str) 
     } else {
         out["skills"] = json!(spec.skills.iter().map(skill_block).collect::<Vec<_>>());
     }
-    out["iconId"] = json!(res_id(ids, spec.icon));
-    out["labelId"] = json!(res_id(ids, spec.label));
-    out["startWindowIconId"] = json!(res_id(ids, spec.start_window_icon));
-    out["startWindowBackgroundId"] = json!(res_id(ids, spec.start_window_background));
     out
 }
 
@@ -255,6 +324,7 @@ fn entry_ability(
             start_window_icon: start_icon,
             start_window_background: "$color:start_window_background",
             skills: &info.skills,
+            extra: &info.extra,
         },
         ids,
         runtime_os,
@@ -282,12 +352,25 @@ fn extra_abilities(
                 &AbilitySpec {
                     name: &a.name,
                     src_entry: ability_src_entry(&a.dir, &a.entry),
-                    icon: default_icon,
+                    icon: if a.icon.is_empty() {
+                        default_icon
+                    } else {
+                        &a.icon
+                    },
                     label,
                     description,
-                    start_window_icon: default_icon,
+                    start_window_icon: if a.start_window_icon.is_empty() {
+                        if a.icon.is_empty() {
+                            default_icon
+                        } else {
+                            &a.icon
+                        }
+                    } else {
+                        &a.start_window_icon
+                    },
                     start_window_background: "$color:start_window_background",
                     skills: &a.skills,
+                    extra: &a.extra,
                 },
                 ids,
                 runtime_os,
@@ -365,7 +448,20 @@ pub fn render(input: &RenderInput<'_>) -> Value {
     let appf = &input.app.app;
     let info = &input.module.module;
     let runtime_os = &appf.runtime_os;
-    let mut abilities = vec![entry_ability(info, &appf.icon, input.ids, runtime_os)];
+    // `module.dependencies`: the packages this module links against. hvigor fills it from the
+    // module's `oh-package.json5` dependencies (`.scratch/multi-module/truth/entry/module.json`),
+    // and a shared package declares the empty array.
+    let dependencies: Vec<Value> = input
+        .dependencies
+        .iter()
+        .map(|(name, version_code)| json!({ "moduleName": name, "versionCode": version_code }))
+        .collect();
+    let mut abilities = vec![entry_ability(
+        info,
+        appf.icon.reference(),
+        input.ids,
+        runtime_os,
+    )];
     abilities.extend(extra_abilities(
         &info.abilities,
         info,
@@ -380,33 +476,53 @@ pub fn render(input: &RenderInput<'_>) -> Value {
         .file_stem()
         .and_then(|s| s.to_str())
         .unwrap_or(&info.entry);
-    let mut module = json!({
-        "name": info.name,
-        "type": if info.module_type.is_empty() { "entry" } else { &info.module_type },
-        "mainElement": main_element,
-        "pages": "$profile:main_pages",
-        "deviceTypes": info.device_types,
-        "deliveryWithInstall": info.delivery_with_install.unwrap_or(true),
-        "installationFree": info.installation_free.unwrap_or(false),
-        "abilities": abilities,
-        "packageName": info.name,
-        "virtualMachine": input.virtual_machine,
-        "compileMode": "esmodule",
-        "dependencies": Vec::<Value>::new(),
-    });
+    // A shared package is a library module: it has no ability, no page table and no main
+    // element, and its entry is `src/main/<entry>` spelled `./<entry>`
+    // (`.scratch/multi-module/truth/shared/module.json`).
+    let mut module = if info.is_hsp() {
+        json!({
+            "name": info.name,
+            "type": info.module_type,
+            "srcEntry": format!("./{}", info.entry.trim_start_matches("./")),
+            "deviceTypes": info.device_types,
+            "deliveryWithInstall": info.delivery_with_install.unwrap_or(true),
+            "installationFree": info.installation_free.unwrap_or(false),
+            "dependencies": dependencies,
+        })
+    } else {
+        json!({
+            "name": info.name,
+            "type": if info.module_type.is_empty() { "entry" } else { &info.module_type },
+            "mainElement": main_element,
+            "pages": "$profile:main_pages",
+            "deviceTypes": info.device_types,
+            "deliveryWithInstall": info.delivery_with_install.unwrap_or(true),
+            "installationFree": info.installation_free.unwrap_or(false),
+            "abilities": abilities,
+            "dependencies": dependencies,
+        })
+    };
+    // The schema accepts "ark" or "default"; an empty value means the SDK has no bytecode
+    // version for this API level, and writing "" fails the manifest check.
+    if !input.virtual_machine.is_empty() {
+        module["virtualMachine"] = json!(input.virtual_machine);
+    }
+    merge_extra(&mut module, &info.extra);
     if input.has_insight_intent {
         module["hasInsightIntent"] = json!(true);
     }
-    if input.has_route_map {
+    if input.has_route_map && !info.is_hsp() {
         // The installer loads a route table only through this reference; the packaged
         // `route_map.json` alone is inert (`ImportConfigFromURL`/`ImportConfigFromFile` both
         // resolve through it).
         module["routerMap"] = json!("$profile:route_map");
     }
-    if let Some(src) = &info.src_entry {
-        // The device loads this file as the application entry point; without it the runtime
-        // derives an entry from the main ability and never finds it.
-        module["srcEntry"] = json!(ability_src_entry("", src));
+    if !info.is_hsp() {
+        if let Some(src) = &info.src_entry {
+            // The device loads this file as the application entry point; without it the runtime
+            // derives an entry from the main ability and never finds it.
+            module["srcEntry"] = json!(ability_src_entry("", src));
+        }
     }
     if !extensions.is_empty() {
         module["extensionAbilities"] = json!(extensions);
@@ -432,9 +548,6 @@ pub fn render(input: &RenderInput<'_>) -> Value {
         module["requestPermissions"] = json!(permissions);
     }
     module["description"] = json!("$string:module_desc");
-    if let Some(desc_id) = res_id(input.ids, "$string:module_desc") {
-        module["descriptionId"] = json!(desc_id);
-    }
     json!({
         "app": app_block(
             input.app,
@@ -471,6 +584,7 @@ color start_window_background 0x01000008
         // ModuleInfo has no Default derive; build the one field set asr uses.
         let module = ModuleConfig {
             module: ModuleInfo {
+                extra: Default::default(),
                 router_map: Vec::new(),
                 main: None,
                 forms: Vec::new(),
@@ -532,12 +646,66 @@ color start_window_background 0x01000008
             build_mode: "release",
             compile_sdk_version: "26.0.0.23",
             api_release_type: "Beta1",
+            dependencies: &[],
         });
-        assert_eq!(out["app"]["labelId"], 0x01000000);
-        assert_eq!(out["module"]["descriptionId"], 0x01000004);
+        // The schema has no id-suffixed mirrors: references stay `$string:`/`$media:`.
         let ability = &out["module"]["abilities"][0];
-        assert_eq!(ability["descriptionId"], 0x01000005);
-        assert_eq!(ability["labelId"], 0x01000006);
+        assert_eq!(ability["label"], "$string:EntryAbility_label");
+        assert_eq!(out["module"].get("descriptionId"), None);
+    }
+
+    /// A key with no modelled behaviour reaches the manifest under the camelCase name the
+    /// schema uses (`background_modes` -> `backgroundModes`).
+    #[test]
+    fn unmodelled_keys_are_carried_through_as_camel_case() {
+        let ids = ids();
+        let mut extra = std::collections::BTreeMap::new();
+        extra.insert(
+            "background_modes".to_string(),
+            toml::Value::Array(vec![toml::Value::String("dataTransfer".to_string())]),
+        );
+        let ability = AbilitySpec {
+            name: "EntryAbility",
+            src_entry: "./ets/entryability/EntryAbility.ets".to_string(),
+            icon: "$media:layered_image",
+            label: "$string:EntryAbility_label",
+            description: None,
+            start_window_icon: "$media:startIcon",
+            start_window_background: "$color:start_window_background",
+            skills: &[],
+            extra: &extra,
+        };
+        let out = ability_block(&ability, &ids, "openharmony");
+        assert_eq!(
+            out["backgroundModes"],
+            serde_json::json!(["dataTransfer"]),
+            "the extra key must land under its camelCase name"
+        );
+    }
+
+    /// A modelled field wins over an extra of the same name: its value already carries
+    /// hvolt's own derivation.
+    #[test]
+    fn a_modelled_field_is_not_overwritten_by_an_extra() {
+        let ids = ids();
+        let mut extra = std::collections::BTreeMap::new();
+        extra.insert(
+            "name".to_string(),
+            toml::Value::String("hijack".to_string()),
+        );
+        let ability = AbilitySpec {
+            name: "EntryAbility",
+            src_entry: "./ets/entryability/EntryAbility.ets".to_string(),
+            icon: "$media:layered_image",
+            label: "$string:EntryAbility_label",
+            description: None,
+            start_window_icon: "$media:startIcon",
+            start_window_background: "$color:start_window_background",
+            skills: &[],
+            extra: &extra,
+        };
+        let out = ability_block(&ability, &ids, "openharmony");
+        assert_eq!(out["name"], "EntryAbility");
     }
 
     /// The srcEntry spells the module source root the device resolves against, not the
@@ -556,9 +724,67 @@ color start_window_background 0x01000008
             build_mode: "release",
             compile_sdk_version: "26.0.0.23",
             api_release_type: "Beta1",
+            dependencies: &[],
         });
         let ability = &out["module"]["abilities"][0];
         assert_eq!(ability["srcEntry"], "./ets/EntryAbility.ets");
         assert_eq!(out["module"]["mainElement"], "EntryAbility");
+    }
+
+    /// A shared package's manifest is a library manifest: `type: shared`, `srcEntry` relative
+    /// to `src/main/`, no ability, no page table, and the dependencies list the HAP declares
+    /// is absent from it (`truth/shared/module.json`).
+    #[test]
+    fn a_shared_package_has_no_ability_and_a_src_main_entry() {
+        let (app, mut module) = input();
+        module.module.name = "shared".into();
+        module.module.module_type = "shared".into();
+        module.module.entry = "Index.ets".into();
+        module.module.routes = Vec::new();
+        let ids = ids();
+        let out = render(&RenderInput {
+            has_insight_intent: false,
+            has_route_map: false,
+            virtual_machine: "",
+            app: &app,
+            module: &module,
+            ids: &ids,
+            build_mode: "debug",
+            compile_sdk_version: "26.0.0.23",
+            api_release_type: "Beta1",
+            dependencies: &[],
+        });
+        let body = &out["module"];
+        assert_eq!(body["type"], "shared");
+        assert_eq!(body["srcEntry"], "./Index.ets");
+        assert!(body.get("abilities").is_none(), "{body}");
+        assert!(body.get("mainElement").is_none(), "{body}");
+        assert!(body.get("pages").is_none(), "{body}");
+        assert_eq!(body["dependencies"], json!([]));
+    }
+
+    /// The HAP-side dependency declaration is the shape the reference packages
+    /// (`truth/entry/module.json`: `[{"moduleName":"shared","versionCode":1000000}]`).
+    #[test]
+    fn dependencies_are_module_name_and_version_code() {
+        let (app, module) = input();
+        let ids = ids();
+        let deps = [("shared".to_string(), 1_000_000u32)];
+        let out = render(&RenderInput {
+            has_insight_intent: false,
+            has_route_map: false,
+            virtual_machine: "",
+            app: &app,
+            module: &module,
+            ids: &ids,
+            build_mode: "debug",
+            compile_sdk_version: "26.0.0.23",
+            api_release_type: "Beta1",
+            dependencies: &deps,
+        });
+        assert_eq!(
+            out["module"]["dependencies"],
+            json!([{ "moduleName": "shared", "versionCode": 1_000_000 }])
+        );
     }
 }

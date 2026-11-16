@@ -56,12 +56,10 @@ pub fn run_with(
     // Values the package carries come from the SDK and the build mode, never from literals.
     let sdk_env = crate::sdk::manage::detect("")?;
     let sdk_root = sdk_env.ohos_sdk.clone();
-    let node_binary = crate::sdk::manage::node_bin(&sdk_env.node_home);
     let compatible_api =
         crate::build::deps::sdk_facts::compatible_api(&app.app.compatible_sdk_version)
             .unwrap_or_default();
-    let facts =
-        crate::build::deps::sdk_facts::SdkFacts::detect(&sdk_root, &node_binary, compatible_api)?;
+    let facts = crate::build::deps::sdk_facts::SdkFacts::detect(&sdk_root, compatible_api)?;
     let build_mode = "debug";
 
     let res_dir = out_dir.join("res");
@@ -84,14 +82,29 @@ pub fn run_with(
     let final_module = out_dir.join("module.json");
     std::fs::copy(&restool_module, &final_module).map_err(|e| format!("copy module.json: {e}"))?;
 
-    // 3) rpcid.sc: encoded in-tree from the SDK device-define intersection
-    let syscap_path = crate::build::artifacts::syscap::generate(
-        &sdk_root,
-        out_dir,
-        app.app.target_api_version(),
-        &module_cfg.module.device_types,
-    )?;
-    println!("  rpcid.sc            {}", syscap_path.display());
+    // 3) rpcid.sc: encoded in-tree from the SDK device-define intersection.
+    //
+    // Two rules stack here, and the runtime target outranks the topology:
+    //   * OpenHarmony always carries `rpcid.sc` in the entry package — that is what the device
+    //     side reads for syscap, and a build without it shipped an entry HAP the SysCap check
+    //     could not match (measured on a multi-package OpenHarmony project, 2026-11-09).
+    //   * HarmonyOS follows the reference: the single-package baseline carries it (pinned by
+    //     `.scratch/multi-module/baseline/hello-world-before.txt`), a multi-package build does
+    //     not (`.scratch/multi-module/truth/{entry,shared}/contents.txt`).
+    // Shared packages never carry one: it is entry-package content.
+    let multi_package = modules.iter().any(|(_, cfg)| cfg.module.is_hsp());
+    let entry_package = module_cfg.module.module_type.is_empty();
+    let wants_rpcid = entry_package
+        && (!multi_package || crate::support::config::is_open_harmony(&app.app.runtime_os));
+    if wants_rpcid {
+        let syscap_path = crate::build::artifacts::syscap::generate(
+            &sdk_root,
+            out_dir,
+            app.app.target_api_version(),
+            &module_cfg.module.device_types,
+        )?;
+        println!("  rpcid.sc            {}", syscap_path.display());
+    }
 
     // 4) lift resources.index and resources/ to the hvolt-out root
     //    (restool writes them under res/; the package layout wants
@@ -107,6 +120,10 @@ pub fn run_with(
     copy_dir_flat(&res_dir.join("resources"), &lifted_res)?;
 
     // 5) pack.info from the same manifest + table
+    // `module.dependencies`: the shared packages this module links against (empty for a shared
+    // package itself). The same list lands in `module.json` through `res_compile`.
+    let dependencies =
+        crate::build::artifacts::module_json::module_dependencies(project, app, module_cfg);
     let pack_info = crate::build::artifacts::pack_info::render(
         &crate::build::artifacts::pack_info::PackInput {
             // The package carries the module's declared name, not its source directory.
@@ -129,6 +146,7 @@ pub fn run_with(
             .map(|entries| !entries.is_empty())
             .unwrap_or(false),
             ids: &ids,
+            dependencies: &dependencies,
         },
     );
     let pack_path = out_dir.join("pack.info");
@@ -141,18 +159,52 @@ pub fn run_with(
     // 6) pkgContextInfo.json from declared native dependencies. Keyed by the module's
     // logical name: the runtime looks the module up by that name and reports an empty
     // PkgContextInfo when the key is the source directory instead.
-    let ets_deps: Vec<(String, String)> = modules
+    //
+    // A shared package (HSP) is the one dependency kind that records its `moduleName`: the
+    // truth entry is `{"moduleName":"shared","packageName":"shared","entryPath":"src/main/Index.ets","version":""}`
+    // (`.scratch/multi-module/truth/entry/pkgContextInfo.json`). Every other ETS member keeps
+    // the old `Index.ets` package-entry form.
+    let ets_deps: Vec<crate::build::artifacts::pkg_context::EtsDep> = modules
         .iter()
         .filter(|(dir, _)| dir != module_arg)
-        // Package-entry path as the device composes it: `Index.ets`-style, not the toml entry.
-        .map(|(_dir, cfg)| (cfg.module.name.clone(), "Index.ets".to_string()))
+        // A shared package links no sibling module: its package context names itself only
+        // (`.scratch/multi-module/truth/shared/pkgContextInfo.json`). A HAP names the shared
+        // packages it consumes, plus the ETS members it compiles into its own abc.
+        .filter(|(_, cfg)| !module_cfg.module.is_hsp() || cfg.module.is_hsp())
+        .map(|(_dir, cfg)| {
+            if cfg.module.is_hsp() {
+                crate::build::artifacts::pkg_context::EtsDep {
+                    package_name: cfg.module.name.clone(),
+                    module_name: cfg.module.name.clone(),
+                    entry_path: cfg.module.shared_entry_path(),
+                    version: String::new(),
+                }
+            } else {
+                crate::build::artifacts::pkg_context::EtsDep {
+                    package_name: cfg.module.name.clone(),
+                    module_name: String::new(),
+                    // Package-entry path as the device composes it: `Index.ets`-style, not the
+                    // toml entry.
+                    entry_path: "Index.ets".to_string(),
+                    version: "1.0.0".to_string(),
+                }
+            }
+        })
         .collect();
+    // A shared package's own entry carries an empty `entryPath`
+    // (`.scratch/multi-module/truth/shared/pkgContextInfo.json`); an entry module's names its
+    // source root (`src/main/`).
+    let own_entry_path = if module_cfg.module.is_hsp() {
+        ""
+    } else {
+        "src/main/"
+    };
     let pkg_context = crate::build::artifacts::pkg_context::render(
         &crate::build::artifacts::pkg_context::PkgContextInput {
             module_name: &logical_name,
             project_dir: project,
             native_deps: &native,
-            module_version: "1.0.0",
+            own_entry_path,
             ets_deps: &ets_deps,
             packages: &packages,
             app,

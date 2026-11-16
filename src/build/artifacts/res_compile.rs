@@ -334,6 +334,91 @@ fn merge_element_table(from: &Path, to: &Path) -> Result<(), String> {
 
 /// Stage the resource tree restool compiles: the project's `resources/` plus a
 /// generated `profile/main_pages.json` (the reference injects it the same way).
+/// Materialise a `{ foreground, background }` icon into the staged media directory.
+///
+/// The pair is a build input: `app.json` can only name a resource, so the files are copied in
+/// under fixed names and `layered_image.json` is written to reference them. A project that
+/// ships its own `layered_image.json` keeps it — only a pair from the toml generates one.
+fn generate_layered_icon(
+    stage: &Path,
+    project_dir: &Path,
+    foreground: &str,
+    background: &str,
+) -> Result<(), String> {
+    let media = stage.join("base").join("media");
+    std::fs::create_dir_all(&media).map_err(|e| format!("mkdir {}: {e}", media.display()))?;
+    for (source, stem) in [
+        (foreground, "icon_foreground"),
+        (background, "icon_background"),
+    ] {
+        let path = project_dir.join(source);
+        let ext = path
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("png")
+            .to_string();
+        let dest = media.join(format!("{stem}.{ext}"));
+        std::fs::copy(&path, &dest)
+            .map_err(|e| format!("copy icon {} -> {}: {e}", path.display(), dest.display()))?;
+    }
+    let manifest = serde_json::json!({
+        "layered-image": {
+            "background": "$media:icon_background",
+            "foreground": "$media:icon_foreground"
+        }
+    });
+    let path = media.join("layered_image.json");
+    std::fs::write(
+        &path,
+        serde_json::to_string_pretty(&manifest).map_err(|e| e.to_string())?,
+    )
+    .map_err(|e| format!("write {}: {e}", path.display()))?;
+    Ok(())
+}
+
+/// Write the `hvolt.toml` application name into the staged `string.json` as `app_name`.
+///
+/// `app.json` can only point `label` at a string resource, so the manifest alone cannot carry a
+/// literal. Doing it here keeps the toml the single place a project names itself: the entry is
+/// replaced when present and appended when not, and a product overlay still runs afterwards.
+fn inject_app_name(stage: &Path, name: &str) -> Result<(), String> {
+    if name.is_empty() {
+        return Ok(());
+    }
+    let dir = stage.join("base").join("element");
+    let path = dir.join("string.json");
+    let mut doc: serde_json::Value = if path.is_file() {
+        let text =
+            std::fs::read_to_string(&path).map_err(|e| format!("read {}: {e}", path.display()))?;
+        serde_json::from_str(&text).map_err(|e| format!("parse {}: {e}", path.display()))?
+    } else {
+        std::fs::create_dir_all(&dir).map_err(|e| format!("mkdir {}: {e}", dir.display()))?;
+        serde_json::json!({ "string": [] })
+    };
+    let Some(list) = doc.get_mut("string").and_then(|v| v.as_array_mut()) else {
+        return Err(format!(
+            "{} has no \"string\" array to write app_name into",
+            path.display()
+        ));
+    };
+    let mut replaced = false;
+    for entry in list.iter_mut() {
+        if entry.get("name").and_then(|v| v.as_str()) == Some("app_name") {
+            entry["value"] = serde_json::json!(name);
+            replaced = true;
+        }
+    }
+    if !replaced {
+        list.push(serde_json::json!({ "name": "app_name", "value": name }));
+    }
+    std::fs::write(
+        &path,
+        serde_json::to_string_pretty(&doc).map_err(|e| e.to_string())?,
+    )
+    .map_err(|e| format!("write {}: {e}", path.display()))?;
+    Ok(())
+}
+
 pub(crate) fn stage_resources(input: &ResCompileInput<'_>, stage: &Path) -> Result<(), String> {
     // Two layouts are valid: a migrated project keeps resources beside its module
     // (`entry/resources/`), a scaffolded one keeps them at the project root
@@ -352,6 +437,12 @@ pub(crate) fn stage_resources(input: &ResCompileInput<'_>, stage: &Path) -> Resu
         ));
     }
     copy_dir_recursive(&project_res, stage)?;
+    // The application name is a string resource (`app.json` label must be `$string:...`), so the
+    // toml value is written into the staged table instead of the project declaring it twice.
+    inject_app_name(stage, &input.app.app.name)?;
+    if let Some((foreground, background)) = input.app.app.icon.as_layers() {
+        generate_layered_icon(stage, input.project_dir, foreground, background)?;
+    }
     // The selected product's directories are overlaid before the app scope is split out: an
     // icon or label a product redefines has to land in the same tree the split reads.
     overlay_product_resources(input, stage)?;
@@ -364,7 +455,35 @@ pub(crate) fn stage_resources(input: &ResCompileInput<'_>, stage: &Path) -> Resu
         std::fs::remove_dir_all(&app_stage)
             .map_err(|e| format!("clean {}: {e}", app_stage.display()))?;
     }
-    split_app_resources(input.app, stage, &app_stage)?;
+    if has_separate_app_scope(input) {
+        split_app_resources(input.app, stage, &app_stage)?;
+    }
+    // A multi-module project keeps the app scope in the project tree and gives every member
+    // its own `resources/` (`project/resources` + `project/entry/resources` +
+    // `project/shared/resources`). The app scope is then a *separate* tree, and every package
+    // carries it: both reference packages ship the icon's three files
+    // (`.scratch/multi-module/truth/{entry,shared}/contents.txt`:
+    // `resources/base/media/{layered_image.json,background.png,foreground.png}`), while only
+    // the entry module's own media (`startIcon.png`) stays entry-only.
+    //
+    // Only the app-level subset of that tree moves: the icon and its composed media, plus
+    // `app_name`. The rest belongs to no module and is not package content — notably the root
+    // tree's `startIcon.png`, which the shared package must not carry.
+    let module_res = input.module_dir.join("resources");
+    let root_res = input.project_dir.join("resources");
+    if module_res.is_dir() && root_res.is_dir() {
+        let module_res = module_res.canonicalize().unwrap_or(module_res);
+        let root_res = root_res.canonicalize().unwrap_or(root_res);
+        if module_res != root_res {
+            let root_stage = stage.with_file_name("appsrc-stage");
+            if root_stage.exists() {
+                std::fs::remove_dir_all(&root_stage)
+                    .map_err(|e| format!("clean {}: {e}", root_stage.display()))?;
+            }
+            copy_dir_recursive(&root_res, &root_stage)?;
+            split_app_resources(input.app, &root_stage, &app_stage)?;
+        }
+    }
     // The project may keep an app-scope tree of its own (`app-resources/`). restool numbers
     // the app scope before the module, so every media file in it has to reach `app-stage`;
     // leaving them in the module tree shifts every later id by their count (measured
@@ -407,9 +526,15 @@ pub(crate) fn stage_resources(input: &ResCompileInput<'_>, stage: &Path) -> Resu
     let profile_dir = stage.join("base").join("profile");
     std::fs::create_dir_all(&profile_dir)
         .map_err(|e| format!("mkdir {}: {e}", profile_dir.display()))?;
-    let main_pages = crate::translator::generate_main_pages(input.module);
-    std::fs::write(profile_dir.join("main_pages.json"), main_pages)
-        .map_err(|e| format!("write main_pages.json: {e}"))?;
+    // A shared package (HSP) carries code and resources only: the reference's shared package has
+    // no page table (`.scratch/multi-module/truth/shared/contents.txt`), while the entry
+    // package's has one (`truth/entry/contents.txt`:
+    // `resources/base/profile/main_pages.json`). Only an entry/feature module gets the profile.
+    if !input.module.module.is_hsp() {
+        let main_pages = crate::translator::generate_main_pages(input.module);
+        std::fs::write(profile_dir.join("main_pages.json"), main_pages)
+            .map_err(|e| format!("write main_pages.json: {e}"))?;
+    }
     write_route_map(
         stage,
         input.module_dir,
@@ -430,7 +555,7 @@ fn split_app_resources(
     module_stage: &Path,
     app_stage: &Path,
 ) -> Result<(), String> {
-    let icon = &app.app.icon;
+    let icon = app.app.icon.reference();
     let media_name = icon
         .split(':')
         .next_back()
@@ -588,6 +713,7 @@ fn write_res_config(
     let deps = discover_dependencies(
         input.project_dir,
         &input.module.module.name,
+        input.module.module.is_hsp(),
         &declared,
         &package_roots,
     );
@@ -786,6 +912,7 @@ fn local_module_names(project_dir: &Path, own_module: &str) -> Vec<String> {
 fn discover_dependencies(
     project_dir: &Path,
     own_module: &str,
+    own_is_hsp: bool,
     declared: &[String],
     package_roots: &[(String, PathBuf)],
 ) -> Vec<(String, PathBuf)> {
@@ -808,7 +935,13 @@ fn discover_dependencies(
     // a directory left behind): still a dependency's resources, so still in `dependencies`.
     push_deps_packages(&mut out, project_dir);
     for root in roots {
-        scan_module_dirs(root, project_dir, own_module, &mut out);
+        // A shared package compiles only its own resources and the app scope: the reference
+        // `resources.index` of the shared package names `shared/resources/…` only
+        // (`.scratch/multi-module/truth/shared/resources.index`), never a sibling module's.
+        // Its siblings are packages of their own, not dependencies it links against.
+        if !own_is_hsp {
+            scan_module_dirs(root, project_dir, own_module, &mut out);
+        }
         push_packages(&mut out, root.join("oh_modules").join(".ohpm"));
         push_packages(&mut out, root.join("oh_modules"));
     }
@@ -852,6 +985,13 @@ fn discover_dependencies(
     out
 }
 
+/// Whether a sibling module directory declares itself a shared package (HSP).
+fn is_shared_package_dir(dir: &Path) -> bool {
+    crate::support::config::ModuleConfig::from_file(&dir.join("hvolt.toml"))
+        .map(|cfg| cfg.module.is_hsp())
+        .unwrap_or(false)
+}
+
 /// Module directories beside the entry module (`xb_components`, `proxy_core`, …).
 fn scan_module_dirs(
     root: &Path,
@@ -883,6 +1023,11 @@ fn scan_module_dirs(
             continue;
         }
         if dir.canonicalize().unwrap_or_else(|_| dir.clone()) == project_dir {
+            continue;
+        }
+        // A shared module is its own package: its resources are compiled into its own
+        // `resources.index` and must not appear in a sibling's table.
+        if is_shared_package_dir(&dir) {
             continue;
         }
         let res = if dir.join("resources").is_dir() {
@@ -1288,7 +1433,24 @@ fn write_index_in_tree(
 
     // `resources/` is package content: rawfile and profile files plus the media the media
     // records name. restool writes it; here it is copied from the staged tree.
-    copy_staged_content(stage, &input.out_dir.join("resources"))?;
+    //
+    // The app scope is package content too when it is a tree of its own: the reference ships
+    // the icon's three files in both the entry and the shared package
+    // (`.scratch/multi-module/truth/*/contents.txt`). In the flat single-module layout the
+    // project's `resources/` *is* the module tree and `app-stage` only carries what restool
+    // compiles into the index; packing it there would add media the package never had
+    // (`.scratch/multi-module/baseline/hello-world-before.txt`).
+    let packaged = input.out_dir.join("resources");
+    // Rebuilt from the staged trees on every run: the packaged `resources/` is what the packer
+    // archives, so a file an earlier build put there must not survive into this one.
+    if packaged.exists() {
+        std::fs::remove_dir_all(&packaged)
+            .map_err(|e| format!("clean {}: {e}", packaged.display()))?;
+    }
+    if has_separate_app_scope(input) && stage.with_file_name("app-stage").is_dir() {
+        copy_staged_content(&stage.with_file_name("app-stage"), &packaged)?;
+    }
+    copy_staged_content(stage, &packaged)?;
     Ok(table)
 }
 
@@ -1331,8 +1493,63 @@ fn read_preset(out_dir: &Path) -> Result<std::collections::BTreeSet<(u32, String
     Ok(out)
 }
 
+/// Whether the project keeps an app-scope resource tree separate from every module.
+///
+/// A multi-module layout has `<project>/resources` beside `<module>/resources` for each member
+/// (`.scratch/multi-module/project`), so the app scope is its own tree and every package ships
+/// it. A flat single-module layout keeps everything in `<project>/resources` and the module has
+/// none (`examples/hello-world`), so the project tree *is* the module tree.
+fn has_separate_app_scope(input: &ResCompileInput<'_>) -> bool {
+    let root_res = input.project_dir.join("resources");
+    if !root_res.is_dir() {
+        return false;
+    }
+    let module_res = input.module_dir.join("resources");
+    if module_res.is_dir() {
+        return module_res.canonicalize().unwrap_or(module_res)
+            != root_res.canonicalize().unwrap_or(root_res);
+    }
+    // The entry module keeps no tree of its own, so the root tree is the app scope only when
+    // another module declares resources of its own (`<project>/resources` beside
+    // `<shared>/resources`, which is the emustack layout). A flat single-module project keeps
+    // everything in the root and the project tree *is* the module tree
+    // (`examples/hello-world`); packing the app scope there adds media the package never had
+    // (`.scratch/multi-module/baseline/hello-world-before.txt`).
+    sibling_module_has_resources(input.project_dir, input.module_dir)
+}
+
+/// Whether any module other than the one being assembled declares its own `resources/`.
+fn sibling_module_has_resources(project_dir: &Path, module_dir: &Path) -> bool {
+    let module_canon = module_dir
+        .canonicalize()
+        .unwrap_or_else(|_| module_dir.to_path_buf());
+    let Ok(entries) = std::fs::read_dir(project_dir) else {
+        return false;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if !path.is_dir() {
+            continue;
+        }
+        if path.canonicalize().unwrap_or_else(|_| path.clone()) == module_canon {
+            continue;
+        }
+        if path.join("hvolt.toml").is_file() && path.join("resources").is_dir() {
+            return true;
+        }
+    }
+    false
+}
+
 /// Copy the media and profile files of every qualified tree into the packaged `resources/`.
 fn copy_staged_content(stage: &Path, target: &Path) -> Result<(), String> {
+    // `rawfile` carries no qualifier: the stage keeps it at the root, beside the qualifier
+    // trees (`res-stage/rawfile/xterm/…`). Without this the packaged resources lose every
+    // rawfile the project ships (measured on the emustack HAP/HSP, 2026-11-09).
+    let root_rawfile = stage.join("rawfile");
+    if root_rawfile.is_dir() {
+        copy_dir_recursive(&root_rawfile, &target.join("rawfile"))?;
+    }
     let Ok(entries) = std::fs::read_dir(stage) else {
         return Ok(());
     };
@@ -1380,6 +1597,10 @@ pub(crate) fn run(
     // module.json is the config restool validates resource refs against. Empty
     // ResourceTable: restool fills the real ids into its own output copy.
     let ids = crate::build::compile::ets_resources::parse_table("");
+    // `module.dependencies` is part of the packaged manifest, so the restool-stage document
+    // already carries it (hvigor derives it from the module's package dependencies).
+    let dependencies =
+        crate::build::artifacts::module_json::module_dependencies(project_dir, app, module);
     let manifest = crate::build::artifacts::module_json::render(
         &crate::build::artifacts::module_json::RenderInput {
             app,
@@ -1404,6 +1625,7 @@ pub(crate) fn run(
             )
             .map_err(|error| format!("module.json: {error}"))?
             .is_empty(),
+            dependencies: &dependencies,
         },
     );
     let module_json_path = out_dir.join("module.json");
@@ -1454,6 +1676,7 @@ pub(crate) fn run(
             )
             .map_err(|error| format!("module.json: {error}"))?
             .is_empty(),
+            dependencies: &dependencies,
         },
     );
     std::fs::write(
@@ -1461,6 +1684,30 @@ pub(crate) fn run(
         serde_json::to_string_pretty(&manifest).map_err(|e| e.to_string())?,
     )
     .map_err(|e| format!("write module.json with ids: {e}"))?;
+
+    // Check the final manifest against the schema the SDK itself validates with. This is the
+    // shape that ships, so a package the system would refuse fails the build here instead.
+    if let Some(root) = crate::sdk::manage::sdk_root() {
+        let runtime_os = &input.app.app.runtime_os;
+        // Each schema describes one document, so hand it the document it describes rather
+        // than the combined value this stage writes.
+        if let Some(module) = manifest.get("module") {
+            crate::build::artifacts::module_check::check(
+                &root,
+                runtime_os,
+                "module.json",
+                &serde_json::json!({ "module": module }),
+            )?;
+        }
+        if let Some(app) = manifest.get("app") {
+            crate::build::artifacts::module_check::check(
+                &root,
+                runtime_os,
+                "app.json",
+                &serde_json::json!({ "app": app }),
+            )?;
+        }
+    }
 
     // 3) the intent manifest is package content, not a resource: writing it into the restool
     //    input would add a `profile insight_intent` entry the reference package does not have.
@@ -1488,11 +1735,50 @@ mod tests {
     };
     use crate::support::config::{Dependency, ModuleConfig, ModuleInfo, ResolvedProduct};
 
+    /// A foreground/background pair in the toml becomes the layered icon the manifest names.
+    #[test]
+    fn a_layered_pair_generates_the_icon_set() {
+        let root = std::env::temp_dir().join(format!("hvolt-icon-{}", std::process::id()));
+        let assets = root.join("assets");
+        let stage = root.join("stage");
+        std::fs::create_dir_all(&assets).unwrap();
+        std::fs::create_dir_all(&stage).unwrap();
+        std::fs::write(assets.join("fg.png"), b"fg").unwrap();
+        std::fs::write(assets.join("bg.png"), b"bg").unwrap();
+        super::generate_layered_icon(&stage, &root, "assets/fg.png", "assets/bg.png").unwrap();
+        let media = stage.join("base").join("media");
+        assert!(media.join("icon_foreground.png").is_file());
+        assert!(media.join("icon_background.png").is_file());
+        let text = std::fs::read_to_string(media.join("layered_image.json")).unwrap();
+        assert!(text.contains("$media:icon_foreground"), "{text}");
+        assert!(text.contains("$media:icon_background"), "{text}");
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// The application name comes from `hvolt.toml`, not from a copy in string.json.
+    #[test]
+    fn the_toml_name_replaces_the_staged_app_name() {
+        let root = std::env::temp_dir().join(format!("hvolt-appname-{}", std::process::id()));
+        let element = root.join("base").join("element");
+        std::fs::create_dir_all(&element).unwrap();
+        std::fs::write(
+            element.join("string.json"),
+            r#"{"string":[{"name":"app_name","value":"old"},{"name":"other","value":"keep"}]}"#,
+        )
+        .unwrap();
+        super::inject_app_name(&root, "New Name").unwrap();
+        let text = std::fs::read_to_string(element.join("string.json")).unwrap();
+        assert!(text.contains("New Name"), "{text}");
+        assert!(text.contains("keep"), "unrelated entries survive: {text}");
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
     /// generate_main_pages (via stage) drops the .ets suffix and keeps order.
     #[test]
     fn main_pages_strips_ets_and_keeps_order() {
         let module = ModuleConfig {
             module: ModuleInfo {
+                extra: Default::default(),
                 router_map: Vec::new(),
                 main: None,
                 forms: Vec::new(),
@@ -1704,7 +1990,7 @@ mod tests {
         );
         let declared: Vec<String> = app.dependencies.keys().cloned().collect();
         let roots = declared_package_roots(&root, &app);
-        let deps = discover_dependencies(&root, "entry", &declared, &roots);
+        let deps = discover_dependencies(&root, "entry", false, &declared, &roots);
         let widget = root.join("deps/acme/widget/src/main/resources");
         let widget = widget.canonicalize().unwrap_or(widget);
         let hits = deps.iter().filter(|(_, dir)| dir == &widget).count();
@@ -1754,7 +2040,7 @@ mod tests {
         let root = parent.join("proj");
         std::fs::create_dir_all(root.join("resources/base")).unwrap();
         std::fs::create_dir_all(parent.join("lib/resources/base")).unwrap();
-        let deps = discover_dependencies(&root, "entry", &[], &[]);
+        let deps = discover_dependencies(&root, "entry", false, &[], &[]);
         let names: Vec<&str> = deps.iter().map(|(name, _)| name.as_str()).collect();
         assert_eq!(names, ["lib"], "{names:?}");
         let _ = std::fs::remove_dir_all(&parent);

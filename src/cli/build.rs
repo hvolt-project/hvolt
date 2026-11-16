@@ -2,10 +2,14 @@
 use std::path::PathBuf;
 
 pub(crate) fn build(product: Option<String>) {
+    // A killed build can leave a lock or a half-unpacked dependency behind; sweeping before the
+    // chain starts keeps the cache from growing one leftover per crash. A failure here is not
+    // fatal: the build can still proceed with what is already installed.
+    let _ = crate::build::deps::registry::sweep_leftovers();
     crate::build::deps::pipeline::build_and_sign(std::path::Path::new("."), product.as_deref())
         .unwrap_or_else(|e| {
             eprintln!("✗ {}", e);
-            std::process::exit(1);
+            crate::support::cli_exit(1);
         });
 }
 
@@ -16,7 +20,7 @@ pub(crate) fn pack_hap(module_build: PathBuf, out: PathBuf, hvolt_out: bool) {
         Ok(()) => println!("✓ packed {}", out.display()),
         Err(e) => {
             eprintln!("✗ {}", e);
-            std::process::exit(1);
+            crate::support::cli_exit(1);
         }
     }
 }
@@ -58,7 +62,7 @@ pub(crate) fn build_native(project: PathBuf, out: Option<PathBuf>) {
     };
     if let Err(e) = run() {
         eprintln!("✗ {e}");
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     }
 }
 
@@ -115,11 +119,17 @@ pub(crate) fn assemble_ets(ets_dir: PathBuf, out: PathBuf, bundle: String, modul
     })();
     if let Err(e) = result {
         eprintln!("✗ {e}");
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     }
 }
 
 pub(crate) fn compile_abc(ts_root: PathBuf, out: PathBuf, file_threads: u32) {
+    // 编译前先核对每个具名 import 在源模块里确有对应导出。设备端只会在启动时
+    // 报 "Cannot execute ark file ..."，那时拿不到原因，所以判据必须放在这里。
+    if let Err(problem) = crate::build::imports::check(&ts_root) {
+        eprintln!("\u{2717} 具名 import 解析失败:\n{}", problem);
+        crate::support::cli_exit(1);
+    }
     let result = (|| -> Result<(), String> {
         let es2abc = crate::build::ets_assemble::sdk_es2abc()?;
         // The incoming tree is already staged, so a source-level `use shared`
@@ -140,6 +150,10 @@ pub(crate) fn compile_abc(ts_root: PathBuf, out: PathBuf, file_threads: u32) {
                 npm: &[],
                 abc_inputs: &[],
                 shared: &shared,
+                // The tree is already staged and names its own packages; no module table is
+                // available to filter by, so every staged file is merged.
+                staged_modules: &[],
+                package_modules: None,
             },
         )?;
         println!("✓ merged {}", merged.display());
@@ -147,7 +161,7 @@ pub(crate) fn compile_abc(ts_root: PathBuf, out: PathBuf, file_threads: u32) {
     })();
     if let Err(e) = result {
         eprintln!("✗ {e}");
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     }
 }
 
@@ -172,10 +186,9 @@ pub(crate) fn res_compile(project: PathBuf, module: String, out: Option<PathBuf>
         let default_out = project.join("build/hvolt-out/res");
         let out_dir = out.unwrap_or(default_out);
         let env = crate::sdk::manage::detect("")?;
-        let node = crate::sdk::manage::node_bin(&env.node_home);
         let api = crate::build::deps::sdk_facts::compatible_api(&app.app.compatible_sdk_version)
             .unwrap_or_default();
-        let facts = crate::build::deps::sdk_facts::SdkFacts::detect(&env.ohos_sdk, &node, api)?;
+        let facts = crate::build::deps::sdk_facts::SdkFacts::detect(&env.ohos_sdk, api)?;
         let table = crate::build::artifacts::res_compile::run(
             &project,
             &project.join(&module_dir),
@@ -190,14 +203,14 @@ pub(crate) fn res_compile(project: PathBuf, module: String, out: Option<PathBuf>
     };
     if let Err(e) = run() {
         eprintln!("✗ {e}");
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     }
 }
 
 pub(crate) fn assemble_hap(project: PathBuf, module: String, out: Option<PathBuf>) {
     if let Err(e) = crate::build::artifacts::assemble_hap::run(&project, &module, out.as_deref()) {
         eprintln!("✗ {e}");
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     }
 }
 
@@ -228,6 +241,8 @@ pub(crate) fn render_module_json(
         let text = std::fs::read_to_string(&res_table)
             .map_err(|e| format!("read {}: {}", res_table.display(), e))?;
         let ids = crate::build::compile::ets_resources::parse_table(&text);
+        let dependencies =
+            crate::build::artifacts::module_json::module_dependencies(&project, &app, module_cfg);
         let out = crate::build::artifacts::module_json::render(
             &crate::build::artifacts::module_json::RenderInput {
                 app: &app,
@@ -239,6 +254,7 @@ pub(crate) fn render_module_json(
                 virtual_machine: "",
                 has_insight_intent: false,
                 has_route_map: !module_cfg.module.router_map.is_empty(),
+                dependencies: &dependencies,
             },
         );
         let formatted =
@@ -250,7 +266,11 @@ pub(crate) fn render_module_json(
                     module_name: &module_dir,
                     project_dir: &project,
                     native_deps: &native,
-                    module_version: "1.0.0",
+                    own_entry_path: if module_cfg.module.is_hsp() {
+                        ""
+                    } else {
+                        "src/main/"
+                    },
                     ets_deps: &[],
                     packages: &[],
                     app: &app,
@@ -277,6 +297,7 @@ pub(crate) fn render_module_json(
                     virtual_machine: "",
                     has_insight_intent: false,
                     ids: &ids,
+                    dependencies: &dependencies,
                 },
             );
             let pi_formatted = serde_json::to_string_pretty(&pi)
@@ -287,7 +308,7 @@ pub(crate) fn render_module_json(
     };
     if let Err(e) = run() {
         eprintln!("✗ {e}");
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     }
 }
 
@@ -327,7 +348,7 @@ pub(crate) fn transpile_ets(
     })();
     if let Err(e) = result {
         eprintln!("✗ {e}");
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     }
 }
 
@@ -378,14 +399,14 @@ pub(crate) fn compile_ets(
                 Ok(()) => println!("✓ wrote {}", path.display()),
                 Err(e) => {
                     eprintln!("✗ write {}: {}", path.display(), e);
-                    std::process::exit(1);
+                    crate::support::cli_exit(1);
                 }
             },
             None => print!("{js}"),
         },
         Err(e) => {
             eprintln!("✗ {e}");
-            std::process::exit(1);
+            crate::support::cli_exit(1);
         }
     }
 }

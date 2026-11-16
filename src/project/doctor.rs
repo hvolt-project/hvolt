@@ -63,16 +63,10 @@ pub fn run(project_dir: &Path, product: Option<&str>) -> Report {
 
     println!("hvolt doctor");
 
-    // ── env ────────────────────────────────────────────────
+    // ── environment (self-contained chain) ───────
     println!("[env]");
-    check_executable(
-        &rep,
-        "node",
-        "env",
-        sdk::find_node(),
-        |home| sdk::node_bin(home),
-        "--version",
-    );
+    println!("  ✓ [env] toolchain   self-contained chain (no Node.js / JDK / hdc)");
+
     // ── sdk store ──────────────────────────────────────────
     println!("[sdk]");
     let sdk_root = check_sdk(&rep);
@@ -151,93 +145,6 @@ fn read_device_type_enum(path: &Path) -> Option<Vec<String>> {
 }
 
 // ─── individual checks ───────────────────────────────────────────
-
-/// Locate via hvolt's resolution chain then EXECUTE it: an existing but
-/// non-functional binary (e.g. macOS /usr/bin/java stub) must fail here,
-/// not at build time.
-fn check_executable(
-    rep: &Report,
-    label: &str,
-    section: &str,
-    found: Result<PathBuf, String>,
-    bin_of: fn(&PathBuf) -> PathBuf,
-    version_arg: &str,
-) -> Option<PathBuf> {
-    match found {
-        Err(e) => {
-            rep.line(
-                false,
-                false,
-                section,
-                label,
-                &e,
-                &format!("hvolt config set {}_home <path>", label),
-            );
-            None
-        }
-        Ok(home) => {
-            let bin = bin_of(&home);
-            match Command::new(&bin).arg(version_arg).output() {
-                Ok(out) if out.status.success() => {
-                    let out_s = String::from_utf8_lossy(&out.stdout).to_string();
-                    let err_s = String::from_utf8_lossy(&out.stderr).to_string();
-                    let first = out_s
-                        .lines()
-                        .next()
-                        .or_else(|| err_s.lines().next())
-                        .unwrap_or("")
-                        .trim()
-                        .chars()
-                        .take(40)
-                        .collect::<String>();
-                    rep.line(
-                        true,
-                        false,
-                        section,
-                        label,
-                        &format!("{} ({})", first, bin.display()),
-                        "",
-                    );
-                    Some(home)
-                }
-                Ok(out) => {
-                    let err = String::from_utf8_lossy(&out.stderr)
-                        .lines()
-                        .next()
-                        .unwrap_or("")
-                        .trim()
-                        .to_string();
-                    rep.line(
-                        false,
-                        false,
-                        section,
-                        label,
-                        &format!("runs but fails: {}", err),
-                        &format!(
-                            "hvolt config set {}_home <path to a working {}>",
-                            label, label
-                        ),
-                    );
-                    None
-                }
-                Err(e) => {
-                    rep.line(
-                        false,
-                        false,
-                        section,
-                        label,
-                        &format!("cannot execute {}: {}", bin.display(), e),
-                        &format!(
-                            "check {} installation or hvolt config set {}_home <path>",
-                            label, label
-                        ),
-                    );
-                    None
-                }
-            }
-        }
-    }
-}
 
 fn check_sdk(rep: &Report) -> Option<PathBuf> {
     // Resolution order is the same one `hvolt build` follows, including env vars and an

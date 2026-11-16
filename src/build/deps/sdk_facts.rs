@@ -23,13 +23,9 @@ impl SdkFacts {
     /// Read the SDK metadata next to the compilers and look up the bytecode version for
     /// `compatible_api`.
     ///
-    /// `node_binary` is not used: the bytecode version comes from the `sdk_bytecode` table, so
-    /// detecting facts no longer spawns a Node process.
-    pub fn detect(
-        sdk_root: &Path,
-        _node_binary: &Path,
-        compatible_api: u32,
-    ) -> Result<Self, String> {
+    /// Nothing outside the SDK is consulted: the bytecode version comes from the
+    /// `sdk_bytecode` table, so detecting facts never spawns a Node process.
+    pub fn detect(sdk_root: &Path, compatible_api: u32) -> Result<Self, String> {
         let platform = platform_root(sdk_root);
         let package = platform.join("ets/oh-uni-package.json");
         let text = std::fs::read_to_string(&package)
@@ -121,19 +117,13 @@ mod tests {
             Ok(env) => env,
             Err(_) => return,
         };
-        let node = crate::sdk::manage::node_bin(&env.node_home);
-        if !node.is_file() {
-            println!("no node at {}", node.display());
-            return;
-        }
-        let facts = SdkFacts::detect(&env.ohos_sdk, &node, 17).expect("read SDK facts");
+        let facts = SdkFacts::detect(&env.ohos_sdk, 17).expect("read SDK facts");
         println!(
-            "version={} release={} vm={:?} root={} node={}",
+            "version={} release={} vm={:?} root={}",
             facts.version,
             facts.release_type,
             facts.virtual_machine,
-            env.ohos_sdk.display(),
-            node.display()
+            env.ohos_sdk.display()
         );
         assert!(!facts.version.is_empty(), "SDK version is empty");
     }
