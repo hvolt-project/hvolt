@@ -75,8 +75,8 @@ pub fn check(
     instance: &Value,
 ) -> Result<(), String> {
     let path = schema_path(sdk_root, runtime_os, schema_name);
-    let text = std::fs::read_to_string(&path)
-        .map_err(|e| format!("read {}: {e}", path.display()))?;
+    let text =
+        std::fs::read_to_string(&path).map_err(|e| format!("read {}: {e}", path.display()))?;
     let schema: Value =
         serde_json::from_str(&text).map_err(|e| format!("parse {}: {e}", path.display()))?;
     let validator = jsonschema::validator_for(&schema)

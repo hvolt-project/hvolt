@@ -513,6 +513,10 @@ pub struct Skill {
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
 pub struct AbilityConfig {
     pub name: String,
+    /// Keys of an ability table this struct does not model, carried into module.json under the
+    /// same snake_case -> camelCase rule (e.g. `background_modes` -> `backgroundModes`).
+    #[serde(flatten)]
+    pub extra: std::collections::BTreeMap<String, toml::Value>,
     /// Source entry file (e.g. "EntryFormAbility.ets").
     pub entry: String,
     /// Resource reference for the ability label (e.g. "$string:My_label").
@@ -697,6 +701,14 @@ pub struct RouterMapDef {
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct ModuleInfo {
     pub name: String,
+    /// Keys of `[module]` this struct does not model, carried through to module.json.
+    ///
+    /// The manifest schema has 45 module fields and grows with each SDK, so the ones hvolt has
+    /// no behaviour for are kept verbatim instead of being dropped on parse. `render` merges
+    /// them under the same snake_case -> camelCase rule the modelled fields follow, and a
+    /// modelled field always wins.
+    #[serde(flatten)]
+    pub extra: std::collections::BTreeMap<String, toml::Value>,
     /// Page routes for main_pages.json.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub routes: Vec<String>,
@@ -1190,6 +1202,7 @@ impl ModuleConfig {
         ModuleConfig {
             dependencies: BTreeMap::new(),
             module: ModuleInfo {
+                extra: Default::default(),
                 router_map: Vec::new(),
                 main: None,
                 forms: Vec::new(),

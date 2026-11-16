@@ -1649,6 +1649,7 @@ mod tests {
     fn main_pages_strips_ets_and_keeps_order() {
         let module = ModuleConfig {
             module: ModuleInfo {
+                extra: Default::default(),
                 router_map: Vec::new(),
                 main: None,
                 forms: Vec::new(),

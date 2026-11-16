@@ -112,6 +112,41 @@ fn app_block(
     app_json
 }
 
+/// `background_modes` -> `backgroundModes`, the rule every modelled field already follows.
+fn camel(key: &str) -> String {
+    let mut out = String::with_capacity(key.len());
+    let mut upper = false;
+    for ch in key.chars() {
+        if ch == '_' {
+            upper = true;
+            continue;
+        }
+        if upper {
+            out.extend(ch.to_uppercase());
+            upper = false;
+        } else {
+            out.push(ch);
+        }
+    }
+    out
+}
+
+/// Merge the `[module]` keys this crate does not model into the rendered manifest.
+///
+/// Modelled fields win: their value already went through hvolt's own derivation, and an extra
+/// key of the same name would otherwise silently replace it.
+fn merge_extra(module: &mut Value, extra: &std::collections::BTreeMap<String, toml::Value>) {
+    let Ok(Value::Object(table)) = serde_json::to_value(extra) else {
+        return;
+    };
+    for (key, value) in table {
+        let field = camel(&key);
+        if module.get(&field).is_none() {
+            module[&field] = value;
+        }
+    }
+}
+
 /// The app.json schema wants `Release1`/`Beta1`/`Canary1`; the SDK reports the bare stage
 /// name (`Release`), and the bare form fails the pattern.
 fn release_type_with_stage(release_type: &str) -> String {
@@ -135,6 +170,8 @@ struct AbilitySpec<'a> {
     start_window_icon: &'a str,
     start_window_background: &'a str,
     skills: &'a [Skill],
+    /// Ability-table keys with no modelled behaviour; merged verbatim into the block.
+    extra: &'a std::collections::BTreeMap<String, toml::Value>,
 }
 
 /// One ability entry: name, source path, resource references and their ids.
@@ -148,6 +185,7 @@ fn ability_block(spec: &AbilitySpec<'_>, _ids: &ResourceTable, runtime_os: &str)
         "startWindowBackground": spec.start_window_background,
         "exported": true,
     });
+    merge_extra(&mut out, spec.extra);
     if let Some(desc) = spec.description {
         out["description"] = json!(desc);
     }
@@ -286,6 +324,7 @@ fn entry_ability(
             start_window_icon: start_icon,
             start_window_background: "$color:start_window_background",
             skills: &info.skills,
+            extra: &info.extra,
         },
         ids,
         runtime_os,
@@ -319,6 +358,7 @@ fn extra_abilities(
                     start_window_icon: default_icon,
                     start_window_background: "$color:start_window_background",
                     skills: &a.skills,
+                    extra: &a.extra,
                 },
                 ids,
                 runtime_os,
@@ -450,6 +490,7 @@ pub fn render(input: &RenderInput<'_>) -> Value {
     if !input.virtual_machine.is_empty() {
         module["virtualMachine"] = json!(input.virtual_machine);
     }
+    merge_extra(&mut module, &info.extra);
     if input.has_insight_intent {
         module["hasInsightIntent"] = json!(true);
     }
@@ -526,6 +567,7 @@ color start_window_background 0x01000008
         // ModuleInfo has no Default derive; build the one field set asr uses.
         let module = ModuleConfig {
             module: ModuleInfo {
+                extra: Default::default(),
                 router_map: Vec::new(),
                 main: None,
                 forms: Vec::new(),
@@ -593,6 +635,60 @@ color start_window_background 0x01000008
         let ability = &out["module"]["abilities"][0];
         assert_eq!(ability["label"], "$string:EntryAbility_label");
         assert_eq!(out["module"].get("descriptionId"), None);
+    }
+
+    /// A key with no modelled behaviour reaches the manifest under the camelCase name the
+    /// schema uses (`background_modes` -> `backgroundModes`).
+    #[test]
+    fn unmodelled_keys_are_carried_through_as_camel_case() {
+        let ids = ids();
+        let mut extra = std::collections::BTreeMap::new();
+        extra.insert(
+            "background_modes".to_string(),
+            toml::Value::Array(vec![toml::Value::String("dataTransfer".to_string())]),
+        );
+        let ability = AbilitySpec {
+            name: "EntryAbility",
+            src_entry: "./ets/entryability/EntryAbility.ets".to_string(),
+            icon: "$media:layered_image",
+            label: "$string:EntryAbility_label",
+            description: None,
+            start_window_icon: "$media:startIcon",
+            start_window_background: "$color:start_window_background",
+            skills: &[],
+            extra: &extra,
+        };
+        let out = ability_block(&ability, &ids, "openharmony");
+        assert_eq!(
+            out["backgroundModes"],
+            serde_json::json!(["dataTransfer"]),
+            "the extra key must land under its camelCase name"
+        );
+    }
+
+    /// A modelled field wins over an extra of the same name: its value already carries
+    /// hvolt's own derivation.
+    #[test]
+    fn a_modelled_field_is_not_overwritten_by_an_extra() {
+        let ids = ids();
+        let mut extra = std::collections::BTreeMap::new();
+        extra.insert(
+            "name".to_string(),
+            toml::Value::String("hijack".to_string()),
+        );
+        let ability = AbilitySpec {
+            name: "EntryAbility",
+            src_entry: "./ets/entryability/EntryAbility.ets".to_string(),
+            icon: "$media:layered_image",
+            label: "$string:EntryAbility_label",
+            description: None,
+            start_window_icon: "$media:startIcon",
+            start_window_background: "$color:start_window_background",
+            skills: &[],
+            extra: &extra,
+        };
+        let out = ability_block(&ability, &ids, "openharmony");
+        assert_eq!(out["name"], "EntryAbility");
     }
 
     /// The srcEntry spells the module source root the device resolves against, not the

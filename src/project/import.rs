@@ -910,6 +910,7 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
             // Module-scoped deps come from the source module's own oh-package.json5.
             dependencies: module_dependencies(&dir, &from.join(&dir)),
             module: ModuleInfo {
+                extra: Default::default(),
                 name,
                 routes,
                 // Route names only: the page and its `@Builder` are derived by the build.
