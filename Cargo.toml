@@ -78,6 +78,7 @@ p12 = "0.6"
 pkcs8 = "0.10"
 p256 = "0.13"
 rhai = { version = "1.27.0", default-features = false, features = ["std"] }
+jsonschema = { version = "0.61.2", default-features = false }
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"

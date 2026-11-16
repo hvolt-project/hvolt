@@ -1594,6 +1594,30 @@ pub(crate) fn run(
     )
     .map_err(|e| format!("write module.json with ids: {e}"))?;
 
+    // Check the final manifest against the schema the SDK itself validates with. This is the
+    // shape that ships, so a package the system would refuse fails the build here instead.
+    if let Some(root) = crate::sdk::manage::sdk_root() {
+        let runtime_os = &input.app.app.runtime_os;
+        // Each schema describes one document, so hand it the document it describes rather
+        // than the combined value this stage writes.
+        if let Some(module) = manifest.get("module") {
+            crate::build::artifacts::module_check::check(
+                &root,
+                runtime_os,
+                "module.json",
+                &serde_json::json!({ "module": module }),
+            )?;
+        }
+        if let Some(app) = manifest.get("app") {
+            crate::build::artifacts::module_check::check(
+                &root,
+                runtime_os,
+                "app.json",
+                &serde_json::json!({ "app": app }),
+            )?;
+        }
+    }
+
     // 3) the intent manifest is package content, not a resource: writing it into the restool
     //    input would add a `profile insight_intent` entry the reference package does not have.
     if let Some(manifest) = crate::build::artifacts::insight_intent::render(

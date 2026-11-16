@@ -83,9 +83,9 @@ pub fn module_dependencies(
 /// The `app.*` block.
 fn app_block(
     app: &AppConfig,
-    ids: &ResourceTable,
+    _ids: &ResourceTable,
     build_mode: &str,
-    compile_sdk_version: &str,
+    _compile_sdk_version: &str,
     api_release_type: &str,
 ) -> Value {
     let appf = &app.app;
@@ -97,21 +97,12 @@ fn app_block(
         "versionName": appf.version,
         "icon": appf.icon,
         "label": "$string:app_name",
-        "apiReleaseType": api_release_type,
-        "compileSdkVersion": compile_sdk_version,
+        "apiReleaseType": release_type_with_stage(api_release_type),
         "targetAPIVersion": appf.target_api_version(),
         "minAPIVersion": appf.min_api_version(),
-        "compileSdkType": appf.compile_sdk_type(),
-        "targetMinorAPIVersion": 0,
-        "targetPatchAPIVersion": 0,
-        "minMinorAPIVersion": 0,
-        "minPatchAPIVersion": 0,
         "appEnvironments": [],
         "bundleType": appf.bundle_type,
-        "buildMode": build_mode,
         "debug": debug,
-        "iconId": res_id(ids, &appf.icon),
-        "labelId": res_id(ids, "$string:app_name"),
     });
     // hvigor records a build version only when the project declares one; the key is absent
     // otherwise, and an explicit `null` still counts as a different document.
@@ -119,6 +110,19 @@ fn app_block(
         app_json["buildVersion"] = json!(appf.build_version);
     }
     app_json
+}
+
+/// The app.json schema wants `Release1`/`Beta1`/`Canary1`; the SDK reports the bare stage
+/// name (`Release`), and the bare form fails the pattern.
+fn release_type_with_stage(release_type: &str) -> String {
+    let trimmed = release_type.trim();
+    if trimmed.is_empty() {
+        return "Release1".to_string();
+    }
+    if trimmed.chars().last().is_some_and(|c| c.is_ascii_digit()) {
+        return trimmed.to_string();
+    }
+    format!("{trimmed}1")
 }
 
 /// What one ability contributes to the manifest, already resolved from config.
@@ -134,7 +138,7 @@ struct AbilitySpec<'a> {
 }
 
 /// One ability entry: name, source path, resource references and their ids.
-fn ability_block(spec: &AbilitySpec<'_>, ids: &ResourceTable, runtime_os: &str) -> Value {
+fn ability_block(spec: &AbilitySpec<'_>, _ids: &ResourceTable, runtime_os: &str) -> Value {
     let mut out = json!({
         "name": spec.name,
         "srcEntry": spec.src_entry,
@@ -146,7 +150,6 @@ fn ability_block(spec: &AbilitySpec<'_>, ids: &ResourceTable, runtime_os: &str) 
     });
     if let Some(desc) = spec.description {
         out["description"] = json!(desc);
-        out["descriptionId"] = json!(res_id(ids, desc));
     }
     if spec.skills.is_empty() {
         // A HarmonyOS build declares the home skill under `action.system.home`; the
@@ -166,10 +169,6 @@ fn ability_block(spec: &AbilitySpec<'_>, ids: &ResourceTable, runtime_os: &str) 
     } else {
         out["skills"] = json!(spec.skills.iter().map(skill_block).collect::<Vec<_>>());
     }
-    out["iconId"] = json!(res_id(ids, spec.icon));
-    out["labelId"] = json!(res_id(ids, spec.label));
-    out["startWindowIconId"] = json!(res_id(ids, spec.start_window_icon));
-    out["startWindowBackgroundId"] = json!(res_id(ids, spec.start_window_background));
     out
 }
 
@@ -431,9 +430,6 @@ pub fn render(input: &RenderInput<'_>) -> Value {
             "deviceTypes": info.device_types,
             "deliveryWithInstall": info.delivery_with_install.unwrap_or(true),
             "installationFree": info.installation_free.unwrap_or(false),
-            "packageName": info.name,
-            "virtualMachine": input.virtual_machine,
-            "compileMode": "esmodule",
             "dependencies": dependencies,
         })
     } else {
@@ -446,12 +442,14 @@ pub fn render(input: &RenderInput<'_>) -> Value {
             "deliveryWithInstall": info.delivery_with_install.unwrap_or(true),
             "installationFree": info.installation_free.unwrap_or(false),
             "abilities": abilities,
-            "packageName": info.name,
-            "virtualMachine": input.virtual_machine,
-            "compileMode": "esmodule",
             "dependencies": dependencies,
         })
     };
+    // The schema accepts "ark" or "default"; an empty value means the SDK has no bytecode
+    // version for this API level, and writing "" fails the manifest check.
+    if !input.virtual_machine.is_empty() {
+        module["virtualMachine"] = json!(input.virtual_machine);
+    }
     if input.has_insight_intent {
         module["hasInsightIntent"] = json!(true);
     }
@@ -492,9 +490,6 @@ pub fn render(input: &RenderInput<'_>) -> Value {
         module["requestPermissions"] = json!(permissions);
     }
     module["description"] = json!("$string:module_desc");
-    if let Some(desc_id) = res_id(input.ids, "$string:module_desc") {
-        module["descriptionId"] = json!(desc_id);
-    }
     json!({
         "app": app_block(
             input.app,
@@ -594,11 +589,10 @@ color start_window_background 0x01000008
             api_release_type: "Beta1",
             dependencies: &[],
         });
-        assert_eq!(out["app"]["labelId"], 0x01000000);
-        assert_eq!(out["module"]["descriptionId"], 0x01000004);
+        // The schema has no id-suffixed mirrors: references stay `$string:`/`$media:`.
         let ability = &out["module"]["abilities"][0];
-        assert_eq!(ability["descriptionId"], 0x01000005);
-        assert_eq!(ability["labelId"], 0x01000006);
+        assert_eq!(ability["label"], "$string:EntryAbility_label");
+        assert_eq!(out["module"].get("descriptionId"), None);
     }
 
     /// The srcEntry spells the module source root the device resolves against, not the
