@@ -111,7 +111,80 @@ pub fn check(
 
 #[cfg(test)]
 mod tests {
-    use super::{snake, toml_key};
+    use super::{check, snake, toml_key};
+    use serde_json::json;
+
+    /// Lay down the SDK-side schema the check reads, under the layout `schema_path` expects.
+    fn write_schema(
+        root: &std::path::Path,
+        runtime_os: &str,
+        name: &str,
+        schema: &serde_json::Value,
+    ) {
+        let toolchain = if crate::support::config::is_open_harmony(runtime_os) {
+            "openharmony"
+        } else {
+            "hms"
+        };
+        let dir = root
+            .join("default")
+            .join(toolchain)
+            .join("toolchains")
+            .join("modulecheck");
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join(name), schema.to_string()).unwrap();
+    }
+
+    /// An SDK that ships no modulecheck copy must not fail the build: this is the shape an
+    /// OpenHarmony-only SDK has, and it used to abort every build with a read error.
+    #[test]
+    fn a_missing_schema_skips_the_check() {
+        let root = std::env::temp_dir().join(format!("hvolt-schema-none-{}", std::process::id()));
+        std::fs::create_dir_all(&root).unwrap();
+        let instance = json!({"name": "entry"});
+        assert!(check(&root, "OpenHarmony", "module.json", &instance).is_ok());
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// A conforming manifest passes against the SDK's own schema.
+    #[test]
+    fn a_conforming_manifest_passes() {
+        let root = std::env::temp_dir().join(format!("hvolt-schema-ok-{}", std::process::id()));
+        let schema = json!({
+            "type": "object",
+            "required": ["name"],
+            "properties": {"name": {"type": "string"}}
+        });
+        write_schema(&root, "OpenHarmony", "module.json", &schema);
+        let instance = json!({"name": "entry"});
+        assert!(check(&root, "OpenHarmony", "module.json", &instance).is_ok());
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// A violation is reported with both the manifest path and the toml key that writes it, so
+    /// the message names something a person can find in hvolt.toml.
+    #[test]
+    fn a_violation_names_the_path_and_the_toml_key() {
+        let root = std::env::temp_dir().join(format!("hvolt-schema-bad-{}", std::process::id()));
+        let schema = json!({
+            "type": "object",
+            "properties": {
+                "abilities": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {"label": {"type": "string"}}
+                    }
+                }
+            }
+        });
+        write_schema(&root, "OpenHarmony", "module.json", &schema);
+        let instance = json!({"abilities": [{"label": 42}]});
+        let err = check(&root, "OpenHarmony", "module.json", &instance).unwrap_err();
+        assert!(err.contains("/abilities/0/label"), "{err}");
+        assert!(err.contains("abilities[0].label"), "{err}");
+        let _ = std::fs::remove_dir_all(&root);
+    }
 
     #[test]
     fn camel_case_maps_back_to_the_toml_key() {
