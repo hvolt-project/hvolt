@@ -53,10 +53,19 @@ fn resolve_sdk(override_path: Option<&str>) -> Result<PathBuf, String> {
     crate::sdk::manage::sdk_dir("")
 }
 
+/// The ArkTS language server is a Node program, so this one subcommand still needs a node
+/// on PATH. It is no longer an hvolt config key and build never consults it.
 fn resolve_node() -> Result<PathBuf, String> {
-    let home = crate::sdk::manage::find_node()?;
-    crate::support::platform::find_in_dirs("node", [home.join("bin"), home.clone()])
-        .ok_or_else(|| format!("no node binary under {}", home.display()))
+    if let Some(home) = std::env::var_os("NODE_HOME") {
+        let home = PathBuf::from(home);
+        if let Some(node) =
+            crate::support::platform::find_in_dirs("node", [home.join("bin"), home.clone()])
+        {
+            return Ok(node);
+        }
+    }
+    crate::support::platform::on_path("node")
+        .ok_or_else(|| "hvolt lsp needs node on PATH; nothing else does".to_string())
 }
 
 /// Where the bundled server is: explicit override, then next to the binary, then

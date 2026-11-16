@@ -8,7 +8,7 @@ use std::time::Duration;
 
 /// Resolve the target address the native transport understands: a USB serial
 /// or `<host>:<port>` for a networked device.
-fn target_addr(device: Option<&str>) -> Result<String, String> {
+pub(crate) fn target_addr_for(device: Option<&str>) -> Result<String, String> {
     if let Some(d) = device {
         if !d.trim().is_empty() {
             return Ok(d.trim().to_string());
@@ -21,15 +21,15 @@ fn target_addr(device: Option<&str>) -> Result<String, String> {
     Err("no device: pass one, or run `hvolt device connect <serial|ip:port>`".to_string())
 }
 
-fn identity() -> Result<HostIdentity, String> {
+pub(crate) fn host_identity() -> Result<HostIdentity, String> {
     HostIdentity::load_from_home()
 }
 
 /// Run one command on the device over the native hdc protocol and return its
 /// output. No hdc binary is spawned.
 pub(crate) fn sh(device: Option<&str>, cmdline: &str) -> Result<(String, String), String> {
-    let addr = target_addr(device)?;
-    let id = identity()?;
+    let addr = target_addr_for(device)?;
+    let id = host_identity()?;
     let out = hdc_proto::shell(&addr, "Ver: 3.2.0", &id, cmdline, Duration::from_secs(90))?;
     Ok((addr, out))
 }
@@ -101,6 +101,18 @@ pub(crate) fn line_process(line: &str) -> Option<&str> {
     }
 }
 
+/// Whether a line passes the follower's client-side keyword filter.
+pub(crate) fn line_kept(line: &str, keywords: &[String]) -> bool {
+    if keywords.is_empty() {
+        return true;
+    }
+    let mut pass = true;
+    for k in keywords {
+        pass = pass && line.contains(k.as_str());
+    }
+    pass
+}
+
 pub(crate) fn line_matches(line: &str, terms: &[String]) -> bool {
     // keywords are case-insensitive (hilog renders tags uppercase; users type lowercase)
     let lc = line.to_lowercase();
@@ -115,40 +127,10 @@ pub(crate) fn bundle_matches_line(line: &str, bundle: &str) -> bool {
 }
 
 pub fn log(o: &LogOpts, device: Option<&str>) -> Result<(), String> {
-    // device-side pid filter whenever the bundle is running (follow or dump);
-    // falls back to process-column matching when it is not
-    let pid = o
-        .bundle
-        .as_deref()
-        .and_then(|b| resolve_pid(b, device).ok());
-    let mut args = hilog_args(o, pid.as_deref());
-    // The native shell call is one round trip, so always ask hilog for the
-    // dump form (`-x`); a streaming mode is rebuilt by polling and de-duping.
-    if !args.iter().any(|a| a == "-x") {
-        args.push("-x".to_string());
-    }
-    let cmdline = args.join(" ");
-    let terms = client_terms(o);
-
-    let keep = |lines: &str, sink: &mut Vec<String>| {
-        for l in lines.lines() {
-            if let Some(b) = &o.bundle {
-                if !bundle_matches_line(l, b) && pid.is_none() {
-                    continue;
-                }
-            }
-            if line_matches(l, &terms) {
-                sink.push(l.to_string());
-            }
-        }
-    };
-
     if o.follow {
         let mut seen: std::collections::HashSet<String> = Default::default();
         loop {
-            let (_, out) = sh(device, &cmdline)?;
-            let mut kept = Vec::new();
-            keep(&out, &mut kept);
+            let kept = log_lines(o, device)?;
             for l in kept {
                 if seen.insert(l.clone()) {
                     println!("{}", l);
@@ -157,20 +139,65 @@ pub fn log(o: &LogOpts, device: Option<&str>) -> Result<(), String> {
             std::thread::sleep(Duration::from_secs(2));
         }
     }
+    for l in log_lines(o, device)? {
+        println!("{}", l);
+    }
+    Ok(())
+}
+/// The command a follower should run: hilog without `-x` keeps printing instead of
+/// dumping and exiting, which is what makes a real stream possible at all.
+pub fn stream_command(o: &LogOpts, device: Option<&str>) -> Result<String, String> {
+    let pid = o
+        .bundle
+        .as_deref()
+        .and_then(|b| resolve_pid(b, device).ok());
+    let following = LogOpts {
+        level: o.level.clone(),
+        tag: o.tag.clone(),
+        domain: o.domain.clone(),
+        bundle: o.bundle.clone(),
+        keyword: o.keyword.clone(),
+        follow: true,
+        ..LogOpts::default()
+    };
+    let args = hilog_args(&following, pid.as_deref());
+    Ok(args.join(" "))
+}
+
+/// One dump of the matching lines, newest last. The embedder's streaming reader calls
+/// this on a timer, so the filtering and the tail limit live here rather than in the
+/// printing path.
+pub fn log_lines(o: &LogOpts, device: Option<&str>) -> Result<Vec<String>, String> {
+    let pid = o
+        .bundle
+        .as_deref()
+        .and_then(|b| resolve_pid(b, device).ok());
+    let mut args = hilog_args(o, pid.as_deref());
+    if !args.iter().any(|a| a == "-x") {
+        args.push("-x".to_string());
+    }
+    let cmdline = args.join(" ");
+    let terms = client_terms(o);
 
     let (_, stdout) = sh(device, &cmdline)?;
     let mut kept: Vec<String> = Vec::new();
-    keep(&stdout, &mut kept);
+    for l in stdout.lines() {
+        if let Some(b) = &o.bundle {
+            if !bundle_matches_line(l, b) && pid.is_none() {
+                continue;
+            }
+        }
+        if line_matches(l, &terms) {
+            kept.push(l.to_string());
+        }
+    }
     // "last N matching lines": filter first, THEN tail
     if let Some(n) = o.tail {
         if kept.len() > n {
             kept.drain(0..kept.len() - n);
         }
     }
-    for l in &kept {
-        println!("{}", l);
-    }
-    Ok(())
+    Ok(kept)
 }
 
 /// hdc path to use ON the device host: registered path wins; build-host path
@@ -186,21 +213,27 @@ pub(crate) fn resolve_pid(bundle: &str, device: Option<&str>) -> Result<String, 
 
 // ─── file transfer ─────────────────────────────────────────────────
 
-pub fn file_send(local: &Path, remote: &str, device: Option<&str>) -> Result<(), String> {
+pub fn file_send(
+    local: &Path,
+    remote: &str,
+    device: Option<&str>,
+    bundle: Option<&str>,
+) -> Result<(), String> {
     if !local.exists() {
         return Err(format!("local file not found: {}", local.display()));
     }
     let abs = local
         .canonicalize()
         .map_err(|e| format!("resolve {}: {}", local.display(), e))?;
-    let addr = target_addr(device)?;
-    let id = identity()?;
+    let addr = target_addr_for(device)?;
+    let id = host_identity()?;
     crate::device::hdc_proto::send_file(
         &addr,
         "Ver: 3.2.0",
         &id,
         &abs,
         remote,
+        bundle,
         Duration::from_secs(120),
     )?;
     println!("✓ sent {} → {}:{}", local.display(), addr, remote);
@@ -208,8 +241,8 @@ pub fn file_send(local: &Path, remote: &str, device: Option<&str>) -> Result<(),
 }
 
 pub fn file_recv(remote: &str, local: &Path, device: Option<&str>) -> Result<(), String> {
-    let addr = target_addr(device)?;
-    let id = identity()?;
+    let addr = target_addr_for(device)?;
+    let id = host_identity()?;
     let n = crate::device::hdc_proto::recv_file(
         &addr,
         "Ver: 3.2.0",
@@ -225,6 +258,89 @@ pub fn file_recv(remote: &str, local: &Path, device: Option<&str>) -> Result<(),
         local.display(),
         n
     );
+    Ok(())
+}
+
+// ─── fault logs ────────────────────────────────────────────────────
+
+/// HiviewDFX keeps crash records here; the shell user is not allowed to read the directory
+/// on retail builds, while the daemon behind file_recv is. So the names come from the
+/// uploader that announces every record in hilog, and the bytes come from the file channel.
+pub fn faultlog(
+    bundle: Option<&str>,
+    name: Option<&str>,
+    list: bool,
+    out: Option<&Path>,
+    device: Option<&str>,
+) -> Result<(), String> {
+    const DIR: &str = "/data/log/faultlog/faultlogger";
+
+    // Names are only for orientation: the device rotates these records, so a name read from
+    // hilog may already be gone. The bytes always come from the file channel, which is also
+    // the only path the shell user is not allowed to take on retail builds.
+    if list {
+        let mut names: Vec<String> = Vec::new();
+        if let Ok((_, listed)) = sh(device, &format!("ls {DIR}")) {
+            if !listed.contains("Permission denied") {
+                names = listed
+                    .lines()
+                    .map(|l| l.trim().to_string())
+                    .filter(|l| !l.is_empty() && !l.contains(' '))
+                    .collect();
+            }
+        }
+        if names.is_empty() {
+            let (_, log) = sh(device, &format!("hilog -x | grep -F {DIR}/"))?;
+            for line in log.lines() {
+                if let Some(at) = line.find(DIR) {
+                    let tail = &line[at..];
+                    let raw: String = tail.chars().take_while(|c| !c.is_whitespace()).collect();
+                    let raw = raw.trim_end_matches(['.', ',', ';', ':', ')']);
+                    if let Some(short) = raw.strip_prefix(&format!("{DIR}/")) {
+                        if !short.is_empty() && !names.iter().any(|n| n == short) {
+                            names.push(short.to_string());
+                        }
+                    }
+                }
+            }
+        }
+        if let Some(b) = bundle {
+            names.retain(|n| n.contains(b));
+        }
+        names.sort();
+        if names.is_empty() {
+            return Err(format!("no fault record found under {DIR}"));
+        }
+        for n in &names {
+            println!("{n}");
+        }
+        return Ok(());
+    }
+
+    let remote = match name {
+        Some(n) => format!("{DIR}/{n}"),
+        // The daemon answers a directory request with the newest record it holds.
+        None => DIR.to_string(),
+    };
+    let addr = target_addr_for(device)?;
+    let id = host_identity()?;
+    let staging = std::env::temp_dir().join("hvolt-faultlog");
+    crate::device::hdc_proto::recv_file(
+        &addr,
+        "Ver: 3.2.0",
+        &id,
+        &remote,
+        &staging,
+        Duration::from_secs(180),
+    )?;
+    let body = std::fs::read_to_string(&staging).map_err(|e| format!("read: {e}"))?;
+    match out {
+        Some(path) => {
+            std::fs::write(path, &body).map_err(|e| format!("save: {e}"))?;
+            println!("✓ {remote} → {} ({} bytes)", path.display(), body.len());
+        }
+        None => print!("{body}"),
+    }
     Ok(())
 }
 
@@ -245,8 +361,8 @@ pub fn screenshot(device: Option<&str>, out: Option<&Path>) -> Result<(), String
     // snapshot_display FORCES .jpeg on the device (measured: .png rejected)
     let (_t, _so) = sh(device, &format!("snapshot_display -f {remote}"))?;
     let staging = std::env::temp_dir().join("hvolt_capture.jpeg");
-    let addr = target_addr(device)?;
-    let id = identity()?;
+    let addr = target_addr_for(device)?;
+    let id = host_identity()?;
     let n = crate::device::hdc_proto::recv_file(
         &addr,
         "Ver: 3.2.0",
@@ -275,8 +391,8 @@ pub fn ui_dump(device: Option<&str>, out: Option<&Path>) -> Result<(), String> {
         return Err(format!("dumpLayout failed: {}", so.trim()));
     }
     let staging = std::env::temp_dir().join("hvolt_layout.json");
-    let addr = target_addr(device)?;
-    let id = identity()?;
+    let addr = target_addr_for(device)?;
+    let id = host_identity()?;
     let n = crate::device::hdc_proto::recv_file(
         &addr,
         "Ver: 3.2.0",
@@ -307,6 +423,29 @@ pub fn uninstall(bundle: &str, device: Option<&str>) -> Result<(), String> {
         Ok(())
     } else {
         Err(format!("uninstall failed: {text}"))
+    }
+}
+
+/// Launch an installed bundle over the device shell (`aa start`).
+///
+/// The embedder needs this after installing: `run` builds and signs first, which
+/// is exactly what an IDE does not want when it only has to start what is there.
+pub fn start(device: Option<&str>, target: &str) -> Result<String, String> {
+    let (bundle, ability) = match target.split_once('/') {
+        Some((b, a)) => (b, a),
+        None => (target, "EntryAbility"),
+    };
+    if bundle.is_empty() {
+        return Err("start: bundle name is empty".to_string());
+    }
+    let (_addr, out) = sh(device, &format!("aa start -a {ability} -b {bundle}"))?;
+    if out.contains("start ability successfully") {
+        Ok(format!("✓ started {bundle}/{ability}"))
+    } else {
+        Err(format!(
+            "aa start {bundle}/{ability} failed: {}",
+            out.trim()
+        ))
     }
 }
 

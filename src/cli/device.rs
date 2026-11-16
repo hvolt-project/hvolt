@@ -11,7 +11,7 @@ pub(crate) fn exec(
     let timeout = std::time::Duration::from_secs(60);
     let identity = crate::device::hdc_proto::HostIdentity::load_from_home().unwrap_or_else(|e| {
         eprintln!("✗ {}", e);
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     });
     let result = match (shell, put) {
         (_, Some(paths)) => {
@@ -22,6 +22,7 @@ pub(crate) fn exec(
                 &identity,
                 &local,
                 &paths[1],
+                None,
                 timeout,
             )
             .map(|()| println!("✓ sent {} -> {}", paths[0], paths[1]))
@@ -51,7 +52,7 @@ pub(crate) fn exec(
     };
     if let Err(e) = result {
         eprintln!("✗ {}", e);
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     }
 }
 
@@ -124,7 +125,7 @@ pub(crate) fn device(action: DevAction) {
 pub(crate) fn screenshot(out: Option<PathBuf>, device: Option<String>) {
     if let Err(e) = crate::device::devtools::screenshot(device.as_deref(), out.as_deref()) {
         eprintln!("✗ {}", e);
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     }
 }
 
@@ -133,7 +134,7 @@ pub(crate) fn ui(action: UiAction) {
         crate::support::cli::UiAction::Dump { out, device } => {
             if let Err(e) = crate::device::devtools::ui_dump(device.as_deref(), out.as_deref()) {
                 eprintln!("✗ {}", e);
-                std::process::exit(1);
+                crate::support::cli_exit(1);
             }
         }
     }
@@ -163,7 +164,7 @@ pub(crate) fn log(
     };
     if let Err(e) = crate::device::devtools::log(&o, device.as_deref()) {
         eprintln!("✗ {}", e);
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     }
 }
 
@@ -173,10 +174,12 @@ pub(crate) fn file(action: FileAction) {
             local,
             remote,
             device,
+            bundle,
         } => crate::device::devtools::file_send(
             std::path::Path::new(&local),
             &remote,
             device.as_deref(),
+            bundle.as_deref(),
         ),
         crate::support::cli::FileAction::Recv {
             remote,
@@ -190,7 +193,23 @@ pub(crate) fn file(action: FileAction) {
     };
     if let Err(e) = r {
         eprintln!("✗ {}", e);
-        std::process::exit(1);
+        crate::support::cli_exit(1);
+    }
+}
+
+/// Fault records: list what the device keeps, print or copy the newest one.
+pub(crate) fn faultlog(
+    bundle: Option<&str>,
+    name: Option<&str>,
+    list: bool,
+    out: Option<&str>,
+    device: Option<&str>,
+) {
+    if let Err(e) =
+        crate::device::devtools::faultlog(bundle, name, list, out.map(std::path::Path::new), device)
+    {
+        eprintln!("✗ {}", e);
+        crate::support::cli_exit(1);
     }
 }
 
@@ -200,6 +219,33 @@ pub(crate) fn file(action: FileAction) {
 fn emu(cmd: &crate::sdk::emulator::EmuCmd) {
     if let Err(e) = crate::sdk::emulator::run(cmd) {
         eprintln!("✗ {}", e);
-        std::process::exit(1);
+        crate::support::cli_exit(1);
+    }
+}
+
+/// `hvolt start <bundle>[/<ability>]`: launch an already installed package.
+pub(crate) fn start(target: String, device: Option<String>) {
+    match crate::device::devtools::start(device.as_deref(), &target) {
+        Ok(msg) => println!("{msg}"),
+        Err(e) => {
+            eprintln!("✗ {e}");
+            crate::support::cli_exit(1);
+        }
+    }
+}
+
+/// `hvolt shell <command>`: run one command on the device and print what it said.
+pub(crate) fn shell(command: String, device: Option<String>) {
+    match crate::device::devtools::sh(device.as_deref(), &command) {
+        Ok((_addr, out)) => {
+            print!("{out}");
+            if !out.ends_with('\n') {
+                println!();
+            }
+        }
+        Err(e) => {
+            eprintln!("✗ {e}");
+            crate::support::cli_exit(1);
+        }
     }
 }

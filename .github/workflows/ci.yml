@@ -54,3 +54,8 @@ jobs:
 
       - name: cargo test
         run: cargo test
+
+      # The device-side posture is a separate cfg: es2abc_inproc and the embedder paths are not
+      # compiled by the default features, so their tests would never run otherwise.
+      - name: cargo test (ohos)
+        run: cargo test --features ohos

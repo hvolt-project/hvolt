@@ -32,6 +32,13 @@ pub struct PackInputs {
     pub pkg_context: PathBuf,
     /// `--rpcid-path`: rpcid.sc, packed only when the file exists.
     pub rpcid_sc: Option<PathBuf>,
+    /// The native libraries *this* build produced, when the caller knows them.
+    ///
+    /// `None` walks `lib_dir` (the CLI path, and every build that has no per-package native
+    /// step). A multi-package build sets the list: the output directory is reused between
+    /// builds, so a `.so` left by an earlier build must not be packed into a package that no
+    /// longer produces it (`.scratch/multi-module/truth/entry/contents.txt` has no `libs/`).
+    pub lib_files: Option<Vec<PathBuf>>,
 }
 
 /// Derive the part locations from an `hvolt assemble-hap` output directory.
@@ -48,6 +55,7 @@ pub fn inputs_from_hvolt_out(hvolt_out: &Path) -> PackInputs {
         modules_dir: hvolt_out.join("ets"),
         pack_info: hvolt_out.join("pack.info"),
         pkg_context: hvolt_out.join("pkgContextInfo.json"),
+        lib_files: None,
         rpcid_sc: {
             let p = hvolt_out.join("rpcid.sc");
             if p.exists() {
@@ -124,7 +132,18 @@ pub fn pack(inputs: &PackInputs, out: &Path) -> Result<(), String> {
     let mut entries: Vec<(String, PathBuf)> = Vec::new();
     entries.push(("module.json".into(), inputs.module_json.clone()));
     entries.push(("resources.index".into(), inputs.resources_index.clone()));
-    collect_files(&inputs.lib_dir, "libs/", &mut entries)?;
+    if let Some(files) = &inputs.lib_files {
+        for path in files {
+            let rel = path
+                .strip_prefix(&inputs.lib_dir)
+                .unwrap_or(path)
+                .to_string_lossy()
+                .replace('\\', "/");
+            entries.push((format!("libs/{rel}"), path.clone()));
+        }
+    } else {
+        collect_files(&inputs.lib_dir, "libs/", &mut entries)?;
+    }
     collect_files(&inputs.resources_dir, "resources/", &mut entries)?;
     collect_files(&inputs.modules_dir, "ets/", &mut entries)?;
     entries.push(("pack.info".into(), inputs.pack_info.clone()));
@@ -155,7 +174,13 @@ pub fn pack(inputs: &PackInputs, out: &Path) -> Result<(), String> {
         .compression_method(zip::CompressionMethod::Stored)
         .unix_permissions(0o644)
         .with_alignment(4096);
-    let word_aligned = page_aligned.with_alignment(4);
+    // Everything the runtime does not map (resources, manifests) is deflated: a HAP is
+    // extracted at install time, so packing cost is the only price, and text assets such as
+    // the SDK .d.ts set or the embedded editor shrink by ~4x.
+    let word_aligned = zip::write::SimpleFileOptions::default()
+        .compression_method(zip::CompressionMethod::Deflated)
+        .unix_permissions(0o644)
+        .with_alignment(4);
     for (name, path) in &entries {
         let mut body = std::fs::read(path).map_err(|e| format!("read {}: {e}", path.display()))?;
         if name.starts_with("resources/") && name.ends_with(".json") {
@@ -212,6 +237,7 @@ mod tests {
             pack_info: PathBuf::from("/nonexistent/pack.info"),
             pkg_context: PathBuf::from("/nonexistent/pkgContextInfo.json"),
             rpcid_sc: None,
+            lib_files: None,
         };
         let err = pack(&inputs, &std::env::temp_dir().join("hvolt-x.hap")).unwrap_err();
         assert!(err.contains("module.json"), "{err}");

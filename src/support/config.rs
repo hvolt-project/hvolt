@@ -27,6 +27,33 @@ pub struct AppConfig {
     pub resolved: Option<ResolvedProduct>,
 }
 
+/// `[app.build]` — the table build hooks live under.
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+pub struct BuildFields {
+    /// Steps run after assembly and before packing, in table order.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub steps: Vec<BuildStep>,
+}
+
+/// One `[[app.build.steps]]` entry.
+///
+/// `kind` is a registry with one entry today: `run` executes the `.rhai` script at `path`
+/// (project-root relative). The field exists so later kinds do not need a config break.
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+pub struct BuildStep {
+    pub kind: String,
+    pub path: String,
+    /// When the step runs: `pre` before the ArkTS compile, `post` after assembly and before
+    /// packing (the default). A step that generates source has to be `pre` — a file written
+    /// after the compile pass never reaches the package.
+    #[serde(default = "default_step_phase")]
+    pub phase: String,
+}
+
+fn default_step_phase() -> String {
+    "post".to_string()
+}
+
 /// One `[products.<name>]` table.
 ///
 /// The override set is deliberately narrow: `bundle` / `name` / `version` / `version_code` /
@@ -164,6 +191,9 @@ pub struct AppFields {
     /// Module member directories (relative to project root).
     #[serde(default)]
     pub members: Vec<String>,
+    /// `[app.build]`: build-time hooks. Written as `[[app.build.steps]]` in hvolt.toml.
+    #[serde(default)]
+    pub build: BuildFields,
     /// Signing configs per product (keyed by product name).
     /// Supports legacy format `[app.signing]` (maps to "default") and new `[app.signing.default]`.
     #[serde(default, deserialize_with = "deserialize_signing")]
@@ -765,6 +795,27 @@ pub struct ModuleInfo {
     pub abi_filters: Vec<String>,
 }
 
+impl ModuleInfo {
+    /// Whether the module is a shared package (HSP).
+    ///
+    /// DevEco spells the type `shared`; older hvolt projects spell it `hsp`, and the oracle
+    /// layout emitter accepts both (`scripts/oracle/emit-layout.py`, `HSP_TYPES`). Either way
+    /// hvigor builds the module with `hspTasks` and packages a `.hsp`.
+    pub fn is_hsp(&self) -> bool {
+        matches!(self.module_type.as_str(), "shared" | "hsp")
+    }
+
+    /// The package entry as a shared package declares it: `./Index.ets` at the module root,
+    /// i.e. relative to `src/main/` rather than to the source root (`src/main/ets/`).
+    ///
+    /// The reference's shared layout keeps its sources at `src/main/<rel>` (the oracle's
+    /// `emit_shared`), so `module.json`'s `srcEntry` is `./<entry>` and `pkgContextInfo`'s
+    /// `entryPath` is `src/main/<entry>` — not the `./ets/<entry>` an entry module writes.
+    pub fn shared_entry_path(&self) -> String {
+        format!("src/main/{}", self.entry.trim_start_matches("./"))
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct UriScheme {
     pub scheme: String,
@@ -861,6 +912,7 @@ impl AppConfig {
                 products: default_products(),
                 runtime_os: default_runtime_os(),
                 members: vec!["src".into()],
+                build: BuildFields::default(),
             },
             products: BTreeMap::new(),
             default_product: None,
@@ -1364,6 +1416,24 @@ mod combination_tests {
 #[cfg(test)]
 mod runtime_predicate_tests {
     use super::{device_types_for_runtime, is_open_harmony};
+
+    /// Both spellings of the shared-package type select the HSP build path, and a shared
+    /// package's entry is declared relative to `src/main/` (`./Index.ets`), not to the source
+    /// root an entry module uses (`./ets/Index.ets`).
+    #[test]
+    fn shared_type_is_recognized_in_both_spellings() {
+        let mut info = super::ModuleConfig::default_entry().module;
+        info.module_type = "shared".into();
+        info.entry = "Index.ets".into();
+        assert!(info.is_hsp());
+        assert_eq!(info.shared_entry_path(), "src/main/Index.ets");
+        info.module_type = "hsp".into();
+        assert!(info.is_hsp());
+        info.module_type = "har".into();
+        assert!(!info.is_hsp());
+        info.module_type = String::new();
+        assert!(!info.is_hsp());
+    }
 
     /// The comparison is case-insensitive, matching how DevEco writes the field.
     #[test]

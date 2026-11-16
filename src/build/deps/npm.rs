@@ -166,6 +166,22 @@ pub fn discover(app: &AppConfig, project_dir: &Path) -> Result<Vec<Package>, Str
         if kind == Kind::Native {
             continue;
         }
+        // A registry dependency is fetched into the package cache on first use; the reference
+        // does this with ohpm, which needs node, so hvolt does it itself. Both outcomes are
+        // printed, so a second build can be told apart from a first one by its log alone.
+        if dep.path.is_none() && dir.is_dir() {
+            println!("dependency {name}: cache hit at {}", dir.display());
+        }
+        if !dir.is_dir() && dep.path.is_none() {
+            let registry = dep.registry.as_deref().unwrap_or("default");
+            let version = lock
+                .version_of(name)
+                .or_else(|| dep.version.clone())
+                .unwrap_or_default();
+            if !version.is_empty() {
+                let _ = crate::build::deps::registry::ensure(registry, name, &version)?;
+            }
+        }
         if !dir.is_dir() {
             if dep.optional {
                 continue;
@@ -398,13 +414,11 @@ fn resolve_dir(
         // An exact version needs no lock: it names its own directory.
         None => match dep.version.as_deref() {
             Some(version) if is_exact(version) => version.to_string(),
-            Some(range) => {
-                return Err(format!(
-                    "dependency '{name}' = \"{range}\" needs a pinned version: hvolt does not \
-                     fetch from a registry, so write the exact version (\"1.2.3\") or add \
-                     `path` pointing at a vendored copy"
-                ))
-            }
+            Some(range) => crate::build::deps::registry::resolve_version(
+                dep.registry.as_deref().unwrap_or("default"),
+                name,
+                range,
+            )?,
             None => return Ok(None),
         },
     };

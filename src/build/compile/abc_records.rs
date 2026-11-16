@@ -60,7 +60,7 @@ pub(crate) fn run(path: &Path) {
         }
         Err(e) => {
             eprintln!("✗ {e}");
-            std::process::exit(1);
+            crate::support::cli_exit(1);
         }
     }
 }

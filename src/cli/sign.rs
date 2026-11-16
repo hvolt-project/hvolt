@@ -5,6 +5,7 @@ use std::path::PathBuf;
 pub(crate) fn sign(
     hap: Option<PathBuf>,
     local: bool,
+    release: bool,
     apl: String,
     flavor: String,
     p12: Option<PathBuf>,
@@ -44,20 +45,20 @@ pub(crate) fn sign(
         };
         if let Err(e) = result {
             eprintln!("✗ {}", e);
-            std::process::exit(1);
+            crate::support::cli_exit(1);
         }
         return;
     }
     if local {
         if let Err(e) = crate::sign::sign_local::sign(project, &apl, kind) {
             eprintln!("✗ {}", e);
-            std::process::exit(1);
+            crate::support::cli_exit(1);
         }
         return;
     }
-    if let Err(e) = crate::sign::backend::sign_remote(project) {
+    if let Err(e) = crate::sign::backend::sign_remote(project, release) {
         eprintln!("✗ {}", e);
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     }
 }
 

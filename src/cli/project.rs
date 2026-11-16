@@ -9,7 +9,7 @@ pub(crate) fn init(name: String) {
     // `init examples/test-app`)
     if let Err(e) = crate::project::scaffold::validate_project_name(&name) {
         eprintln!("✗ {}", e);
-        std::process::exit(2);
+        crate::support::cli_exit(2);
     }
     crate::project::scaffold::init(&name);
     println!("✓ Created hvolt project: {}/", name);
@@ -19,7 +19,7 @@ pub(crate) fn init(name: String) {
 pub(crate) fn migrate(from: Option<PathBuf>, out: Option<PathBuf>, dry_run: bool) {
     if let Err(e) = crate::project::import::run(from.as_deref(), out.as_deref(), dry_run) {
         eprintln!("✗ {}", e);
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     }
 }
 
@@ -47,14 +47,14 @@ fn sync_deps(project: Option<PathBuf>) {
         }
         Err(e) => {
             eprintln!("✗ {}", e);
-            std::process::exit(1);
+            crate::support::cli_exit(1);
         }
     }
 }
 
 pub(crate) fn doctor(product: Option<String>) {
     let rep = crate::project::doctor::run(std::path::Path::new("."), product.as_deref());
-    std::process::exit(rep.finish());
+    crate::support::cli_exit(rep.finish());
 }
 
 pub(crate) fn clean() {
@@ -68,13 +68,35 @@ pub(crate) fn clean() {
 }
 
 pub(crate) fn check(package: Option<PathBuf>, size_limit: Option<u64>) {
+    // Source-level names first: the package gate only sees files, and a package can be perfectly
+    // well formed while a file inside it calls a name that was never imported.
+    if crate::build::stage::semantic_check::enabled() {
+        let (diagnostics, read, skipped) =
+            crate::build::stage::semantic_check::check_sources(std::path::Path::new("."));
+        for diagnostic in &diagnostics {
+            println!(
+                "{}:{}:{}: error: {}",
+                diagnostic.file, diagnostic.line, diagnostic.column, diagnostic.message
+            );
+        }
+        if skipped > 0 {
+            println!(
+                "semantic: {read} source(s), {skipped} not readable without lowering \
+                 (checked during build)"
+            );
+        }
+        if !diagnostics.is_empty() {
+            eprintln!("✗ {} undefined identifier(s)", diagnostics.len());
+            crate::support::cli_exit(1);
+        }
+    }
     if let Err(e) = crate::project::check::check_package(
         std::path::Path::new("."),
         package.as_deref(),
         size_limit,
     ) {
         eprintln!("✗ {}", e);
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     }
 }
 
@@ -91,11 +113,11 @@ pub(crate) fn export_report(ts_root: PathBuf) {
             for m in &missing {
                 println!("  {}: {} from {}", m.from, m.name, m.spec);
             }
-            std::process::exit(1);
+            crate::support::cli_exit(1);
         }
         Err(e) => {
             eprintln!("✗ {e}");
-            std::process::exit(1);
+            crate::support::cli_exit(1);
         }
     }
 }
@@ -178,11 +200,11 @@ pub(crate) fn parse_report(dir: Option<String>) {
 pub(crate) fn lsp(stdio: bool, sdk: Option<String>) {
     if !stdio {
         eprintln!("✗ hvolt lsp speaks LSP over stdio; pass --stdio");
-        std::process::exit(2);
+        crate::support::cli_exit(2);
     }
     if let Err(e) = crate::support::lsp::serve(sdk.as_deref()) {
         eprintln!("✗ {}", e);
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     }
 }
 

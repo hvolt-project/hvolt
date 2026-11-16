@@ -64,6 +64,11 @@ pub struct MergeInput<'a> {
     /// Staged `.ts` files whose source declared `"use shared"`. The flag is a column of the
     /// filesInfo table (`field 6`), not of the source text the compiler sees.
     pub shared: &'a std::collections::BTreeSet<PathBuf>,
+    /// Every module tree staged under `ts_root` (its directory name).
+    pub staged_modules: &'a [String],
+    /// The module trees this abc is assembled from. `None` = every staged file (the
+    /// single-module case, and every caller that has only one module to begin with).
+    pub package_modules: Option<&'a [String]>,
 }
 
 /// One fileInfo line, split out for the tests.
@@ -132,6 +137,11 @@ pub fn files_info_line_v(
 /// place that needs an addressable path goes through [`module_path`].
 pub(crate) const MODULE_SOURCE_ROOT: &str = "src/main/ets";
 
+/// The source root of a shared package (HSP): its sources sit beside `module.json5` under
+/// `src/main/` (`scripts/oracle/emit-layout.py::emit_shared`), which is why its records read
+/// `&shared.src.main.Index&` rather than `&shared.src.main.ets.Index&`.
+pub(crate) const MODULE_SOURCE_ROOT_SHARED: &str = "src/main";
+
 /// The entry name a module carries when its manifest declares no `main`.
 ///
 /// A member module (`import … from '<member>'`) is addressed through its package entry, and
@@ -169,6 +179,36 @@ pub(crate) fn module_entry(module: &str) -> &'static str {
         .get()
         .and_then(|entries| entries.get(module).map(String::as_str))
         .unwrap_or(DEFAULT_MODULE_ENTRY)
+}
+
+/// Every shared package (HSP) in the build: module name → its package entry path as the
+/// device composes it (`src/main/Index.ets`, relative to the module root).
+///
+/// A shared package's source root is `src/main/`, not `src/main/ets/`: the reference's shared
+/// layout keeps `Index.ets` beside `module.json5`, and both its records and the normalized
+/// url its consumer emits are built from that path
+/// (`.scratch/multi-module/truth/shared/modules.disasm`: `&shared.src.main.Index&`;
+/// `truth/entry/modules.disasm`: `@normalized:N&shared&&shared/src/main/Index&`).
+static SHARED_MODULES: std::sync::OnceLock<std::collections::BTreeMap<String, String>> =
+    std::sync::OnceLock::new();
+
+/// Publish the project's shared packages for this build.
+pub(crate) fn set_shared_modules(entries: std::collections::BTreeMap<String, String>) {
+    let _ = SHARED_MODULES.set(entries);
+}
+
+/// Whether `module` is a shared package (HSP) of this build.
+pub(crate) fn is_shared_module(module: &str) -> bool {
+    SHARED_MODULES
+        .get()
+        .is_some_and(|entries| entries.contains_key(module))
+}
+
+/// A shared package's package entry path (`src/main/Index.ets`), when it is one.
+pub(crate) fn shared_entry_path(module: &str) -> Option<&'static str> {
+    SHARED_MODULES
+        .get()
+        .and_then(|entries| entries.get(module).map(String::as_str))
 }
 
 /// The addressable name of a member module's package entry (`proxy_core/Index`).
@@ -235,10 +275,20 @@ pub(crate) fn record_version(module: &str, entry_module: &str) -> &'static str {
 }
 
 /// Addressable path of a file inside a module: `<module>/<root>/<relative path>`.
+///
+/// The root is the module's source root: `src/main/ets` for an entry (or feature) module and
+/// `src/main` for a shared package (HSP). The reference's shared layout keeps its sources
+/// beside `module.json5` under `src/main/` (`scripts/oracle/emit-layout.py::emit_shared`), and
+/// the packaged record is that path: `truth/shared/modules.disasm` carries
+/// `&shared.src.main.Index&`, while `truth/entry/modules.disasm` carries
+/// `&entry.src.main.ets.pages.Index&`.
 pub fn module_path(module: &str, rel: &str) -> String {
     // Build-generated modules (`build/...`) sit beside the source root, not inside it.
     if rel.starts_with("build/") {
         return format!("{module}/{rel}");
+    }
+    if is_shared_module(module) {
+        return format!("{module}/{MODULE_SOURCE_ROOT_SHARED}/{rel}");
     }
     format!("{module}/{MODULE_SOURCE_ROOT}/{rel}")
 }
@@ -262,7 +312,15 @@ pub fn record_name_from_ts(ts_root: &Path, ts_path: &Path, entry_module: &str) -
         // A member module's package entry is staged at the module root, so its record has no
         // source root (`&proxy_core/Index&1.0.0`). The entry module has no package entry: its
         // `entryPath` is the source root, so a file of its own keeps the full form.
-        Some((module, entry)) if module != entry_module && module_entry(module) == entry => {
+        //
+        // A shared package is the exception among member modules: its package entry is
+        // `src/main/Index` (not `Index` at the module root), so it takes the ordinary
+        // `module_path` form — which is exactly `&shared.src.main.Index&`.
+        Some((module, entry))
+            if module != entry_module
+                && !is_shared_module(module)
+                && module_entry(module) == entry =>
+        {
             module_entry_path(module)
         }
         Some((module, rest)) => module_path(module, rest),
@@ -284,6 +342,13 @@ pub fn record_name_from_ts(ts_root: &Path, ts_path: &Path, entry_module: &str) -
 }
 
 /// Write filesInfo.txt for every .ts under `ts_root`.
+///
+/// `staged_modules` names the module trees staged under `ts_root`; `package_modules` selects
+/// the ones whose files belong in the abc being merged (`None` = every staged file). A
+/// multi-module project merges one abc per package, so the entry package's table must not
+/// name the shared package's files: `.scratch/multi-module/truth/entry/modules.disasm` has
+/// zero `&shared.` records while `truth/shared/modules.disasm` has two `&shared.` ones.
+#[allow(clippy::too_many_arguments)]
 pub fn write_files_info(
     ts_root: &Path,
     out: &Path,
@@ -292,6 +357,8 @@ pub fn write_files_info(
     entry_record: Option<&str>,
     packages: &[crate::build::deps::npm::Package],
     shared: &std::collections::BTreeSet<PathBuf>,
+    staged_modules: &[String],
+    package_modules: Option<&[String]>,
 ) -> Result<(), String> {
     let mut lines = String::new();
     let mut files: Vec<PathBuf> = Vec::new();
@@ -299,6 +366,15 @@ pub fn write_files_info(
     files.sort();
     for f in files {
         let rel = f.strip_prefix(ts_root).unwrap_or(&f).to_string_lossy();
+        // A staged module tree that this package does not own contributes no record. Only a
+        // module name can select it: packages are staged under their own directory, which is
+        // never one of `staged_modules`.
+        let first = rel.split(['/', '\\']).next().unwrap_or("");
+        if staged_modules.iter().any(|module| module == first)
+            && package_modules.is_some_and(|wanted| !wanted.iter().any(|module| module == first))
+        {
+            continue;
+        }
         // package name = first path segment under the module root, like the reference's
         // `src|src|1.0.0|…` carrier.
         let pkg = rel.split(['/', '\\']).next().unwrap_or("src").to_string();
@@ -414,6 +490,8 @@ pub fn merge(input: &MergeInput<'_>) -> Result<PathBuf, String> {
         input.entry_record,
         input.npm,
         input.shared,
+        input.staged_modules,
+        input.package_modules,
     )?;
     // A byte-code HAR contributes its own abc as a merge input, with the record its package
     // entry is addressed by.
@@ -473,17 +551,53 @@ pub fn merge(input: &MergeInput<'_>) -> Result<PathBuf, String> {
     if let Some(ctx) = input.compile_context_info {
         cmd.arg("--compile-context-info").arg(ctx);
     }
-    let output = cmd.output().map_err(|e| format!("run es2abc: {e}"))?;
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        return Err(format!(
-            "es2abc merge failed: {}{}",
-            stdout.trim_end(),
-            stderr.trim_end()
-        ));
+    #[cfg(feature = "ohos")]
+    {
+        // Device-side: there is no process to spawn, the compiler is a shared library
+        // loaded into this process (libes2abc.so, resolved via HVOLT_ES2ABC_LIB).
+        //
+        // The argv mirrors the SDK's ets-loader, which drives the commercial es2abc.
+        // The open-source library behind libes2abc.so has a smaller option set, so ask
+        // it which names it knows and omit the rest rather than fail the whole merge.
+        let supported = crate::build::compile::es2abc_inproc::supported_flags()?;
+        let mut args: Vec<String> = Vec::new();
+        let mut dropped: Vec<String> = Vec::new();
+        for a in cmd.get_args().map(|a| a.to_string_lossy().into_owned()) {
+            if a.starts_with("--") {
+                let name = a.split('=').next().unwrap_or(&a).to_string();
+                if !supported.contains(&name) {
+                    dropped.push(name);
+                    continue;
+                }
+            }
+            args.push(a);
+        }
+        if !dropped.is_empty() {
+            eprintln!(
+                "hvolt: es2abc here does not take {} — omitted from the merge",
+                dropped.join(", ")
+            );
+        }
+        let (code, out) = crate::build::compile::es2abc_inproc::run(&args)?;
+        if code != 0 {
+            return Err(format!("es2abc merge failed: {}", out.trim_end()));
+        }
+        return Ok(input.out_abc.to_path_buf());
     }
-    Ok(input.out_abc.to_path_buf())
+    #[cfg(not(feature = "ohos"))]
+    {
+        let output = cmd.output().map_err(|e| format!("run es2abc: {e}"))?;
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            return Err(format!(
+                "es2abc merge failed: {}{}",
+                stdout.trim_end(),
+                stderr.trim_end()
+            ));
+        }
+        Ok(input.out_abc.to_path_buf())
+    }
 }
 
 #[cfg(test)]

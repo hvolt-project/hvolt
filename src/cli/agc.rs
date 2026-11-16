@@ -3,13 +3,40 @@ use crate::support::cli::AgcAction;
 
 pub(crate) fn agc(action: AgcAction) {
     match action {
-        crate::support::cli::AgcAction::Login => match crate::sign::backend::login() {
-            Ok(()) => println!("✓ Login successful."),
-            Err(e) => {
-                eprintln!("✗ Login failed: {}", e);
-                std::process::exit(1);
+        crate::support::cli::AgcAction::Login {
+            print_url,
+            callback,
+            wait,
+        } => {
+            // --print-url answers with one line of JSON and nothing else: the caller parses
+            // this output, so a trailing "✓ Login successful." would break it.
+            if print_url {
+                match crate::sign::backend::login_port_and_url() {
+                    Ok((port, url)) => {
+                        println!("{{\"port\":{},\"url\":\"{}\"}}", port, url);
+                        return;
+                    }
+                    Err(e) => {
+                        eprintln!("✗ Login failed: {}", e);
+                        crate::support::cli_exit(1);
+                    }
+                }
             }
-        },
+            let result = if let Some(cb) = callback {
+                crate::sign::backend::login_with_callback(&cb)
+            } else if let Some(port) = wait {
+                crate::sign::backend::login_on_port(port)
+            } else {
+                crate::sign::backend::login()
+            };
+            match result {
+                Ok(()) => println!("✓ Login successful."),
+                Err(e) => {
+                    eprintln!("✗ Login failed: {}", e);
+                    crate::support::cli_exit(1);
+                }
+            }
+        }
         crate::support::cli::AgcAction::Certs { action: None } => {
             agc_failed(crate::sign::backend::list_certs())
         }
@@ -22,7 +49,7 @@ pub(crate) fn agc(action: AgcAction) {
                     id
                 );
                 eprintln!("  confirm with: hvolt agc certs delete {} --yes", id);
-                std::process::exit(2);
+                crate::support::cli_exit(2);
             }
             agc_failed(crate::sign::backend::delete_cert(&id))
         }
@@ -43,6 +70,6 @@ pub(crate) fn agc(action: AgcAction) {
 fn agc_failed(r: Result<(), String>) {
     if let Err(e) = r {
         eprintln!("✗ {}", e);
-        std::process::exit(2);
+        crate::support::cli_exit(2);
     }
 }
