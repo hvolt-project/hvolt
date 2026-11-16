@@ -334,6 +334,48 @@ fn merge_element_table(from: &Path, to: &Path) -> Result<(), String> {
 
 /// Stage the resource tree restool compiles: the project's `resources/` plus a
 /// generated `profile/main_pages.json` (the reference injects it the same way).
+/// Materialise a `{ foreground, background }` icon into the staged media directory.
+///
+/// The pair is a build input: `app.json` can only name a resource, so the files are copied in
+/// under fixed names and `layered_image.json` is written to reference them. A project that
+/// ships its own `layered_image.json` keeps it — only a pair from the toml generates one.
+fn generate_layered_icon(
+    stage: &Path,
+    project_dir: &Path,
+    foreground: &str,
+    background: &str,
+) -> Result<(), String> {
+    let media = stage.join("base").join("media");
+    std::fs::create_dir_all(&media).map_err(|e| format!("mkdir {}: {e}", media.display()))?;
+    for (source, stem) in [
+        (foreground, "icon_foreground"),
+        (background, "icon_background"),
+    ] {
+        let path = project_dir.join(source);
+        let ext = path
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("png")
+            .to_string();
+        let dest = media.join(format!("{stem}.{ext}"));
+        std::fs::copy(&path, &dest)
+            .map_err(|e| format!("copy icon {} -> {}: {e}", path.display(), dest.display()))?;
+    }
+    let manifest = serde_json::json!({
+        "layered-image": {
+            "background": "$media:icon_background",
+            "foreground": "$media:icon_foreground"
+        }
+    });
+    let path = media.join("layered_image.json");
+    std::fs::write(
+        &path,
+        serde_json::to_string_pretty(&manifest).map_err(|e| e.to_string())?,
+    )
+    .map_err(|e| format!("write {}: {e}", path.display()))?;
+    Ok(())
+}
+
 /// Write the `hvolt.toml` application name into the staged `string.json` as `app_name`.
 ///
 /// `app.json` can only point `label` at a string resource, so the manifest alone cannot carry a
@@ -398,6 +440,9 @@ pub(crate) fn stage_resources(input: &ResCompileInput<'_>, stage: &Path) -> Resu
     // The application name is a string resource (`app.json` label must be `$string:...`), so the
     // toml value is written into the staged table instead of the project declaring it twice.
     inject_app_name(stage, &input.app.app.name)?;
+    if let Some((foreground, background)) = input.app.app.icon.as_layers() {
+        generate_layered_icon(stage, input.project_dir, foreground, background)?;
+    }
     // The selected product's directories are overlaid before the app scope is split out: an
     // icon or label a product redefines has to land in the same tree the split reads.
     overlay_product_resources(input, stage)?;
@@ -510,7 +555,7 @@ fn split_app_resources(
     module_stage: &Path,
     app_stage: &Path,
 ) -> Result<(), String> {
-    let icon = &app.app.icon;
+    let icon = app.app.icon.reference();
     let media_name = icon
         .split(':')
         .next_back()
@@ -1689,6 +1734,26 @@ mod tests {
         ResCompileInput,
     };
     use crate::support::config::{Dependency, ModuleConfig, ModuleInfo, ResolvedProduct};
+
+    /// A foreground/background pair in the toml becomes the layered icon the manifest names.
+    #[test]
+    fn a_layered_pair_generates_the_icon_set() {
+        let root = std::env::temp_dir().join(format!("hvolt-icon-{}", std::process::id()));
+        let assets = root.join("assets");
+        let stage = root.join("stage");
+        std::fs::create_dir_all(&assets).unwrap();
+        std::fs::create_dir_all(&stage).unwrap();
+        std::fs::write(assets.join("fg.png"), b"fg").unwrap();
+        std::fs::write(assets.join("bg.png"), b"bg").unwrap();
+        super::generate_layered_icon(&stage, &root, "assets/fg.png", "assets/bg.png").unwrap();
+        let media = stage.join("base").join("media");
+        assert!(media.join("icon_foreground.png").is_file());
+        assert!(media.join("icon_background.png").is_file());
+        let text = std::fs::read_to_string(media.join("layered_image.json")).unwrap();
+        assert!(text.contains("$media:icon_foreground"), "{text}");
+        assert!(text.contains("$media:icon_background"), "{text}");
+        let _ = std::fs::remove_dir_all(&root);
+    }
 
     /// The application name comes from `hvolt.toml`, not from a copy in string.json.
     #[test]

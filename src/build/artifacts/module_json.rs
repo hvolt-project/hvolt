@@ -95,7 +95,7 @@ fn app_block(
         "vendor": appf.vendor,
         "versionCode": appf.version_code(),
         "versionName": appf.version,
-        "icon": appf.icon,
+        "icon": appf.icon.reference(),
         "label": "$string:app_name",
         "apiReleaseType": release_type_with_stage(api_release_type),
         "targetAPIVersion": appf.target_api_version(),
@@ -456,7 +456,12 @@ pub fn render(input: &RenderInput<'_>) -> Value {
         .iter()
         .map(|(name, version_code)| json!({ "moduleName": name, "versionCode": version_code }))
         .collect();
-    let mut abilities = vec![entry_ability(info, &appf.icon, input.ids, runtime_os)];
+    let mut abilities = vec![entry_ability(
+        info,
+        appf.icon.reference(),
+        input.ids,
+        runtime_os,
+    )];
     abilities.extend(extra_abilities(
         &info.abilities,
         info,
