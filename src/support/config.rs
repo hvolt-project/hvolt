@@ -523,6 +523,13 @@ pub struct AbilityConfig {
     /// Empty = generated from the ability name.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub label: String,
+    /// Resource reference for this ability's icon (`$media:...`). Empty = the app icon, which
+    /// is what the manifest schema calls the default ("can be left blank by default").
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub icon: String,
+    /// Resource reference for the start-window icon. Empty = this ability's icon.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub start_window_icon: String,
     /// Resource reference for the ability description. Empty = generated.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub description: String,

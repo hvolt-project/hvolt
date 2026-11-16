@@ -352,10 +352,22 @@ fn extra_abilities(
                 &AbilitySpec {
                     name: &a.name,
                     src_entry: ability_src_entry(&a.dir, &a.entry),
-                    icon: default_icon,
+                    icon: if a.icon.is_empty() {
+                        default_icon
+                    } else {
+                        &a.icon
+                    },
                     label,
                     description,
-                    start_window_icon: default_icon,
+                    start_window_icon: if a.start_window_icon.is_empty() {
+                        if a.icon.is_empty() {
+                            default_icon
+                        } else {
+                            &a.icon
+                        }
+                    } else {
+                        &a.start_window_icon
+                    },
                     start_window_background: "$color:start_window_background",
                     skills: &a.skills,
                     extra: &a.extra,
