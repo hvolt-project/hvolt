@@ -75,8 +75,14 @@ pub fn check(
     instance: &Value,
 ) -> Result<(), String> {
     let path = schema_path(sdk_root, runtime_os, schema_name);
-    let text =
-        std::fs::read_to_string(&path).map_err(|e| format!("read {}: {e}", path.display()))?;
+    // The schema is an optional SDK asset: an OpenHarmony-only SDK carries no hms
+    // `toolchains/modulecheck/` at all. Treating that as a hard error failed every build on such
+    // a machine, so a missing file skips the check while any other read error still fails.
+    let text = match std::fs::read_to_string(&path) {
+        Ok(text) => text,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+        Err(e) => return Err(format!("read {}: {e}", path.display())),
+    };
     let schema: Value =
         serde_json::from_str(&text).map_err(|e| format!("parse {}: {e}", path.display()))?;
     let validator = jsonschema::validator_for(&schema)
