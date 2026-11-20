@@ -1948,6 +1948,23 @@ impl<'a> Visit<'a> for Checker<'_> {
                     "The '@Link' property cannot be specified a default value.".to_string(),
                 );
             }
+            // `10905303`: a `@State` field needs a default value (measured 8:10 of
+            // `fixtures/ui-state-default`, at the name).
+            let state = it.decorators.iter().any(|decorator| {
+                matches!(&decorator.expression, Expression::Identifier(name) if name.name.as_str() == "State")
+            });
+            if state && it.value.is_none() && in_struct {
+                if let Some(name) = it.key.static_name() {
+                    self.push(
+                        "ERROR",
+                        "10905303",
+                        it.key.span().start as usize,
+                        format!(
+                            "The '@State' property '{name}' must be specified a default value."
+                        ),
+                    );
+                }
+            }
             // A page takes no `@Link` at all (measured 6:9 of `fixtures/ui-static-state`, a
             // warning on the same name as the default-value error above).
             if link {
