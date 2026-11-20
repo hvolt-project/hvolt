@@ -93,6 +93,7 @@ pub(crate) struct ComponentTables {
     attributes: std::collections::HashMap<String, std::collections::HashSet<String>>,
     common: std::collections::HashSet<String>,
     parents: std::collections::HashMap<String, Vec<String>>,
+    children: std::collections::HashMap<String, Vec<String>>,
 }
 
 thread_local! {
@@ -106,14 +107,36 @@ pub(crate) fn set_component_attributes(
     attributes: std::collections::HashMap<String, std::collections::HashSet<String>>,
     common: std::collections::HashSet<String>,
     parents: std::collections::HashMap<String, Vec<String>>,
+    children: std::collections::HashMap<String, Vec<String>>,
 ) {
     COMPONENT_ATTRIBUTES.with(|cell| {
         *cell.borrow_mut() = Some(ComponentTables {
             attributes,
             common,
             parents,
+            children,
         })
     });
+}
+
+/// The children a component allows, when the SDK restricts them (`Text` accepts only `Span`,
+/// `ImageSpan`, `ContainerSpan` and `SymbolSpan`).
+fn component_children(component: &str) -> Option<Vec<String>> {
+    COMPONENT_ATTRIBUTES.with(|cell| {
+        let table = cell.borrow();
+        table.as_ref()?.children.get(component).cloned()
+    })
+}
+
+/// Every component name the SDK knows: what a `Name(` in a body may be.
+fn known_components() -> std::collections::HashSet<String> {
+    COMPONENT_ATTRIBUTES.with(|cell| {
+        let table = cell.borrow();
+        let Some(tables) = table.as_ref() else {
+            return std::collections::HashSet::new();
+        };
+        tables.attributes.keys().cloned().collect()
+    })
 }
 
 /// The parents a component may be nested in, when the SDK restricts them.
@@ -1084,6 +1107,29 @@ impl<'a> Visit<'a> for Checker<'_> {
                 Expression::Identifier(name) if name.name.as_str() == "Component"
             )
         });
+        if self.lints && !component {
+            // `10905337`: a state decorator belongs to a `struct`, and this class is not one
+            // (measured 2:4 of `fixtures/ui-decorator-on-class`, at the decorator's name).
+            for element in &class.body.body {
+                let ClassElement::PropertyDefinition(property) = element else {
+                    continue;
+                };
+                for decorator in &property.decorators {
+                    let Expression::Identifier(name) = &decorator.expression else {
+                        continue;
+                    };
+                    if name.name.as_str() != "State" {
+                        continue;
+                    }
+                    self.push(
+                        "ERROR",
+                        "10905337",
+                        name.span.start as usize,
+                        "The '@State' decorator can only be used with 'struct'.".to_string(),
+                    );
+                }
+            }
+        }
         if self.lints {
             // `validate_ui_syntax`: a `@Component` struct needs exactly one `build` method,
             // reported at the struct name (`fixtures/ui-build-method`: 10905103, 2:8). The masked
@@ -1233,6 +1279,25 @@ impl<'a> Visit<'a> for Checker<'_> {
                         offset,
                         format!("'{quoted}' does not meet UI component syntax."),
                     );
+                }
+                {
+                    let blocks = component_blocks(self.source, (body.brace, brace_end));
+                    let known = known_components();
+                    for (offset, parent, allowed) in restricted_children_violations(
+                        self.source,
+                        (body.brace, brace_end),
+                        &blocks,
+                        &known,
+                    ) {
+                        self.push(
+                            "ERROR",
+                            "10905219",
+                            offset,
+                            format!(
+                                "The component '{parent}' can only have the child component '{allowed}'."
+                            ),
+                        );
+                    }
                 }
                 for (offset, child, allowed) in
                     nesting_violations(self.source, (body.brace, brace_end))
@@ -1487,16 +1552,78 @@ fn parent_restricted_names() -> Vec<String> {
     })
 }
 
+/// `10905219`: a component whose children the SDK restricts, given a child it does not accept.
+///
+/// Reported at the parent, with the accepted children listed (`fixtures/ui-restricted-children`:
+/// `Text` holding a `Text`, 13:7).
+fn restricted_children_violations(
+    source: &str,
+    body: (usize, usize),
+    blocks: &[(String, usize, usize)],
+    known: &std::collections::HashSet<String>,
+) -> Vec<(usize, String, String)> {
+    let mut found = Vec::new();
+    // `component_blocks` reports offsets relative to the body text; the caller's window starts
+    // there too, so both are taken from the same slice.
+    let (start, end) = body;
+    let text = &source[start..end];
+    for (parent, block_start, block_end) in blocks {
+        let Some(allowed) = component_children(parent) else {
+            continue;
+        };
+        let inner = &text[*block_start..*block_end];
+        let bytes = inner.as_bytes();
+        let mut index = 0usize;
+        let mut offending = false;
+        while index < bytes.len() {
+            if !(bytes[index].is_ascii_alphabetic() || bytes[index] == b'_') {
+                index += 1;
+                continue;
+            }
+            let name_start = index;
+            let mut cursor = index;
+            while cursor < bytes.len()
+                && (bytes[cursor].is_ascii_alphanumeric()
+                    || bytes[cursor] == b'_'
+                    || bytes[cursor] == b'$')
+            {
+                cursor += 1;
+            }
+            let name = &inner[name_start..cursor];
+            if bytes.get(cursor) == Some(&b'(')
+                && known.contains(name)
+                && !allowed.iter().any(|a| a == name)
+            {
+                offending = true;
+                break;
+            }
+            index = cursor;
+        }
+        if offending {
+            // The reference anchors at the parent's own name: the last `Name(` before the block
+            // opens (`fixtures/ui-restricted-children`: 11:7).
+            let before = &text[..*block_start];
+            let offset = match before.rfind(&format!("{parent}(")) {
+                Some(at) => start + at,
+                None => start + *block_start,
+            };
+            found.push((offset, parent.clone(), allowed.join(",")));
+        }
+    }
+    let _ = body;
+    found
+}
+
 /// `10905201`: a component nested where only some parents are allowed.
 ///
 /// The restriction comes from the SDK (`components/*.json` has `parents` for 18 components, `Span`
 /// among them), and the reference reports the child at its own identifier with the allowed parents
 /// listed (`fixtures/ui-nested-parent`: `Span` in a `Column`, 8:7).
-fn nesting_violations(source: &str, body: (usize, usize)) -> Vec<(usize, String, String)> {
+/// Every `Name(…) { … }` block in a body: `(name, block_start, block_end)`, offsets absolute.
+fn component_blocks(source: &str, body: (usize, usize)) -> Vec<(String, usize, usize)> {
     let (start, end) = body;
     let text = &source[start..end];
     let bytes = text.as_bytes();
-    // Every `Name(…) {` block in the body: `(name, block_start, block_end)`.
     let mut blocks: Vec<(String, usize, usize)> = Vec::new();
     let mut index = 0usize;
     while index < bytes.len() {
@@ -1550,6 +1677,15 @@ fn nesting_violations(source: &str, body: (usize, usize)) -> Vec<(usize, String,
         }
         index = cursor;
     }
+    blocks
+}
+
+/// `10905201`: a component nested where only some parents are allowed.
+fn nesting_violations(source: &str, body: (usize, usize)) -> Vec<(usize, String, String)> {
+    let (start, end) = body;
+    let text = &source[start..end];
+    let bytes = text.as_bytes();
+    let blocks = component_blocks(source, body);
     let mut found = Vec::new();
     // A child is looked for by name anywhere in the body: a leaf component (`Span("x")`) opens no
     // block of its own, so walking the blocks alone misses it.

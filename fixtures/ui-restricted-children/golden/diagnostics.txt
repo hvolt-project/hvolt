@@ -1,0 +1,2 @@
+ERROR 10905219 ets/pages/Index.ets:11:7 The component 'Text' can only have the child component 'Span,ImageSpan,ContainerSpan,SymbolSpan'.
+ERROR 10905337 ets/pages/Index.ets:2:4 The '@State' decorator can only be used with 'struct'.
