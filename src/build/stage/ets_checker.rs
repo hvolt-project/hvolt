@@ -1103,6 +1103,23 @@ impl<'a> Visit<'a> for Checker<'_> {
         oxc_ast_visit::walk::walk_ts_type_literal(self, it);
     }
 
+    /// An ambient module declaration is refused at the `declare` (10605128, measured 1:1 of
+    /// `fixtures/arkts-ambient-decl`). A probe that also carried an overloaded function and a
+    /// default export drew a second diagnostic — `Invalid module name in augmentation, module
+    /// 'virtual' cannot be found.` at the name — that this fixture does not reproduce, so only the
+    /// rule is judged until the condition behind that one is measured.
+    fn visit_ts_module_declaration(&mut self, it: &oxc_ast::ast::TSModuleDeclaration<'a>) {
+        if self.lints {
+            self.push(
+                "ERROR",
+                "10605128",
+                it.span.start as usize,
+                "Ambient module declaration is not supported (arkts-no-ambient-decls)".to_string(),
+            );
+        }
+        oxc_ast_visit::walk::walk_ts_module_declaration(self, it);
+    }
+
     /// `arkts-no-aliases-by-index` (10605028), reported at the indexed type.
     fn visit_ts_indexed_access_type(&mut self, it: &oxc_ast::ast::TSIndexedAccessType<'a>) {
         if self.lints {
