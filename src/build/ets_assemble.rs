@@ -106,7 +106,99 @@ fn publish_system_modules() {
     if modules.is_empty() {
         return;
     }
+    // The names each of those modules declares, read from its declaration file: a named import
+    // the file does not have is what `process_system_module.js` reports
+    // (`fixtures/ohos-missing-symbol`). `None` marks a module whose file re-exports everything.
+    let mut symbols: std::collections::HashMap<String, Option<std::collections::HashSet<String>>> =
+        std::collections::HashMap::new();
+    let Ok(entries) = std::fs::read_dir(&sdk) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let root = entry.path();
+        for candidate in [
+            root.join("ets/api"),
+            root.join("openharmony/ets/api"),
+            root.join("hms/ets/api"),
+        ] {
+            let Ok(files) = std::fs::read_dir(&candidate) else {
+                continue;
+            };
+            for file in files.flatten() {
+                let name = file.file_name();
+                let Some(name) = name.to_str() else { continue };
+                let Some(module) = name.strip_suffix(".d.ts") else {
+                    continue;
+                };
+                if !modules.contains(module) || symbols.contains_key(module) {
+                    continue;
+                }
+                let Ok(text) = std::fs::read_to_string(file.path()) else {
+                    continue;
+                };
+                symbols.insert(module.to_string(), declared_names(&text));
+            }
+        }
+    }
+    if !symbols.is_empty() {
+        crate::build::stage::ets_checker::set_system_module_symbols(symbols);
+    }
     crate::build::stage::ets_checker::set_system_modules(modules);
+}
+
+/// Top-level names a declaration file introduces, or `None` when it re-exports everything
+/// (`export *`), in which case nothing can be called missing.
+fn declared_names(text: &str) -> Option<std::collections::HashSet<String>> {
+    if text.contains("export *") {
+        return None;
+    }
+    let mut names = std::collections::HashSet::new();
+    for line in text.lines() {
+        let line = line.trim_start();
+        let line = line.strip_prefix("export ").unwrap_or(line);
+        let line = line.strip_prefix("declare ").unwrap_or(line);
+        let line = line.strip_prefix("default ").unwrap_or(line);
+        let line = line.strip_prefix("abstract ").unwrap_or(line);
+        for keyword in [
+            "class ",
+            "interface ",
+            "function ",
+            "const ",
+            "let ",
+            "var ",
+            "type ",
+            "enum ",
+            "namespace ",
+            "module ",
+        ] {
+            let Some(rest) = line.strip_prefix(keyword) else {
+                continue;
+            };
+            let name: String = rest
+                .chars()
+                .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+                .collect();
+            if !name.is_empty() {
+                names.insert(name);
+            }
+            break;
+        }
+        // `export { A, B as C };`
+        if let Some(rest) = line.strip_prefix('{') {
+            for part in rest.split('}').next().unwrap_or_default().split(',') {
+                let part = part.trim();
+                let name = part.rsplit(" as ").next().unwrap_or(part).trim();
+                if !name.is_empty()
+                    && name
+                        .chars()
+                        .all(|c| c.is_alphanumeric() || c == '_' || c == '$')
+                {
+                    names.insert(name.to_string());
+                }
+            }
+        }
+    }
+    Some(names)
 }
 
 pub fn sdk_kit_configs() -> Result<Vec<PathBuf>, String> {

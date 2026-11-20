@@ -27,9 +27,14 @@
 
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{
-    Class, ClassElement, Expression, ImportDeclaration, ImportDeclarationSpecifier,
-    MethodDefinitionKind, ModuleExportName, PropertyDefinition, PropertyKey, TSType,
-    TSTypeAnnotation,
+    CatchClause, Class, ClassElement, Expression, FormalParameter, Function, FunctionBody,
+    ImportDeclaration, ImportDeclarationSpecifier, MethodDefinition, MethodDefinitionKind,
+    ModuleExportName, NewExpression, ObjectExpression, ObjectPropertyKind, Program,
+    PropertyDefinition, PropertyKey, ReturnStatement, Statement, TSConditionalType,
+    TSConstructSignatureDeclaration, TSConstructorType, TSEnumDeclaration, TSIndexSignature,
+    TSMappedType, TSType, TSTypeAnnotation, TSTypeAssertion, TSTypeLiteral, TSTypeQuery,
+    ThisExpression, UnaryOperator, VariableDeclaration, VariableDeclarationKind,
+    VariableDeclarator,
 };
 use oxc_ast_visit::Visit;
 use oxc_parser::Parser;
@@ -67,6 +72,34 @@ thread_local! {
 /// Publishes the SDK's system-module names. Called once per build, before any file is checked.
 pub(crate) fn set_system_modules(modules: std::collections::HashSet<String>) {
     SYSTEM_MODULES.with(|cell| *cell.borrow_mut() = Some(modules));
+}
+
+thread_local! {
+    /// Top-level names each `@ohos.*` / `@system.*` module's declaration file declares. An entry
+    /// that is `None` means the file names everything (`export * from`), so nothing is reported.
+    static SYSTEM_MODULE_SYMBOLS: std::cell::RefCell<
+        Option<std::collections::HashMap<String, Option<std::collections::HashSet<String>>>>,
+    > = const { std::cell::RefCell::new(None) };
+}
+
+/// Publishes the declared names of every system module, alongside their existence.
+pub(crate) fn set_system_module_symbols(
+    symbols: std::collections::HashMap<String, Option<std::collections::HashSet<String>>>,
+) {
+    SYSTEM_MODULE_SYMBOLS.with(|cell| *cell.borrow_mut() = Some(symbols));
+}
+
+/// `Some(true)` when the SDK's declaration of the module has the name, `Some(false)` when it does
+/// not, `None` when that module's names were not collected.
+fn system_module_has_symbol(request: &str, symbol: &str) -> Option<bool> {
+    SYSTEM_MODULE_SYMBOLS.with(|cell| {
+        let table = cell.borrow();
+        let table = table.as_ref()?;
+        match table.get(request)? {
+            None => Some(true),
+            Some(names) => Some(names.contains(symbol)),
+        }
+    })
 }
 
 /// `Some(true)` when the SDK declares the request, `Some(false)` when it does not, `None` when no
@@ -127,6 +160,9 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         data_fields: Vec::new(),
         every_data_field: Vec::new(),
         lints: file.ends_with(".ets"),
+        unannotated_fns: unannotated_functions(&parsed.program),
+        class_names: class_names(&parsed.program),
+        method_depth: 0,
     };
     checker.visit_program(&parsed.program);
     checker.scan_call_sites();
@@ -281,6 +317,16 @@ struct Checker<'a> {
     /// flagging it would fail a build the reference accepts (measured on
     /// `fixtures/favorite-configuration`, whose `common/utils/*.ts` were reported).
     lints: bool,
+    /// Functions of this file declared without a return type. `arkts-no-implicit-return-types`
+    /// fires when such a function returns a call to *another* such function: the reference can
+    /// infer `1` and `"x"` but refuses to chain two inferences (`fixtures/arkts-return-types`).
+    unannotated_fns: std::collections::BTreeSet<String>,
+    /// Classes declared in this file. A reference to one is not an object the reference accepts
+    /// (`arkts-no-classes-as-obj`, a warning).
+    class_names: std::collections::BTreeSet<String>,
+    /// How many class methods enclose the node being visited. `this` is legal inside a method and
+    /// rejected inside a stand-alone function (`arkts-no-standalone-this`).
+    method_depth: usize,
 }
 
 impl Checker<'_> {
@@ -292,15 +338,36 @@ impl Checker<'_> {
         if !(request.starts_with("@ohos.") || request.starts_with("@system.")) {
             return;
         }
-        if system_module_declared(request) != Some(false) {
+        if system_module_declared(request) == Some(false) {
+            self.push(
+                "ERROR",
+                "10505001",
+                it.source.span.start as usize,
+                format!("Cannot find module '{request}' or its corresponding type declarations."),
+            );
             return;
         }
-        self.push(
-            "ERROR",
-            "10505001",
-            it.source.span.start as usize,
-            format!("Cannot find module '{request}' or its corresponding type declarations."),
-        );
+        // `process_system_module.js`: a named import the module's declaration does not have is
+        // reported at the name, with the reference's own wording (`fixtures/ohos-missing-symbol`).
+        if let Some(specifiers) = &it.specifiers {
+            for specifier in specifiers.iter() {
+                let ImportDeclarationSpecifier::ImportSpecifier(specifier) = specifier else {
+                    continue;
+                };
+                let imported = specifier.imported.name().as_str();
+                if system_module_has_symbol(request, imported) != Some(false) {
+                    continue;
+                }
+                self.push(
+                    "ERROR",
+                    "10505001",
+                    specifier.span.start as usize,
+                    format!(
+                        "Module '\"{request}\"' has no exported member '{imported}'. Did you mean to use 'import {imported} from \"{request}\"' instead?"
+                    ),
+                );
+            }
+        }
     }
 
     fn push(&mut self, severity: &'static str, code: &'static str, offset: usize, message: String) {
@@ -461,6 +528,440 @@ impl<'a> Visit<'a> for Checker<'_> {
         }
         self.check_system_request(it);
         oxc_ast_visit::walk::walk_import_declaration(self, it);
+    }
+
+    /// `arkts-no-ctor-signatures-iface` (10605027): a construct signature in an interface, at the
+    /// `new` (2:3 of `fixtures/arkts-iface-and-stdlib`).
+    fn visit_ts_construct_signature_declaration(
+        &mut self,
+        it: &TSConstructSignatureDeclaration<'a>,
+    ) {
+        if self.lints {
+            self.push(
+                "ERROR",
+                "10605027",
+                it.span.start as usize,
+                "Construct signatures are not supported in interfaces (arkts-no-ctor-signatures-iface)"
+                    .to_string(),
+            );
+        }
+        oxc_ast_visit::walk::walk_ts_construct_signature_declaration(self, it);
+    }
+
+    /// Two more syntactic refusals, anchored where the reference anchors them
+    /// (`fixtures/arkts-ctor-and-casts`): a constructor parameter that declares a field, at the
+    /// `public` (2:15), and an angle-bracket cast, at the `<` (10:19).
+    /// A parameter that carries a modifier declares a field (`constructor(public label: string)`),
+    /// which ArkTS refuses. The parser keeps the modifiers on the parameter, so the test is the
+    /// presence of one; the anchor is the parameter's first token (2:15, the `public`).
+    fn visit_formal_parameter(&mut self, it: &FormalParameter<'a>) {
+        if self.lints
+            && (it.accessibility.is_some()
+                || it.readonly
+                || it.r#override
+                || !it.decorators.is_empty())
+        {
+            self.push(
+                "ERROR",
+                "10605025",
+                it.span.start as usize,
+                "Declaring fields in \"constructor\" is not supported (arkts-no-ctor-prop-decls)"
+                    .to_string(),
+            );
+        }
+        oxc_ast_visit::walk::walk_formal_parameter(self, it);
+    }
+
+    fn visit_ts_type_assertion(&mut self, it: &TSTypeAssertion<'a>) {
+        if self.lints {
+            self.push(
+                "ERROR",
+                "10605053",
+                it.span.start as usize,
+                "Only \"as T\" syntax is supported for type casts (arkts-as-casts)".to_string(),
+            );
+        }
+        oxc_ast_visit::walk::walk_ts_type_assertion(self, it);
+    }
+
+    /// Three more shapes, anchored where the reference anchors them
+    /// (`fixtures/arkts-classes-and-enums`): the `new` of a constructor type (10:16), the first
+    /// member of an enum whose members disagree in kind (3:3), and a class used as a value
+    /// (13:10, a warning).
+    fn visit_ts_constructor_type(&mut self, it: &TSConstructorType<'a>) {
+        if self.lints {
+            self.push(
+                "ERROR",
+                "10605106",
+                it.span.start as usize,
+                "Constructor function type is not supported (arkts-no-ctor-signatures-funcs)"
+                    .to_string(),
+            );
+        }
+        oxc_ast_visit::walk::walk_ts_constructor_type(self, it);
+    }
+
+    fn visit_ts_enum_declaration(&mut self, it: &TSEnumDeclaration<'a>) {
+        if self.lints {
+            let kind_of = |member: &oxc_ast::ast::TSEnumMember<'a>| -> u8 {
+                match member.initializer.as_ref() {
+                    Some(Expression::NumericLiteral(_)) => 1,
+                    Some(Expression::StringLiteral(_)) => 2,
+                    _ => 0,
+                }
+            };
+            let first = it.body.members.first().map(kind_of).unwrap_or(0);
+            // The rule is reported at the member that breaks the kind, not at the first one
+            // (`fixtures/arkts-classes-and-enums`: `A = 1` is fine, `B = "b"` is 3:3).
+            let offender = it.body.members.iter().find(|member| {
+                let kind = kind_of(member);
+                kind != 0 && first != 0 && kind != first
+            });
+            if let Some(member) = offender.filter(|_| first != 0) {
+                {
+                    // The parser's span for an enum member does not land on the member's name
+                    // (measured: it pointed into the `enum` keyword), so the name is found in the
+                    // source from the body's start instead.
+                    let name = match &member.id {
+                        oxc_ast::ast::TSEnumMemberName::Identifier(id) => id.name.to_string(),
+                        oxc_ast::ast::TSEnumMemberName::String(literal) => {
+                            literal.value.to_string()
+                        }
+                        _ => String::new(),
+                    };
+                    let from = it.body.span.start as usize;
+                    let offset = self
+                        .source
+                        .get(from..)
+                        .and_then(|rest| rest.find(&name))
+                        .map(|found| from + found)
+                        .unwrap_or(from);
+                    self.push(
+                        "ERROR",
+                        "10605111",
+                        offset,
+                        "Enumeration members can be initialized only with compile time expressions of the same type (arkts-no-enum-mixed-types)"
+                            .to_string(),
+                    );
+                }
+            }
+        }
+        oxc_ast_visit::walk::walk_ts_enum_declaration(self, it);
+    }
+
+    /// `arkts-limited-stdlib` (10605144): members the reference's restricted standard library
+    /// refuses. Measured on `fixtures/arkts-iface-and-stdlib` — `Object.assign` (22:10),
+    /// `Object.freeze` (2:18) and `Object.create` (5:19) are refused, while `Object.entries`,
+    /// `Object.getOwnPropertyNames`, `Date.parse`, `parseInt` and `JSON.stringify` are not, so the
+    /// table holds exactly the measured members, anchored at the `Object` identifier.
+    fn visit_call_expression(&mut self, it: &oxc_ast::ast::CallExpression<'a>) {
+        if self.lints {
+            if let Expression::StaticMemberExpression(member) = &it.callee {
+                if let Expression::Identifier(object) = &member.object {
+                    if object.name.as_str() == "Object"
+                        && matches!(
+                            member.property.name.as_str(),
+                            "assign" | "freeze" | "create"
+                        )
+                    {
+                        self.push(
+                            "ERROR",
+                            "10605144",
+                            object.span.start as usize,
+                            "Usage of standard library is restricted (arkts-limited-stdlib)"
+                                .to_string(),
+                        );
+                        // `Object.assign({}, …)`: the parameters are untyped, so the literal has
+                        // no contextual type either and draws the same rule a declarator would
+                        // (7:24 of `fixtures/arkts-iface-and-stdlib`). An object literal passed to
+                        // a typed parameter — the ordinary component call — does not.
+                        if member.property.name.as_str() == "assign" {
+                            for argument in &it.arguments {
+                                if let Some(Expression::ObjectExpression(literal)) =
+                                    argument.as_expression()
+                                {
+                                    self.push(
+                                        "ERROR",
+                                        "10605038",
+                                        literal.span.start as usize,
+                                        "Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)".to_string(),
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        oxc_ast_visit::walk::walk_call_expression(self, it);
+    }
+
+    /// `new Holder(...)` names the class as a constructor, which is allowed; every other mention
+    /// of a class name is a value use.
+    fn visit_new_expression(&mut self, it: &NewExpression<'a>) {
+        for argument in &it.arguments {
+            if let Some(expression) = argument.as_expression() {
+                self.visit_expression(expression);
+            }
+        }
+    }
+
+    /// Five type forms ArkTS does not have, each anchored where the reference anchors it
+    /// (`fixtures/arkts-type-shapes`): the indexed signature's `[` (2:3), a conditional type's
+    /// check type (5:23), a mapped type's `{` (7:15), the `typeof` (12:15), and an object literal
+    /// used as a type (17:16).
+    fn visit_ts_index_signature(&mut self, it: &TSIndexSignature<'a>) {
+        if self.lints {
+            self.push(
+                "ERROR",
+                "10605017",
+                it.span.start as usize,
+                "Indexed signatures are not supported (arkts-no-indexed-signatures)".to_string(),
+            );
+        }
+        oxc_ast_visit::walk::walk_ts_index_signature(self, it);
+    }
+
+    fn visit_ts_conditional_type(&mut self, it: &TSConditionalType<'a>) {
+        if self.lints {
+            self.push(
+                "ERROR",
+                "10605022",
+                it.check_type.span().start as usize,
+                "Conditional types are not supported (arkts-no-conditional-types)".to_string(),
+            );
+        }
+        oxc_ast_visit::walk::walk_ts_conditional_type(self, it);
+    }
+
+    fn visit_ts_mapped_type(&mut self, it: &TSMappedType<'a>) {
+        if self.lints {
+            self.push(
+                "ERROR",
+                "10605083",
+                it.span.start as usize,
+                "Mapped type expression is not supported (arkts-no-mapped-types)".to_string(),
+            );
+        }
+        oxc_ast_visit::walk::walk_ts_mapped_type(self, it);
+    }
+
+    fn visit_ts_type_query(&mut self, it: &TSTypeQuery<'a>) {
+        if self.lints {
+            self.push(
+                "ERROR",
+                "10605060",
+                it.span.start as usize,
+                "\"typeof\" operator is allowed only in expression contexts (arkts-no-type-query)"
+                    .to_string(),
+            );
+        }
+        oxc_ast_visit::walk::walk_ts_type_query(self, it);
+    }
+
+    fn visit_ts_type_literal(&mut self, it: &TSTypeLiteral<'a>) {
+        if self.lints {
+            self.push(
+                "ERROR",
+                "10605040",
+                it.span.start as usize,
+                "Object literals cannot be used as type declarations (arkts-no-obj-literals-as-types)"
+                    .to_string(),
+            );
+        }
+        oxc_ast_visit::walk::walk_ts_type_literal(self, it);
+    }
+
+    /// `arkts-no-untyped-obj-literals` (10605038): an object literal with no contextual type, at
+    /// the `{`. Measured on `fixtures/arkts-object-shapes`: `return { ...a }` (2:10) and
+    /// `const o = { … }` without an annotation (10:13); the same literal passed to a typed
+    /// parameter is accepted, so only these two positions are judged.
+    fn visit_variable_declarator(&mut self, it: &VariableDeclarator<'a>) {
+        // A type *literal* annotation declares no class or interface, so the initialiser still has
+        // no contextual type: the reference reports both the type literal (10605040) and this
+        // (measured at 17:16 and 17:32 of `fixtures/arkts-type-shapes`).
+        let typed = matches!(
+            it.id.type_annotation.as_ref().map(|annotation| &annotation.type_annotation),
+            Some(annotation) if !matches!(annotation, TSType::TSTypeLiteral(_))
+        );
+        if self.lints && !typed {
+            if let Some(Expression::ObjectExpression(object)) = &it.init {
+                self.push(
+                    "ERROR",
+                    "10605038",
+                    object.span.start as usize,
+                    "Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)".to_string(),
+                );
+            }
+        }
+        oxc_ast_visit::walk::walk_variable_declarator(self, it);
+    }
+
+    fn visit_return_statement(&mut self, it: &ReturnStatement<'a>) {
+        if self.lints {
+            // A class returned as a value: `arkts-no-classes-as-obj`, a warning. Only this
+            // position is measured (`fixtures/arkts-classes-and-enums`, 13:10); a class named in
+            // a type position (`new () => Holder`) draws nothing.
+            if let Some(Expression::Identifier(id)) = &it.argument {
+                if self.class_names.contains(id.name.as_str()) {
+                    self.push(
+                        "WARN",
+                        "-",
+                        id.span.start as usize,
+                        "Classes cannot be used as objects (arkts-no-classes-as-obj)".to_string(),
+                    );
+                }
+            }
+            if let Some(Expression::ObjectExpression(object)) = &it.argument {
+                self.push(
+                    "ERROR",
+                    "10605038",
+                    object.span.start as usize,
+                    "Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)".to_string(),
+                );
+            }
+        }
+        oxc_ast_visit::walk::walk_return_statement(self, it);
+    }
+
+    /// `arkts-no-spread` (10605099): a spread inside an object literal (arrays only), at the
+    /// `...`.
+    fn visit_object_expression(&mut self, it: &ObjectExpression<'a>) {
+        if self.lints {
+            for property in &it.properties {
+                if let ObjectPropertyKind::SpreadProperty(spread) = property {
+                    self.push(
+                        "ERROR",
+                        "10605099",
+                        spread.span.start as usize,
+                        "It is possible to spread only arrays or classes derived from arrays into the rest parameter or array literals (arkts-no-spread)"
+                            .to_string(),
+                    );
+                }
+            }
+        }
+        oxc_ast_visit::walk::walk_object_expression(self, it);
+    }
+
+    fn visit_method_definition(&mut self, it: &MethodDefinition<'a>) {
+        self.method_depth += 1;
+        oxc_ast_visit::walk::walk_method_definition(self, it);
+        self.method_depth -= 1;
+    }
+
+    /// Two rules about functions, both anchored on the function itself:
+    ///
+    /// · `arkts-no-standalone-this` (10605093) — `this` in a function that is not a method, at the
+    ///   `this` (15:10 in the fixture);
+    /// · `arkts-no-implicit-return-types` (10605090) — a function with no return type that
+    ///   returns `this` or a call to another unannotated function, at the function name (14:10).
+    fn visit_function(&mut self, it: &Function<'a>, flags: oxc_syntax::scope::ScopeFlags) {
+        if self.lints {
+            if self.method_depth == 0 {
+                for span in this_spans(it) {
+                    self.push(
+                        "ERROR",
+                        "10605093",
+                        span,
+                        "Using \"this\" inside stand-alone functions is not supported (arkts-no-standalone-this)".to_string(),
+                    );
+                }
+            }
+            if it.return_type.is_none() {
+                if let (Some(id), Some(body)) = (&it.id, &it.body) {
+                    if returns_limited_type(body, &self.unannotated_fns) {
+                        self.push(
+                            "ERROR",
+                            "10605090",
+                            id.span.start as usize,
+                            "Function return type inference is limited (arkts-no-implicit-return-types)"
+                                .to_string(),
+                        );
+                    }
+                }
+            }
+        }
+        oxc_ast_visit::walk::walk_function(self, it, flags);
+    }
+
+    /// Three rules the reference reports on constructs ArkTS does not have.
+    ///
+    /// · `arkts-no-delete` (10605059): the `delete` operator, at the operator;
+    /// · `arkts-no-globalthis` (a warning, no code): `globalThis`, at the identifier;
+    /// · `arkts-no-types-in-catch` (10605079): a type annotation on a catch parameter, at the
+    ///   `:`; the same file also draws the type system's own error, at the type itself.
+    ///
+    /// Measured on `fixtures/unsupported-syntax`: 2:3, 6:3, 12:12 and 12:15.
+    fn visit_unary_expression(&mut self, it: &oxc_ast::ast::UnaryExpression<'a>) {
+        if self.lints && it.operator == UnaryOperator::Delete {
+            self.push(
+                "ERROR",
+                "10605059",
+                it.span.start as usize,
+                "\"delete\" operator is not supported (arkts-no-delete)".to_string(),
+            );
+        }
+        oxc_ast_visit::walk::walk_unary_expression(self, it);
+    }
+
+    fn visit_identifier_reference(&mut self, it: &oxc_ast::ast::IdentifierReference<'a>) {
+        if self.lints && it.name.as_str() == "globalThis" {
+            self.push(
+                "WARN",
+                "-",
+                it.span.start as usize,
+                "\"globalThis\" is not supported (arkts-no-globalthis)".to_string(),
+            );
+        }
+        oxc_ast_visit::walk::walk_identifier_reference(self, it);
+    }
+
+    fn visit_catch_clause(&mut self, it: &CatchClause<'a>) {
+        if self.lints {
+            if let Some(parameter) = &it.param {
+                if let Some(annotation) = &parameter.pattern.type_annotation {
+                    // The reference anchors the rule at the parameter itself (`e`), one column
+                    // before the `:` the annotation span starts at.
+                    self.push(
+                        "ERROR",
+                        "10605079",
+                        parameter.pattern.span().start as usize,
+                        "Type annotation in catch clause is not supported (arkts-no-types-in-catch)"
+                            .to_string(),
+                    );
+                    // The type system rejects the annotation too, unless it names `any` or
+                    // `unknown`; the reference prints both diagnostics.
+                    let allowed = matches!(
+                        annotation.type_annotation,
+                        TSType::TSAnyKeyword(_) | TSType::TSUnknownKeyword(_)
+                    );
+                    if !allowed {
+                        self.push(
+                            "ERROR",
+                            "10505001",
+                            annotation.type_annotation.span().start as usize,
+                            "Catch clause variable type annotation must be 'any' or 'unknown' if specified."
+                                .to_string(),
+                        );
+                    }
+                }
+            }
+        }
+        oxc_ast_visit::walk::walk_catch_clause(self, it);
+    }
+
+    /// `arkts-no-var`: a `var` declaration, which ArkTS rejects in favour of `let`.
+    /// Measured on `fixtures/var-declaration` (11:1, the keyword).
+    fn visit_variable_declaration(&mut self, it: &VariableDeclaration<'a>) {
+        if self.lints && it.kind == VariableDeclarationKind::Var {
+            self.push(
+                "ERROR",
+                "10605005",
+                it.span.start as usize,
+                "Use \"let\" instead of \"var\" (arkts-no-var)".to_string(),
+            );
+        }
+        oxc_ast_visit::walk::walk_variable_declaration(self, it);
     }
 
     /// A decorated field and a method with the same name: `@State sdkState` and `sdkState()`.
@@ -624,6 +1125,80 @@ fn literal_name(value: &Expression<'_>) -> Option<&'static str> {
         Expression::BooleanLiteral(_) => Some("boolean"),
         _ => None,
     }
+}
+
+/// Classes declared in this file.
+fn class_names(program: &Program<'_>) -> std::collections::BTreeSet<String> {
+    struct Collect(std::collections::BTreeSet<String>);
+    impl<'a> Visit<'a> for Collect {
+        fn visit_class(&mut self, it: &Class<'a>) {
+            if let Some(id) = &it.id {
+                self.0.insert(id.name.to_string());
+            }
+            oxc_ast_visit::walk::walk_class(self, it);
+        }
+    }
+    let mut collect = Collect(std::collections::BTreeSet::new());
+    collect.visit_program(program);
+    collect.0
+}
+
+/// Functions declared in this file without a return type.
+fn unannotated_functions(program: &Program<'_>) -> std::collections::BTreeSet<String> {
+    struct Collect(std::collections::BTreeSet<String>);
+    impl<'a> Visit<'a> for Collect {
+        fn visit_function(&mut self, it: &Function<'a>, flags: oxc_syntax::scope::ScopeFlags) {
+            if it.return_type.is_none() {
+                if let Some(id) = &it.id {
+                    self.0.insert(id.name.to_string());
+                }
+            }
+            oxc_ast_visit::walk::walk_function(self, it, flags);
+        }
+    }
+    let mut collect = Collect(std::collections::BTreeSet::new());
+    collect.visit_program(program);
+    collect.0
+}
+
+/// Byte offsets of every `this` inside a function.
+fn this_spans(function: &Function<'_>) -> Vec<usize> {
+    struct Collect(Vec<usize>);
+    impl<'a> Visit<'a> for Collect {
+        fn visit_this_expression(&mut self, it: &ThisExpression) {
+            self.0.push(it.span.start as usize);
+        }
+    }
+    let mut collect = Collect(Vec::new());
+    if let Some(body) = &function.body {
+        for statement in &body.statements {
+            collect.visit_statement(statement);
+        }
+    }
+    collect.0
+}
+
+/// Whether a body returns a `this` or a call to a function whose return type is itself inferred.
+fn returns_limited_type(
+    body: &FunctionBody<'_>,
+    unannotated: &std::collections::BTreeSet<String>,
+) -> bool {
+    body.statements.iter().any(|statement| {
+        let Statement::ReturnStatement(ret) = statement else {
+            return false;
+        };
+        let Some(argument) = &ret.argument else {
+            return false;
+        };
+        match argument {
+            Expression::ThisExpression(_) => true,
+            Expression::CallExpression(call) => match &call.callee {
+                Expression::Identifier(id) => unannotated.contains(id.name.as_str()),
+                _ => false,
+            },
+            _ => false,
+        }
+    })
 }
 
 #[cfg(test)]
