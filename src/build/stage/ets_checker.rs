@@ -284,6 +284,20 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
     // reported together when there are two, both against the file rather than a position
     // (`fixtures/ui-entry-count`). Only pages are judged — the message itself says "a page
     // configured in main_pages.json or build-profile.json5".
+    if checker.lints {
+        // `arkts-unique-names` (10605004): a type may not take a name the ArkUI components already
+        // use — `interface Shape` collides with the `Shape` component
+        // (measured 1:11 of `fixtures/arkts-unique-names`).
+        let known = known_components();
+        for offset in component_name_collisions(&parsed.program, &known) {
+            checker.push(
+                "ERROR",
+                "10605004",
+                offset,
+                "Use unique names for types and namespaces. (arkts-unique-names)".to_string(),
+            );
+        }
+    }
     if checker.lints && file.contains("/pages/") {
         let (entries, components) = structure_counts(&parsed.program);
         if components == 0 {
@@ -2181,6 +2195,54 @@ fn build_body(source: &str, brace: usize) -> Option<BuildBody> {
     })
 }
 
+/// Offsets of declared type names that collide with an ArkUI component name
+/// (`arkts-unique-names`, 10605004).
+fn component_name_collisions(
+    program: &Program<'_>,
+    known: &std::collections::HashSet<String>,
+) -> Vec<usize> {
+    struct Collect<'k> {
+        known: &'k std::collections::HashSet<String>,
+        found: Vec<usize>,
+    }
+    impl<'a> Visit<'a> for Collect<'_> {
+        fn visit_class(&mut self, it: &Class<'a>) {
+            if let Some(id) = &it.id {
+                if self.known.contains(id.name.as_str()) {
+                    self.found.push(id.span.start as usize);
+                }
+            }
+            oxc_ast_visit::walk::walk_class(self, it);
+        }
+
+        fn visit_ts_interface_declaration(
+            &mut self,
+            it: &oxc_ast::ast::TSInterfaceDeclaration<'a>,
+        ) {
+            if self.known.contains(it.id.name.as_str()) {
+                self.found.push(it.id.span.start as usize);
+            }
+            oxc_ast_visit::walk::walk_ts_interface_declaration(self, it);
+        }
+
+        fn visit_ts_type_alias_declaration(
+            &mut self,
+            it: &oxc_ast::ast::TSTypeAliasDeclaration<'a>,
+        ) {
+            if self.known.contains(it.id.name.as_str()) {
+                self.found.push(it.id.span.start as usize);
+            }
+            oxc_ast_visit::walk::walk_ts_type_alias_declaration(self, it);
+        }
+    }
+    let mut collect = Collect {
+        known,
+        found: Vec::new(),
+    };
+    collect.visit_program(program);
+    collect.found
+}
+
 /// Members each class of this file declares: fields and methods by name.
 fn class_members(
     program: &Program<'_>,
@@ -2207,6 +2269,31 @@ fn class_members(
                 }
             }
             oxc_ast_visit::walk::walk_class(self, it);
+        }
+
+        /// An interface's members are judged the same way
+        /// (`Property 'notAReal' does not exist on type 'Rect'.`).
+        fn visit_ts_interface_declaration(
+            &mut self,
+            it: &oxc_ast::ast::TSInterfaceDeclaration<'a>,
+        ) {
+            let set = self.0.entry(it.id.name.to_string()).or_default();
+            for element in &it.body.body {
+                match element {
+                    oxc_ast::ast::TSSignature::TSPropertySignature(property) => {
+                        if let PropertyKey::StaticIdentifier(name) = &property.key {
+                            set.insert(name.name.to_string());
+                        }
+                    }
+                    oxc_ast::ast::TSSignature::TSMethodSignature(method) => {
+                        if let PropertyKey::StaticIdentifier(name) = &method.key {
+                            set.insert(name.name.to_string());
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            oxc_ast_visit::walk::walk_ts_interface_declaration(self, it);
         }
     }
     let mut collect = Collect(std::collections::HashMap::new());
