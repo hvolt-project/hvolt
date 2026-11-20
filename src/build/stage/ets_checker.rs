@@ -1022,6 +1022,13 @@ impl<'a> Visit<'a> for Checker<'_> {
     /// The reference reports `Duplicate identifier` once per declaration, at each name.
     /// Measured on `fixtures/member-collision` (7:18 the field, 9:11 the method).
     fn visit_class(&mut self, class: &Class<'a>) {
+        // `@Entry` is what makes the page-level and body-level rules apply to this structure.
+        let entry = class.decorators.iter().any(|decorator| {
+            matches!(
+                &decorator.expression,
+                Expression::Identifier(name) if name.name.as_str() == "Entry"
+            )
+        });
         if self.lints {
             // `validate_ui_syntax`: a `@Component` struct needs exactly one `build` method,
             // reported at the struct name (`fixtures/ui-build-method`: 10905103, 2:8). The masked
@@ -1119,6 +1126,47 @@ impl<'a> Visit<'a> for Checker<'_> {
         } else {
             // A file that carries no lints still walks; the call-site stack stays empty.
         }
+
+        // `10905209` / `10905210`: the body of an `@Entry` component's `build`. A declaration
+        // statement is not UI syntax, and the body needs exactly one root node — measured as
+        // 5:5 for the declaration and 12:12 for two roots (`fixtures/ui-build-statements`,
+        // `fixtures/ui-build-roots`).
+        if self.lints && entry {
+            for element in &class.body.body {
+                let ClassElement::MethodDefinition(method) = element else {
+                    continue;
+                };
+                if method.key.static_name().as_deref() != Some("build") {
+                    continue;
+                }
+                let from = method.span.start as usize;
+                let Some(brace) = self.source[from..].find('{').map(|at| from + at) else {
+                    continue;
+                };
+                let Some(body) = build_body(self.source, brace) else {
+                    continue;
+                };
+                for offset in &body.declarations {
+                    self.push(
+                        "ERROR",
+                        "10905209",
+                        *offset,
+                        "Only UI component syntax can be written here.".to_string(),
+                    );
+                }
+                if body.nodes != 1 {
+                    self.push(
+                        "ERROR",
+                        "10905210",
+                        // The reference anchors one character past the `{` (measured 4:12 on
+                        // `fixtures/ui-build-roots`, where the `{` itself is column 11).
+                        body.brace + 1,
+                        "In an '@Entry' decorated component, the 'build' method can have only one root node, which must be a container component."
+                            .to_string(),
+                    );
+                }
+            }
+        }
         oxc_ast_visit::walk::walk_class(self, class);
         self.data_fields.truncate(base);
     }
@@ -1215,6 +1263,102 @@ fn literal_name(value: &Expression<'_>) -> Option<&'static str> {
         Expression::BooleanLiteral(_) => Some("boolean"),
         _ => None,
     }
+}
+
+/// What a `build()` body holds: its top-level nodes, and the declaration statements among them.
+struct BuildBody {
+    /// Offset of the body's `{`.
+    brace: usize,
+    /// One offset per top-level statement that is a declaration (`10905209`, at its first token).
+    declarations: Vec<usize>,
+    /// How many top-level statements are not declarations (`10905210` wants exactly one).
+    nodes: usize,
+}
+
+/// Reads one `build()` body from the source text.
+///
+/// The body is the loader's own spelling — `Column() { … }` is not something a TypeScript parser
+/// accepts — so it is walked as text: the statement boundaries are the `;` at nesting depth zero
+/// and a closing brace at depth zero that is followed by more code (`Column() { … } Text(…)` is
+/// two statements without a semicolon between them). Measured anchors: a declaration at 5:5 of
+/// `fixtures/ui-build-statements`, the `{` at 12:12 of `fixtures/ui-build-roots`.
+fn build_body(source: &str, brace: usize) -> Option<BuildBody> {
+    let bytes = source.as_bytes();
+    if bytes.get(brace) != Some(&b'{') {
+        return None;
+    }
+    let body_start = brace + 1;
+    let mut depth = 1usize;
+    let mut position = body_start;
+    while position < bytes.len() && depth > 0 {
+        match bytes[position] {
+            b'{' => depth += 1,
+            b'}' => depth -= 1,
+            _ => {}
+        }
+        position += 1;
+    }
+    let body_end = position.saturating_sub(1);
+    let mut declarations = Vec::new();
+    let mut nodes = 0usize;
+    let mut statement_start: Option<usize> = None;
+    let mut depth = 0usize;
+    let mut index = body_start;
+    let close_statement =
+        |start: usize, end: usize, declarations: &mut Vec<usize>, nodes: &mut usize| {
+            let text = &source[start..end];
+            let trimmed = text.trim_start();
+            let lead = text.len() - trimmed.len();
+            let trimmed = trimmed.trim_end();
+            if trimmed.is_empty() {
+                return;
+            }
+            for keyword in ["const ", "let ", "var "] {
+                if trimmed.starts_with(keyword) {
+                    declarations.push(start + lead);
+                    return;
+                }
+            }
+            *nodes += 1;
+        };
+    while index < body_end {
+        let byte = bytes[index];
+        match byte {
+            b'{' | b'(' | b'[' => depth += 1,
+            b'}' | b')' | b']' => {
+                depth = depth.saturating_sub(1);
+                if depth == 0 && byte == b'}' {
+                    // A node that closes its block starts a new statement only if more code
+                    // follows before the next `;`.
+                    let rest = &source[index + 1..body_end];
+                    let next = rest.trim_start();
+                    if !next.is_empty() && !next.starts_with(';') {
+                        if let Some(start) = statement_start.take() {
+                            close_statement(start, index + 1, &mut declarations, &mut nodes);
+                        }
+                    }
+                }
+            }
+            b';' if depth == 0 => {
+                if let Some(start) = statement_start.take() {
+                    close_statement(start, index, &mut declarations, &mut nodes);
+                }
+            }
+            _ => {}
+        }
+        if statement_start.is_none() && !matches!(byte, b' ' | b'\t' | b'\n' | b'\r') {
+            statement_start = Some(index);
+        }
+        index += 1;
+    }
+    if let Some(start) = statement_start {
+        close_statement(start, body_end, &mut declarations, &mut nodes);
+    }
+    Some(BuildBody {
+        brace,
+        declarations,
+        nodes,
+    })
 }
 
 /// `(structures carrying @Entry, structures carrying @Component)` in this file.
@@ -1371,7 +1515,7 @@ mod tests {
         // diagnostics under test are the ones below it.
         let source = "@Entry\n@Component\nstruct Index {\n  private value!: number;\n\n\
                       \x20 private tick = function () {\n    return 1;\n  };\n\n\
-                      \x20 build() {\n  }\n}\n";
+                      \x20 build() {\n    Column() {\n    }\n  }\n}\n";
         let reported = lines(source);
         assert_eq!(reported.len(), 2, "{reported:?}");
         // Sorted by position, which is what the comparison and the console both read.
@@ -1410,7 +1554,7 @@ mod tests {
 
     #[test]
     fn a_side_effect_kit_import_is_reported_at_the_statement() {
-        let source = "import \"@kit.AbilityKit\";\n\n@Entry\n@Component\nstruct Index {\n  build() {\n  }\n}\n";
+        let source = "import \"@kit.AbilityKit\";\n\n@Entry\n@Component\nstruct Index {\n  build() {\n    Column() {\n    }\n  }\n}\n";
         let reported = lines(source);
         assert_eq!(reported.len(), 1, "{reported:?}");
         assert_eq!(
