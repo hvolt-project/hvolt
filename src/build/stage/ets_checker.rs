@@ -1204,6 +1204,36 @@ impl<'a> Visit<'a> for Checker<'_> {
                         "Only UI component syntax can be written here.".to_string(),
                     );
                 }
+                let builders: std::collections::HashSet<String> = class
+                    .body
+                    .body
+                    .iter()
+                    .filter_map(|element| {
+                        let ClassElement::MethodDefinition(method) = element else {
+                            return None;
+                        };
+                        let builder = method.decorators.iter().any(|decorator| {
+                            matches!(
+                                &decorator.expression,
+                                Expression::Identifier(name) if name.name.as_str() == "Builder"
+                            )
+                        });
+                        if !builder {
+                            return None;
+                        }
+                        method.key.static_name().map(|name| name.to_string())
+                    })
+                    .collect();
+                for (offset, quoted) in
+                    non_component_statements(self.source, (body.brace, brace_end), &builders)
+                {
+                    self.push(
+                        "ERROR",
+                        "10905204",
+                        offset,
+                        format!("'{quoted}' does not meet UI component syntax."),
+                    );
+                }
                 for (offset, child, allowed) in
                     nesting_violations(self.source, (body.brace, brace_end))
                 {
@@ -1558,6 +1588,55 @@ fn nesting_violations(source: &str, body: (usize, usize)) -> Vec<(usize, String,
             }
             found.push((start + position, name.clone(), allowed.join(",")));
         }
+    }
+    found
+}
+
+/// `10905204`: a statement in a `build()` body that is neither a component call nor a builder
+/// call, quoted as the reference quotes it (`'this.helper();' does not meet UI component syntax.`,
+/// 10:7 of `fixtures/ui-non-component-statement`).
+///
+/// Only a `this.<method>(…)` statement is judged, and only when that method carries no `@Builder`:
+/// a builder call is UI syntax, and telling every other statement apart (an `if`, a `ForEach`, a
+/// component the SDK grew after this table was read) needs the loader's own kind table. The
+/// statement is looked for anywhere in the body, since a nested component's statements are not
+/// top-level ones.
+fn non_component_statements(
+    source: &str,
+    body: (usize, usize),
+    builders: &std::collections::HashSet<String>,
+) -> Vec<(usize, String)> {
+    let (start, end) = body;
+    let text = &source[start..end];
+    let bytes = text.as_bytes();
+    let mut found = Vec::new();
+    let mut index = 0usize;
+    while let Some(at) = text[index..].find("this.") {
+        let position = index + at;
+        index = position + "this.".len();
+        // A statement position: the nearest code before it opened or closed a block, or ended a
+        // statement.
+        let before = text[..position]
+            .trim_end_matches(|c: char| c.is_whitespace())
+            .len();
+        let at_statement =
+            before == 0 || matches!(bytes.get(before - 1), Some(b'{') | Some(b'}') | Some(b';'));
+        if !at_statement {
+            continue;
+        }
+        let rest = &text[index..];
+        let method: String = rest
+            .chars()
+            .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+            .collect();
+        if method.is_empty() || builders.contains(&method) {
+            continue;
+        }
+        let Some(close) = text[index..].find(';') else {
+            continue;
+        };
+        let quoted = text[position..index + close + 1].trim().to_string();
+        found.push((start + position, quoted));
     }
     found
 }
