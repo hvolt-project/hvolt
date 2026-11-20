@@ -1051,6 +1051,21 @@ impl<'a> Visit<'a> for Checker<'_> {
         oxc_ast_visit::walk::walk_ts_type_literal(self, it);
     }
 
+    /// `arkts-no-private-identifiers` (10605003): a `#name`, at the `#` on both its declaration and
+    /// its use (measured 2:3 and 5:17 of `fixtures/arkts-private-identifiers`).
+    fn visit_private_field_expression(&mut self, it: &oxc_ast::ast::PrivateFieldExpression<'a>) {
+        if self.lints {
+            self.push(
+                "ERROR",
+                "10605003",
+                it.field.span.start as usize,
+                "Private \"#\" identifiers are not supported (arkts-no-private-identifiers)"
+                    .to_string(),
+            );
+        }
+        oxc_ast_visit::walk::walk_private_field_expression(self, it);
+    }
+
     /// `arkts-no-untyped-obj-literals` (10605038): an object literal with no contextual type, at
     /// the `{`. Measured on `fixtures/arkts-object-shapes`: `return { ...a }` (2:10) and
     /// `const o = { … }` without an annotation (10:13); the same literal passed to a typed
@@ -1653,6 +1668,19 @@ impl<'a> Visit<'a> for Checker<'_> {
 
     /// The assignability slice: a property whose declared type and literal initialiser disagree.
     fn visit_property_definition(&mut self, it: &PropertyDefinition<'a>) {
+        // `arkts-no-private-identifiers` (10605003): a `#name` field, at the `#`
+        // (measured 2:3 of `fixtures/arkts-private-identifiers`).
+        if self.lints {
+            if let PropertyKey::PrivateIdentifier(name) = &it.key {
+                self.push(
+                    "ERROR",
+                    "10605003",
+                    name.span.start as usize,
+                    "Private \"#\" identifiers are not supported (arkts-no-private-identifiers)"
+                        .to_string(),
+                );
+            }
+        }
         // `arkts-no-definite-assignment`: `value!: number`. The reference reports it as a
         // warning, at the property, and the build still produces a package.
         if it.definite && self.lints {
