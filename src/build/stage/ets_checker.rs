@@ -262,6 +262,7 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         return Vec::new();
     }
     let mut checker = Checker {
+        style_names: std::collections::HashSet::new(),
         file: file.to_string(),
         source,
         line_starts: line_starts(source),
@@ -278,6 +279,25 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         arrow_depth: 0,
         method_depth: 0,
     };
+    if checker.lints {
+        // `validate_ui_syntax`: a `@Styles` takes no arguments (`10905105`, measured 8:3 of
+        // `fixtures/ui-styles-arguments`, at the decorator). The mask blanks the whole member, so
+        // the declaration is read from the file's own `@Styles` list rather than from the tree.
+        let styles = crate::build::stage::process_ui_syntax::mask_builder_decorators(source).styles;
+        for style in &styles {
+            if !style.params_text.is_empty() {
+                checker.push(
+                    "ERROR",
+                    "10905105",
+                    style.order,
+                    "'@Styles' decorated functions and methods cannot have arguments.".to_string(),
+                );
+            }
+            // Its call stays in the page as `.styledColumn(100)`, and that is a style call, not an
+            // attribute the component lacks.
+            checker.style_names.insert(style.name.clone());
+        }
+    }
     checker.visit_program(&parsed.program);
     checker.scan_call_sites();
     // `validate_ui_syntax`, file level: a page must carry exactly one `@Entry`. Two rules are
@@ -455,6 +475,8 @@ fn line_starts(source: &str) -> Vec<usize> {
 }
 
 struct Checker<'a> {
+    /// Names declared as `@Styles` in this file: a call to one is not an unknown attribute.
+    style_names: std::collections::HashSet<String>,
     file: String,
     source: &'a str,
     line_starts: Vec<usize>,
@@ -1756,6 +1778,9 @@ impl<'a> Visit<'a> for Checker<'_> {
                     for (offset, attribute, type_name) in
                         attribute_violations(self.source, *statement)
                     {
+                        if self.style_names.contains(&attribute) {
+                            continue;
+                        }
                         self.push(
                             "ERROR",
                             "10505001",

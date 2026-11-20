@@ -64,6 +64,13 @@ pub(crate) struct StyleFn {
     pub comp: String,
     pub name: String,
     pub body: Vec<(String, Vec<String>)>,
+    /// The declared parameter list as written, empty when the member takes none. A `@Styles`
+    /// takes no arguments (`10905105`), so a non-empty value marks a declaration the reference
+    /// refuses — it is still recorded, because the call it answers must not be mistaken for an
+    /// unknown attribute.
+    pub params_text: String,
+    /// Offset of the `@`, for the diagnostic's anchor.
+    pub order: usize,
 }
 
 /// A `@Builder function name(params) { body }` declaration.

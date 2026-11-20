@@ -697,12 +697,20 @@ pub(crate) fn read_component_file(
         // (measured: `GlobalStyleShadowProbe` expands its own 21/22, not the global 98/99),
         // so the struct's own styles come first and the global ones follow as the fallback
         // the lookup's `find` never reaches when a member answers.
+        // A `@Styles` that declares parameters is refused (`10905105`) and is not expanded: the
+        // reference stops there, and expanding it would emit the body with unbound names
+        // (`Column.width(width)` from `fixtures/ui-styles-arguments`).
         let mut visible_styles: Vec<crate::build::ets::StyleFn> = styles
             .iter()
-            .filter(|decl| decl.comp == component_name)
+            .filter(|decl| decl.comp == component_name && decl.params_text.is_empty())
             .cloned()
             .collect();
-        visible_styles.extend(styles.iter().filter(|decl| decl.comp.is_empty()).cloned());
+        visible_styles.extend(
+            styles
+                .iter()
+                .filter(|decl| decl.comp.is_empty() && decl.params_text.is_empty())
+                .cloned(),
+        );
         components.push(ComponentInfo {
             name: component_name,
             declaration,
