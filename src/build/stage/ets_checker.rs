@@ -1103,6 +1103,31 @@ impl<'a> Visit<'a> for Checker<'_> {
         ) {
             self.primitives.insert(name.name.to_string(), "number");
         }
+        // `arkts-no-any-unknown` also covers a declaration that has to take its type from something
+        // that is `any`: a call of a member the primitive does not have has no type, so the local
+        // that receives it is `any` (measured 3:9 of `fixtures/type-any-cascade`, next to the
+        // member error at 3:20).
+        if self.lints {
+            let untyped = it.id.type_annotation.is_none();
+            let missing_member_call = matches!(&it.init, Some(Expression::CallExpression(call))
+                if matches!(&call.callee, Expression::StaticMemberExpression(member)
+                    if matches!(&member.object, Expression::Identifier(object)
+                        if self
+                            .primitives
+                            .get(object.name.as_str())
+                            .is_some_and(|kind| primitive_has_member(kind, member.property.name.as_str()) == Some(false)))));
+            if untyped && missing_member_call {
+                if let oxc_ast::ast::BindingPatternKind::BindingIdentifier(name) = &it.id.kind {
+                    self.push(
+                        "ERROR",
+                        "10605008",
+                        name.span.start as usize,
+                        "Use explicit types instead of \"any\", \"unknown\" (arkts-no-any-unknown)"
+                            .to_string(),
+                    );
+                }
+            }
+        }
         let typed = matches!(
             it.id.type_annotation.as_ref().map(|annotation| &annotation.type_annotation),
             Some(annotation) if !matches!(annotation, TSType::TSTypeLiteral(_))
