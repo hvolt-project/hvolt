@@ -1118,14 +1118,19 @@ impl<'a> Visit<'a> for Checker<'_> {
                     let Expression::Identifier(name) = &decorator.expression else {
                         continue;
                     };
-                    if name.name.as_str() != "State" {
+                    // Measured for `@State`, `@Prop`, `@Link` and `@Provide`, each with its own name
+                    // in the message (`fixtures/ui-state-decorator-on-class`).
+                    if !matches!(name.name.as_str(), "State" | "Prop" | "Link" | "Provide") {
                         continue;
                     }
                     self.push(
                         "ERROR",
                         "10905337",
                         name.span.start as usize,
-                        "The '@State' decorator can only be used with 'struct'.".to_string(),
+                        format!(
+                            "The '@{}' decorator can only be used with 'struct'.",
+                            name.name
+                        ),
                     );
                 }
             }

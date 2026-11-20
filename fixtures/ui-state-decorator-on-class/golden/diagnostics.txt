@@ -1,0 +1,3 @@
+ERROR 10905337 ets/pages/Index.ets:2:4 The '@Prop' decorator can only be used with 'struct'.
+ERROR 10905337 ets/pages/Index.ets:5:4 The '@Link' decorator can only be used with 'struct'.
+ERROR 10905337 ets/pages/Index.ets:8:4 The '@Provide' decorator can only be used with 'struct'.
