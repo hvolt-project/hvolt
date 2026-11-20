@@ -273,6 +273,7 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         class_names: class_names(&parsed.program),
         arity: declared_arity(&parsed.program),
         primitives: std::collections::HashMap::new(),
+        arrow_depth: 0,
         method_depth: 0,
     };
     checker.visit_program(&parsed.program);
@@ -466,6 +467,10 @@ struct Checker<'a> {
     arity: std::collections::HashMap<String, (usize, usize)>,
     /// Locals declared with a primitive annotation: `name -> "string" | "number" | "boolean"`.
     primitives: std::collections::HashMap<String, &'static str>,
+    /// How many arrow functions enclose the node being visited. A callback's parameter is typed by
+    /// the call it is passed to, so an unannotated one there is not `any` (the reference stays
+    /// silent for the `(err) => …` callbacks of `ets/EntryAbility.ets`).
+    arrow_depth: usize,
     /// How many class methods enclose the node being visited. `this` is legal inside a method and
     /// rejected inside a stand-alone function (`arkts-no-standalone-this`).
     method_depth: usize,
@@ -708,7 +713,31 @@ impl<'a> Visit<'a> for Checker<'_> {
     /// A parameter that carries a modifier declares a field (`constructor(public label: string)`),
     /// which ArkTS refuses. The parser keeps the modifiers on the parameter, so the test is the
     /// presence of one; the anchor is the parameter's first token (2:15, the `public`).
+    /// `arkts-no-any-unknown` for a parameter written without a type: the reference reports the
+    /// parameter's own name (measured 11:21 of `fixtures/type-implicit-any`), not the function.
+    fn visit_arrow_function_expression(&mut self, it: &oxc_ast::ast::ArrowFunctionExpression<'a>) {
+        self.arrow_depth += 1;
+        oxc_ast_visit::walk::walk_arrow_function_expression(self, it);
+        self.arrow_depth -= 1;
+    }
+
     fn visit_formal_parameter(&mut self, it: &FormalParameter<'a>) {
+        if self.lints
+            && self.arrow_depth == 0
+            && it.pattern.type_annotation.is_none()
+            && matches!(
+                it.pattern.kind,
+                oxc_ast::ast::BindingPatternKind::BindingIdentifier(_)
+            )
+        {
+            self.push(
+                "ERROR",
+                "10605008",
+                it.pattern.span().start as usize,
+                "Use explicit types instead of \"any\", \"unknown\" (arkts-no-any-unknown)"
+                    .to_string(),
+            );
+        }
         if self.lints
             && (it.accessibility.is_some()
                 || it.readonly
@@ -1093,7 +1122,19 @@ impl<'a> Visit<'a> for Checker<'_> {
             }
             if it.return_type.is_none() {
                 if let (Some(id), Some(body)) = (&it.id, &it.body) {
-                    if returns_limited_type(body, &self.unannotated_fns) {
+                    let any_params: std::collections::HashSet<String> = it
+                        .params
+                        .items
+                        .iter()
+                        .filter(|parameter| parameter.pattern.type_annotation.is_none())
+                        .filter_map(|parameter| match &parameter.pattern.kind {
+                            oxc_ast::ast::BindingPatternKind::BindingIdentifier(name) => {
+                                Some(name.name.to_string())
+                            }
+                            _ => None,
+                        })
+                        .collect();
+                    if returns_limited_type(body, &self.unannotated_fns, &any_params) {
                         self.push(
                             "ERROR",
                             "10605090",
@@ -2163,10 +2204,12 @@ fn this_spans(function: &Function<'_>) -> Vec<usize> {
     collect.0
 }
 
-/// Whether a body returns a `this` or a call to a function whose return type is itself inferred.
+/// Whether a body returns a `this`, a call to a function whose return type is itself inferred, or a
+/// parameter that has no type of its own (and is therefore `any`).
 fn returns_limited_type(
     body: &FunctionBody<'_>,
     unannotated: &std::collections::BTreeSet<String>,
+    any_params: &std::collections::HashSet<String>,
 ) -> bool {
     body.statements.iter().any(|statement| {
         let Statement::ReturnStatement(ret) = statement else {
@@ -2181,6 +2224,9 @@ fn returns_limited_type(
                 Expression::Identifier(id) => unannotated.contains(id.name.as_str()),
                 _ => false,
             },
+            // `return param;` where the parameter carries no type: the return type would have to
+            // come from an `any` (measured 1:10 of `fixtures/type-implicit-any`).
+            Expression::Identifier(id) => any_params.contains(id.name.as_str()),
             _ => false,
         }
     })
