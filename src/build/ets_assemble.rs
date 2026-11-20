@@ -146,6 +146,75 @@ fn publish_system_modules() {
     crate::build::stage::ets_checker::set_system_modules(modules);
 }
 
+/// Reads the ArkUI attribute names the reference accepts, for the component attribute check.
+///
+/// Two sources, both from the installed SDK: `components/*.json` gives each component's own
+/// attributes (`Text` → `fontColor`, `fontSize`, …), and `component/common.d.ts` gives the ones
+/// every component inherits (`CommonMethod`: `width`, `height`, `onClick`, …). Measured message:
+/// `Property 'notARealAttribute' does not exist on type 'TextAttribute'.`
+pub fn publish_component_attributes() {
+    use std::collections::{HashMap, HashSet};
+    let Some(sdk) = crate::sdk::manage::sdk_root() else {
+        return;
+    };
+    let mut attributes: HashMap<String, HashSet<String>> = HashMap::new();
+    let mut common: HashSet<String> = HashSet::new();
+    let Ok(entries) = std::fs::read_dir(&sdk) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let root = entry.path();
+        for base in [root.join("ets"), root.join("openharmony/ets")] {
+            let components = base.join("build-tools/ets-loader/components");
+            if let Ok(files) = std::fs::read_dir(&components) {
+                for file in files.flatten() {
+                    let Ok(text) = std::fs::read_to_string(file.path()) else {
+                        continue;
+                    };
+                    let Ok(value) = serde_json::from_str::<serde_json::Value>(&text) else {
+                        continue;
+                    };
+                    let Some(name) = value.get("name").and_then(|name| name.as_str()) else {
+                        continue;
+                    };
+                    let set = attributes.entry(name.to_string()).or_default();
+                    for attribute in value
+                        .get("attrs")
+                        .and_then(|attrs| attrs.as_array())
+                        .into_iter()
+                        .flatten()
+                    {
+                        if let Some(attribute) = attribute.as_str() {
+                            set.insert(attribute.to_string());
+                        }
+                    }
+                }
+            }
+            if let Ok(text) = std::fs::read_to_string(base.join("component/common.d.ts")) {
+                if let Some(start) = text.find("declare class CommonMethod") {
+                    let body = &text[start..];
+                    let end = body.find("\n}").unwrap_or(body.len());
+                    for line in body[..end].lines() {
+                        let trimmed = line.trim_start();
+                        let name: String = trimmed
+                            .chars()
+                            .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+                            .collect();
+                        if name.is_empty() || !trimmed[name.len()..].starts_with('(') {
+                            continue;
+                        }
+                        common.insert(name);
+                    }
+                }
+            }
+        }
+    }
+    if attributes.is_empty() || common.is_empty() {
+        return;
+    }
+    crate::build::stage::ets_checker::set_component_attributes(attributes, common);
+}
+
 /// Top-level names a declaration file introduces, or `None` when it re-exports everything
 /// (`export *`), in which case nothing can be called missing.
 fn declared_names(text: &str) -> Option<std::collections::HashSet<String>> {
@@ -348,6 +417,7 @@ pub fn assemble_packages(
     } = *opts;
     let kits = load_kit_configs(kit_configs_dir).unwrap_or_default();
     publish_system_modules();
+    publish_component_attributes();
     // `$r('app.<kind>.<name>')` has to become the object literal the runtime expects: left
     // as a call it resolves against the system table only, and an app resource comes back as
     // an invalid id (`getStringSync` → 401).

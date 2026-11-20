@@ -86,6 +86,38 @@ pub(crate) fn set_system_modules(modules: std::collections::HashSet<String>) {
     SYSTEM_MODULES.with(|cell| *cell.borrow_mut() = Some(modules));
 }
 
+/// Per-component attribute names, and the ones every component inherits.
+type AttributeTable = (
+    std::collections::HashMap<String, std::collections::HashSet<String>>,
+    std::collections::HashSet<String>,
+);
+
+thread_local! {
+    /// ArkUI attribute names per component, and the ones every component inherits. Published by
+    /// the build from the installed SDK (`publish_component_attributes`).
+    static COMPONENT_ATTRIBUTES: std::cell::RefCell<Option<AttributeTable>> =
+        const { std::cell::RefCell::new(None) };
+}
+
+/// Publishes the attribute names; see `ets_assemble::publish_component_attributes`.
+pub(crate) fn set_component_attributes(
+    attributes: std::collections::HashMap<String, std::collections::HashSet<String>>,
+    common: std::collections::HashSet<String>,
+) {
+    COMPONENT_ATTRIBUTES.with(|cell| *cell.borrow_mut() = Some((attributes, common)));
+}
+
+/// `Some(true)` when the component accepts the attribute, `Some(false)` when it does not and the
+/// component is known, `None` when the SDK was not read or the component is not built in.
+fn component_accepts(component: &str, attribute: &str) -> Option<bool> {
+    COMPONENT_ATTRIBUTES.with(|cell| {
+        let table = cell.borrow();
+        let (attributes, common) = table.as_ref()?;
+        let own = attributes.get(component)?;
+        Some(own.contains(attribute) || common.contains(attribute))
+    })
+}
+
 thread_local! {
     /// Top-level names each `@ohos.*` / `@system.*` module's declaration file declares. An entry
     /// that is `None` means the file names everything (`export * from`), so nothing is reported.
@@ -1029,16 +1061,16 @@ impl<'a> Visit<'a> for Checker<'_> {
                 Expression::Identifier(name) if name.name.as_str() == "Entry"
             )
         });
+        let component = class.decorators.iter().any(|decorator| {
+            matches!(
+                &decorator.expression,
+                Expression::Identifier(name) if name.name.as_str() == "Component"
+            )
+        });
         if self.lints {
             // `validate_ui_syntax`: a `@Component` struct needs exactly one `build` method,
             // reported at the struct name (`fixtures/ui-build-method`: 10905103, 2:8). The masked
             // view turns `struct X` into `class X`, so the test is a decorated class without one.
-            let component = class.decorators.iter().any(|decorator| {
-                matches!(
-                    &decorator.expression,
-                    Expression::Identifier(name) if name.name.as_str() == "Component"
-                )
-            });
             if component {
                 let builds = class
                     .body
@@ -1131,7 +1163,7 @@ impl<'a> Visit<'a> for Checker<'_> {
         // statement is not UI syntax, and the body needs exactly one root node — measured as
         // 5:5 for the declaration and 12:12 for two roots (`fixtures/ui-build-statements`,
         // `fixtures/ui-build-roots`).
-        if self.lints && entry {
+        if self.lints && (entry || component) {
             for element in &class.body.body {
                 let ClassElement::MethodDefinition(method) = element else {
                     continue;
@@ -1153,6 +1185,31 @@ impl<'a> Visit<'a> for Checker<'_> {
                         *offset,
                         "Only UI component syntax can be written here.".to_string(),
                     );
+                }
+                for statement in &body.statements {
+                    // `10905202`: a `Button` whose label argument is a string (or a `$r`/`Resource`
+                    // call) cannot also carry children. Reported at the `Button`
+                    // (measured 6:7 of `fixtures/ui-button-label`); the call is looked for
+                    // anywhere in the statement, since a nested component is not a top-level one.
+                    for offset in button_label_with_children(self.source, *statement) {
+                        self.push(
+                            "ERROR",
+                            "10905202",
+                            offset,
+                            "The Button component with a label parameter can not have any child."
+                                .to_string(),
+                        );
+                    }
+                    for (offset, attribute, type_name) in
+                        attribute_violations(self.source, *statement)
+                    {
+                        self.push(
+                            "ERROR",
+                            "10505001",
+                            offset,
+                            format!("Property '{attribute}' does not exist on type '{type_name}'."),
+                        );
+                    }
                 }
                 if body.nodes != 1 {
                     self.push(
@@ -1265,10 +1322,148 @@ fn literal_name(value: &Expression<'_>) -> Option<&'static str> {
     }
 }
 
+/// `Property '<attribute>' does not exist on type '<Component>Attribute'.`
+///
+/// Measured on a `Text(...).notARealAttribute(1)` chain (8:17) and on a `Column() { … }
+/// .alsoNotAReal(2)` chain (10:6): the head identifier of the statement names the component, and
+/// every `.name(` after it has to be an attribute that component accepts or inherits.
+fn attribute_violations(source: &str, statement: (usize, usize)) -> Vec<(usize, String, String)> {
+    let (start, end) = statement;
+    let text = &source[start..end];
+    let head: String = text
+        .chars()
+        .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+        .collect();
+    if head.is_empty() {
+        return Vec::new();
+    }
+    let bytes = text.as_bytes();
+    let mut found = Vec::new();
+    // The component a `.name(` belongs to: the last component call at the same nesting depth, or
+    // the statement's head when the chain sits outside every block. `Text(…).notAReal(1)` inside a
+    // `Column` block is `Text`'s (8:17 of the measurement), while `.alsoNotAReal(2)` after the
+    // block's `}` is `Column`'s (10:6).
+    let mut depth = 0usize;
+    let mut last_component = head.clone();
+    let mut last_component_depth = 0usize;
+    let mut index = 0usize;
+    while index < bytes.len() {
+        match bytes[index] {
+            b'{' | b'(' | b'[' => depth += 1,
+            b'}' | b')' | b']' => depth = depth.saturating_sub(1),
+            b'.' => {
+                let name_start = index + 1;
+                let mut cursor = name_start;
+                while cursor < bytes.len()
+                    && (bytes[cursor].is_ascii_alphanumeric()
+                        || bytes[cursor] == b'_'
+                        || bytes[cursor] == b'$')
+                {
+                    cursor += 1;
+                }
+                let name = &text[name_start..cursor];
+                if !name.is_empty() && bytes.get(cursor) == Some(&b'(') {
+                    // An attribute attaches to the component call at the *same* nesting depth;
+                    // a `.name(` deeper than that sits inside the call's arguments
+                    // (`Text(this.sdkState())` is not `Text`'s attribute).
+                    // At depth zero the chain belongs to the statement's head (`Column() { … }
+                    // .alsoNotReal(2)`); deeper, it belongs to the component call at that same
+                    // depth, and a `.name(` deeper still is inside that call's arguments
+                    // (`Text(this.sdkState())` is not `Text`'s attribute).
+                    let owner = if depth == 0 {
+                        head.clone()
+                    } else if depth == last_component_depth {
+                        last_component.clone()
+                    } else {
+                        index = cursor;
+                        continue;
+                    };
+                    if component_accepts(&owner, name) == Some(false) {
+                        found.push((
+                            start + name_start,
+                            name.to_string(),
+                            format!("{owner}Attribute"),
+                        ));
+                    }
+                    index = cursor;
+                    continue;
+                }
+                index = name_start;
+                continue;
+            }
+            byte if byte.is_ascii_alphabetic() || byte == b'_' || byte == b'$' => {
+                let name_start = index;
+                let mut cursor = index;
+                while cursor < bytes.len()
+                    && (bytes[cursor].is_ascii_alphanumeric()
+                        || bytes[cursor] == b'_'
+                        || bytes[cursor] == b'$')
+                {
+                    cursor += 1;
+                }
+                let name = &text[name_start..cursor];
+                if bytes.get(cursor) == Some(&b'(') {
+                    last_component = name.to_string();
+                    last_component_depth = depth;
+                }
+                index = cursor;
+                continue;
+            }
+            _ => {}
+        }
+        index += 1;
+    }
+    found
+}
+
+/// Offsets of `Button("label") { … }` inside a statement: the label makes children illegal.
+fn button_label_with_children(source: &str, statement: (usize, usize)) -> Vec<usize> {
+    let (start, end) = statement;
+    let text = &source[start..end];
+    let bytes = text.as_bytes();
+    let mut found = Vec::new();
+    let mut index = 0usize;
+    while let Some(at) = text[index..].find("Button(") {
+        let name_start = index + at;
+        let before_is_word = name_start
+            .checked_sub(1)
+            .and_then(|previous| bytes.get(previous))
+            .is_some_and(|byte| byte.is_ascii_alphanumeric() || *byte == b'_' || *byte == b'.');
+        let mut cursor = name_start + "Button(".len();
+        if before_is_word {
+            index = cursor;
+            continue;
+        }
+        let arguments = text[cursor..].trim_start();
+        let labelled = arguments.starts_with('"')
+            || arguments.starts_with('\'')
+            || arguments.starts_with("$r(")
+            || arguments.starts_with("Resource(");
+        // Walk to the matching `)` of the call, then look for a block after it.
+        let mut depth = 1usize;
+        while cursor < bytes.len() && depth > 0 {
+            match bytes[cursor] {
+                b'(' => depth += 1,
+                b')' => depth -= 1,
+                _ => {}
+            }
+            cursor += 1;
+        }
+        let after = text[cursor.min(text.len())..].trim_start();
+        if labelled && after.starts_with('{') {
+            found.push(start + name_start);
+        }
+        index = cursor;
+    }
+    found
+}
+
 /// What a `build()` body holds: its top-level nodes, and the declaration statements among them.
 struct BuildBody {
     /// Offset of the body's `{`.
     brace: usize,
+    /// `(start, end)` of every top-level statement that is not a declaration.
+    statements: Vec<(usize, usize)>,
     /// One offset per top-level statement that is a declaration (`10905209`, at its first token).
     declarations: Vec<usize>,
     /// How many top-level statements are not declarations (`10905210` wants exactly one).
@@ -1300,27 +1495,32 @@ fn build_body(source: &str, brace: usize) -> Option<BuildBody> {
     }
     let body_end = position.saturating_sub(1);
     let mut declarations = Vec::new();
+    let mut statements = Vec::new();
     let mut nodes = 0usize;
     let mut statement_start: Option<usize> = None;
     let mut depth = 0usize;
     let mut index = body_start;
-    let close_statement =
-        |start: usize, end: usize, declarations: &mut Vec<usize>, nodes: &mut usize| {
-            let text = &source[start..end];
-            let trimmed = text.trim_start();
-            let lead = text.len() - trimmed.len();
-            let trimmed = trimmed.trim_end();
-            if trimmed.is_empty() {
+    let close_statement = |start: usize,
+                           end: usize,
+                           declarations: &mut Vec<usize>,
+                           statements: &mut Vec<(usize, usize)>,
+                           nodes: &mut usize| {
+        let text = &source[start..end];
+        let trimmed = text.trim_start();
+        let lead = text.len() - trimmed.len();
+        let trimmed = trimmed.trim_end();
+        if trimmed.is_empty() {
+            return;
+        }
+        for keyword in ["const ", "let ", "var "] {
+            if trimmed.starts_with(keyword) {
+                declarations.push(start + lead);
                 return;
             }
-            for keyword in ["const ", "let ", "var "] {
-                if trimmed.starts_with(keyword) {
-                    declarations.push(start + lead);
-                    return;
-                }
-            }
-            *nodes += 1;
-        };
+        }
+        *nodes += 1;
+        statements.push((start + lead, end));
+    };
     while index < body_end {
         let byte = bytes[index];
         match byte {
@@ -1332,16 +1532,23 @@ fn build_body(source: &str, brace: usize) -> Option<BuildBody> {
                     // follows before the next `;`.
                     let rest = &source[index + 1..body_end];
                     let next = rest.trim_start();
-                    if !next.is_empty() && !next.starts_with(';') {
+                    // `.attr(…)` after the block continues the same chain, not a new statement.
+                    if !next.is_empty() && !next.starts_with(';') && !next.starts_with('.') {
                         if let Some(start) = statement_start.take() {
-                            close_statement(start, index + 1, &mut declarations, &mut nodes);
+                            close_statement(
+                                start,
+                                index + 1,
+                                &mut declarations,
+                                &mut statements,
+                                &mut nodes,
+                            );
                         }
                     }
                 }
             }
             b';' if depth == 0 => {
                 if let Some(start) = statement_start.take() {
-                    close_statement(start, index, &mut declarations, &mut nodes);
+                    close_statement(start, index, &mut declarations, &mut statements, &mut nodes);
                 }
             }
             _ => {}
@@ -1352,10 +1559,17 @@ fn build_body(source: &str, brace: usize) -> Option<BuildBody> {
         index += 1;
     }
     if let Some(start) = statement_start {
-        close_statement(start, body_end, &mut declarations, &mut nodes);
+        close_statement(
+            start,
+            body_end,
+            &mut declarations,
+            &mut statements,
+            &mut nodes,
+        );
     }
     Some(BuildBody {
         brace,
+        statements,
         declarations,
         nodes,
     })

@@ -1,0 +1,1 @@
+ERROR 10905202 ets/pages/Index.ets:6:7 The Button component with a label parameter can not have any child.
