@@ -273,6 +273,8 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         class_names: class_names(&parsed.program),
         arity: declared_arity(&parsed.program),
         primitives: std::collections::HashMap::new(),
+        members: class_members(&parsed.program),
+        class_locals: std::collections::HashMap::new(),
         arrow_depth: 0,
         method_depth: 0,
     };
@@ -467,6 +469,10 @@ struct Checker<'a> {
     arity: std::collections::HashMap<String, (usize, usize)>,
     /// Locals declared with a primitive annotation: `name -> "string" | "number" | "boolean"`.
     primitives: std::collections::HashMap<String, &'static str>,
+    /// Members of each class this file declares.
+    members: std::collections::HashMap<String, std::collections::HashSet<String>>,
+    /// Locals and parameters annotated with a class of this file: `name -> class name`.
+    class_locals: std::collections::HashMap<String, String>,
     /// How many arrow functions enclose the node being visited. A callback's parameter is typed by
     /// the call it is passed to, so an unannotated one there is not `any` (the reference stays
     /// silent for the `(err) => …` callbacks of `ets/EntryAbility.ets`).
@@ -480,6 +486,26 @@ impl Checker<'_> {
     /// `process_system_module.js`: an `@ohos.*` / `@system.*` request the SDK does not declare
     /// has no declaration file behind it. The reference reports it at the specifier instead of
     /// letting the runtime fail to resolve it (measured on `fixtures/ohos-missing-module`).
+    /// Records `name -> class` when the annotation names a class of this file, so a member access
+    /// through it can be judged (`Property 'notAReal' does not exist on type 'Holder'.`).
+    fn remember_class_type(&mut self, pattern: &oxc_ast::ast::BindingPattern<'_>) {
+        let (oxc_ast::ast::BindingPatternKind::BindingIdentifier(name), Some(annotation)) =
+            (&pattern.kind, pattern.type_annotation.as_ref())
+        else {
+            return;
+        };
+        let oxc_ast::ast::TSType::TSTypeReference(reference) = &annotation.type_annotation else {
+            return;
+        };
+        let oxc_ast::ast::TSTypeName::IdentifierReference(type_name) = &reference.type_name else {
+            return;
+        };
+        if self.members.contains_key(type_name.name.as_str()) {
+            self.class_locals
+                .insert(name.name.to_string(), type_name.name.to_string());
+        }
+    }
+
     fn check_system_request(&mut self, it: &ImportDeclaration<'_>) {
         let request = it.source.value.as_str();
         if !(request.starts_with("@ohos.") || request.starts_with("@system.")) {
@@ -722,6 +748,7 @@ impl<'a> Visit<'a> for Checker<'_> {
     }
 
     fn visit_formal_parameter(&mut self, it: &FormalParameter<'a>) {
+        self.remember_class_type(&it.pattern);
         if self.lints
             && self.arrow_depth == 0
             && it.pattern.type_annotation.is_none()
@@ -995,6 +1022,22 @@ impl<'a> Visit<'a> for Checker<'_> {
     fn visit_static_member_expression(&mut self, it: &oxc_ast::ast::StaticMemberExpression<'a>) {
         if self.lints {
             if let Expression::Identifier(object) = &it.object {
+                // `Property 'notAReal' does not exist on type 'Holder'.` — a class of this file,
+                // reached through a local or a parameter annotated with it (measured 10:51 of
+                // `fixtures/type-class-member`).
+                if let Some(class) = self.class_locals.get(object.name.as_str()).cloned() {
+                    if let Some(members) = self.members.get(&class) {
+                        let member = it.property.name.as_str();
+                        if !members.contains(member) {
+                            self.push(
+                                "ERROR",
+                                "10505001",
+                                it.property.span.start as usize,
+                                format!("Property '{member}' does not exist on type '{class}'."),
+                            );
+                        }
+                    }
+                }
                 if let Some(kind) = self.primitives.get(object.name.as_str()).copied() {
                     let member = it.property.name.as_str();
                     if primitive_has_member(kind, member) == Some(false) {
@@ -1015,6 +1058,7 @@ impl<'a> Visit<'a> for Checker<'_> {
         // A type *literal* annotation declares no class or interface, so the initialiser still has
         // no contextual type: the reference reports both the type literal (10605040) and this
         // (measured at 17:16 and 17:32 of `fixtures/arkts-type-shapes`).
+        self.remember_class_type(&it.id);
         if let (
             oxc_ast::ast::BindingPatternKind::BindingIdentifier(name),
             Some(oxc_ast::ast::TSType::TSStringKeyword(_)),
@@ -2084,6 +2128,39 @@ fn build_body(source: &str, brace: usize) -> Option<BuildBody> {
         declarations,
         nodes,
     })
+}
+
+/// Members each class of this file declares: fields and methods by name.
+fn class_members(
+    program: &Program<'_>,
+) -> std::collections::HashMap<String, std::collections::HashSet<String>> {
+    struct Collect(std::collections::HashMap<String, std::collections::HashSet<String>>);
+    impl<'a> Visit<'a> for Collect {
+        fn visit_class(&mut self, it: &Class<'a>) {
+            if let Some(id) = &it.id {
+                let set = self.0.entry(id.name.to_string()).or_default();
+                for element in &it.body.body {
+                    match element {
+                        ClassElement::PropertyDefinition(property) => {
+                            if let Some(name) = property.key.static_name() {
+                                set.insert(name.to_string());
+                            }
+                        }
+                        ClassElement::MethodDefinition(method) => {
+                            if let Some(name) = method.key.static_name() {
+                                set.insert(name.to_string());
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            oxc_ast_visit::walk::walk_class(self, it);
+        }
+    }
+    let mut collect = Collect(std::collections::HashMap::new());
+    collect.visit_program(program);
+    collect.0
 }
 
 /// `name -> (minimum, maximum)` arguments for the functions this file declares.
