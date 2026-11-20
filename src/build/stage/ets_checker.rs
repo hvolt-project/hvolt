@@ -669,6 +669,12 @@ impl Checker<'_> {
     }
 }
 
+/// `arkts-no-aliases-by-index` (10605028): an indexed access type, at the type it indexes
+/// (measured 11:16 of `fixtures/arkts-indexed-and-apply`).
+fn indexed_access_violation(it: &oxc_ast::ast::TSIndexedAccessType<'_>) -> usize {
+    it.object_type.span().start as usize
+}
+
 /// Offset of a destructured parameter's pattern (`arkts-no-destruct-params`, 10605091).
 fn destructuring_parameter(it: &FormalParameter<'_>) -> Option<usize> {
     matches!(
@@ -955,6 +961,31 @@ impl<'a> Visit<'a> for Checker<'_> {
                 }
             }
         }
+        // `arkts-no-func-apply-call` (10605152): `f.apply(…)` and `f.call(…)`, at the method name
+        // (measured 14:26 of `fixtures/arkts-indexed-and-apply`); `f.bind(…)` is accepted.
+        if self.lints {
+            if let Expression::StaticMemberExpression(member) = &it.callee {
+                if matches!(member.property.name.as_str(), "apply" | "call") {
+                    self.push(
+                        "ERROR",
+                        "10605152",
+                        member.property.span.start as usize,
+                        "'Function.apply', 'Function.call' are not supported (arkts-no-func-apply-call)"
+                            .to_string(),
+                    );
+                }
+                // `f.bind(…)` is refused too, as a warning with no code of its own
+                // (12:17 of `fixtures/arkts-indexed-and-apply`).
+                if member.property.name.as_str() == "bind" {
+                    self.push(
+                        "WARN",
+                        "-",
+                        member.property.span.start as usize,
+                        "'Function.bind' is not supported (arkts-no-func-bind)".to_string(),
+                    );
+                }
+            }
+        }
         if self.lints {
             if let Expression::StaticMemberExpression(member) = &it.callee {
                 if let Expression::Identifier(object) = &member.object {
@@ -1070,6 +1101,19 @@ impl<'a> Visit<'a> for Checker<'_> {
             );
         }
         oxc_ast_visit::walk::walk_ts_type_literal(self, it);
+    }
+
+    /// `arkts-no-aliases-by-index` (10605028), reported at the indexed type.
+    fn visit_ts_indexed_access_type(&mut self, it: &oxc_ast::ast::TSIndexedAccessType<'a>) {
+        if self.lints {
+            self.push(
+                "ERROR",
+                "10605028",
+                indexed_access_violation(it),
+                "Indexed access types are not supported (arkts-no-aliases-by-index)".to_string(),
+            );
+        }
+        oxc_ast_visit::walk::walk_ts_indexed_access_type(self, it);
     }
 
     /// `arkts-no-as-const` (10605142): an `as const` assertion, anchored at the `as`
