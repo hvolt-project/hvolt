@@ -1,0 +1,3 @@
+ERROR 10605074 ets/pages/Index.ets:12:9 Destructuring variable declarations are not supported (arkts-no-destruct-decls)
+ERROR 10605091 ets/pages/Index.ets:7:24 Destructuring parameter declarations are not supported (arkts-no-destruct-params)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

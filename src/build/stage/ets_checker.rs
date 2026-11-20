@@ -669,6 +669,16 @@ impl Checker<'_> {
     }
 }
 
+/// Offset of a destructured parameter's pattern (`arkts-no-destruct-params`, 10605091).
+fn destructuring_parameter(it: &FormalParameter<'_>) -> Option<usize> {
+    matches!(
+        it.pattern.kind,
+        oxc_ast::ast::BindingPatternKind::ObjectPattern(_)
+            | oxc_ast::ast::BindingPatternKind::ArrayPattern(_)
+    )
+    .then(|| it.pattern.span().start as usize)
+}
+
 impl<'a> Visit<'a> for Checker<'_> {
     /// `arkts-no-any-unknown`: the annotation names the type `any` or `unknown`.
     fn visit_ts_type_annotation(&mut self, it: &TSTypeAnnotation<'a>) {
@@ -787,6 +797,17 @@ impl<'a> Visit<'a> for Checker<'_> {
 
     fn visit_formal_parameter(&mut self, it: &FormalParameter<'a>) {
         self.remember_class_type(&it.pattern);
+        if self.lints {
+            if let Some(offset) = destructuring_parameter(it) {
+                self.push(
+                    "ERROR",
+                    "10605091",
+                    offset,
+                    "Destructuring parameter declarations are not supported (arkts-no-destruct-params)"
+                        .to_string(),
+                );
+            }
+        }
         if self.lints
             && self.arrow_depth == 0
             && it.pattern.type_annotation.is_none()
@@ -1141,6 +1162,23 @@ impl<'a> Visit<'a> for Checker<'_> {
         // no contextual type: the reference reports both the type literal (10605040) and this
         // (measured at 17:16 and 17:32 of `fixtures/arkts-type-shapes`).
         self.remember_class_type(&it.id);
+        // `arkts-no-destruct-decls` (10605074): a destructured declaration, at the pattern
+        // (measured 12:9 and 17:9 of `fixtures/arkts-destructuring`).
+        if self.lints
+            && matches!(
+                it.id.kind,
+                oxc_ast::ast::BindingPatternKind::ObjectPattern(_)
+                    | oxc_ast::ast::BindingPatternKind::ArrayPattern(_)
+            )
+        {
+            self.push(
+                "ERROR",
+                "10605074",
+                it.id.span().start as usize,
+                "Destructuring variable declarations are not supported (arkts-no-destruct-decls)"
+                    .to_string(),
+            );
+        }
         if let (
             oxc_ast::ast::BindingPatternKind::BindingIdentifier(name),
             Some(oxc_ast::ast::TSType::TSStringKeyword(_)),
