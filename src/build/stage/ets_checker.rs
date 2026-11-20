@@ -501,8 +501,32 @@ impl Checker<'_> {
             return;
         };
         if self.members.contains_key(type_name.name.as_str()) {
-            self.class_locals
-                .insert(name.name.to_string(), type_name.name.to_string());
+            // The reference prints the type as written, arguments included
+            // (`Property 'notAReal' does not exist on type 'Box<number>'.`, 10:41 of
+            // `fixtures/type-generic-member`).
+            let mut display = type_name.name.to_string();
+            if let Some(arguments) = &reference.type_arguments {
+                let rendered: Vec<String> = arguments
+                    .params
+                    .iter()
+                    .map(|argument| match argument {
+                        oxc_ast::ast::TSType::TSNumberKeyword(_) => "number".to_string(),
+                        oxc_ast::ast::TSType::TSStringKeyword(_) => "string".to_string(),
+                        oxc_ast::ast::TSType::TSBooleanKeyword(_) => "boolean".to_string(),
+                        oxc_ast::ast::TSType::TSTypeReference(reference) => {
+                            match &reference.type_name {
+                                oxc_ast::ast::TSTypeName::IdentifierReference(identifier) => {
+                                    identifier.name.to_string()
+                                }
+                                _ => "_".to_string(),
+                            }
+                        }
+                        _ => "_".to_string(),
+                    })
+                    .collect();
+                display = format!("{display}<{}>", rendered.join(", "));
+            }
+            self.class_locals.insert(name.name.to_string(), display);
         }
     }
 
@@ -1026,7 +1050,9 @@ impl<'a> Visit<'a> for Checker<'_> {
                 // reached through a local or a parameter annotated with it (measured 10:51 of
                 // `fixtures/type-class-member`).
                 if let Some(class) = self.class_locals.get(object.name.as_str()).cloned() {
-                    if let Some(members) = self.members.get(&class) {
+                    // The table is keyed by the base name; the message shows the written type.
+                    let base = class.split('<').next().unwrap_or(&class).to_string();
+                    if let Some(members) = self.members.get(&base) {
                         let member = it.property.name.as_str();
                         if !members.contains(member) {
                             self.push(
