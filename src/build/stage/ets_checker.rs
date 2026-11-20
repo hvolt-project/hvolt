@@ -54,9 +54,21 @@ pub(crate) struct Diagnostic {
 
 impl Diagnostic {
     pub(crate) fn line(&self) -> String {
+        // A diagnostic the reference reports against the whole file (`10905231`, `10905402`) has
+        // no line or column; both are zero and print as `-`, the form `diagnostics.py` documents.
+        let line = if self.line == 0 {
+            "-".to_string()
+        } else {
+            self.line.to_string()
+        };
+        let column = if self.column == 0 {
+            "-".to_string()
+        } else {
+            self.column.to_string()
+        };
         format!(
             "{} {} {}:{}:{} {}",
-            self.severity, self.code, self.file, self.line, self.column, self.message
+            self.severity, self.code, self.file, line, column, self.message
         )
     }
 }
@@ -166,6 +178,33 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
     };
     checker.visit_program(&parsed.program);
     checker.scan_call_sites();
+    // `validate_ui_syntax`, file level: a page must carry exactly one `@Entry`. Two rules are
+    // reported together when there are two, both against the file rather than a position
+    // (`fixtures/ui-entry-count`). Only pages are judged — the message itself says "a page
+    // configured in main_pages.json or build-profile.json5".
+    if checker.lints && file.contains("/pages/") {
+        let (entries, components) = structure_counts(&parsed.program);
+        if components == 0 {
+            checker
+                .out
+                .sort_by(|a, b| (a.line, a.column, a.code).cmp(&(b.line, b.column, b.code)));
+            return checker.out;
+        }
+        if entries > 1 {
+            checker.push_file_level(
+                "ERROR",
+                "10905231",
+                "A page can't contain more than one '@Entry' decorator.".to_string(),
+            );
+        }
+        if entries != 1 {
+            checker.push_file_level(
+                "ERROR",
+                "10905402",
+                "A page configured in 'main_pages.json or build-profile.json5' must have one and only one '@Entry' decorator.".to_string(),
+            );
+        }
+    }
     checker
         .out
         .sort_by(|a, b| (a.line, a.column, a.code).cmp(&(b.line, b.column, b.code)));
@@ -368,6 +407,18 @@ impl Checker<'_> {
                 );
             }
         }
+    }
+
+    /// A diagnostic that belongs to the file rather than to a position in it.
+    fn push_file_level(&mut self, severity: &'static str, code: &'static str, message: String) {
+        self.out.push(Diagnostic {
+            severity,
+            code,
+            file: self.file.clone(),
+            line: 0,
+            column: 0,
+            message,
+        });
     }
 
     fn push(&mut self, severity: &'static str, code: &'static str, offset: usize, message: String) {
@@ -971,6 +1022,45 @@ impl<'a> Visit<'a> for Checker<'_> {
     /// The reference reports `Duplicate identifier` once per declaration, at each name.
     /// Measured on `fixtures/member-collision` (7:18 the field, 9:11 the method).
     fn visit_class(&mut self, class: &Class<'a>) {
+        if self.lints {
+            // `validate_ui_syntax`: a `@Component` struct needs exactly one `build` method,
+            // reported at the struct name (`fixtures/ui-build-method`: 10905103, 2:8). The masked
+            // view turns `struct X` into `class X`, so the test is a decorated class without one.
+            let component = class.decorators.iter().any(|decorator| {
+                matches!(
+                    &decorator.expression,
+                    Expression::Identifier(name) if name.name.as_str() == "Component"
+                )
+            });
+            if component {
+                let builds = class
+                    .body
+                    .body
+                    .iter()
+                    .filter(|element| {
+                        matches!(
+                            element,
+                            ClassElement::MethodDefinition(method)
+                                if method.key.static_name().as_deref() == Some("build")
+                        )
+                    })
+                    .count();
+                if builds != 1 {
+                    if let Some(id) = &class.id {
+                        self.push(
+                            "ERROR",
+                            "10905103",
+                            id.span.start as usize,
+                            format!(
+                                "The struct '{}' must have at least and at most one 'build' method.",
+                                id.name
+                            ),
+                        );
+                    }
+                }
+            }
+        }
+
         let base = self.data_fields.len();
         if self.lints {
             let mut fields: Vec<(String, u32)> = Vec::new();
@@ -1127,6 +1217,36 @@ fn literal_name(value: &Expression<'_>) -> Option<&'static str> {
     }
 }
 
+/// `(structures carrying @Entry, structures carrying @Component)` in this file.
+///
+/// The component count is what makes the page rules apply at all: a page is a file with ArkUI
+/// structures in it, and a plain TypeScript file that merely sits under `pages/` is not one.
+fn structure_counts(program: &Program<'_>) -> (usize, usize) {
+    struct Collect(usize, usize);
+    impl<'a> Visit<'a> for Collect {
+        fn visit_class(&mut self, it: &Class<'a>) {
+            let decorated = |name: &str| {
+                it.decorators.iter().any(|decorator| {
+                    matches!(
+                        &decorator.expression,
+                        Expression::Identifier(identifier) if identifier.name.as_str() == name
+                    )
+                })
+            };
+            if decorated("Entry") {
+                self.0 += 1;
+            }
+            if decorated("Component") {
+                self.1 += 1;
+            }
+            oxc_ast_visit::walk::walk_class(self, it);
+        }
+    }
+    let mut collect = Collect(0, 0);
+    collect.visit_program(program);
+    (collect.0, collect.1)
+}
+
 /// Classes declared in this file.
 fn class_names(program: &Program<'_>) -> std::collections::BTreeSet<String> {
     struct Collect(std::collections::BTreeSet<String>);
@@ -1247,8 +1367,11 @@ mod tests {
 
     #[test]
     fn a_function_expression_is_an_error_and_a_definite_assertion_is_a_warning() {
+        // A `@Component` struct needs one `build` (10905103), so the snippet carries it; the two
+        // diagnostics under test are the ones below it.
         let source = "@Entry\n@Component\nstruct Index {\n  private value!: number;\n\n\
-                      \x20 private tick = function () {\n    return 1;\n  };\n}\n";
+                      \x20 private tick = function () {\n    return 1;\n  };\n\n\
+                      \x20 build() {\n  }\n}\n";
         let reported = lines(source);
         assert_eq!(reported.len(), 2, "{reported:?}");
         // Sorted by position, which is what the comparison and the console both read.
@@ -1287,7 +1410,7 @@ mod tests {
 
     #[test]
     fn a_side_effect_kit_import_is_reported_at_the_statement() {
-        let source = "import \"@kit.AbilityKit\";\n\n@Entry\n@Component\nstruct Index {\n}\n";
+        let source = "import \"@kit.AbilityKit\";\n\n@Entry\n@Component\nstruct Index {\n  build() {\n  }\n}\n";
         let reported = lines(source);
         assert_eq!(reported.len(), 1, "{reported:?}");
         assert_eq!(

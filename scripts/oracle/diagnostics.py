@@ -27,6 +27,11 @@ ANSI = re.compile(r"\x1b\[[0-9;]*m")
 HEAD = re.compile(r"^\s*(\d+)\s+(ERROR|WARN):\s*(\d{3,})?\s*(.*)$")
 # `Error Message: <message> At File: <path>:<line>:<col>`
 BODY = re.compile(r"^\s*Error Message:\s*(.*?)\s*(?:At File:\s*(.*):(\d+):(\d+))?\s*$")
+# `Error Message: <message> At File: <path>` — a diagnostic the compiler reports against the whole
+# file, with no line or column (`10905231`, `10905402`).
+BODY_FILEONLY = re.compile(r"^\s*Error Message:\s*(.*?)\s*At File:\s*(\S+)\s*$")
+# `At File: <path>:<line>:<col>` at the end of a message — the positioned shape.
+POSITIONED_AT = re.compile(r"At File:\s*\S+:\d+:\d+\s*$")
 # `2 ERROR: ArkTS:ERROR File: <path>:<line>:<col>` — the shape that carries the position in the
 # head and the code on its own `ERROR Code:` line.
 HEAD_POSITIONED = re.compile(r"^\s*\d+\s+(ERROR|WARN):\s*ArkTS:(?:ERROR|WARN)\s+File:\s*(.*):(\d+):(\d+)\s*$")
@@ -100,7 +105,11 @@ def parse(text):
                 joined = f"{joined} {follow}".strip()
                 if "At File:" in joined:
                     break
-            body = BODY.match(joined) if joined else None
+            # `BODY`'s `At File:` group is optional, so it also matches a message that ends in an
+            # `At File:` without a position; the two shapes are told apart by the position itself.
+            positioned = POSITIONED_AT.search(joined) if joined else None
+            body = BODY.match(joined) if positioned else None
+            fileonly = None if positioned else (BODY_FILEONLY.match(joined) if joined else None)
             if not body:
                 # A numbered entry with no position and no `Error Message:` line still counts:
                 # the reference prints `1 WARN: ArkTS:WARN: For details about ArkTS syntax
@@ -109,6 +118,12 @@ def parse(text):
                 if inline:
                     message = " ".join(inline.group(2).split())
                     seen.add(f"{inline.group(1)} - -:-:- {message}")
+            if fileonly:
+                # No position at all: the reference names only the file.
+                message = " ".join(fileonly.group(1).split())
+                where = relative_path(fileonly.group(2))
+                # `file:-:-` — the same two-field shape hvolt prints for a file-level entry.
+                seen.add(f"{severity} {code} {where}:-:-  {message}".replace("  ", " "))
             if body:
                 message = " ".join(body.group(1).split())
                 where = relative_path(body.group(2))
