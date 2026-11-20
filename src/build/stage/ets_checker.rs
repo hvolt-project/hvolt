@@ -1588,6 +1588,28 @@ impl<'a> Visit<'a> for Checker<'_> {
         let previous_class = self.current_class.clone();
         if let Some(id) = &class.id {
             self.current_class = Some(id.name.to_string());
+            // `10905114`: a `@Builder` method outside a struct, anchored at the decorator's name
+            // (measured 2:4 of `fixtures/ui-builder-scope`).
+            if !self.structs.contains(id.name.as_str()) {
+                for element in &class.body.body {
+                    let ClassElement::MethodDefinition(method) = element else {
+                        continue;
+                    };
+                    for decorator in &method.decorators {
+                        if let Expression::Identifier(name) = &decorator.expression {
+                            if name.name.as_str() == "Builder" {
+                                self.push(
+                                    "ERROR",
+                                    "10905114",
+                                    decorator.span.start as usize + 1,
+                                    "Use the '@Builder' decorator only in the global scope or in a struct."
+                                        .to_string(),
+                                );
+                            }
+                        }
+                    }
+                }
+            }
         }
         // `@Entry` is what makes the page-level and body-level rules apply to this structure.
         let entry = class.decorators.iter().any(|decorator| {
