@@ -54,10 +54,24 @@ fn exports_of(text: &str) -> HashSet<String> {
     let mut names = HashSet::new();
     // export function/class/interface/const/let/var/enum/type/struct, with optional `async`/`type`.
     let decl = Regex::new(
-        r"(?m)^export\s+(?:declare\s+)?(?:type\s+)?(?:async\s+)?(?:function|class|struct|interface|const|let|var|enum|type)\s+([A-Za-z0-9_]+)",
+        r"(?m)^export\s+(?:declare\s+)?(?:type\s+)?(?:async\s+)?(?:abstract\s+)?(?:function|class|struct|interface|const|let|var|enum|type)\s+([A-Za-z0-9_]+)",
     )
     .expect("export declaration pattern");
+    // `export const enum X` matched the `const` alternative above and captured `enum` as the
+    // name. Measured on `fixtures/const-enum-import`: the file imported `ImportedKind` and this
+    // pass reported it as not exported.
+    let const_enum =
+        Regex::new(r"(?m)^export\s+const\s+enum\s+([A-Za-z0-9_]+)").expect("const enum pattern");
+    for caps in const_enum.captures_iter(text) {
+        names.insert(caps[1].to_string());
+    }
     for caps in decl.captures_iter(text) {
+        // A keyword captured where a name belongs is the shape of the `const enum` miss above,
+        // not a declaration called `enum`.
+        let name: &str = &caps[1];
+        if KEYWORDS.contains(&name) {
+            continue;
+        }
         names.insert(caps[1].to_string());
     }
     // export { a, b as c }
@@ -77,6 +91,20 @@ fn exports_of(text: &str) -> HashSet<String> {
     names
 }
 
+/// Words that can stand where a declared name does in the patterns above.
+const KEYWORDS: &[&str] = &[
+    "enum",
+    "const",
+    "let",
+    "var",
+    "function",
+    "class",
+    "interface",
+    "type",
+    "struct",
+    "declare",
+];
+
 /// `(requested names, specifier)` for one `import { ... } from "..."` statement.
 fn imports_of(text: &str) -> Vec<(Vec<String>, String)> {
     let pattern = Regex::new(r#"(?m)^import\s+(?:type\s+)?\{([^}]*)\}\s+from\s+['"]([^'"]+)['"]"#)
@@ -85,6 +113,10 @@ fn imports_of(text: &str) -> Vec<(Vec<String>, String)> {
     for caps in pattern.captures_iter(text) {
         let mut names = Vec::new();
         for part in caps[1].split(',') {
+            // A comment between the brace and the name is not part of the name. Measured on
+            // `fixtures/import-comment`: without this the graph asked for
+            // `\'// how much to scale by\n  OFFSET\'` and reported it as not exported.
+            let part = crate::build::ets_compile::strip_comments(part.trim());
             let part = part.trim();
             if part.is_empty() {
                 continue;

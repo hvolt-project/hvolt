@@ -367,6 +367,12 @@ pub enum Command {
         #[arg(value_name = "DIR")]
         dir: Option<String>,
     },
+    /// Dump a `resources.index` as JSON (the oracle compares two builds through this)
+    #[command(hide = true)]
+    IndexDump {
+        /// the `resources.index` to read
+        file: PathBuf,
+    },
     /// Report import names a staged module does not export (export/link mismatches)
     #[command(hide = true)]
     ExportReport {

@@ -157,11 +157,24 @@ timeout 900 "$HVIGORW" --mode module -p module="$MODULE@default" -p product=defa
   > "$WORK/hvigor.log" 2>&1 || true
 
 mkdir -p "$FIXTURE/golden"
+# A fixture that declares `expect-build-failure` has no emitted tree by definition: the
+# reference stops at the diagnostic. Its golden set is the diagnostic set.
+FAILS=0
+[ -f "$FIXTURE/expect-build-failure" ] && FAILS=1
 EMITTED="$(find "$WORK/layout/$MODDIR/build" -path "*pages/Index.ts" | head -1)"
-[ -n "$EMITTED" ] || { echo "no emitted Index.ts for $NAME; log: $WORK/hvigor.log" >&2; tail -20 "$WORK/hvigor.log" >&2; exit 1; }
-cp "$EMITTED" "$FIXTURE/golden/Index.ts"
-# `compare.js` reads the AST-level golden next to the fixture, not inside `golden/`.
-cp "$EMITTED" "$FIXTURE/golden.ts"
+if [ -z "$EMITTED" ]; then
+  if [ "$FAILS" = "1" ]; then
+    echo "no emitted Index.ts for $NAME — expected (expect-build-failure)" >&2
+  else
+    echo "no emitted Index.ts for $NAME; log: $WORK/hvigor.log" >&2
+    tail -20 "$WORK/hvigor.log" >&2
+    exit 1
+  fi
+else
+  cp "$EMITTED" "$FIXTURE/golden/Index.ts"
+  # `compare.js` reads the AST-level golden next to the fixture, not inside `golden/`.
+  cp "$EMITTED" "$FIXTURE/golden.ts"
+fi
 # Files beyond the page that the fixture declares (`extra-files.json`). The golden tree keeps
 # one directory level per declared path, so `golden/common/ObservedModel.ts` mirrors the
 # module's own `src/common/ObservedModel.ets`; the comparison reads the same relative path on
@@ -183,25 +196,36 @@ harvest() {
   file="$(find "$WORK/layout/$MODDIR/build" -name "$pattern" | head -1)"
   if [ -n "$file" ]; then cp "$file" "$FIXTURE/golden/$target"; fi
 }
+# A failing build has already written resources and its manifests before it stops at the
+# compile; those are this build's intermediates, not the artifact under test. Keeping them in a
+# diagnostic fixture's golden set would invite a later reader to compare partial output.
+if [ "$FAILS" = "0" ]; then
 harvest "module.json" module.json
 harvest "resources.index" resources.index
 harvest "pack.info" pack.info
 harvest "pkgContextInfo.json" pkgContextInfo.json
 harvest "modules.abc" modules.abc
 harvest "insight_intent.json" insight_intent.json
+fi
 # The reference writes one `sourceMaps.map` per build in four places; the packaged copy under
 # `outputs/default/mapping/` is the artifact the packer carries, so that is the one kept.
 # hvolt does not produce a source map yet; the comparison below reports the missing file rather
 # than treating the absence as agreement.
-SOURCE_MAP="$(find "$WORK/layout/$MODDIR/build/default/outputs/default/mapping" -name "sourceMaps.map" 2>/dev/null | head -1)"
-if [ -n "$SOURCE_MAP" ]; then cp "$SOURCE_MAP" "$FIXTURE/golden/sourceMaps.map"; fi
+# `find` on a tree a failed build never wrote exits 1; under `set -e` that would end the harvest
+# before the diagnostics of exactly the fixtures whose build is meant to stop.
+SOURCE_MAP="$(find "$WORK/layout/$MODDIR/build/default/outputs/default/mapping" -name "sourceMaps.map" 2>/dev/null | head -1 || true)"
+if [ -n "$SOURCE_MAP" ] && [ "$FAILS" = "0" ]; then cp "$SOURCE_MAP" "$FIXTURE/golden/sourceMaps.map"; fi
+
+# The diagnostics are an artifact too, and for a failing fixture the only one: the reference's
+# `ArkTS:ERROR` / `ArkTS:WARN` entries in one canonical line each (`diagnostics.py`).
+python3 "$ROOT/scripts/oracle/diagnostics.py" "$WORK/hvigor.log" > "$FIXTURE/golden/diagnostics.txt"
 
 # Record what this build actually produced. `compare-artifacts.py` reads this list so a file
 # left in `golden/` by an older harvest is not compared as if it were current.
 GOLDEN_MANIFEST="$FIXTURE/golden/manifest.txt"
 : > "$GOLDEN_MANIFEST"
 for artifact in module.json resources.index pack.info pkgContextInfo.json modules.abc \
-                insight_intent.json sourceMaps.map; do
+                insight_intent.json sourceMaps.map diagnostics.txt; do
   if [ -f "$FIXTURE/golden/$artifact" ]; then echo "$artifact" >> "$GOLDEN_MANIFEST"; fi
 done
 

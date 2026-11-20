@@ -1,0 +1,2 @@
+ERROR 10311008 ets/pages/Index.ets:2:1 Can not use empty import(side-effect import) statement with Kit '@kit.AbilityKit'.
+ERROR 10505001 ets/pages/Index.ets:1:10 Module '"@kit.ArkUI"' has no exported member 'NotAThing'.

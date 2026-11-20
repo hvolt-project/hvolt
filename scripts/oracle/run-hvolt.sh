@@ -29,11 +29,17 @@ rsync -a "$PROJECT/" "$WORK/project/"
 # sources (measured 2026-11-06: component-v2 was built from lazy-forms' tree).
 mkdir -p "$WORK/tmp"
 cd "$WORK/project"
-TMPDIR="$WORK/tmp" HVOLT_KEEP_TS=1 "$HVOLT" build > "$WORK/hvolt.log" 2>&1 || {
-  echo "hvolt failed for $NAME; log: $WORK/hvolt.log" >&2
-  tail -20 "$WORK/hvolt.log" >&2
-  exit 1
-}
+if ! TMPDIR="$WORK/tmp" HVOLT_KEEP_TS=1 "$HVOLT" build > "$WORK/hvolt.log" 2>&1; then
+  # A fixture that declares `expect-build-failure` is expected to stop here; the diagnostics it
+  # printed are the artifact under test, so the run continues to the harvest below.
+  if [ -f "$FIXTURE/expect-build-failure" ]; then
+    echo "hvolt failed for $NAME — expected (expect-build-failure)" >&2
+  else
+    echo "hvolt failed for $NAME; log: $WORK/hvolt.log" >&2
+    tail -20 "$WORK/hvolt.log" >&2
+    exit 1
+  fi
+fi
 
 mkdir -p "$RUN_DIR/actual"
 # Every run records which artifacts it produced. The comparison only looks at the files in this
@@ -60,6 +66,10 @@ PROFILE_JSON="$(find "$OUT" -path "*base/profile/insight_intent.json" -type f 2>
 # writes the manifest entry for a file that exists.
 SOURCE_MAP="$(find "$WORK/project/build" -name 'sourceMaps.map' -type f 2>/dev/null | head -1)"
 [ -n "$SOURCE_MAP" ] && stage "$SOURCE_MAP" sourceMaps.map
+# The same canonical form the golden side uses. An empty file is a claim ("no diagnostics"), not
+# an absence, so it is always written and always listed.
+python3 "$ROOT/scripts/oracle/diagnostics.py" "$WORK/hvolt.log" > "$RUN_DIR/actual/diagnostics.txt"
+echo "diagnostics.txt" >> "$MANIFEST"
 STAGED="$(find "$WORK/tmp" -maxdepth 1 -name 'hvolt-ets-*' -type d 2>/dev/null | sort | head -1)"
 if [ -n "$STAGED" ]; then
   TS="$(find "$STAGED" -name 'Index.ts' -path '*pages*' | sort | head -1)"

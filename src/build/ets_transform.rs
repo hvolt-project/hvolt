@@ -95,6 +95,59 @@ pub(crate) fn loaded_requests(specifiers: &[Specifier]) -> HashSet<&str> {
 /// For callers that walk raw project sources: an `.ets` file contains ArkTS constructs
 /// (`struct`, builders) that the TypeScript parser rejects, and these callers only need the
 /// strings a statement points at, not the tree.
+/// The requests a module actually *runs*: every specifier that is not a type-only import.
+///
+/// A type-only import is erased before the runtime sees it, so the module it names is never
+/// loaded and the reference emits no record for it (`fixtures/create-new-config`:
+/// `breakpointsystem.ets`, a class named only in an annotation; `fixtures/const-enum-import`:
+/// `common/Shared.ets`, whose `const enum` members are inlined). The AST answers exactly; a
+/// source it cannot read — every `.ets` page — falls back to the token scan below, which drops a
+/// request only when its statement is spelled `import type`/`export type`, so the error there is
+/// the safe direction: a module stays in the build.
+pub(crate) fn value_requests(text: &str) -> Vec<String> {
+    if let Some(specifiers) = module_specifiers(text) {
+        return specifiers
+            .into_iter()
+            .filter(|specifier| !specifier.type_only)
+            .map(|specifier| specifier.request)
+            .collect();
+    }
+    use crate::build::lex::Kind;
+    let tokens = crate::build::lex::tokenize(text);
+    let mut out = Vec::new();
+    for (index, token) in tokens.iter().enumerate() {
+        if token.kind != Kind::Ident {
+            continue;
+        }
+        let literal = match token.text {
+            "from" => tokens.get(index + 1),
+            "import" => tokens.get(index + 1).filter(|next| next.kind == Kind::Str),
+            _ => continue,
+        };
+        let Some(literal) = literal else {
+            continue;
+        };
+        // Walk back to the statement's opening keyword: `type` between it and the clause makes
+        // the whole statement a type import.
+        let mut start = index;
+        while start > 0 && !tokens[start - 1].is_punct(';') {
+            start -= 1;
+            if matches!(tokens[start].text, "import" | "export") {
+                break;
+            }
+        }
+        let type_only = tokens[start..index]
+            .iter()
+            .take_while(|candidate| !candidate.is_punct('{'))
+            .any(|candidate| candidate.kind == Kind::Ident && candidate.text == "type");
+        if type_only {
+            continue;
+        }
+        out.push(text[literal.start + 1..literal.end.saturating_sub(1)].to_string());
+    }
+    out
+}
+
 pub(crate) fn module_requests(text: &str) -> Vec<String> {
     use crate::build::lex::Kind;
     let tokens = crate::build::lex::tokenize(text);

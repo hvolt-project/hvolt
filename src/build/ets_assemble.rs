@@ -66,6 +66,49 @@ fn es2abc_under(ark: &std::path::Path) -> Option<PathBuf> {
 /// An SDK ships two: the OpenHarmony one and the HMS one. Some kits exist in only one of
 /// them (`@kit.DeskTopExtensionKit` is HMS-only), so picking a single directory silently
 /// drops those kits and leaves their imports unresolvable on the device.
+/// Publishes the names of the system modules the installed SDK declares, for the type pass.
+///
+/// The reference resolves `@ohos.*` against the SDK's `api` directories and reports a request it
+/// cannot find there (`process_system_module.js`). The same list is what this publishes; when no
+/// declaration files are found the set stays unpublished, and the checker then claims nothing —
+/// an SDK laid out differently must not turn every system import into an error.
+fn publish_system_modules() {
+    use std::collections::HashSet;
+    let Some(sdk) = crate::sdk::manage::sdk_root() else {
+        return;
+    };
+    let mut modules: HashSet<String> = HashSet::new();
+    let Ok(entries) = std::fs::read_dir(&sdk) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let root = entry.path();
+        for candidate in [
+            root.join("ets/api"),
+            root.join("openharmony/ets/api"),
+            root.join("hms/ets/api"),
+        ] {
+            let Ok(files) = std::fs::read_dir(&candidate) else {
+                continue;
+            };
+            for file in files.flatten() {
+                let name = file.file_name();
+                let Some(name) = name.to_str() else { continue };
+                let Some(module) = name.strip_suffix(".d.ts") else {
+                    continue;
+                };
+                if module.starts_with('@') {
+                    modules.insert(module.to_string());
+                }
+            }
+        }
+    }
+    if modules.is_empty() {
+        return;
+    }
+    crate::build::stage::ets_checker::set_system_modules(modules);
+}
+
 pub fn sdk_kit_configs() -> Result<Vec<PathBuf>, String> {
     let sdk = crate::sdk::manage::sdk_root().ok_or_else(|| "no SDK root resolved".to_string())?;
     let mut dirs: Vec<PathBuf> = Vec::new();
@@ -212,6 +255,7 @@ pub fn assemble_packages(
         debug,
     } = *opts;
     let kits = load_kit_configs(kit_configs_dir).unwrap_or_default();
+    publish_system_modules();
     // `$r('app.<kind>.<name>')` has to become the object literal the runtime expects: left
     // as a call it resolves against the system table only, and an app resource comes back as
     // an invalid id (`getStringSync` → 401).
@@ -566,6 +610,10 @@ pub fn assemble_packages(
             );
             let src =
                 std::fs::read_to_string(f).map_err(|e| format!("read {}: {e}", f.display()))?;
+            // Judged on the source the project wrote, not on the lowered text: the diagnostic
+            // carries a line and a column the reader resolves against their own file, and
+            // lowering moves both (`fixtures/type-error` pins the positions).
+            check_types(rel, &src);
             if is_shared_module(&src) {
                 shared.insert(dest.clone());
             }
@@ -595,7 +643,7 @@ pub fn assemble_packages(
                 {
                     let lowered = crate::build::lower::ets_transpile::transpile(&src, &opts)
                         .map_err(|e| format!("{}: {e}", f.display()))?;
-                    check_lowered(rel, &lowered);
+                    check_lowered(rel, &src, &lowered);
                     lowered
                 }
             } else {
@@ -606,7 +654,7 @@ pub fn assemble_packages(
                 {
                     let lowered = crate::build::lower::ets_plain::lower(&src, &kits)
                         .map_err(|e| format!("{}: {e}", f.display()))?;
-                    check_lowered(rel, &lowered);
+                    check_lowered(rel, &src, &lowered);
                     lowered
                 }
             };
@@ -840,13 +888,13 @@ pub fn assemble_packages(
                 .join(module)
                 .join("build/default/generated/r/default");
             std::fs::create_dir_all(&dir).map_err(|e| format!("mkdir {}: {e}", dir.display()))?;
-            // A single value export: the merge emits a record for it, and nothing imports it
-            // (the resource ids are inlined by the lowering).
-            std::fs::write(
-                dir.join("ResourceTable.ts"),
-                "export const __hvolt_resource_table__ = 0;\n",
-            )
-            .map_err(|e| format!("write ResourceTable for {module}: {e}"))?;
+            // An empty module: the merge emits a record for it, and nothing imports it (the
+            // resource ids are inlined by the lowering). No export may be declared — the
+            // reference's record carries no `ModuleTag: LOCAL_EXPORT` at all, and an exported
+            // name is exactly that literal (`fixtures/*/golden/modules.abc` disassembled:
+            // the module's body is `"use strict"` and nothing else).
+            std::fs::write(dir.join("ResourceTable.ts"), "export {};\n")
+                .map_err(|e| format!("write ResourceTable for {module}: {e}"))?;
         }
     }
     // The profile module itself, at the path `rewrite_spec` sends `import … from 'BuildProfile'`
@@ -931,6 +979,22 @@ pub fn assemble_packages(
             &wanted,
         )?;
     }
+    // A pruned module leaves no source-map entry either: the map describes what the abc
+    // carries, and the reference emits nothing for a module it never loads.
+    let removed: std::collections::BTreeSet<String> = prune_unreached(ts_root, modules)?
+        .into_iter()
+        .map(|path| {
+            path.strip_prefix(ts_root)
+                .unwrap_or(&path)
+                .to_string_lossy()
+                .replace('\\', "/")
+        })
+        .collect();
+    map_entries.retain(|entry| {
+        let tail = entry.module_path.trim_start_matches("src/main/ets/");
+        !removed.contains(&format!("{}/{}", entry.module, tail))
+    });
+
     // One merge per package. A package's table only names its own module trees, and its
     // records carry that package's version rule: the package's own module is the one the
     // device addresses without a version.
@@ -2081,7 +2145,7 @@ fn source_closure(
             .parent()
             .and_then(|dir| dir.strip_prefix(root).ok())
             .unwrap_or_else(|| Path::new(""));
-        for request in crate::build::ets_transform::module_requests(&text) {
+        for request in crate::build::ets_transform::value_requests(&text) {
             let Some(next) = resolve_source(root, from, &request) else {
                 continue;
             };
@@ -3768,13 +3832,148 @@ fn source_map_entry(
     } else {
         crate::build::compile::ets_source_map::plain_anchors(source, content)
     };
+    // The map names the file with the extension the project wrote: `fixtures/create-new-config`
+    // pins `.ets` (`BreakPoint.ets`, `Common.ets`) and `fixtures/favorite-configuration` pins
+    // `.ts` (`EventHub.ts`, `BreakPoint.ts`) for the same kind of file. Only the source has it.
+    let source_extension = rel
+        .extension()
+        .map(|ext| ext.to_string_lossy().to_string())
+        .unwrap_or_else(|| "ets".to_string());
+    let extension = source_extension.as_str();
     crate::build::compile::ets_source_map::MapEntry {
         module: module.to_string(),
         module_path: module_path.clone(),
-        file: format!("{stem}.ets"),
-        source: format!("{module}/{}.ets", module_path.trim_end_matches(".ts")),
+        file: format!("{stem}.{extension}"),
+        source: format!(
+            "{module}/{}.{extension}",
+            module_path.trim_end_matches(".ts")
+        ),
         anchors,
     }
+}
+
+/// Remove staged modules that nothing in the emitted program loads.
+///
+/// The staging walk follows imports textually, so a module named only where TypeScript erases
+/// the reference is pulled in anyway: `fixtures/create-new-config` imports `BreakpointState`
+/// only in an annotation, `fixtures/const-enum-import` imports a `const enum` whose members are
+/// inlined. The reference emits no record and no source-map entry for either, because the
+/// emitted program never loads them.
+///
+/// The staged tree answers the question exactly: every import has already been rewritten to the
+/// ohm-url the runtime resolves (`@normalized:N&&&<module>/src/main/ets/<path>&`), and a binding
+/// the lowering erased is gone from the file. So the roots are the module's compile roots, its
+/// pages and the generated modules hvolt stages itself; the edges are the staged requests; and a
+/// module tree file no walk reaches is deleted before the merge names it.
+fn prune_unreached(
+    ts_root: &std::path::Path,
+    modules: &[StageModule<'_>],
+) -> Result<Vec<std::path::PathBuf>, String> {
+    let mut staged_files: Vec<std::path::PathBuf> = Vec::new();
+    for module in modules {
+        let dir = ts_root.join(module.name);
+        if dir.is_dir() {
+            collect_staged_ts(&dir, &mut staged_files)?;
+        }
+    }
+    if staged_files.is_empty() {
+        return Ok(Vec::new());
+    }
+    let is_root = |path: &std::path::Path| -> bool {
+        let rel = path
+            .strip_prefix(ts_root)
+            .unwrap_or(path)
+            .to_string_lossy()
+            .replace('\\', "/");
+        if rel.contains("/pages/") || rel.ends_with("/ResourceTable.ts") {
+            return true;
+        }
+        modules.iter().any(|module| {
+            let entry = module
+                .entry_file
+                .trim_start_matches("./")
+                .trim_end_matches(".ets");
+            let stem = std::path::Path::new(entry)
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or(entry);
+            let declared = rel.ends_with(&format!("/{stem}.ts"));
+            let listed = module.entries.iter().any(|root| {
+                let root = root.trim_start_matches("./").trim_end_matches(".ets");
+                rel.ends_with(&format!("/{root}.ts"))
+            });
+            declared || listed
+        })
+    };
+    let mut reached: std::collections::BTreeSet<std::path::PathBuf> = staged_files
+        .iter()
+        .filter(|path| is_root(path))
+        .cloned()
+        .collect();
+    let mut pending: Vec<std::path::PathBuf> = reached.iter().cloned().collect();
+    while let Some(path) = pending.pop() {
+        let text =
+            std::fs::read_to_string(&path).map_err(|e| format!("read {}: {e}", path.display()))?;
+        for request in crate::build::ets_transform::value_requests(&text) {
+            let Some(next) = staged_target(ts_root, &staged_files, &path, &request) else {
+                continue;
+            };
+            if reached.insert(next.clone()) {
+                pending.push(next);
+            }
+        }
+    }
+    let mut removed: Vec<std::path::PathBuf> = Vec::new();
+    for path in &staged_files {
+        if !reached.contains(path) {
+            std::fs::remove_file(path).map_err(|e| format!("remove {}: {e}", path.display()))?;
+            removed.push(path.clone());
+        }
+    }
+    Ok(removed)
+}
+
+/// The staged file a request names: a relative path, or the ohm-url the lowering rewrote it to.
+fn staged_target(
+    ts_root: &std::path::Path,
+    staged_files: &[std::path::PathBuf],
+    from: &std::path::Path,
+    request: &str,
+) -> Option<std::path::PathBuf> {
+    let resolve = |base: &std::path::Path, relative: &str| -> Option<std::path::PathBuf> {
+        let candidate = base.join(relative);
+        [candidate.clone(), candidate.with_extension("ts")]
+            .into_iter()
+            .find(|attempt| staged_files.contains(attempt))
+    };
+    if request.starts_with('.') {
+        return resolve(from.parent().unwrap_or(ts_root), request);
+    }
+    let rest = request
+        .strip_prefix("@normalized:")
+        .and_then(|tail| tail.split("&&&").nth(1))
+        .map(|path| path.trim_end_matches('&'))?;
+    // `<module>/src/main/ets/<path>` → `<ts_root>/<module>/<path>`
+    let (module, after) = rest.split_once('/')?;
+    let relative = after.strip_prefix("src/main/ets/")?;
+    resolve(&ts_root.join(module), relative)
+}
+
+/// Every `.ts` under `dir`.
+fn collect_staged_ts(
+    dir: &std::path::Path,
+    out: &mut Vec<std::path::PathBuf>,
+) -> Result<(), String> {
+    for entry in std::fs::read_dir(dir).map_err(|e| format!("read_dir {}: {e}", dir.display()))? {
+        let entry = entry.map_err(|e| format!("read_dir entry {}: {e}", dir.display()))?;
+        let path = entry.path();
+        if path.is_dir() {
+            collect_staged_ts(&path, out)?;
+        } else if path.extension().is_some_and(|ext| ext == "ts") {
+            out.push(path);
+        }
+    }
+    Ok(())
 }
 
 /// Write `sourceMaps.map` where the reference keeps it: once in the module build directory
@@ -3801,6 +4000,7 @@ fn write_source_maps(
     std::fs::write(packaged.join("sourceMaps.map"), &text)
         .map_err(|e| format!("write packaged sourceMaps.map: {e}"))?;
     fail_on_undefined();
+    fail_on_types();
     Ok(())
 }
 
@@ -3883,18 +4083,64 @@ mod dialog_builder_tests {
 /// The source the project wrote is ArkTS; the lowered text is what `es2abc` accepts, and it is
 /// also the first form a TypeScript parser can read in full. Checking here therefore looks at the
 /// same names the compiler will see, without a separate ArkTS parser.
-fn check_lowered(rel: &std::path::Path, text: &str) {
+fn check_lowered(rel: &std::path::Path, source: &str, text: &str) {
     if !crate::build::stage::semantic_check::enabled() {
         return;
     }
     let name = rel.to_string_lossy().to_string();
+    let file = format!("ets/{}", name);
     for diagnostic in crate::build::stage::semantic_check::check_file(&name, text) {
-        eprintln!(
-            "{}:{}:{}: error: {} (undefined identifier; HVOLT_SEMANTIC=off to build anyway)",
-            diagnostic.file, diagnostic.line, diagnostic.column, diagnostic.message
-        );
+        // The check runs on the lowered text, and the reference reports the *source* position
+        // (`fixtures/undefined-identifier`: 6:12 there, 26:16 in the lowered file). The name is
+        // the one thing both forms share, so it is located in the source; the occurrence chosen
+        // is the unique one, or the one nearest the lowered line when the name repeats.
+        // Only the undefined-name shape is translated here. The pass also reports member
+        // collisions, and those already reach the console through the type checker's own channel
+        // (`fixtures/member-collision`); translating them again invented
+        // `Cannot find name 'Duplicate'.`
+        let Some(bare) = diagnostic.message.strip_suffix(" is not defined") else {
+            continue;
+        };
+        let bare = bare.to_string();
+        let (line, column) = match source_position(source, &bare, diagnostic.line) {
+            Some(position) => position,
+            None => (diagnostic.line, diagnostic.column),
+        };
+        eprintln!("ERROR 10505001 {file}:{line}:{column} Cannot find name '{bare}'.");
         undefined_identifiers::bump();
     }
+}
+
+/// Where `name` is written in `source`: the unique occurrence, else the one nearest `near_line`.
+fn source_position(source: &str, name: &str, near_line: usize) -> Option<(usize, usize)> {
+    use crate::build::lex::{tokenize, Kind};
+    let tokens = tokenize(source);
+    let mut hits: Vec<(usize, usize)> = Vec::new();
+    let mut line = 1usize;
+    let mut line_start = 0usize;
+    let mut next_token = 0usize;
+    for (offset, byte) in source.bytes().enumerate() {
+        while next_token < tokens.len() && tokens[next_token].start == offset {
+            if tokens[next_token].kind == Kind::Ident
+                && source.get(tokens[next_token].start..tokens[next_token].end) == Some(name)
+            {
+                hits.push((line, offset - line_start + 1));
+            }
+            next_token += 1;
+        }
+        if byte == b'\n' {
+            line += 1;
+            line_start = offset + 1;
+        }
+    }
+    if hits.is_empty() {
+        return None;
+    }
+    if hits.len() == 1 {
+        return hits.first().copied();
+    }
+    hits.into_iter()
+        .min_by_key(|(at, _)| at.abs_diff(near_line))
 }
 
 mod undefined_identifiers {
@@ -3916,6 +4162,66 @@ fn fail_on_undefined() {
     let total = undefined_identifiers::total();
     if total > 0 {
         eprintln!("✗ {total} undefined identifier(s)");
+        crate::support::cli_exit(1);
+    }
+}
+
+/// Reports the diagnostics the type pass proves, in the reference's console shape.
+///
+/// The file is named the way the reference names it — `ets/…` is the path under the module's
+/// `src/main` — because that string is what a reader matches against their own tree and what the
+/// oracle's golden set stores.
+fn check_types(rel: &std::path::Path, source: &str) {
+    if !crate::build::stage::ets_checker::enabled() {
+        return;
+    }
+    let file = format!("ets/{}", rel.to_string_lossy().replace('\\', "/"));
+    for diagnostic in crate::build::stage::ets_checker::check(&file, source) {
+        eprintln!("{}", diagnostic.line());
+        if diagnostic.severity == "ERROR" {
+            type_errors::bump();
+        }
+        // The reference's FAQ line is printed by the ArkTS linter, not by every failing build:
+        // `fixtures/type-error` (one `arkts-*` rule) has it, `fixtures/kit-import-errors` (two
+        // type-level errors, no rule) does not — `COMPILE RESULT:FAIL {ERROR:3}` with no WARN.
+        if diagnostic.message.contains("(arkts-") {
+            type_errors::bump_linter();
+        }
+    }
+}
+
+mod type_errors {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    static COUNT: AtomicUsize = AtomicUsize::new(0);
+    static LINTER: AtomicUsize = AtomicUsize::new(0);
+
+    pub(super) fn bump() {
+        COUNT.fetch_add(1, Ordering::SeqCst);
+    }
+
+    pub(super) fn bump_linter() {
+        LINTER.fetch_add(1, Ordering::SeqCst);
+    }
+
+    pub(super) fn total() -> usize {
+        COUNT.load(Ordering::SeqCst)
+    }
+
+    pub(super) fn linter_total() -> usize {
+        LINTER.load(Ordering::SeqCst)
+    }
+}
+
+/// Fails the build if any file carried a diagnostic, and prints the reference's own summary
+/// warning once — it prints it whenever the linter reported anything.
+fn fail_on_types() {
+    let total = type_errors::total();
+    if total > 0 {
+        if type_errors::linter_total() > 0 {
+            eprintln!("WARN - -:-:- For details about ArkTS syntax errors, see FAQs");
+        }
+        eprintln!("✗ {total} type error(s)");
         crate::support::cli_exit(1);
     }
 }

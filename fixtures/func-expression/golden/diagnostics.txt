@@ -1,0 +1,3 @@
+ERROR 10605046 ets/pages/Index.ets:6:18 Use arrow functions instead of function expressions (arkts-no-func-expressions)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs
+WARN - ets/pages/Index.ets:4:3 Definite assignment assertions are not supported (arkts-no-definite-assignment)

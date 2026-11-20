@@ -847,10 +847,21 @@ pub(crate) fn emit_members(
     for (_, member) in slots {
         match member {
             Member::Method(index) => {
-                // The method text is handed over as written: the printer lays it out, so no
-                // re-indentation happens here.
-                out.push_str(&comp.methods[index]);
-                out.push('\n');
+                // A plain `get`/`set` accessor written inside a V1 struct does not reach the
+                // emitted class: the reference drops it, and the `build()` body that reads the
+                // name keeps reading it. Measured on `fixtures/accessor-pair` (the emitted
+                // `Index.ts` has no accessor, the runtime literal then carries every method in
+                // one buffer) and on a probe with an accessor inside a plain class, which the
+                // reference keeps — so the drop is a struct rule, not a class rule.
+                let text = comp.methods[index].trim_start();
+                let accessor =
+                    fields_is_v1(&fields) && (text.starts_with("get ") || text.starts_with("set "));
+                if !accessor {
+                    // The method text is handed over as written: the printer lays it out, so no
+                    // re-indentation happens here.
+                    out.push_str(&comp.methods[index]);
+                    out.push('\n');
+                }
             }
             Member::Builder(index) => {
                 emit_struct_builder_method(out, comp, &comp.struct_builder_methods[index], local)
@@ -885,6 +896,11 @@ pub(crate) fn emit_members(
         }
     }
     Ok(())
+}
+
+/// Whether this struct declares its fields the V1 way.
+fn fields_is_v1(fields: &FieldDecl) -> bool {
+    matches!(fields, FieldDecl::V1)
 }
 
 /// Only an `@Entry` component carries the entry name.
