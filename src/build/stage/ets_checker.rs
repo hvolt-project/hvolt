@@ -1103,6 +1103,37 @@ impl<'a> Visit<'a> for Checker<'_> {
         oxc_ast_visit::walk::walk_ts_type_literal(self, it);
     }
 
+    /// `arkts-no-call-signatures` (10605014): a call signature in an interface, at the `(`
+    /// (measured 2:3 of `fixtures/arkts-call-signature-and-symbol`).
+    fn visit_ts_call_signature_declaration(
+        &mut self,
+        it: &oxc_ast::ast::TSCallSignatureDeclaration<'a>,
+    ) {
+        if self.lints {
+            self.push(
+                "ERROR",
+                "10605014",
+                it.span.start as usize,
+                "Use \"class\" instead of a type with call signature (arkts-no-call-signatures)"
+                    .to_string(),
+            );
+        }
+        oxc_ast_visit::walk::walk_ts_call_signature_declaration(self, it);
+    }
+
+    /// `arkts-no-symbol` (10605002): the `symbol` type, at the keyword (measured 9:28 and 9:37 —
+    /// the parameter's type and the return type).
+    fn visit_ts_symbol_keyword(&mut self, it: &oxc_ast::ast::TSSymbolKeyword) {
+        if self.lints {
+            self.push(
+                "ERROR",
+                "10605002",
+                it.span.start as usize,
+                "\"Symbol()\" API is not supported (arkts-no-symbol)".to_string(),
+            );
+        }
+    }
+
     /// An ambient module declaration is refused at the `declare` (10605128, measured 1:1 of
     /// `fixtures/arkts-ambient-decl`). A probe that also carried an overloaded function and a
     /// default export drew a second diagnostic — `Invalid module name in augmentation, module
