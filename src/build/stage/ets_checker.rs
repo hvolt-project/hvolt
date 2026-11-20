@@ -246,6 +246,7 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         lints: file.ends_with(".ets"),
         unannotated_fns: unannotated_functions(&parsed.program),
         class_names: class_names(&parsed.program),
+        arity: declared_arity(&parsed.program),
         method_depth: 0,
     };
     checker.visit_program(&parsed.program);
@@ -435,6 +436,8 @@ struct Checker<'a> {
     /// Classes declared in this file. A reference to one is not an object the reference accepts
     /// (`arkts-no-classes-as-obj`, a warning).
     class_names: std::collections::BTreeSet<String>,
+    /// Arguments each function of this file takes: `name -> (minimum, maximum)`.
+    arity: std::collections::HashMap<String, (usize, usize)>,
     /// How many class methods enclose the node being visited. `this` is legal inside a method and
     /// rejected inside a stand-alone function (`arkts-no-standalone-this`).
     method_depth: usize,
@@ -778,6 +781,37 @@ impl<'a> Visit<'a> for Checker<'_> {
     /// `Object.getOwnPropertyNames`, `Date.parse`, `parseInt` and `JSON.stringify` are not, so the
     /// table holds exactly the measured members, anchored at the `Object` identifier.
     fn visit_call_expression(&mut self, it: &oxc_ast::ast::CallExpression<'a>) {
+        // `Expected N arguments, but got M.` — anchored at the call's closing `)` (measured 8:22 of
+        // `fixtures/type-call-arity`).
+        if self.lints {
+            if let Expression::Identifier(callee) = &it.callee {
+                if let Some((minimum, maximum)) = self.arity.get(callee.name.as_str()) {
+                    let given = it.arguments.len();
+                    if given > *maximum || given < *minimum {
+                        let expected = if *maximum == usize::MAX {
+                            format!("at least {minimum}")
+                        } else if minimum == maximum {
+                            format!("{minimum}")
+                        } else {
+                            format!("{minimum}-{maximum}")
+                        };
+                        // The reference says "arguments" even for one, and anchors at the last
+                        // argument it was given (measured 8:22 of `fixtures/type-call-arity`).
+                        let offset = it
+                            .arguments
+                            .last()
+                            .map(|argument| argument.span().start as usize)
+                            .unwrap_or_else(|| it.span.end.saturating_sub(1) as usize);
+                        self.push(
+                            "ERROR",
+                            "10505001",
+                            offset,
+                            format!("Expected {expected} arguments, but got {given}."),
+                        );
+                    }
+                }
+            }
+        }
         if self.lints {
             if let Expression::StaticMemberExpression(member) = &it.callee {
                 if let Expression::Identifier(object) = &member.object {
@@ -1942,6 +1976,43 @@ fn build_body(source: &str, brace: usize) -> Option<BuildBody> {
         declarations,
         nodes,
     })
+}
+
+/// `name -> (minimum, maximum)` arguments for the functions this file declares.
+///
+/// The type system reports a call of such a function with too many arguments
+/// (`Expected 1 arguments, but got 2.`, 8:22 of `fixtures/type-call-arity`).
+fn declared_arity(program: &Program<'_>) -> std::collections::HashMap<String, (usize, usize)> {
+    struct Collect(std::collections::HashMap<String, (usize, usize)>);
+    impl<'a> Visit<'a> for Collect {
+        fn visit_function(&mut self, it: &Function<'a>, flags: oxc_syntax::scope::ScopeFlags) {
+            if let Some(id) = &it.id {
+                let mut minimum = 0usize;
+                let mut maximum = 0usize;
+                for parameter in &it.params.items {
+                    // `x = 1` is an assignment pattern and `x?` carries `optional`; both make the
+                    // parameter unrequired.
+                    let optional = parameter.pattern.optional
+                        || matches!(
+                            parameter.pattern.kind,
+                            oxc_ast::ast::BindingPatternKind::AssignmentPattern(_)
+                        );
+                    if !optional {
+                        minimum += 1;
+                    }
+                    maximum += 1;
+                }
+                if it.params.rest.is_some() {
+                    maximum = usize::MAX;
+                }
+                self.0.insert(id.name.to_string(), (minimum, maximum));
+            }
+            oxc_ast_visit::walk::walk_function(self, it, flags);
+        }
+    }
+    let mut collect = Collect(std::collections::HashMap::new());
+    collect.visit_program(program);
+    collect.0
 }
 
 /// `(structures carrying @Entry, structures carrying @Component)` in this file.
