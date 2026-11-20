@@ -4359,6 +4359,27 @@ fn check_lowered(rel: &std::path::Path, source: &str, text: &str) {
         let Some(bare) = diagnostic.message.strip_suffix(" is not defined") else {
             continue;
         };
+        // `as const` and the other spellings a type can have are not names to resolve: the lowered
+        // text keeps them, and reporting `Cannot find name 'const'` next to the real diagnostic for
+        // the assertion would be wrong (`fixtures/arkts-as-const`).
+        if matches!(
+            bare,
+            "const"
+                | "any"
+                | "unknown"
+                | "string"
+                | "number"
+                | "boolean"
+                | "void"
+                | "never"
+                | "null"
+                | "undefined"
+                | "this"
+                | "true"
+                | "false"
+        ) {
+            continue;
+        };
         let bare = bare.to_string();
         let (line, column) = match source_position(source, &bare, diagnostic.line) {
             Some(position) => position,

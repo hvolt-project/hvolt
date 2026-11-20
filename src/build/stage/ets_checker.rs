@@ -1051,6 +1051,33 @@ impl<'a> Visit<'a> for Checker<'_> {
         oxc_ast_visit::walk::walk_ts_type_literal(self, it);
     }
 
+    /// `arkts-no-as-const` (10605142): an `as const` assertion, anchored at the `as`
+    /// (measured 6:28 of `fixtures/arkts-as-const`).
+    fn visit_ts_as_expression(&mut self, it: &oxc_ast::ast::TSAsExpression<'a>) {
+        if self.lints {
+            if let TSType::TSTypeReference(reference) = &it.type_annotation {
+                if matches!(&reference.type_name,
+                    oxc_ast::ast::TSTypeName::IdentifierReference(name) if name.name.as_str() == "const")
+                {
+                    let after = it.expression.span().end as usize;
+                    let offset = self
+                        .source
+                        .get(after..)
+                        .and_then(|rest| rest.find("as"))
+                        .map(|at| after + at)
+                        .unwrap_or(after);
+                    self.push(
+                        "ERROR",
+                        "10605142",
+                        offset,
+                        "\"as const\" assertions are not supported (arkts-no-as-const)".to_string(),
+                    );
+                }
+            }
+        }
+        oxc_ast_visit::walk::walk_ts_as_expression(self, it);
+    }
+
     /// `arkts-no-private-identifiers` (10605003): a `#name`, at the `#` on both its declaration and
     /// its use (measured 2:3 and 5:17 of `fixtures/arkts-private-identifiers`).
     fn visit_private_field_expression(&mut self, it: &oxc_ast::ast::PrivateFieldExpression<'a>) {
