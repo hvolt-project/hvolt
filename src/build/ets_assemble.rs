@@ -146,6 +146,77 @@ fn publish_system_modules() {
     crate::build::stage::ets_checker::set_system_modules(modules);
 }
 
+/// Members of the primitive types, from the TypeScript standard library the loader ships.
+///
+/// `Property 'notARealMethod' does not exist on type 'string'.` is the type checker's answer for a
+/// member the primitive does not have (measured 7:24 of `fixtures/type-primitive-member`), so the
+/// set it accepts comes from the same files the compiler reads: every `interface String`,
+/// `interface Number` and `interface Boolean` in `<ets>/build-tools/ets-loader/node_modules/
+/// typescript/lib/lib.es*.d.ts`.
+pub fn publish_primitive_members() {
+    use std::collections::{HashMap, HashSet};
+    let Some(sdk) = crate::sdk::manage::sdk_root() else {
+        return;
+    };
+    let mut members: HashMap<String, HashSet<String>> = HashMap::new();
+    let Ok(entries) = std::fs::read_dir(&sdk) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let root = entry.path();
+        for base in [root.join("ets"), root.join("openharmony/ets")] {
+            let lib = base.join("build-tools/ets-loader/node_modules/typescript/lib");
+            let Ok(files) = std::fs::read_dir(&lib) else {
+                continue;
+            };
+            for file in files.flatten() {
+                let name = file.file_name();
+                let Some(name) = name.to_str() else { continue };
+                if !name.starts_with("lib.es") || !name.ends_with(".d.ts") {
+                    continue;
+                }
+                let Ok(text) = std::fs::read_to_string(file.path()) else {
+                    continue;
+                };
+                for (interface, kind) in [
+                    ("interface String {", "string"),
+                    ("interface Number {", "number"),
+                    ("interface Boolean {", "boolean"),
+                ] {
+                    let Some(start) = text.find(interface) else {
+                        continue;
+                    };
+                    let rest = &text[start + interface.len()..];
+                    let end = rest.find("\n}").unwrap_or(rest.len());
+                    let set = members.entry(kind.to_string()).or_default();
+                    for line in rest[..end].lines() {
+                        let trimmed = line.trim_start();
+                        let trimmed = trimmed.strip_prefix("readonly ").unwrap_or(trimmed);
+                        let member: String = trimmed
+                            .chars()
+                            .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+                            .collect();
+                        if member.is_empty() {
+                            continue;
+                        }
+                        let after = &trimmed[member.len()..];
+                        if after.starts_with('(')
+                            || after.starts_with(':')
+                            || after.starts_with('?')
+                        {
+                            set.insert(member);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if members.is_empty() {
+        return;
+    }
+    crate::build::stage::ets_checker::set_primitive_members(members);
+}
+
 /// Reads the ArkUI attribute names the reference accepts, for the component attribute check.
 ///
 /// Two sources, both from the installed SDK: `components/*.json` gives each component's own
@@ -442,6 +513,7 @@ pub fn assemble_packages(
     let kits = load_kit_configs(kit_configs_dir).unwrap_or_default();
     publish_system_modules();
     publish_component_attributes();
+    publish_primitive_members();
     // `$r('app.<kind>.<name>')` has to become the object literal the runtime expects: left
     // as a call it resolves against the system table only, and an app resource comes back as
     // an invalid id (`getStringSync` → 401).

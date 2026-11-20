@@ -102,6 +102,31 @@ thread_local! {
         const { std::cell::RefCell::new(None) };
 }
 
+thread_local! {
+    /// Members of the primitive types, published by the build from the TypeScript standard library
+    /// the loader ships (`publish_primitive_members`).
+    static PRIMITIVE_MEMBERS: std::cell::RefCell<
+        Option<std::collections::HashMap<String, std::collections::HashSet<String>>>,
+    > = const { std::cell::RefCell::new(None) };
+}
+
+/// Publishes the primitive member sets; see `ets_assemble::publish_primitive_members`.
+pub(crate) fn set_primitive_members(
+    members: std::collections::HashMap<String, std::collections::HashSet<String>>,
+) {
+    PRIMITIVE_MEMBERS.with(|cell| *cell.borrow_mut() = Some(members));
+}
+
+/// `Some(true)` when the primitive has the member, `Some(false)` when it does not and the set is
+/// known, `None` when the library was not read.
+fn primitive_has_member(kind: &str, member: &str) -> Option<bool> {
+    PRIMITIVE_MEMBERS.with(|cell| {
+        let table = cell.borrow();
+        let table = table.as_ref()?;
+        Some(table.get(kind)?.contains(member))
+    })
+}
+
 /// Publishes the component tables; see `ets_assemble::publish_component_attributes`.
 pub(crate) fn set_component_attributes(
     attributes: std::collections::HashMap<String, std::collections::HashSet<String>>,
@@ -247,6 +272,7 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         unannotated_fns: unannotated_functions(&parsed.program),
         class_names: class_names(&parsed.program),
         arity: declared_arity(&parsed.program),
+        primitives: std::collections::HashMap::new(),
         method_depth: 0,
     };
     checker.visit_program(&parsed.program);
@@ -438,6 +464,8 @@ struct Checker<'a> {
     class_names: std::collections::BTreeSet<String>,
     /// Arguments each function of this file takes: `name -> (minimum, maximum)`.
     arity: std::collections::HashMap<String, (usize, usize)>,
+    /// Locals declared with a primitive annotation: `name -> "string" | "number" | "boolean"`.
+    primitives: std::collections::HashMap<String, &'static str>,
     /// How many class methods enclose the node being visited. `this` is legal inside a method and
     /// rejected inside a stand-alone function (`arkts-no-standalone-this`).
     method_depth: usize,
@@ -933,10 +961,49 @@ impl<'a> Visit<'a> for Checker<'_> {
     /// the `{`. Measured on `fixtures/arkts-object-shapes`: `return { ...a }` (2:10) and
     /// `const o = { … }` without an annotation (10:13); the same literal passed to a typed
     /// parameter is accepted, so only these two positions are judged.
+    /// A member the primitive does not have (`Property 'notARealMethod' does not exist on type
+    /// 'string'.`, 7:24 of `fixtures/type-primitive-member`).
+    fn visit_static_member_expression(&mut self, it: &oxc_ast::ast::StaticMemberExpression<'a>) {
+        if self.lints {
+            if let Expression::Identifier(object) = &it.object {
+                if let Some(kind) = self.primitives.get(object.name.as_str()).copied() {
+                    let member = it.property.name.as_str();
+                    if primitive_has_member(kind, member) == Some(false) {
+                        self.push(
+                            "ERROR",
+                            "10505001",
+                            it.property.span.start as usize,
+                            format!("Property '{member}' does not exist on type '{kind}'."),
+                        );
+                    }
+                }
+            }
+        }
+        oxc_ast_visit::walk::walk_static_member_expression(self, it);
+    }
+
     fn visit_variable_declarator(&mut self, it: &VariableDeclarator<'a>) {
         // A type *literal* annotation declares no class or interface, so the initialiser still has
         // no contextual type: the reference reports both the type literal (10605040) and this
         // (measured at 17:16 and 17:32 of `fixtures/arkts-type-shapes`).
+        if let (
+            oxc_ast::ast::BindingPatternKind::BindingIdentifier(name),
+            Some(oxc_ast::ast::TSType::TSStringKeyword(_)),
+        ) = (
+            &it.id.kind,
+            it.id.type_annotation.as_ref().map(|a| &a.type_annotation),
+        ) {
+            self.primitives.insert(name.name.to_string(), "string");
+        }
+        if let (
+            oxc_ast::ast::BindingPatternKind::BindingIdentifier(name),
+            Some(oxc_ast::ast::TSType::TSNumberKeyword(_)),
+        ) = (
+            &it.id.kind,
+            it.id.type_annotation.as_ref().map(|a| &a.type_annotation),
+        ) {
+            self.primitives.insert(name.name.to_string(), "number");
+        }
         let typed = matches!(
             it.id.type_annotation.as_ref().map(|annotation| &annotation.type_annotation),
             Some(annotation) if !matches!(annotation, TSType::TSTypeLiteral(_))
