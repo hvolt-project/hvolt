@@ -333,6 +333,19 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
                 "A page can't contain more than one '@Entry' decorator.".to_string(),
             );
         }
+        // A `struct` that is none of the component kinds: a warning when it carries `@Entry`
+        // (22:7 of `fixtures/ui-entry-count`), an error with its own code otherwise (`10905233`
+        // at 1:1 of `fixtures/ui-struct-decorator`).
+        for (offset, name, entry) in undecorated_structs(&parsed.program, source) {
+            let message = format!(
+                "Decorator '@Component', '@ComponentV2', or '@CustomDialog' is missing for struct '{name}'."
+            );
+            if entry {
+                checker.push("WARN", "-", offset, message);
+            } else {
+                checker.push("ERROR", "10905233", offset, message);
+            }
+        }
         if entries != 1 {
             checker.push_file_level(
                 "ERROR",
@@ -2552,6 +2565,58 @@ fn declared_arity(program: &Program<'_>) -> std::collections::HashMap<String, (u
 ///
 /// The component count is what makes the page rules apply at all: a page is a file with ArkUI
 /// structures in it, and a plain TypeScript file that merely sits under `pages/` is not one.
+/// Structs declared in this file that carry none of the three decorators that make one a
+/// component: offset one character before the name, which is where the reference anchors the
+/// warning (measured 22:7 of `fixtures/ui-entry-count`, `struct` occupying columns 1–6).
+fn undecorated_structs(program: &Program<'_>, source: &str) -> Vec<(usize, String, bool)> {
+    struct Collect<'s> {
+        source: &'s str,
+        found: Vec<(usize, String, bool)>,
+    }
+    impl<'a> Visit<'a> for Collect<'_> {
+        fn visit_class(&mut self, it: &Class<'a>) {
+            let decorated = |name: &str| {
+                it.decorators.iter().any(|decorator| {
+                    matches!(
+                        &decorator.expression,
+                        Expression::Identifier(identifier) if identifier.name.as_str() == name
+                    )
+                })
+            };
+            if let Some(id) = &it.id {
+                let is_struct = self.source[..id.span.start as usize]
+                    .trim_end()
+                    .ends_with("struct");
+                let component =
+                    decorated("Component") || decorated("ComponentV2") || decorated("CustomDialog");
+                if is_struct && !component {
+                    // The two shapes the reference distinguishes: a struct that would be a page
+                    // (`@Entry` present) draws a warning one character before the name (measured
+                    // 22:7 of `fixtures/ui-entry-count`), while one with no component decorator at
+                    // all is an error anchored at the `struct` keyword (`10905233`, 1:1 of
+                    // `fixtures/ui-struct-decorator`).
+                    let start = id.span.start as usize;
+                    let keyword = self.source[..start].rfind("struct").unwrap_or(start - 1);
+                    let anchor = if decorated("Entry") {
+                        start - 1
+                    } else {
+                        keyword
+                    };
+                    self.found
+                        .push((anchor, id.name.to_string(), decorated("Entry")));
+                }
+            }
+            oxc_ast_visit::walk::walk_class(self, it);
+        }
+    }
+    let mut collect = Collect {
+        source,
+        found: Vec::new(),
+    };
+    collect.visit_program(program);
+    collect.found
+}
+
 fn structure_counts(program: &Program<'_>) -> (usize, usize) {
     struct Collect(usize, usize);
     impl<'a> Visit<'a> for Collect {

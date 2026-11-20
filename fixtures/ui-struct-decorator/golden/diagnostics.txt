@@ -1,0 +1,1 @@
+ERROR 10905233 ets/pages/Index.ets:1:1 Decorator '@Component', '@ComponentV2', or '@CustomDialog' is missing for struct 'StructWithoutDecorator'.
