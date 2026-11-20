@@ -2574,6 +2574,12 @@ fn returns_limited_type(
             Expression::ThisExpression(_) => true,
             Expression::CallExpression(call) => match &call.callee {
                 Expression::Identifier(id) => unannotated.contains(id.name.as_str()),
+                // Returning `f.apply(…)`, `f.call(…)` or `f.bind(…)` also leaves the return type
+                // to be inferred through a library signature (measured 9:10 of
+                // `fixtures/type-return-member-call`).
+                Expression::StaticMemberExpression(member) => {
+                    matches!(member.property.name.as_str(), "apply" | "call" | "bind")
+                }
                 _ => false,
             },
             // `return param;` where the parameter carries no type: the return type would have to
