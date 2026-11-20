@@ -158,6 +158,7 @@ pub fn publish_component_attributes() {
         return;
     };
     let mut attributes: HashMap<String, HashSet<String>> = HashMap::new();
+    let mut parents: HashMap<String, Vec<String>> = HashMap::new();
     let mut common: HashSet<String> = HashSet::new();
     let Ok(entries) = std::fs::read_dir(&sdk) else {
         return;
@@ -177,6 +178,16 @@ pub fn publish_component_attributes() {
                     let Some(name) = value.get("name").and_then(|name| name.as_str()) else {
                         continue;
                     };
+                    if let Some(list) = value.get("parents").and_then(|list| list.as_array()) {
+                        let allowed: Vec<String> = list
+                            .iter()
+                            .filter_map(|parent| parent.as_str())
+                            .map(|parent| parent.to_string())
+                            .collect();
+                        if !allowed.is_empty() {
+                            parents.insert(name.to_string(), allowed);
+                        }
+                    }
                     let set = attributes.entry(name.to_string()).or_default();
                     for attribute in value
                         .get("attrs")
@@ -212,7 +223,7 @@ pub fn publish_component_attributes() {
     if attributes.is_empty() || common.is_empty() {
         return;
     }
-    crate::build::stage::ets_checker::set_component_attributes(attributes, common);
+    crate::build::stage::ets_checker::set_component_attributes(attributes, common, parents);
 }
 
 /// Top-level names a declaration file introduces, or `None` when it re-exports everything

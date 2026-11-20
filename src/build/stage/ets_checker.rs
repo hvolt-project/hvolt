@@ -86,25 +86,42 @@ pub(crate) fn set_system_modules(modules: std::collections::HashSet<String>) {
     SYSTEM_MODULES.with(|cell| *cell.borrow_mut() = Some(modules));
 }
 
-/// Per-component attribute names, and the ones every component inherits.
-type AttributeTable = (
-    std::collections::HashMap<String, std::collections::HashSet<String>>,
-    std::collections::HashSet<String>,
-);
+/// What the SDK says about ArkUI components: each one's own attribute names, the names every
+/// component inherits, and the parents a component may be nested in.
+#[derive(Default)]
+pub(crate) struct ComponentTables {
+    attributes: std::collections::HashMap<String, std::collections::HashSet<String>>,
+    common: std::collections::HashSet<String>,
+    parents: std::collections::HashMap<String, Vec<String>>,
+}
 
 thread_local! {
-    /// ArkUI attribute names per component, and the ones every component inherits. Published by
-    /// the build from the installed SDK (`publish_component_attributes`).
-    static COMPONENT_ATTRIBUTES: std::cell::RefCell<Option<AttributeTable>> =
+    /// Published by the build from the installed SDK (`publish_component_attributes`).
+    static COMPONENT_ATTRIBUTES: std::cell::RefCell<Option<ComponentTables>> =
         const { std::cell::RefCell::new(None) };
 }
 
-/// Publishes the attribute names; see `ets_assemble::publish_component_attributes`.
+/// Publishes the component tables; see `ets_assemble::publish_component_attributes`.
 pub(crate) fn set_component_attributes(
     attributes: std::collections::HashMap<String, std::collections::HashSet<String>>,
     common: std::collections::HashSet<String>,
+    parents: std::collections::HashMap<String, Vec<String>>,
 ) {
-    COMPONENT_ATTRIBUTES.with(|cell| *cell.borrow_mut() = Some((attributes, common)));
+    COMPONENT_ATTRIBUTES.with(|cell| {
+        *cell.borrow_mut() = Some(ComponentTables {
+            attributes,
+            common,
+            parents,
+        })
+    });
+}
+
+/// The parents a component may be nested in, when the SDK restricts them.
+fn component_parents(component: &str) -> Option<Vec<String>> {
+    COMPONENT_ATTRIBUTES.with(|cell| {
+        let table = cell.borrow();
+        table.as_ref()?.parents.get(component).cloned()
+    })
 }
 
 /// `Some(true)` when the component accepts the attribute, `Some(false)` when it does not and the
@@ -112,9 +129,9 @@ pub(crate) fn set_component_attributes(
 fn component_accepts(component: &str, attribute: &str) -> Option<bool> {
     COMPONENT_ATTRIBUTES.with(|cell| {
         let table = cell.borrow();
-        let (attributes, common) = table.as_ref()?;
-        let own = attributes.get(component)?;
-        Some(own.contains(attribute) || common.contains(attribute))
+        let tables = table.as_ref()?;
+        let own = tables.attributes.get(component)?;
+        Some(own.contains(attribute) || tables.common.contains(attribute))
     })
 }
 
@@ -1178,12 +1195,25 @@ impl<'a> Visit<'a> for Checker<'_> {
                 let Some(body) = build_body(self.source, brace) else {
                     continue;
                 };
+                let brace_end = body.brace + 1 + body.span_len;
                 for offset in &body.declarations {
                     self.push(
                         "ERROR",
                         "10905209",
                         *offset,
                         "Only UI component syntax can be written here.".to_string(),
+                    );
+                }
+                for (offset, child, allowed) in
+                    nesting_violations(self.source, (body.brace, brace_end))
+                {
+                    self.push(
+                        "ERROR",
+                        "10905201",
+                        offset,
+                        format!(
+                            "The '{child}' component can only be nested in the '{allowed}' parent component."
+                        ),
                     );
                 }
                 for statement in &body.statements {
@@ -1416,6 +1446,122 @@ fn attribute_violations(source: &str, statement: (usize, usize)) -> Vec<(usize, 
     found
 }
 
+/// Names the SDK restricts to specific parents, whoever nests them.
+fn parent_restricted_names() -> Vec<String> {
+    COMPONENT_ATTRIBUTES.with(|cell| {
+        let table = cell.borrow();
+        let Some(tables) = table.as_ref() else {
+            return Vec::new();
+        };
+        tables.parents.keys().cloned().collect()
+    })
+}
+
+/// `10905201`: a component nested where only some parents are allowed.
+///
+/// The restriction comes from the SDK (`components/*.json` has `parents` for 18 components, `Span`
+/// among them), and the reference reports the child at its own identifier with the allowed parents
+/// listed (`fixtures/ui-nested-parent`: `Span` in a `Column`, 8:7).
+fn nesting_violations(source: &str, body: (usize, usize)) -> Vec<(usize, String, String)> {
+    let (start, end) = body;
+    let text = &source[start..end];
+    let bytes = text.as_bytes();
+    // Every `Name(…) {` block in the body: `(name, block_start, block_end)`.
+    let mut blocks: Vec<(String, usize, usize)> = Vec::new();
+    let mut index = 0usize;
+    while index < bytes.len() {
+        if !(bytes[index].is_ascii_alphabetic() || bytes[index] == b'_') {
+            index += 1;
+            continue;
+        }
+        let name_start = index;
+        let mut cursor = index;
+        while cursor < bytes.len()
+            && (bytes[cursor].is_ascii_alphanumeric()
+                || bytes[cursor] == b'_'
+                || bytes[cursor] == b'$')
+        {
+            cursor += 1;
+        }
+        let name = &text[name_start..cursor];
+        if bytes.get(cursor) != Some(&b'(') {
+            index = cursor;
+            continue;
+        }
+        let mut depth = 1usize;
+        let mut scan = cursor + 1;
+        while scan < bytes.len() && depth > 0 {
+            match bytes[scan] {
+                b'(' => depth += 1,
+                b')' => depth -= 1,
+                _ => {}
+            }
+            scan += 1;
+        }
+        let after = text[scan.min(text.len())..].trim_start();
+        if after.starts_with('{') {
+            let block_start = scan + (text[scan.min(text.len())..].len() - after.len());
+            let mut depth = 0usize;
+            let mut close = block_start;
+            while close < bytes.len() {
+                match bytes[close] {
+                    b'{' => depth += 1,
+                    b'}' => {
+                        depth -= 1;
+                        if depth == 0 {
+                            break;
+                        }
+                    }
+                    _ => {}
+                }
+                close += 1;
+            }
+            blocks.push((name.to_string(), block_start, close));
+        }
+        index = cursor;
+    }
+    let mut found = Vec::new();
+    // A child is looked for by name anywhere in the body: a leaf component (`Span("x")`) opens no
+    // block of its own, so walking the blocks alone misses it.
+    let restricted: Vec<String> = blocks
+        .iter()
+        .map(|(name, _, _)| name.clone())
+        .chain(parent_restricted_names())
+        .collect();
+    for name in restricted {
+        let Some(allowed) = component_parents(&name) else {
+            continue;
+        };
+        let mut index = 0usize;
+        while let Some(at) = text[index..].find(&format!("{name}(")) {
+            let position = index + at;
+            let before_is_word = position
+                .checked_sub(1)
+                .and_then(|previous| bytes.get(previous))
+                .is_some_and(|byte| byte.is_ascii_alphanumeric() || *byte == b'_' || *byte == b'.');
+            index = position + name.len() + 1;
+            if before_is_word {
+                continue;
+            }
+            let parent = blocks
+                .iter()
+                .filter(|(_, inner_start, inner_end)| {
+                    inner_start < &position && position < *inner_end
+                })
+                .max_by_key(|(_, inner_start, _)| *inner_start)
+                .map(|(parent, _, _)| parent.clone());
+            let Some(parent) = parent else {
+                continue;
+            };
+            if allowed.iter().any(|name| name == &parent) {
+                continue;
+            }
+            found.push((start + position, name.clone(), allowed.join(",")));
+        }
+    }
+    found
+}
+
 /// Offsets of `Button("label") { … }` inside a statement: the label makes children illegal.
 fn button_label_with_children(source: &str, statement: (usize, usize)) -> Vec<usize> {
     let (start, end) = statement;
@@ -1462,6 +1608,8 @@ fn button_label_with_children(source: &str, statement: (usize, usize)) -> Vec<us
 struct BuildBody {
     /// Offset of the body's `{`.
     brace: usize,
+    /// Length of the body between the braces.
+    span_len: usize,
     /// `(start, end)` of every top-level statement that is not a declaration.
     statements: Vec<(usize, usize)>,
     /// One offset per top-level statement that is a declaration (`10905209`, at its first token).
@@ -1569,6 +1717,7 @@ fn build_body(source: &str, brace: usize) -> Option<BuildBody> {
     }
     Some(BuildBody {
         brace,
+        span_len: body_end.saturating_sub(body_start),
         statements,
         declarations,
         nodes,
