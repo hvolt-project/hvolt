@@ -275,6 +275,10 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         arity: declared_arity(&parsed.program),
         primitives: std::collections::HashMap::new(),
         members: class_members(&parsed.program),
+        statics: static_members(&parsed.program),
+        entries: entry_classes(&parsed.program),
+        structs: struct_names(&parsed.program, source),
+        current_class: None,
         class_locals: std::collections::HashMap::new(),
         arrow_depth: 0,
         method_depth: 0,
@@ -332,6 +336,29 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
                 "10905231",
                 "A page can't contain more than one '@Entry' decorator.".to_string(),
             );
+        }
+        // `this.<static>`: the reference names the fix
+        // (`… Did you mean to access the static member 'UiStaticState.counter' instead?`, measured
+        // 10:20 of `fixtures/ui-static-state`). The build body is blanked out of the checked view,
+        // so the occurrence is found in the file's own text.
+        let statics: Vec<(String, Vec<String>)> = checker
+            .statics
+            .iter()
+            .map(|(class, members)| (class.clone(), members.iter().cloned().collect()))
+            .collect();
+        for (class, members) in &statics {
+            for member in members {
+                for offset in this_member_offsets(source, member) {
+                    checker.push(
+                        "ERROR",
+                        "10505001",
+                        offset,
+                        format!(
+                            "Property '{member}' does not exist on type '{class}'. Did you mean to access the static member '{class}.{member}' instead?"
+                        ),
+                    );
+                }
+            }
         }
         // A `struct` that is none of the component kinds: a warning when it carries `@Entry`
         // (22:7 of `fixtures/ui-entry-count`), an error with its own code otherwise (`10905233`
@@ -520,6 +547,12 @@ struct Checker<'a> {
     primitives: std::collections::HashMap<String, &'static str>,
     /// Members of each class this file declares.
     members: std::collections::HashMap<String, std::collections::HashSet<String>>,
+    /// Static members of each class this file declares: `class -> {name}`.
+    statics: std::collections::HashMap<String, std::collections::HashSet<String>>,
+    entries: std::collections::HashSet<String>,
+    structs: std::collections::HashSet<String>,
+    /// Which class the walk is inside, for `this.<static>`.
+    current_class: Option<String>,
     /// Locals and parameters annotated with a class of this file: `name -> class name`.
     class_locals: std::collections::HashMap<String, String>,
     /// How many arrow functions enclose the node being visited. A callback's parameter is typed by
@@ -1552,6 +1585,10 @@ impl<'a> Visit<'a> for Checker<'_> {
     /// The reference reports `Duplicate identifier` once per declaration, at each name.
     /// Measured on `fixtures/member-collision` (7:18 the field, 9:11 the method).
     fn visit_class(&mut self, class: &Class<'a>) {
+        let previous_class = self.current_class.clone();
+        if let Some(id) = &class.id {
+            self.current_class = Some(id.name.to_string());
+        }
         // `@Entry` is what makes the page-level and body-level rules apply to this structure.
         let entry = class.decorators.iter().any(|decorator| {
             matches!(
@@ -1816,6 +1853,7 @@ impl<'a> Visit<'a> for Checker<'_> {
             }
         }
         oxc_ast_visit::walk::walk_class(self, class);
+        self.current_class = previous_class;
         self.data_fields.truncate(base);
     }
 
@@ -1874,6 +1912,59 @@ impl<'a> Visit<'a> for Checker<'_> {
                     "Private \"#\" identifiers are not supported (arkts-no-private-identifiers)"
                         .to_string(),
                 );
+            }
+        }
+        if self.lints {
+            // `10905313`: a `static` field of a struct cannot carry a built-in decorator
+            // (measured 4:3 of `fixtures/ui-static-state`, at the decorator).
+            let in_struct = self
+                .current_class
+                .as_ref()
+                .is_some_and(|class| self.structs.contains(class));
+            // `10905337` (`The '@Prop' decorator can only be used with 'struct'.`) answers a
+            // built-in decorator on a plain class instead, so the struct-only rules below stay
+            // out of that case (`fixtures/ui-state-decorator-on-class`).
+            if !it.decorators.is_empty() && it.r#static && in_struct {
+                if let Some(decorator) = it.decorators.first() {
+                    self.push(
+                        "ERROR",
+                        "10905313",
+                        decorator.span.start as usize,
+                        "The static variable of struct cannot be used together with built-in decorators."
+                            .to_string(),
+                    );
+                }
+            }
+            // `10905304`: `@Link` takes no default value (measured 6:9 of `fixtures/ui-static-state`,
+            // at the property name).
+            let link = it.decorators.iter().any(|decorator| {
+                matches!(&decorator.expression, Expression::Identifier(name) if name.name.as_str() == "Link")
+            });
+            if link && it.value.is_some() && in_struct {
+                self.push(
+                    "ERROR",
+                    "10905304",
+                    it.key.span().start as usize,
+                    "The '@Link' property cannot be specified a default value.".to_string(),
+                );
+            }
+            // A page takes no `@Link` at all (measured 6:9 of `fixtures/ui-static-state`, a
+            // warning on the same name as the default-value error above).
+            if link {
+                if let Some(class) = self.current_class.clone() {
+                    if self.entries.contains(&class) {
+                        if let Some(name) = it.key.static_name() {
+                            self.push(
+                                "WARN",
+                                "-",
+                                it.key.span().start as usize,
+                                format!(
+                                    "The '@Entry' component '{class}' cannot have the '@Link' property '{name}'."
+                                ),
+                            );
+                        }
+                    }
+                }
             }
         }
         // `arkts-no-definite-assignment`: `value!: number`. The reference reports it as a
@@ -2467,6 +2558,106 @@ fn component_name_collisions(
 }
 
 /// Members each class of this file declares: fields and methods by name.
+/// Offsets of the name in every `this.<member>` the text contains.
+fn this_member_offsets(source: &str, member: &str) -> Vec<usize> {
+    let needle = format!("this.{member}");
+    let mut found = Vec::new();
+    let mut from = 0usize;
+    while let Some(at) = source[from..].find(&needle) {
+        let start = from + at;
+        // Not `this.<member>` when the member name continues (a longer identifier).
+        let after = start + needle.len();
+        let continues = source[after..]
+            .chars()
+            .next()
+            .is_some_and(|c| c.is_alphanumeric() || c == '_' || c == '$');
+        if !continues {
+            found.push(start + "this.".len());
+        }
+        from = after;
+    }
+    found
+}
+
+/// Names of the `struct`s this file declares, whatever decorators they carry. The masked view
+/// turns `struct X` into `class X`, so the keyword is read back from the file's own text.
+fn struct_names(program: &Program<'_>, source: &str) -> std::collections::HashSet<String> {
+    struct Collect<'s> {
+        source: &'s str,
+        found: std::collections::HashSet<String>,
+    }
+    impl<'a> Visit<'a> for Collect<'_> {
+        fn visit_class(&mut self, it: &Class<'a>) {
+            if let Some(id) = &it.id {
+                if self.source[..id.span.start as usize]
+                    .trim_end()
+                    .ends_with("struct")
+                {
+                    self.found.insert(id.name.to_string());
+                }
+            }
+            oxc_ast_visit::walk::walk_class(self, it);
+        }
+    }
+    let mut collect = Collect {
+        source,
+        found: std::collections::HashSet::new(),
+    };
+    collect.visit_program(program);
+    collect.found
+}
+
+/// Names of the structs that carry `@Entry`: a page cannot take a `@Link`
+/// (measured 6:9 of `fixtures/ui-static-state`).
+fn entry_classes(program: &Program<'_>) -> std::collections::HashSet<String> {
+    struct Collect(std::collections::HashSet<String>);
+    impl<'a> Visit<'a> for Collect {
+        fn visit_class(&mut self, it: &Class<'a>) {
+            let entry = it.decorators.iter().any(|decorator| {
+                matches!(&decorator.expression, Expression::Identifier(name) if name.name.as_str() == "Entry")
+            });
+            if entry {
+                if let Some(id) = &it.id {
+                    self.0.insert(id.name.to_string());
+                }
+            }
+            oxc_ast_visit::walk::walk_class(self, it);
+        }
+    }
+    let mut collect = Collect(std::collections::HashSet::new());
+    collect.visit_program(program);
+    collect.0
+}
+
+/// Members each class of this file declares `static`: reaching one through `this` is a mistake the
+/// reference names, with the fix in the message (measured 10:20 of `fixtures/ui-static-state`).
+fn static_members(
+    program: &Program<'_>,
+) -> std::collections::HashMap<String, std::collections::HashSet<String>> {
+    struct Collect(std::collections::HashMap<String, std::collections::HashSet<String>>);
+    impl<'a> Visit<'a> for Collect {
+        fn visit_class(&mut self, it: &Class<'a>) {
+            if let Some(id) = &it.id {
+                let set = self.0.entry(id.name.to_string()).or_default();
+                for element in &it.body.body {
+                    let ClassElement::PropertyDefinition(property) = element else {
+                        continue;
+                    };
+                    if property.r#static {
+                        if let Some(name) = property.key.static_name() {
+                            set.insert(name.to_string());
+                        }
+                    }
+                }
+            }
+            oxc_ast_visit::walk::walk_class(self, it);
+        }
+    }
+    let mut collect = Collect(std::collections::HashMap::new());
+    collect.visit_program(program);
+    collect.0
+}
+
 fn class_members(
     program: &Program<'_>,
 ) -> std::collections::HashMap<String, std::collections::HashSet<String>> {
