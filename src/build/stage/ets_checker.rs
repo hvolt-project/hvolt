@@ -343,6 +343,11 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
                 "A page can't contain more than one '@Entry' decorator.".to_string(),
             );
         }
+        // A `@Builder` method's declared parameter count, and the calls that disagree with it.
+        let builders = builder_arities(source);
+        for (offset, message) in builder_arity_violations(source, &builders) {
+            checker.push("ERROR", "10505001", offset, message);
+        }
         // `component_map` carries each component's constructor signature; `Text` takes
         // `string | Resource`, so a numeric literal is refused at the argument
         // (measured 7:12 of `fixtures/ui-text-argument`).
@@ -2626,6 +2631,147 @@ fn component_name_collisions(
 }
 
 /// Members each class of this file declares: fields and methods by name.
+/// Declared parameter count of every `@Builder` method in the file, keyed by its name.
+fn builder_arities(source: &str) -> std::collections::HashMap<String, usize> {
+    let mut table = std::collections::HashMap::new();
+    let mut from = 0usize;
+    while let Some(at) = source[from..].find("@Builder") {
+        let start = from + at;
+        let after = &source[start + "@Builder".len()..];
+        let rest = after.trim_start();
+        // `@Builder x(…)` is a method; `@Builder function …` is a global builder, whose calls are
+        // not `this.<name>(…)` and are not judged here.
+        if rest.starts_with("function") {
+            from = start + "@Builder".len();
+            continue;
+        }
+        let name_len = rest
+            .chars()
+            .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+            .count();
+        if name_len == 0 {
+            from = start + "@Builder".len();
+            continue;
+        }
+        let name = rest[..name_len].to_string();
+        let tail = &rest[name_len..];
+        if let Some(params_at) = tail.find('(') {
+            let params = &tail[params_at + 1..];
+            if let Some(close) = params.find(')') {
+                let inside = params[..close].trim();
+                let count = if inside.is_empty() {
+                    0
+                } else {
+                    argument_offsets(inside).len()
+                };
+                table.insert(name, count);
+            }
+        }
+        from = start + "@Builder".len();
+    }
+    table
+}
+
+/// Start offsets of each argument of a call, given the text between its parentheses. Commas
+/// inside nested brackets, strings and template literals do not separate arguments.
+fn argument_offsets(inside: &str) -> Vec<usize> {
+    let bytes = inside.as_bytes();
+    let mut starts = Vec::new();
+    let mut depth = 0usize;
+    let mut quote: Option<u8> = None;
+    let mut current: Option<usize> = None;
+    let mut index = 0usize;
+    while index < bytes.len() {
+        let byte = bytes[index];
+        if let Some(open) = quote {
+            if byte == b'\\' {
+                index += 2;
+                continue;
+            }
+            if byte == open {
+                quote = None;
+            }
+            index += 1;
+            continue;
+        }
+        match byte {
+            b'"' | b'\'' | b'`' => {
+                quote = Some(byte);
+                current.get_or_insert(index);
+            }
+            b'(' | b'[' | b'{' => {
+                depth += 1;
+                current.get_or_insert(index);
+            }
+            b')' | b']' | b'}' => depth = depth.saturating_sub(1),
+            b',' if depth == 0 => {
+                starts.push(current.unwrap_or(index));
+                current = None;
+            }
+            b if b.is_ascii_whitespace() => {}
+            _ => {
+                current.get_or_insert(index);
+            }
+        }
+        index += 1;
+    }
+    if let Some(start) = current {
+        starts.push(start);
+    }
+    starts
+}
+
+/// `this.<builder>(...)` calls whose argument count differs from the declaration: the offset to
+/// report and the message. Too few arguments are reported at the method name, too many at the
+/// first extra argument (measured 13:12 and 14:22 of `fixtures/ui-builder-arity`).
+fn builder_arity_violations(
+    source: &str,
+    builders: &std::collections::HashMap<String, usize>,
+) -> Vec<(usize, String)> {
+    let mut found = Vec::new();
+    for (name, expected) in builders {
+        let needle = format!("this.{name}(");
+        let mut from = 0usize;
+        while let Some(at) = source[from..].find(&needle) {
+            let start = from + at;
+            let open = start + needle.len() - 1;
+            let mut depth = 0usize;
+            let mut close = None;
+            for (offset, byte) in source[open..].bytes().enumerate() {
+                match byte {
+                    b'(' => depth += 1,
+                    b')' => {
+                        depth -= 1;
+                        if depth == 0 {
+                            close = Some(open + offset);
+                            break;
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            let Some(close) = close else { break };
+            let arguments = argument_offsets(&source[open + 1..close]);
+            let got = arguments.len();
+            if got < *expected {
+                found.push((
+                    start + "this.".len(),
+                    format!("Expected {expected} arguments, but got {got}."),
+                ));
+            } else if got > *expected {
+                let extra = open + 1 + arguments[*expected];
+                found.push((
+                    extra,
+                    format!("Expected {expected} arguments, but got {got}."),
+                ));
+            }
+            from = close;
+        }
+    }
+    found.sort_unstable();
+    found
+}
+
 /// Offsets of numeric literal arguments passed to `Text(...)`, which takes `string | Resource`.
 /// Only a bare literal is judged: `Text(this.count)` and a template keep their own typing, and the
 /// reference reports neither (`fixtures/ui-text-argument`).
