@@ -275,6 +275,8 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         arity: declared_arity(&parsed.program),
         primitives: std::collections::HashMap::new(),
         inferred_numbers: std::collections::HashSet::new(),
+        member_types: interface_member_types(&parsed.program),
+        return_type: None,
         members: class_members(&parsed.program),
         statics: static_members(&parsed.program),
         entries: entry_classes(&parsed.program),
@@ -588,6 +590,10 @@ struct Checker<'a> {
     primitives: std::collections::HashMap<String, &'static str>,
     /// Locals whose type is a number only by their initialiser: `let x = 1`.
     inferred_numbers: std::collections::HashSet<String>,
+    /// Property types of the file's interfaces: `Holder -> {count: "number"}`.
+    member_types: std::collections::HashMap<String, std::collections::HashMap<String, String>>,
+    /// The declared return type of the function being walked, when it names such an interface.
+    return_type: Option<String>,
     /// Members of each class this file declares.
     members: std::collections::HashMap<String, std::collections::HashSet<String>>,
     /// Static members of each class this file declares: `class -> {name}`.
@@ -798,25 +804,6 @@ fn destructuring_parameter(it: &FormalParameter<'_>) -> Option<usize> {
 }
 
 impl<'a> Visit<'a> for Checker<'_> {
-    /// `x = "s"` where `x` is a number: `Type 'string' is not assignable to type 'number'.` at
-    /// the target (measured 3:3 of `fixtures/type-assign`).
-    fn visit_assignment_expression(&mut self, it: &oxc_ast::ast::AssignmentExpression<'a>) {
-        if self.lints {
-            if let oxc_ast::ast::AssignmentTarget::AssignmentTargetIdentifier(target) = &it.left {
-                let numeric = self.primitives.get(target.name.as_str()) == Some(&"number")
-                    || self.inferred_numbers.contains(target.name.as_str());
-                if numeric && matches!(&it.right, Expression::StringLiteral(_)) {
-                    self.push(
-                        "ERROR",
-                        "10505001",
-                        target.span.start as usize,
-                        "Type 'string' is not assignable to type 'number'.".to_string(),
-                    );
-                }
-            }
-        }
-        oxc_ast_visit::walk::walk_assignment_expression(self, it);
-    }
     /// `arkts-no-any-unknown`: the annotation names the type `any` or `unknown`.
     fn visit_ts_type_annotation(&mut self, it: &TSTypeAnnotation<'a>) {
         if self.lints
@@ -1380,6 +1367,26 @@ impl<'a> Visit<'a> for Checker<'_> {
         oxc_ast_visit::walk::walk_static_member_expression(self, it);
     }
 
+    /// `x = "s"` where `x` is a number: `Type 'string' is not assignable to type 'number'.` at
+    /// the target (measured 3:3 of `fixtures/type-assign`).
+    fn visit_assignment_expression(&mut self, it: &oxc_ast::ast::AssignmentExpression<'a>) {
+        if self.lints {
+            if let oxc_ast::ast::AssignmentTarget::AssignmentTargetIdentifier(target) = &it.left {
+                let numeric = self.primitives.get(target.name.as_str()) == Some(&"number")
+                    || self.inferred_numbers.contains(target.name.as_str());
+                if numeric && matches!(&it.right, Expression::StringLiteral(_)) {
+                    self.push(
+                        "ERROR",
+                        "10505001",
+                        target.span.start as usize,
+                        "Type 'string' is not assignable to type 'number'.".to_string(),
+                    );
+                }
+            }
+        }
+        oxc_ast_visit::walk::walk_assignment_expression(self, it);
+    }
+
     fn visit_variable_declarator(&mut self, it: &VariableDeclarator<'a>) {
         // A type *literal* annotation declares no class or interface, so the initialiser still has
         // no contextual type: the reference reports both the type literal (10605040) and this
@@ -1388,6 +1395,20 @@ impl<'a> Visit<'a> for Checker<'_> {
         if let (oxc_ast::ast::BindingPatternKind::BindingIdentifier(name), Some(initialiser)) =
             (&it.id.kind, &it.init)
         {
+            // `const n: number = "s"` — at the declarator's name (measured 2:9 of
+            // `fixtures/type-declaration`).
+            if let Some(annotation) = &it.id.type_annotation {
+                if matches!(annotation.type_annotation, TSType::TSNumberKeyword(_))
+                    && matches!(initialiser, Expression::StringLiteral(_))
+                {
+                    self.push(
+                        "ERROR",
+                        "10505001",
+                        name.span.start as usize,
+                        "Type 'string' is not assignable to type 'number'.".to_string(),
+                    );
+                }
+            }
             if matches!(initialiser, Expression::NumericLiteral(_)) {
                 self.inferred_numbers.insert(name.name.to_string());
             }
@@ -1520,7 +1541,14 @@ impl<'a> Visit<'a> for Checker<'_> {
                     );
                 }
             }
+            // A returned literal whose function declares a return type of this file has a
+            // contextual type, so it is a typed literal like any other
+            // (`fixtures/type-declaration`, where the interface answers for it).
             if let Some(Expression::ObjectExpression(object)) = &it.argument {
+                if self.return_type.is_some() {
+                    oxc_ast_visit::walk::walk_return_statement(self, it);
+                    return;
+                }
                 self.push(
                     "ERROR",
                     "10605038",
@@ -1536,6 +1564,37 @@ impl<'a> Visit<'a> for Checker<'_> {
     /// `...`.
     fn visit_object_expression(&mut self, it: &ObjectExpression<'a>) {
         if self.lints {
+            // `return { count: "s" }` against `interface Holder { count: number }` — at the
+            // property name (measured 15:12 of `fixtures/type-declaration`).
+            if let Some(name) = self.return_type.clone() {
+                if let Some(properties) = self.member_types.get(&name).cloned() {
+                    for property in &it.properties {
+                        let ObjectPropertyKind::ObjectProperty(property) = property else {
+                            continue;
+                        };
+                        let PropertyKey::StaticIdentifier(key) = &property.key else {
+                            continue;
+                        };
+                        let Some(expected) = properties.get(key.name.as_str()) else {
+                            continue;
+                        };
+                        let found = match &property.value {
+                            Expression::StringLiteral(_) => "string",
+                            Expression::NumericLiteral(_) => "number",
+                            Expression::BooleanLiteral(_) => "boolean",
+                            _ => continue,
+                        };
+                        if found != expected {
+                            self.push(
+                                "ERROR",
+                                "10505001",
+                                key.span.start as usize,
+                                format!("Type '{found}' is not assignable to type '{expected}'."),
+                            );
+                        }
+                    }
+                }
+            }
             for property in &it.properties {
                 if let ObjectPropertyKind::SpreadProperty(spread) = property {
                     self.push(
@@ -1564,6 +1623,18 @@ impl<'a> Visit<'a> for Checker<'_> {
     /// · `arkts-no-implicit-return-types` (10605090) — a function with no return type that
     ///   returns `this` or a call to another unannotated function, at the function name (14:10).
     fn visit_function(&mut self, it: &Function<'a>, flags: oxc_syntax::scope::ScopeFlags) {
+        // The declared return type decides what an object literal returned here must look like.
+        let previous_return = self.return_type.clone();
+        if let Some(annotation) = &it.return_type {
+            if let TSType::TSTypeReference(reference) = &annotation.type_annotation {
+                if let oxc_ast::ast::TSTypeName::IdentifierReference(name) = &reference.type_name {
+                    let spelling = name.name.to_string();
+                    if self.member_types.contains_key(&spelling) {
+                        self.return_type = Some(spelling);
+                    }
+                }
+            }
+        }
         if self.lints {
             if self.method_depth == 0 {
                 for span in this_spans(it) {
@@ -1602,6 +1673,7 @@ impl<'a> Visit<'a> for Checker<'_> {
             }
         }
         oxc_ast_visit::walk::walk_function(self, it, flags);
+        self.return_type = previous_return;
     }
 
     /// Three rules the reference reports on constructs ArkTS does not have.
@@ -3102,6 +3174,45 @@ fn this_member_offsets(source: &str, member: &str) -> Vec<usize> {
         from = after;
     }
     found
+}
+
+/// Property types of each interface this file declares, for the ones spelled with a primitive:
+/// `interface Holder { count: number }` → `Holder.count = "number"`.
+fn interface_member_types(
+    program: &Program<'_>,
+) -> std::collections::HashMap<String, std::collections::HashMap<String, String>> {
+    struct Collect(std::collections::HashMap<String, std::collections::HashMap<String, String>>);
+    impl<'a> Visit<'a> for Collect {
+        fn visit_ts_interface_declaration(
+            &mut self,
+            it: &oxc_ast::ast::TSInterfaceDeclaration<'a>,
+        ) {
+            let mut types = std::collections::HashMap::new();
+            for element in &it.body.body {
+                let oxc_ast::ast::TSSignature::TSPropertySignature(property) = element else {
+                    continue;
+                };
+                let PropertyKey::StaticIdentifier(name) = &property.key else {
+                    continue;
+                };
+                let Some(annotation) = &property.type_annotation else {
+                    continue;
+                };
+                let spelling = match &annotation.type_annotation {
+                    TSType::TSNumberKeyword(_) => "number",
+                    TSType::TSStringKeyword(_) => "string",
+                    TSType::TSBooleanKeyword(_) => "boolean",
+                    _ => continue,
+                };
+                types.insert(name.name.to_string(), spelling.to_string());
+            }
+            self.0.insert(it.id.name.to_string(), types);
+            oxc_ast_visit::walk::walk_ts_interface_declaration(self, it);
+        }
+    }
+    let mut collect = Collect(std::collections::HashMap::new());
+    collect.visit_program(program);
+    collect.0
 }
 
 /// Names of the structs decorated `@ComponentV2`: the V2-only decorators belong to those.
