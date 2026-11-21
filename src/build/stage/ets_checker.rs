@@ -1570,21 +1570,41 @@ impl<'a> Visit<'a> for Checker<'_> {
                                 {
                                     self.push("ERROR", "10505001", offset, message);
                                 }
-                                // An empty literal has none of the required members: reported at
-                                // the declarator's name, with the literal's own spelling
-                                // (`Property 'count' is missing in type '{}' but required in type
-                                // 'Holder'.`, 6:9 of `fixtures/type-missing-member`).
-                                if literal.properties.is_empty() && !expected.is_empty() {
-                                    if let Some((member, _)) = expected.iter().next() {
-                                        self.push(
-                                            "ERROR",
-                                            "10505001",
-                                            name.span.start as usize,
-                                            format!(
-                                                "Property '{member}' is missing in type '{{}}' but required in type '{spelled}'."
-                                            ),
-                                        );
-                                    }
+                                // A member the literal leaves out: reported at the declarator's
+                                // name, with the literal spelled as the reference spells it —
+                                // `{}` when empty, `{ count: number; }` otherwise (measured 6:9 of
+                                // `fixtures/type-missing-member` and 8:9 of
+                                // `fixtures/type-missing-partial`).
+                                let provided: std::collections::HashSet<&str> = literal
+                                    .properties
+                                    .iter()
+                                    .filter_map(|property| match property {
+                                        ObjectPropertyKind::ObjectProperty(property) => {
+                                            match &property.key {
+                                                PropertyKey::StaticIdentifier(key) => {
+                                                    Some(key.name.as_str())
+                                                }
+                                                _ => None,
+                                            }
+                                        }
+                                        _ => None,
+                                    })
+                                    .collect();
+                                let mut missing: Vec<&String> = expected
+                                    .keys()
+                                    .filter(|member| !provided.contains(member.as_str()))
+                                    .collect();
+                                missing.sort();
+                                if let Some(member) = missing.first() {
+                                    self.push(
+                                        "ERROR",
+                                        "10505001",
+                                        name.span.start as usize,
+                                        format!(
+                                            "Property '{member}' is missing in type '{}' but required in type '{spelled}'.",
+                                            object_spelling(literal)
+                                        ),
+                                    );
                                 }
                             }
                         }
@@ -3530,6 +3550,31 @@ fn function_parameter_named_types(
     };
     collect.visit_program(program);
     collect.found
+}
+
+/// How the reference spells an object literal in a missing-member message: `{}` when empty and
+/// `{ count: number; }` otherwise, each member typed by its literal.
+fn object_spelling(literal: &oxc_ast::ast::ObjectExpression<'_>) -> String {
+    if literal.properties.is_empty() {
+        return "{}".to_string();
+    }
+    let mut parts = Vec::new();
+    for property in &literal.properties {
+        let ObjectPropertyKind::ObjectProperty(property) = property else {
+            continue;
+        };
+        let PropertyKey::StaticIdentifier(key) = &property.key else {
+            continue;
+        };
+        let spelled = match &property.value {
+            Expression::StringLiteral(_) => "string",
+            Expression::NumericLiteral(_) => "number",
+            Expression::BooleanLiteral(_) => "boolean",
+            _ => continue,
+        };
+        parts.push(format!("{}: {};", key.name, spelled));
+    }
+    format!("{{ {} }}", parts.join(" "))
 }
 
 /// `this.<name>` where the enclosing class or struct declares no such member: the reference reports
