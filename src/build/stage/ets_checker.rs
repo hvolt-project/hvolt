@@ -392,6 +392,11 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         for (offset, code, message) in global_function_decorator_violations(source) {
             checker.push("ERROR", code, offset, message);
         }
+        // `this.<name>` that no struct of the file declares (measured 8:35 of
+        // `fixtures/type-struct-member`).
+        for (offset, message) in struct_member_violations(source, &checker.members) {
+            checker.push("ERROR", "10505001", offset, message);
+        }
         // A child instantiation that hands a literal of the wrong type to a declared member
         // (measured 17:19 of `fixtures/ui-component-argument`).
         let struct_fields = struct_field_types(&parsed.program, source);
@@ -3364,6 +3369,74 @@ fn this_member_offsets(source: &str, member: &str) -> Vec<usize> {
         from = after;
     }
     found
+}
+
+/// `this.<name>` where the enclosing class or struct declares no such member: the reference reports
+/// `Property 'notAField' does not exist on type 'FieldProbe'.` at the name (measured 8:35 of
+/// `fixtures/type-struct-member`).
+///
+/// The page's build body is blanked out of the checked view, so the occurrences are read from the
+/// file's own text. The owner is the declaration the `this` sits in — a `class Box` member is known
+/// from `Box`, and a page's member from the struct (`fixtures/type-generic-member` caught the first
+/// attempt, which only knew struct members).
+fn struct_member_violations(
+    source: &str,
+    members: &std::collections::HashMap<String, std::collections::HashSet<String>>,
+) -> Vec<(usize, String)> {
+    let mut found = Vec::new();
+    let mut from = 0usize;
+    while let Some(at) = source[from..].find("this.") {
+        let start = from + at;
+        let after = start + "this.".len();
+        let member: String = source[after..]
+            .chars()
+            .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+            .collect();
+        from = after;
+        if member.is_empty() {
+            continue;
+        }
+        let Some(owner) = enclosing_declaration(source, start) else {
+            continue;
+        };
+        let Some(known) = members.get(&owner) else {
+            continue;
+        };
+        if known.contains(member.as_str()) {
+            continue;
+        }
+        found.push((
+            after,
+            format!("Property '{member}' does not exist on type '{owner}'."),
+        ));
+    }
+    found
+}
+
+/// The name of the nearest `class`/`struct` declared before `offset`.
+fn enclosing_declaration(source: &str, offset: usize) -> Option<String> {
+    let before = &source[..offset];
+    let mut best: Option<(usize, String)> = None;
+    for keyword in ["class", "struct"] {
+        let mut from = 0usize;
+        while let Some(at) = before[from..].find(keyword) {
+            let start = from + at;
+            let after = start + keyword.len();
+            let boundary = after < before.len() && before[after..].starts_with(char::is_whitespace);
+            if boundary {
+                let name: String = before[after..]
+                    .trim_start()
+                    .chars()
+                    .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+                    .collect();
+                if !name.is_empty() && best.as_ref().is_none_or(|(seen, _)| *seen < start) {
+                    best = Some((start, name));
+                }
+            }
+            from = after;
+        }
+    }
+    best.map(|(_, name)| name)
 }
 
 /// Field types of each struct in this file whose members spell a primitive:
