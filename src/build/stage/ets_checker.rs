@@ -81,7 +81,24 @@ thread_local! {
         const { std::cell::RefCell::new(None) };
 }
 
-/// Publishes the SDK's system-module names. Called once per build, before any file is checked.
+thread_local! {
+    /// Names the installed SDK declares globally. `None` until the build has resolved the SDK, and
+    /// stays `None` when it found no declaration files: an SDK laid out differently must not turn
+    /// every local class into a redeclaration.
+    static GLOBAL_DECLARATIONS: std::cell::RefCell<Option<std::collections::HashSet<String>>> =
+        const { std::cell::RefCell::new(None) };
+}
+
+/// Publishes the names the SDK declares in the global scope.
+pub(crate) fn set_global_declarations(names: std::collections::HashSet<String>) {
+    GLOBAL_DECLARATIONS.with(|cell| *cell.borrow_mut() = Some(names));
+}
+
+/// `Some(true)` when the SDK declares the name globally, `None` when the set is unpublished.
+fn sdk_declares(name: &str) -> Option<bool> {
+    GLOBAL_DECLARATIONS.with(|cell| cell.borrow().as_ref().map(|set| set.contains(name)))
+}
+
 pub(crate) fn set_system_modules(modules: std::collections::HashSet<String>) {
     SYSTEM_MODULES.with(|cell| *cell.borrow_mut() = Some(modules));
 }
@@ -322,6 +339,26 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
     // (`fixtures/ui-entry-count`). Only pages are judged — the message itself says "a page
     // configured in main_pages.json or build-profile.json5".
     if checker.lints {
+        // `Cannot redeclare block-scoped variable 'Counter'.`: a class or interface may not take a
+        // name the SDK declares globally (measured 1:7 of `fixtures/type-redeclare`, at the name).
+        for (offset, name, is_class) in declared_type_names(&parsed.program, source) {
+            if std::env::var("HVOLT_GLOBAL_DEBUG").is_ok() {
+                eprintln!(
+                    "[decl] {name} class={is_class} sdk={:?}",
+                    sdk_declares(&name)
+                );
+            }
+            // Only a `class` collides this way: an interface of the same name is answered by
+            // `arkts-unique-names` instead (`fixtures/arkts-unique-names` keeps its single 10605004).
+            if is_class && sdk_declares(&name) == Some(true) {
+                checker.push(
+                    "ERROR",
+                    "10505001",
+                    offset,
+                    format!("Cannot redeclare block-scoped variable '{name}'."),
+                );
+            }
+        }
         // `arkts-unique-names` (10605004): a type may not take a name the ArkUI components already
         // use — `interface Shape` collides with the `Shape` component
         // (measured 1:11 of `fixtures/arkts-unique-names`).
@@ -2956,6 +2993,43 @@ fn build_body(source: &str, brace: usize) -> Option<BuildBody> {
     })
 }
 
+/// Offsets and names of the classes, interfaces and type aliases this file declares.
+fn declared_type_names(program: &Program<'_>, _source: &str) -> Vec<(usize, String, bool)> {
+    struct Collect {
+        found: Vec<(usize, String, bool)>,
+    }
+    impl<'a> Visit<'a> for Collect {
+        fn visit_class(&mut self, it: &Class<'a>) {
+            if let Some(id) = &it.id {
+                self.found
+                    .push((id.span.start as usize, id.name.to_string(), true));
+            }
+            oxc_ast_visit::walk::walk_class(self, it);
+        }
+
+        fn visit_ts_interface_declaration(
+            &mut self,
+            it: &oxc_ast::ast::TSInterfaceDeclaration<'a>,
+        ) {
+            self.found
+                .push((it.id.span.start as usize, it.id.name.to_string(), false));
+            oxc_ast_visit::walk::walk_ts_interface_declaration(self, it);
+        }
+
+        fn visit_ts_type_alias_declaration(
+            &mut self,
+            it: &oxc_ast::ast::TSTypeAliasDeclaration<'a>,
+        ) {
+            self.found
+                .push((it.id.span.start as usize, it.id.name.to_string(), false));
+            oxc_ast_visit::walk::walk_ts_type_alias_declaration(self, it);
+        }
+    }
+    let mut collect = Collect { found: Vec::new() };
+    collect.visit_program(program);
+    collect.found
+}
+
 /// Offsets of declared type names that collide with an ArkUI component name
 /// (`arkts-unique-names`, 10605004).
 fn component_name_collisions(
@@ -2967,15 +3041,6 @@ fn component_name_collisions(
         found: Vec<usize>,
     }
     impl<'a> Visit<'a> for Collect<'_> {
-        fn visit_class(&mut self, it: &Class<'a>) {
-            if let Some(id) = &it.id {
-                if self.known.contains(id.name.as_str()) {
-                    self.found.push(id.span.start as usize);
-                }
-            }
-            oxc_ast_visit::walk::walk_class(self, it);
-        }
-
         fn visit_ts_interface_declaration(
             &mut self,
             it: &oxc_ast::ast::TSInterfaceDeclaration<'a>,

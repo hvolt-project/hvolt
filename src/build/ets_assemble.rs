@@ -146,6 +146,82 @@ fn publish_system_modules() {
     crate::build::stage::ets_checker::set_system_modules(modules);
 }
 
+/// Names the installed SDK declares in the global scope, for the redeclaration rule.
+///
+/// The reference reports `Cannot redeclare block-scoped variable 'Counter'.` when a file declares a
+/// class or interface the SDK already has (`fixtures/type-redeclare`). The names are read from the
+/// `declare class` / `declare interface` heads of the SDK's `ets/api/*.d.ts` and
+/// `ets/component/*.d.ts`; when no such files are found the set stays unpublished and the checker
+/// claims nothing.
+pub fn publish_global_declarations() {
+    use std::collections::HashSet;
+    let Some(sdk) = crate::sdk::manage::sdk_root() else {
+        return;
+    };
+    let mut names: HashSet<String> = HashSet::new();
+    let Ok(entries) = std::fs::read_dir(&sdk) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let root = entry.path();
+        for base in [root.join("ets"), root.join("openharmony/ets")] {
+            // Both folders: a component declares its global name as `declare const Counter:
+            // CounterInterface`, and a file that declares a class of that name is refused as a
+            // redeclaration (`fixtures/type-redeclare`). An *interface* of a component's name is a
+            // different case — `arkts-unique-names` answers it (`fixtures/arkts-unique-names`) —
+            // so the rule that reads this set judges classes only.
+            for folder in [base.join("api"), base.join("component")] {
+                let Ok(files) = std::fs::read_dir(&folder) else {
+                    continue;
+                };
+                for file in files.flatten() {
+                    let path = file.path();
+                    let Some(name) = path.file_name().and_then(|it| it.to_str()) else {
+                        continue;
+                    };
+                    if !name.ends_with(".d.ts") {
+                        continue;
+                    }
+                    let Ok(text) = std::fs::read_to_string(&path) else {
+                        continue;
+                    };
+                    for line in text.lines() {
+                        // Only the file's own top level: `class Holder` nested inside a
+                        // `declare namespace contact { … }` is namespace-scoped and does not
+                        // collide with a page's class of that name
+                        // (`fixtures/type-class-member` measures a page declaring `Holder`).
+                        if line.len() != line.trim_start().len() {
+                            continue;
+                        }
+                        let line = line.trim_start();
+                        let line = line.strip_prefix("export ").unwrap_or(line);
+                        let line = line.strip_prefix("declare ").unwrap_or(line);
+                        let Some(rest) = line
+                            .strip_prefix("class ")
+                            .or_else(|| line.strip_prefix("interface "))
+                            .or_else(|| line.strip_prefix("const "))
+                            .or_else(|| line.strip_prefix("function "))
+                        else {
+                            continue;
+                        };
+                        let declared: String = rest
+                            .chars()
+                            .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+                            .collect();
+                        if !declared.is_empty() {
+                            names.insert(declared);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if names.is_empty() {
+        return;
+    }
+    crate::build::stage::ets_checker::set_global_declarations(names);
+}
+
 /// Members of the primitive types, from the TypeScript standard library the loader ships.
 ///
 /// `Property 'notARealMethod' does not exist on type 'string'.` is the type checker's answer for a
@@ -514,6 +590,7 @@ pub fn assemble_packages(
     publish_system_modules();
     publish_component_attributes();
     publish_primitive_members();
+    publish_global_declarations();
     // `$r('app.<kind>.<name>')` has to become the object literal the runtime expects: left
     // as a call it resolves against the system table only, and an app resource comes back as
     // an invalid id (`getStringSync` → 401).
