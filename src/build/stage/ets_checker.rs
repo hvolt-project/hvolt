@@ -1590,6 +1590,37 @@ impl<'a> Visit<'a> for Checker<'_> {
                                         _ => None,
                                     })
                                     .collect();
+                                // A member the interface does not declare makes the literal a shape
+                                // of its own: the reference reports the assignability first, at the
+                                // excess property, then the untyped-literal rule at the `{`
+                                // (33 and 21 of line 6 in `fixtures/type-excess-property`).
+                                let mut excess: Vec<&str> = provided
+                                    .iter()
+                                    .copied()
+                                    .filter(|member| !expected.contains_key(*member))
+                                    .collect();
+                                excess.sort_unstable();
+                                if let Some(member) = excess.first() {
+                                    self.push(
+                                        "ERROR",
+                                        "10505001",
+                                        literal.span.start as usize
+                                            + self.source[literal.span.start as usize..]
+                                                .find(member)
+                                                .unwrap_or(0),
+                                        format!(
+                                            "Type '{}' is not assignable to type '{spelled}'. Object literal may only specify known properties, and '{member}' does not exist in type '{spelled}'.",
+                                            object_spelling(literal)
+                                        ),
+                                    );
+                                    self.push(
+                                        "ERROR",
+                                        "10605038",
+                                        literal.span.start as usize,
+                                        "Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)"
+                                            .to_string(),
+                                    );
+                                }
                                 let mut missing: Vec<&String> = expected
                                     .keys()
                                     .filter(|member| !provided.contains(member.as_str()))
