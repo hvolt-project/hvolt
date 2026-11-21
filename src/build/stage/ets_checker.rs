@@ -343,6 +343,11 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
                 "A page can't contain more than one '@Entry' decorator.".to_string(),
             );
         }
+        // A global `function` may only carry the six decorators the reference lists; `@LocalBuilder`
+        // belongs to a method (both at 1:1 of `fixtures/ui-local-builder`).
+        for (offset, code, message) in global_function_decorator_violations(source) {
+            checker.push("ERROR", code, offset, message);
+        }
         // A `@Builder` method's declared parameter count, and the calls that disagree with it.
         let builders = builder_arities(source);
         for (offset, message) in builder_arity_violations(source, &builders) {
@@ -2631,6 +2636,62 @@ fn component_name_collisions(
 }
 
 /// Members each class of this file declares: fields and methods by name.
+/// Decorators the reference accepts on a global `function`, and the two diagnostics it raises
+/// when it gets another one (measured 1:1 of `fixtures/ui-local-builder`).
+fn global_function_decorator_violations(source: &str) -> Vec<(usize, &'static str, String)> {
+    const ALLOWED: [&str; 6] = [
+        "AnimatableExtend",
+        "Builder",
+        "Extend",
+        "Styles",
+        "Concurrent",
+        "Sendable",
+    ];
+    let mut found = Vec::new();
+    let mut from = 0usize;
+    while let Some(at) = source[from..].find('@') {
+        let start = from + at;
+        let rest = &source[start + 1..];
+        let name_len = rest
+            .chars()
+            .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+            .count();
+        if name_len == 0 {
+            from = start + 1;
+            continue;
+        }
+        let name = &rest[..name_len];
+        // Past an optional argument list, the next word decides whether this decorates a function.
+        let mut after = rest[name_len..].trim_start();
+        if let Some(inner) = after.strip_prefix('(') {
+            if let Some(close) = inner.find(')') {
+                after = inner[close + 1..].trim_start();
+            }
+        }
+        if !after.starts_with("function") {
+            from = start + 1;
+            continue;
+        }
+        if !ALLOWED.contains(&name) {
+            found.push((
+                start,
+                "10905117",
+                "A function can only be decorated by one of the '@AnimatableExtend', '@Builder', '@Extend', '@Styles', '@Concurrent' and '@Sendable'."
+                    .to_string(),
+            ));
+        }
+        if name == "LocalBuilder" {
+            found.push((
+                start,
+                "10905115",
+                "'@LocalBuilder' can only decorate method.".to_string(),
+            ));
+        }
+        from = start + 1 + name_len;
+    }
+    found
+}
+
 /// Declared parameter count of every `@Builder` method in the file, keyed by its name.
 fn builder_arities(source: &str) -> std::collections::HashMap<String, usize> {
     let mut table = std::collections::HashMap::new();
