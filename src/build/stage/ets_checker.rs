@@ -2011,6 +2011,43 @@ impl<'a> Visit<'a> for Checker<'_> {
                     "The '@Link' property cannot be specified a default value.".to_string(),
                 );
             }
+            // `10905301`: `@Watch('name')` has to name a method of the struct (measured 4:17 of
+            // `fixtures/ui-watch-name`, at the string).
+            for decorator in &it.decorators {
+                let Expression::CallExpression(call) = &decorator.expression else {
+                    continue;
+                };
+                let Expression::Identifier(callee) = &call.callee else {
+                    continue;
+                };
+                if callee.name.as_str() != "Watch" {
+                    continue;
+                }
+                let Some(argument) = call.arguments.first() else {
+                    continue;
+                };
+                let oxc_ast::ast::Argument::StringLiteral(literal) = argument else {
+                    continue;
+                };
+                let Some(class) = self.current_class.clone() else {
+                    continue;
+                };
+                let known = self
+                    .members
+                    .get(&class)
+                    .is_some_and(|set| set.contains(literal.value.as_str()));
+                if !known {
+                    self.push(
+                        "ERROR",
+                        "10905301",
+                        literal.span.start as usize,
+                        format!(
+                            "'@Watch' cannot be used with '{}'. Apply it only to parameters that correspond to existing methods.",
+                            literal.value
+                        ),
+                    );
+                }
+            }
             // `10905338`: a V2-only decorator belongs to an `@ComponentV2` struct (measured 4:4 and
             // 6:4 of `fixtures/ui-v2-decorators`, at the decorator's name).
             let v2_only = self
