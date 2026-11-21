@@ -276,6 +276,7 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         primitives: std::collections::HashMap::new(),
         inferred_numbers: std::collections::HashSet::new(),
         member_types: interface_member_types(&parsed.program),
+        parameter_types: function_parameter_types(&parsed.program),
         return_type: None,
         members: class_members(&parsed.program),
         statics: static_members(&parsed.program),
@@ -592,6 +593,8 @@ struct Checker<'a> {
     inferred_numbers: std::collections::HashSet<String>,
     /// Property types of the file's interfaces: `Holder -> {count: "number"}`.
     member_types: std::collections::HashMap<String, std::collections::HashMap<String, String>>,
+    /// Declared parameter types of the file's functions, by name.
+    parameter_types: std::collections::HashMap<String, Vec<String>>,
     /// The declared return type of the function being walked, when it names such an interface.
     return_type: Option<String>,
     /// Members of each class this file declares.
@@ -1079,6 +1082,39 @@ impl<'a> Visit<'a> for Checker<'_> {
                 }
             }
         }
+        // A call that hands a string literal to a `number` parameter, or the other way round:
+        // `Argument of type 'string' is not assignable to parameter of type 'number'.` at the
+        // argument (measured 6:15 of `fixtures/type-call-argument`).
+        if self.lints {
+            if let Expression::Identifier(callee) = &it.callee {
+                if let Some(types) = self.parameter_types.get(callee.name.as_str()).cloned() {
+                    for (index, argument) in it.arguments.iter().enumerate() {
+                        let Some(expected) = types.get(index) else {
+                            continue;
+                        };
+                        let Some(expression) = argument.as_expression() else {
+                            continue;
+                        };
+                        let found = match expression {
+                            Expression::StringLiteral(_) => "string",
+                            Expression::NumericLiteral(_) => "number",
+                            Expression::BooleanLiteral(_) => "boolean",
+                            _ => continue,
+                        };
+                        if expected != "_" && found != expected {
+                            self.push(
+                                "ERROR",
+                                "10505001",
+                                expression.span().start as usize,
+                                format!(
+                                    "Argument of type '{found}' is not assignable to parameter of type '{expected}'."
+                                ),
+                            );
+                        }
+                    }
+                }
+            }
+        }
         // `arkts-no-func-apply-call` (10605152): `f.apply(…)` and `f.call(…)`, at the method name
         // (measured 14:26 of `fixtures/arkts-indexed-and-apply`); `f.bind(…)` is accepted.
         if self.lints {
@@ -1396,16 +1432,24 @@ impl<'a> Visit<'a> for Checker<'_> {
             (&it.id.kind, &it.init)
         {
             // `const n: number = "s"` — at the declarator's name (measured 2:9 of
-            // `fixtures/type-declaration`).
+            // `fixtures/type-declaration`); `const s: string = 1` at 10:9 of
+            // `fixtures/type-call-argument`.
             if let Some(annotation) = &it.id.type_annotation {
-                if matches!(annotation.type_annotation, TSType::TSNumberKeyword(_))
-                    && matches!(initialiser, Expression::StringLiteral(_))
-                {
+                let mismatch = match (&annotation.type_annotation, initialiser) {
+                    (TSType::TSNumberKeyword(_), Expression::StringLiteral(_)) => {
+                        Some(("string", "number"))
+                    }
+                    (TSType::TSStringKeyword(_), Expression::NumericLiteral(_)) => {
+                        Some(("number", "string"))
+                    }
+                    _ => None,
+                };
+                if let Some((found, expected)) = mismatch {
                     self.push(
                         "ERROR",
                         "10505001",
                         name.span.start as usize,
-                        "Type 'string' is not assignable to type 'number'.".to_string(),
+                        format!("Type '{found}' is not assignable to type '{expected}'."),
                     );
                 }
             }
@@ -3174,6 +3218,52 @@ fn this_member_offsets(source: &str, member: &str) -> Vec<usize> {
         from = after;
     }
     found
+}
+
+/// Declared parameter types of each function of this file that spells them with a primitive:
+/// `takesNumber` → `["number"]`. A parameter left unannotated contributes `"_"`.
+fn function_parameter_types(
+    program: &Program<'_>,
+) -> std::collections::HashMap<String, Vec<String>> {
+    struct Collect(std::collections::HashMap<String, Vec<String>>);
+    impl<'a> Visit<'a> for Collect {
+        fn visit_function(
+            &mut self,
+            it: &oxc_ast::ast::Function<'a>,
+            flags: oxc_syntax::scope::ScopeFlags,
+        ) {
+            if let Some(id) = &it.id {
+                let spelled: Vec<String> = it
+                    .params
+                    .items
+                    .iter()
+                    .map(|parameter| {
+                        let Some(annotation) = parameter
+                            .pattern
+                            .type_annotation
+                            .as_ref()
+                            .map(|it| &it.type_annotation)
+                        else {
+                            return "_".to_string();
+                        };
+                        match annotation {
+                            TSType::TSNumberKeyword(_) => "number".to_string(),
+                            TSType::TSStringKeyword(_) => "string".to_string(),
+                            TSType::TSBooleanKeyword(_) => "boolean".to_string(),
+                            _ => "_".to_string(),
+                        }
+                    })
+                    .collect();
+                if spelled.iter().any(|spelling| spelling != "_") {
+                    self.0.insert(id.name.to_string(), spelled);
+                }
+            }
+            oxc_ast_visit::walk::walk_function(self, it, flags);
+        }
+    }
+    let mut collect = Collect(std::collections::HashMap::new());
+    collect.visit_program(program);
+    collect.0
 }
 
 /// Property types of each interface this file declares, for the ones spelled with a primitive:
