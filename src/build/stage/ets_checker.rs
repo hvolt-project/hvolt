@@ -293,6 +293,7 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         primitives: std::collections::HashMap::new(),
         inferred_numbers: std::collections::HashSet::new(),
         member_types: interface_member_types(&parsed.program),
+        optional_members: optional_members(&parsed.program),
         argument_types: {
             let known = interface_member_types(&parsed.program);
             function_parameter_named_types(&parsed.program, &known)
@@ -647,6 +648,8 @@ struct Checker<'a> {
     inferred_numbers: std::collections::HashSet<String>,
     /// Property types of the file's interfaces: `Holder -> {count: "number"}`.
     member_types: std::collections::HashMap<String, std::collections::HashMap<String, String>>,
+    /// Members each interface declares optional (`?`).
+    optional_members: std::collections::HashMap<String, std::collections::HashSet<String>>,
     /// Interface types named by each function's parameters, by position.
     argument_types: std::collections::HashMap<String, Vec<String>>,
     /// Declared parameter types of the file's functions, by name.
@@ -1621,9 +1624,15 @@ impl<'a> Visit<'a> for Checker<'_> {
                                             .to_string(),
                                     );
                                 }
+                                let optional = self
+                                    .optional_members
+                                    .get(&spelled)
+                                    .cloned()
+                                    .unwrap_or_default();
                                 let mut missing: Vec<&String> = expected
                                     .keys()
                                     .filter(|member| !provided.contains(member.as_str()))
+                                    .filter(|member| !optional.contains(member.as_str()))
                                     .collect();
                                 missing.sort();
                                 if let Some(member) = missing.first() {
@@ -4057,6 +4066,40 @@ fn entry_classes(program: &Program<'_>) -> std::collections::HashSet<String> {
         }
     }
     let mut collect = Collect(std::collections::HashSet::new());
+    collect.visit_program(program);
+    collect.0
+}
+
+/// Members each interface declares with `?`: these are not required in a literal
+/// (`fixtures/type-optional-member`).
+fn optional_members(
+    program: &Program<'_>,
+) -> std::collections::HashMap<String, std::collections::HashSet<String>> {
+    struct Collect(std::collections::HashMap<String, std::collections::HashSet<String>>);
+    impl<'a> Visit<'a> for Collect {
+        fn visit_ts_interface_declaration(
+            &mut self,
+            it: &oxc_ast::ast::TSInterfaceDeclaration<'a>,
+        ) {
+            let mut optional = std::collections::HashSet::new();
+            for element in &it.body.body {
+                let oxc_ast::ast::TSSignature::TSPropertySignature(property) = element else {
+                    continue;
+                };
+                let PropertyKey::StaticIdentifier(name) = &property.key else {
+                    continue;
+                };
+                if property.optional {
+                    optional.insert(name.name.to_string());
+                }
+            }
+            if !optional.is_empty() {
+                self.0.insert(it.id.name.to_string(), optional);
+            }
+            oxc_ast_visit::walk::walk_ts_interface_declaration(self, it);
+        }
+    }
+    let mut collect = Collect(std::collections::HashMap::new());
     collect.visit_program(program);
     collect.0
 }

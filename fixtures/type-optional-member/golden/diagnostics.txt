@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:9:9 Property 'label' is missing in type '{}' but required in type 'OptionalHolder'.
