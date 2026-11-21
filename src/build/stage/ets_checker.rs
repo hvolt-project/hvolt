@@ -343,6 +343,18 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
                 "A page can't contain more than one '@Entry' decorator.".to_string(),
             );
         }
+        // `component_map` carries each component's constructor signature; `Text` takes
+        // `string | Resource`, so a numeric literal is refused at the argument
+        // (measured 7:12 of `fixtures/ui-text-argument`).
+        for offset in text_number_arguments(source) {
+            checker.push(
+                "ERROR",
+                "10505001",
+                offset,
+                "Argument of type 'number' is not assignable to parameter of type 'string | Resource'."
+                    .to_string(),
+            );
+        }
         // Two `@Extend(C)` functions of the same name emit one helper twice, which the reference
         // reports as `Duplicate function implementation.` at each name (`fixtures/ui-extend-duplicate`:
         // 1:24 and 5:24).
@@ -2614,6 +2626,34 @@ fn component_name_collisions(
 }
 
 /// Members each class of this file declares: fields and methods by name.
+/// Offsets of numeric literal arguments passed to `Text(...)`, which takes `string | Resource`.
+/// Only a bare literal is judged: `Text(this.count)` and a template keep their own typing, and the
+/// reference reports neither (`fixtures/ui-text-argument`).
+fn text_number_arguments(source: &str) -> Vec<usize> {
+    let mut found = Vec::new();
+    let mut from = 0usize;
+    while let Some(at) = source[from..].find("Text(") {
+        let start = from + at;
+        // The call has to be the component itself, not the tail of a longer identifier.
+        let boundary = start == 0
+            || !source[..start]
+                .chars()
+                .next_back()
+                .is_some_and(|c| c.is_alphanumeric() || c == '_' || c == '$' || c == '.');
+        let argument_at = start + "Text(".len();
+        let rest = &source[argument_at..];
+        let literal_len = rest
+            .chars()
+            .take_while(|c| c.is_ascii_digit() || *c == '.')
+            .count();
+        if boundary && literal_len > 0 && rest[literal_len..].trim_start().starts_with(')') {
+            found.push(argument_at);
+        }
+        from = argument_at;
+    }
+    found
+}
+
 /// Offsets of the names in `@Extend(C) function name(...)` declarations whose emitted helper
 /// collides with another of the same name (`__C__name`).
 fn duplicate_extends(source: &str) -> Vec<usize> {
