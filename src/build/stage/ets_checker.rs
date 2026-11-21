@@ -1665,7 +1665,15 @@ impl<'a> Visit<'a> for Checker<'_> {
                 Expression::Identifier(name) if name.name.as_str() == "Component"
             )
         });
-        if self.lints && !component {
+        // A `@ComponentV2` struct is a struct too: its V1-decorator complaint is `10905339`, and
+        // `10905337` must not answer for it (`fixtures/ui-v1-decorator-in-v2`).
+        let v2 = class.decorators.iter().any(|decorator| {
+            matches!(
+                &decorator.expression,
+                Expression::Identifier(name) if name.name.as_str() == "ComponentV2"
+            )
+        });
+        if self.lints && !component && !v2 {
             // `10905337`: a state decorator belongs to a `struct`, and this class is not one
             // (measured 2:4 of `fixtures/ui-decorator-on-class`, at the decorator's name).
             for element in &class.body.body {
@@ -2046,6 +2054,39 @@ impl<'a> Visit<'a> for Checker<'_> {
                             literal.value
                         ),
                     );
+                }
+            }
+            // `10905339`: the mirror rule — a V1 decorator belongs to an `@Component` struct
+            // (measured 4:4 of `fixtures/ui-v1-decorator-in-v2`, at the decorator's name).
+            let in_v2 = self
+                .current_class
+                .as_ref()
+                .is_some_and(|class| self.v2_classes.contains(class));
+            if in_v2 {
+                for decorator in &it.decorators {
+                    if let Expression::Identifier(name) = &decorator.expression {
+                        if matches!(
+                            name.name.as_str(),
+                            "State"
+                                | "Link"
+                                | "Prop"
+                                | "Provide"
+                                | "Consume"
+                                | "ObjectLink"
+                                | "StorageLink"
+                                | "StorageProp"
+                        ) {
+                            self.push(
+                                "ERROR",
+                                "10905339",
+                                decorator.span.start as usize + 1,
+                                format!(
+                                    "The '@{}' decorator can only be used in a 'struct' decorated with '@Component'.",
+                                    name.name
+                                ),
+                            );
+                        }
+                    }
                 }
             }
             // `10905338`: a V2-only decorator belongs to an `@ComponentV2` struct (measured 4:4 and
