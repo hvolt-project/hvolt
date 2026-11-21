@@ -287,7 +287,13 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         // `validate_ui_syntax`: a `@Styles` takes no arguments (`10905105`, measured 8:3 of
         // `fixtures/ui-styles-arguments`, at the decorator). The mask blanks the whole member, so
         // the declaration is read from the file's own `@Styles` list rather than from the tree.
-        let styles = crate::build::stage::process_ui_syntax::mask_builder_decorators(source).styles;
+        let masked = crate::build::stage::process_ui_syntax::mask_builder_decorators(source);
+        // An `@Extend` name is a style call too: `.fancy()` on a `Text` is the generated helper,
+        // not an attribute the component lacks (`fixtures/ui-extend-duplicate`).
+        for extend in &masked.extends {
+            checker.style_names.insert(extend.name.clone());
+        }
+        let styles = masked.styles;
         for style in &styles {
             if !style.params_text.is_empty() {
                 checker.push(
@@ -335,6 +341,17 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
                 "ERROR",
                 "10905231",
                 "A page can't contain more than one '@Entry' decorator.".to_string(),
+            );
+        }
+        // Two `@Extend(C)` functions of the same name emit one helper twice, which the reference
+        // reports as `Duplicate function implementation.` at each name (`fixtures/ui-extend-duplicate`:
+        // 1:24 and 5:24).
+        for offset in duplicate_extends(source) {
+            checker.push(
+                "ERROR",
+                "10505001",
+                offset,
+                "Duplicate function implementation.".to_string(),
             );
         }
         // `this.<static>`: the reference names the fix
@@ -2597,6 +2614,50 @@ fn component_name_collisions(
 }
 
 /// Members each class of this file declares: fields and methods by name.
+/// Offsets of the names in `@Extend(C) function name(...)` declarations whose emitted helper
+/// collides with another of the same name (`__C__name`).
+fn duplicate_extends(source: &str) -> Vec<usize> {
+    let mut seen: std::collections::HashMap<String, Vec<usize>> = std::collections::HashMap::new();
+    let mut from = 0usize;
+    while let Some(at) = source[from..].find("@Extend(") {
+        let start = from + at;
+        let rest = &source[start + "@Extend(".len()..];
+        let Some(close) = rest.find(')') else {
+            break;
+        };
+        let component = rest[..close].trim().to_string();
+        let after = &rest[close + 1..];
+        if let Some(keyword) = after.find("function") {
+            let tail = after[keyword + "function".len()..].trim_start();
+            let name_len = tail
+                .chars()
+                .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+                .count();
+            if name_len > 0 {
+                let name = tail[..name_len].to_string();
+                let name_at = start
+                    + "@Extend(".len()
+                    + close
+                    + 1
+                    + keyword
+                    + "function".len()
+                    + (after[keyword + "function".len()..].len() - tail.len());
+                seen.entry(format!("__{component}__{name}"))
+                    .or_default()
+                    .push(name_at);
+            }
+        }
+        from = start + "@Extend(".len();
+    }
+    let mut found: Vec<usize> = seen
+        .into_iter()
+        .filter(|(_, offsets)| offsets.len() > 1)
+        .flat_map(|(_, offsets)| offsets)
+        .collect();
+    found.sort_unstable();
+    found
+}
+
 /// Offsets of the name in every `this.<member>` the text contains.
 fn this_member_offsets(source: &str, member: &str) -> Vec<usize> {
     let needle = format!("this.{member}");
