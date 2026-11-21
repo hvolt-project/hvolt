@@ -274,6 +274,7 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         class_names: class_names(&parsed.program),
         arity: declared_arity(&parsed.program),
         primitives: std::collections::HashMap::new(),
+        inferred_numbers: std::collections::HashSet::new(),
         members: class_members(&parsed.program),
         statics: static_members(&parsed.program),
         entries: entry_classes(&parsed.program),
@@ -585,6 +586,8 @@ struct Checker<'a> {
     arity: std::collections::HashMap<String, (usize, usize)>,
     /// Locals declared with a primitive annotation: `name -> "string" | "number" | "boolean"`.
     primitives: std::collections::HashMap<String, &'static str>,
+    /// Locals whose type is a number only by their initialiser: `let x = 1`.
+    inferred_numbers: std::collections::HashSet<String>,
     /// Members of each class this file declares.
     members: std::collections::HashMap<String, std::collections::HashSet<String>>,
     /// Static members of each class this file declares: `class -> {name}`.
@@ -795,6 +798,25 @@ fn destructuring_parameter(it: &FormalParameter<'_>) -> Option<usize> {
 }
 
 impl<'a> Visit<'a> for Checker<'_> {
+    /// `x = "s"` where `x` is a number: `Type 'string' is not assignable to type 'number'.` at
+    /// the target (measured 3:3 of `fixtures/type-assign`).
+    fn visit_assignment_expression(&mut self, it: &oxc_ast::ast::AssignmentExpression<'a>) {
+        if self.lints {
+            if let oxc_ast::ast::AssignmentTarget::AssignmentTargetIdentifier(target) = &it.left {
+                let numeric = self.primitives.get(target.name.as_str()) == Some(&"number")
+                    || self.inferred_numbers.contains(target.name.as_str());
+                if numeric && matches!(&it.right, Expression::StringLiteral(_)) {
+                    self.push(
+                        "ERROR",
+                        "10505001",
+                        target.span.start as usize,
+                        "Type 'string' is not assignable to type 'number'.".to_string(),
+                    );
+                }
+            }
+        }
+        oxc_ast_visit::walk::walk_assignment_expression(self, it);
+    }
     /// `arkts-no-any-unknown`: the annotation names the type `any` or `unknown`.
     fn visit_ts_type_annotation(&mut self, it: &TSTypeAnnotation<'a>) {
         if self.lints
@@ -1363,6 +1385,49 @@ impl<'a> Visit<'a> for Checker<'_> {
         // no contextual type: the reference reports both the type literal (10605040) and this
         // (measured at 17:16 and 17:32 of `fixtures/arkts-type-shapes`).
         self.remember_class_type(&it.id);
+        if let (oxc_ast::ast::BindingPatternKind::BindingIdentifier(name), Some(initialiser)) =
+            (&it.id.kind, &it.init)
+        {
+            if matches!(initialiser, Expression::NumericLiteral(_)) {
+                self.inferred_numbers.insert(name.name.to_string());
+            }
+            // `const arr: number[] = ["a"]` — the literal is refused at the `[` (measured 8:26 of
+            // `fixtures/type-assign`).
+            if let Some(annotation) = &it.id.type_annotation {
+                if let TSType::TSArrayType(array) = &annotation.type_annotation {
+                    if matches!(array.element_type, TSType::TSNumberKeyword(_)) {
+                        if let Expression::ArrayExpression(literal) = initialiser {
+                            let offending = literal.elements.iter().any(|element| {
+                                matches!(
+                                    element,
+                                    oxc_ast::ast::ArrayExpressionElement::StringLiteral(_)
+                                )
+                            });
+                            if offending {
+                                // The reference anchors the offending element, not the bracket:
+                                // `["a"]` is refused at the `"a"` (8:26).
+                                let anchor = literal
+                                    .elements
+                                    .iter()
+                                    .find_map(|element| match element {
+                                        oxc_ast::ast::ArrayExpressionElement::StringLiteral(
+                                            string,
+                                        ) => Some(string.span.start as usize),
+                                        _ => None,
+                                    })
+                                    .unwrap_or(literal.span.start as usize);
+                                self.push(
+                                    "ERROR",
+                                    "10505001",
+                                    anchor,
+                                    "Type 'string' is not assignable to type 'number'.".to_string(),
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
         // `arkts-no-destruct-decls` (10605074): a destructured declaration, at the pattern
         // (measured 12:9 and 17:9 of `fixtures/arkts-destructuring`).
         if self.lints
