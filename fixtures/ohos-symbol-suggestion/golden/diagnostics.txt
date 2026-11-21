@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:1:10 Module '"@ohos.app.ability.UIAbility"' has no exported member 'NotASymbol'. Did you mean to use 'import NotASymbol from "@ohos.app.ability.UIAbility"' instead?
