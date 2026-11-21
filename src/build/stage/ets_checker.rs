@@ -1570,6 +1570,22 @@ impl<'a> Visit<'a> for Checker<'_> {
                                 {
                                     self.push("ERROR", "10505001", offset, message);
                                 }
+                                // An empty literal has none of the required members: reported at
+                                // the declarator's name, with the literal's own spelling
+                                // (`Property 'count' is missing in type '{}' but required in type
+                                // 'Holder'.`, 6:9 of `fixtures/type-missing-member`).
+                                if literal.properties.is_empty() && !expected.is_empty() {
+                                    if let Some((member, _)) = expected.iter().next() {
+                                        self.push(
+                                            "ERROR",
+                                            "10505001",
+                                            name.span.start as usize,
+                                            format!(
+                                                "Property '{member}' is missing in type '{{}}' but required in type '{spelled}'."
+                                            ),
+                                        );
+                                    }
+                                }
                             }
                         }
                     }

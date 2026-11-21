@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:6:9 Property 'count' is missing in type '{}' but required in type 'Holder'.
