@@ -277,7 +277,9 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         inferred_numbers: std::collections::HashSet::new(),
         member_types: interface_member_types(&parsed.program),
         parameter_types: function_parameter_types(&parsed.program),
+        method_parameter_types: method_parameter_types(&parsed.program),
         return_type: None,
+        return_spelling: None,
         members: class_members(&parsed.program),
         statics: static_members(&parsed.program),
         entries: entry_classes(&parsed.program),
@@ -595,8 +597,12 @@ struct Checker<'a> {
     member_types: std::collections::HashMap<String, std::collections::HashMap<String, String>>,
     /// Declared parameter types of the file's functions, by name.
     parameter_types: std::collections::HashMap<String, Vec<String>>,
+    /// Declared parameter types of the file's class methods, keyed `Class.method`.
+    method_parameter_types: std::collections::HashMap<String, Vec<String>>,
     /// The declared return type of the function being walked, when it names such an interface.
     return_type: Option<String>,
+    /// The primitive a function's declared return type spells, when it is one.
+    return_spelling: Option<String>,
     /// Members of each class this file declares.
     members: std::collections::HashMap<String, std::collections::HashSet<String>>,
     /// Static members of each class this file declares: `class -> {name}`.
@@ -1078,6 +1084,44 @@ impl<'a> Visit<'a> for Checker<'_> {
                             offset,
                             format!("Expected {expected} arguments, but got {given}."),
                         );
+                    }
+                }
+            }
+        }
+        // `counter.bump("x")` where the method takes a `number`: at the argument (measured 12:16 of
+        // `fixtures/type-return`).
+        if self.lints {
+            if let Expression::StaticMemberExpression(member) = &it.callee {
+                if let Expression::Identifier(object) = &member.object {
+                    if let Some(class) = self.class_locals.get(object.name.as_str()).cloned() {
+                        let base = class.split('<').next().unwrap_or(&class).to_string();
+                        let key = format!("{}.{}", base, member.property.name);
+                        if let Some(types) = self.method_parameter_types.get(&key).cloned() {
+                            for (index, argument) in it.arguments.iter().enumerate() {
+                                let Some(expected) = types.get(index) else {
+                                    continue;
+                                };
+                                let Some(expression) = argument.as_expression() else {
+                                    continue;
+                                };
+                                let found = match expression {
+                                    Expression::StringLiteral(_) => "string",
+                                    Expression::NumericLiteral(_) => "number",
+                                    Expression::BooleanLiteral(_) => "boolean",
+                                    _ => continue,
+                                };
+                                if expected != "_" && found != expected {
+                                    self.push(
+                                        "ERROR",
+                                        "10505001",
+                                        expression.span().start as usize,
+                                        format!(
+                                            "Argument of type '{found}' is not assignable to parameter of type '{expected}'."
+                                        ),
+                                    );
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1572,6 +1616,26 @@ impl<'a> Visit<'a> for Checker<'_> {
 
     fn visit_return_statement(&mut self, it: &ReturnStatement<'a>) {
         if self.lints {
+            // `return "s"` in a function declared to return `number`: at the `return`
+            // (measured 8:3 of `fixtures/type-return`).
+            if let Some(expected) = self.return_spelling.clone() {
+                if let Some(argument) = &it.argument {
+                    let found = match argument {
+                        Expression::StringLiteral(_) => "string",
+                        Expression::NumericLiteral(_) => "number",
+                        Expression::BooleanLiteral(_) => "boolean",
+                        _ => "",
+                    };
+                    if !found.is_empty() && found != expected {
+                        self.push(
+                            "ERROR",
+                            "10505001",
+                            it.span.start as usize,
+                            format!("Type '{found}' is not assignable to type '{expected}'."),
+                        );
+                    }
+                }
+            }
             // A class returned as a value: `arkts-no-classes-as-obj`, a warning. Only this
             // position is measured (`fixtures/arkts-classes-and-enums`, 13:10); a class named in
             // a type position (`new () => Holder`) draws nothing.
@@ -1669,14 +1733,24 @@ impl<'a> Visit<'a> for Checker<'_> {
     fn visit_function(&mut self, it: &Function<'a>, flags: oxc_syntax::scope::ScopeFlags) {
         // The declared return type decides what an object literal returned here must look like.
         let previous_return = self.return_type.clone();
+        let previous_spelling = self.return_spelling.clone();
+        self.return_spelling = None;
         if let Some(annotation) = &it.return_type {
-            if let TSType::TSTypeReference(reference) = &annotation.type_annotation {
-                if let oxc_ast::ast::TSTypeName::IdentifierReference(name) = &reference.type_name {
-                    let spelling = name.name.to_string();
-                    if self.member_types.contains_key(&spelling) {
-                        self.return_type = Some(spelling);
+            match &annotation.type_annotation {
+                TSType::TSNumberKeyword(_) => self.return_spelling = Some("number".to_string()),
+                TSType::TSStringKeyword(_) => self.return_spelling = Some("string".to_string()),
+                TSType::TSBooleanKeyword(_) => self.return_spelling = Some("boolean".to_string()),
+                TSType::TSTypeReference(reference) => {
+                    if let oxc_ast::ast::TSTypeName::IdentifierReference(name) =
+                        &reference.type_name
+                    {
+                        let spelling = name.name.to_string();
+                        if self.member_types.contains_key(&spelling) {
+                            self.return_type = Some(spelling);
+                        }
                     }
                 }
+                _ => {}
             }
         }
         if self.lints {
@@ -1718,6 +1792,7 @@ impl<'a> Visit<'a> for Checker<'_> {
         }
         oxc_ast_visit::walk::walk_function(self, it, flags);
         self.return_type = previous_return;
+        self.return_spelling = previous_spelling;
     }
 
     /// Three rules the reference reports on constructs ArkTS does not have.
@@ -3218,6 +3293,54 @@ fn this_member_offsets(source: &str, member: &str) -> Vec<usize> {
         from = after;
     }
     found
+}
+
+/// Declared parameter types of each class method in this file, keyed `Class.method`.
+fn method_parameter_types(program: &Program<'_>) -> std::collections::HashMap<String, Vec<String>> {
+    struct Collect(std::collections::HashMap<String, Vec<String>>);
+    impl<'a> Visit<'a> for Collect {
+        fn visit_class(&mut self, it: &Class<'a>) {
+            if let Some(id) = &it.id {
+                for element in &it.body.body {
+                    let ClassElement::MethodDefinition(method) = element else {
+                        continue;
+                    };
+                    let Some(name) = method.key.static_name() else {
+                        continue;
+                    };
+                    let spelled: Vec<String> = method
+                        .value
+                        .params
+                        .items
+                        .iter()
+                        .map(|parameter| {
+                            let Some(annotation) = parameter
+                                .pattern
+                                .type_annotation
+                                .as_ref()
+                                .map(|it| &it.type_annotation)
+                            else {
+                                return "_".to_string();
+                            };
+                            match annotation {
+                                TSType::TSNumberKeyword(_) => "number".to_string(),
+                                TSType::TSStringKeyword(_) => "string".to_string(),
+                                TSType::TSBooleanKeyword(_) => "boolean".to_string(),
+                                _ => "_".to_string(),
+                            }
+                        })
+                        .collect();
+                    if spelled.iter().any(|spelling| spelling != "_") {
+                        self.0.insert(format!("{}.{}", id.name, name), spelled);
+                    }
+                }
+            }
+            oxc_ast_visit::walk::walk_class(self, it);
+        }
+    }
+    let mut collect = Collect(std::collections::HashMap::new());
+    collect.visit_program(program);
+    collect.0
 }
 
 /// Declared parameter types of each function of this file that spells them with a primitive:
