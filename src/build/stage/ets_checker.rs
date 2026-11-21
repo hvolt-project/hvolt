@@ -392,6 +392,12 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         for (offset, code, message) in global_function_decorator_violations(source) {
             checker.push("ERROR", code, offset, message);
         }
+        // A child instantiation that hands a literal of the wrong type to a declared member
+        // (measured 17:19 of `fixtures/ui-component-argument`).
+        let struct_fields = struct_field_types(&parsed.program, source);
+        for (offset, message) in component_argument_violations(source, &struct_fields) {
+            checker.push("ERROR", "10505001", offset, message);
+        }
         // A `@Builder` method's declared parameter count, and the calls that disagree with it.
         let builders = builder_arities(source);
         for (offset, message) in builder_arity_violations(source, &builders) {
@@ -3358,6 +3364,187 @@ fn this_member_offsets(source: &str, member: &str) -> Vec<usize> {
         from = after;
     }
     found
+}
+
+/// Field types of each struct in this file whose members spell a primitive:
+/// `ChildCard -> {label: "string"}`.
+fn struct_field_types(
+    program: &Program<'_>,
+    source: &str,
+) -> std::collections::HashMap<String, std::collections::HashMap<String, String>> {
+    struct Collect<'s> {
+        source: &'s str,
+        found: std::collections::HashMap<String, std::collections::HashMap<String, String>>,
+    }
+    impl<'a> Visit<'a> for Collect<'_> {
+        fn visit_class(&mut self, it: &Class<'a>) {
+            if let Some(id) = &it.id {
+                let is_struct = self.source[..id.span.start as usize]
+                    .trim_end()
+                    .ends_with("struct");
+                if is_struct {
+                    let mut fields = std::collections::HashMap::new();
+                    for element in &it.body.body {
+                        let ClassElement::PropertyDefinition(property) = element else {
+                            continue;
+                        };
+                        let Some(name) = property.key.static_name() else {
+                            continue;
+                        };
+                        let Some(annotation) = &property.type_annotation else {
+                            continue;
+                        };
+                        let spelling = match &annotation.type_annotation {
+                            TSType::TSNumberKeyword(_) => "number",
+                            TSType::TSStringKeyword(_) => "string",
+                            TSType::TSBooleanKeyword(_) => "boolean",
+                            _ => continue,
+                        };
+                        fields.insert(name.to_string(), spelling.to_string());
+                    }
+                    if !fields.is_empty() {
+                        self.found.insert(id.name.to_string(), fields);
+                    }
+                }
+            }
+            oxc_ast_visit::walk::walk_class(self, it);
+        }
+    }
+    let mut collect = Collect {
+        source,
+        found: std::collections::HashMap::new(),
+    };
+    collect.visit_program(program);
+    collect.found
+}
+
+/// A child instantiation whose argument object hands a literal of the wrong type to a declared
+/// member: `ChildCard({ label: 1 })` against `@Prop label: string` reports at the property name
+/// (measured 17:19 of `fixtures/ui-component-argument`), and `ChildCard({ label: "ok" })` beside it
+/// draws nothing.
+fn component_argument_violations(
+    source: &str,
+    structs: &std::collections::HashMap<String, std::collections::HashMap<String, String>>,
+) -> Vec<(usize, String)> {
+    let mut found = Vec::new();
+    for (name, fields) in structs {
+        let needle = format!("{name}(");
+        let mut from = 0usize;
+        while let Some(at) = source[from..].find(&needle) {
+            let start = from + at;
+            let boundary = start == 0
+                || !source[..start]
+                    .chars()
+                    .next_back()
+                    .is_some_and(|c| c.is_alphanumeric() || c == '_' || c == '$' || c == '.');
+            let open = start + needle.len() - 1;
+            let Some(close) = matching_paren(source, open) else {
+                break;
+            };
+            from = close;
+            if !boundary {
+                continue;
+            }
+            let inside = &source[open + 1..close];
+            let trimmed = inside.trim_start();
+            let Some(body) = trimmed.strip_prefix('{') else {
+                continue;
+            };
+            let Some(end) = body.rfind('}') else {
+                continue;
+            };
+            let body_start = open + 1 + (inside.len() - trimmed.len()) + 1;
+            for item in split_top_level(&body[..end]) {
+                let item_start = body[..end]
+                    .find(&item)
+                    .map(|at| body_start + at)
+                    .unwrap_or(body_start);
+                let Some(colon) = item.find(':') else {
+                    continue;
+                };
+                let key = item[..colon].trim();
+                let value = item[colon + 1..].trim();
+                let Some(expected) = fields.get(key) else {
+                    continue;
+                };
+                let spelled = literal_spelling(value);
+                if spelled.is_empty() || &spelled == expected {
+                    continue;
+                }
+                let key_at = item_start + item[..colon].find(key).unwrap_or(0);
+                found.push((
+                    key_at,
+                    format!("Type '{spelled}' is not assignable to type '{expected}'."),
+                ));
+            }
+        }
+    }
+    found.sort_unstable();
+    found
+}
+
+/// The offset of the `)` matching the `(` at `open`.
+fn matching_paren(source: &str, open: usize) -> Option<usize> {
+    let mut depth = 0usize;
+    for (offset, byte) in source[open..].bytes().enumerate() {
+        match byte {
+            b'(' => depth += 1,
+            b')' => {
+                depth -= 1;
+                if depth == 0 {
+                    return Some(open + offset);
+                }
+            }
+            _ => {}
+        }
+    }
+    None
+}
+
+/// Splits an object literal's body at its own commas.
+fn split_top_level(body: &str) -> Vec<String> {
+    let mut items = Vec::new();
+    let mut depth = 0i32;
+    let mut current = String::new();
+    for byte in body.chars() {
+        match byte {
+            '(' | '[' | '{' => {
+                depth += 1;
+                current.push(byte);
+            }
+            ')' | ']' | '}' => {
+                depth -= 1;
+                current.push(byte);
+            }
+            ',' if depth == 0 => {
+                items.push(current.trim().to_string());
+                current = String::new();
+            }
+            _ => current.push(byte),
+        }
+    }
+    if !current.trim().is_empty() {
+        items.push(current.trim().to_string());
+    }
+    items
+}
+
+/// The primitive a literal spells, or `""` when the value is not a literal at all.
+fn literal_spelling(value: &str) -> String {
+    if value.starts_with('"') || value.starts_with('\'') {
+        return "string".to_string();
+    }
+    let number: String = value
+        .chars()
+        .take_while(|c| c.is_ascii_digit() || *c == '.' || *c == '-')
+        .collect();
+    if !number.is_empty() && number != "-" {
+        return "number".to_string();
+    }
+    if value == "true" || value == "false" {
+        return "boolean".to_string();
+    }
+    String::new()
 }
 
 /// Declared parameter types of each class method in this file, keyed `Class.method`.
