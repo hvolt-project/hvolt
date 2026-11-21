@@ -293,6 +293,10 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         primitives: std::collections::HashMap::new(),
         inferred_numbers: std::collections::HashSet::new(),
         member_types: interface_member_types(&parsed.program),
+        argument_types: {
+            let known = interface_member_types(&parsed.program);
+            function_parameter_named_types(&parsed.program, &known)
+        },
         parameter_types: function_parameter_types(&parsed.program),
         method_parameter_types: method_parameter_types(&parsed.program),
         return_type: None,
@@ -643,6 +647,8 @@ struct Checker<'a> {
     inferred_numbers: std::collections::HashSet<String>,
     /// Property types of the file's interfaces: `Holder -> {count: "number"}`.
     member_types: std::collections::HashMap<String, std::collections::HashMap<String, String>>,
+    /// Interface types named by each function's parameters, by position.
+    argument_types: std::collections::HashMap<String, Vec<String>>,
     /// Declared parameter types of the file's functions, by name.
     parameter_types: std::collections::HashMap<String, Vec<String>>,
     /// Declared parameter types of the file's class methods, keyed `Class.method`.
@@ -1136,6 +1142,32 @@ impl<'a> Visit<'a> for Checker<'_> {
                 }
             }
         }
+        // `takeHolder({ count: "x" })` where the parameter is `Holder`: at the property name
+        // (measured 11:23 of `fixtures/type-object-shape`).
+        if self.lints {
+            if let Expression::Identifier(callee) = &it.callee {
+                if let Some(types) = self.argument_types.get(callee.name.as_str()).cloned() {
+                    for (index, argument) in it.arguments.iter().enumerate() {
+                        let Some(type_name) = types.get(index) else {
+                            continue;
+                        };
+                        if type_name.is_empty() {
+                            continue;
+                        }
+                        let Some(expected) = self.member_types.get(type_name).cloned() else {
+                            continue;
+                        };
+                        let Some(Expression::ObjectExpression(literal)) = argument.as_expression()
+                        else {
+                            continue;
+                        };
+                        for (offset, message) in object_literal_violations(literal, &expected) {
+                            self.push("ERROR", "10505001", offset, message);
+                        }
+                    }
+                }
+            }
+        }
         // `counter.bump("x")` where the method takes a `number`: at the argument (measured 12:16 of
         // `fixtures/type-return`).
         if self.lints {
@@ -1523,6 +1555,26 @@ impl<'a> Visit<'a> for Checker<'_> {
         if let (oxc_ast::ast::BindingPatternKind::BindingIdentifier(name), Some(initialiser)) =
             (&it.id.kind, &it.init)
         {
+            // `const h: Holder = { count: "s" }` — at the property name (measured 10:23 of
+            // `fixtures/type-object-shape`).
+            if let Some(annotation) = &it.id.type_annotation {
+                if let TSType::TSTypeReference(reference) = &annotation.type_annotation {
+                    if let oxc_ast::ast::TSTypeName::IdentifierReference(type_name) =
+                        &reference.type_name
+                    {
+                        let spelled = type_name.name.to_string();
+                        if let Some(expected) = self.member_types.get(&spelled).cloned() {
+                            if let Expression::ObjectExpression(literal) = initialiser {
+                                for (offset, message) in
+                                    object_literal_violations(literal, &expected)
+                                {
+                                    self.push("ERROR", "10505001", offset, message);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             // `const n: number = "s"` — at the declarator's name (measured 2:9 of
             // `fixtures/type-declaration`); `const s: string = 1` at 10:9 of
             // `fixtures/type-call-argument`.
@@ -3369,6 +3421,99 @@ fn this_member_offsets(source: &str, member: &str) -> Vec<usize> {
         from = after;
     }
     found
+}
+
+/// A property of an object literal whose literal value disagrees with the declared member type:
+/// `{ count: "s" }` against `interface Holder { count: number }`.
+fn object_literal_violations(
+    literal: &oxc_ast::ast::ObjectExpression<'_>,
+    expected: &std::collections::HashMap<String, String>,
+) -> Vec<(usize, String)> {
+    let mut found = Vec::new();
+    for property in &literal.properties {
+        let ObjectPropertyKind::ObjectProperty(property) = property else {
+            continue;
+        };
+        let PropertyKey::StaticIdentifier(key) = &property.key else {
+            continue;
+        };
+        let Some(wanted) = expected.get(key.name.as_str()) else {
+            continue;
+        };
+        let found_spelling = match &property.value {
+            Expression::StringLiteral(_) => "string",
+            Expression::NumericLiteral(_) => "number",
+            Expression::BooleanLiteral(_) => "boolean",
+            _ => continue,
+        };
+        if found_spelling != wanted {
+            found.push((
+                key.span.start as usize,
+                format!("Type '{found_spelling}' is not assignable to type '{wanted}'."),
+            ));
+        }
+    }
+    found
+}
+
+/// Parameter type names of each function, for the ones that name an interface or class of the file.
+fn function_parameter_named_types(
+    program: &Program<'_>,
+    known: &std::collections::HashMap<String, std::collections::HashMap<String, String>>,
+) -> std::collections::HashMap<String, Vec<String>> {
+    struct Collect<'k> {
+        known: &'k std::collections::HashMap<String, std::collections::HashMap<String, String>>,
+        found: std::collections::HashMap<String, Vec<String>>,
+    }
+    impl<'a> Visit<'a> for Collect<'_> {
+        fn visit_function(
+            &mut self,
+            it: &oxc_ast::ast::Function<'a>,
+            flags: oxc_syntax::scope::ScopeFlags,
+        ) {
+            if let Some(id) = &it.id {
+                let spelled: Vec<String> = it
+                    .params
+                    .items
+                    .iter()
+                    .map(|parameter| {
+                        let Some(annotation) = parameter
+                            .pattern
+                            .type_annotation
+                            .as_ref()
+                            .map(|it| &it.type_annotation)
+                        else {
+                            return String::new();
+                        };
+                        let TSType::TSTypeReference(reference) = annotation else {
+                            return String::new();
+                        };
+                        let oxc_ast::ast::TSTypeName::IdentifierReference(name) =
+                            &reference.type_name
+                        else {
+                            return String::new();
+                        };
+                        let spelled = name.name.to_string();
+                        if self.known.contains_key(&spelled) {
+                            spelled
+                        } else {
+                            String::new()
+                        }
+                    })
+                    .collect();
+                if spelled.iter().any(|name| !name.is_empty()) {
+                    self.found.insert(id.name.to_string(), spelled);
+                }
+            }
+            oxc_ast_visit::walk::walk_function(self, it, flags);
+        }
+    }
+    let mut collect = Collect {
+        known,
+        found: std::collections::HashMap::new(),
+    };
+    collect.visit_program(program);
+    collect.found
 }
 
 /// `this.<name>` where the enclosing class or struct declares no such member: the reference reports
