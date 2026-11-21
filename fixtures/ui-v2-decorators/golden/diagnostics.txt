@@ -1,0 +1,2 @@
+ERROR 10905338 ets/pages/Index.ets:4:4 The '@Param' decorator can only be used in a 'struct' decorated with '@ComponentV2'.
+ERROR 10905338 ets/pages/Index.ets:6:4 The '@Local' decorator can only be used in a 'struct' decorated with '@ComponentV2'.

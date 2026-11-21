@@ -278,6 +278,7 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         statics: static_members(&parsed.program),
         entries: entry_classes(&parsed.program),
         structs: struct_names(&parsed.program, source),
+        v2_classes: v2_classes(&parsed.program),
         current_class: None,
         class_locals: std::collections::HashMap::new(),
         arrow_depth: 0,
@@ -590,6 +591,7 @@ struct Checker<'a> {
     statics: std::collections::HashMap<String, std::collections::HashSet<String>>,
     entries: std::collections::HashSet<String>,
     structs: std::collections::HashSet<String>,
+    v2_classes: std::collections::HashSet<String>,
     /// Which class the walk is inside, for `this.<static>`.
     current_class: Option<String>,
     /// Locals and parameters annotated with a class of this file: `name -> class name`.
@@ -2009,6 +2011,39 @@ impl<'a> Visit<'a> for Checker<'_> {
                     "The '@Link' property cannot be specified a default value.".to_string(),
                 );
             }
+            // `10905338`: a V2-only decorator belongs to an `@ComponentV2` struct (measured 4:4 and
+            // 6:4 of `fixtures/ui-v2-decorators`, at the decorator's name).
+            let v2_only = self
+                .current_class
+                .as_ref()
+                .is_some_and(|class| !self.v2_classes.contains(class));
+            if v2_only {
+                for decorator in &it.decorators {
+                    if let Expression::Identifier(name) = &decorator.expression {
+                        if matches!(
+                            name.name.as_str(),
+                            "Param"
+                                | "Local"
+                                | "Once"
+                                | "Event"
+                                | "Monitor"
+                                | "Computed"
+                                | "Provider"
+                                | "Consumer"
+                        ) {
+                            self.push(
+                                "ERROR",
+                                "10905338",
+                                decorator.span.start as usize + 1,
+                                format!(
+                                    "The '@{}' decorator can only be used in a 'struct' decorated with '@ComponentV2'.",
+                                    name.name
+                                ),
+                            );
+                        }
+                    }
+                }
+            }
             // `10905303`: a `@State` field needs a default value (measured 8:10 of
             // `fixtures/ui-state-default`, at the name).
             let state = it.decorators.iter().any(|decorator| {
@@ -2924,6 +2959,27 @@ fn this_member_offsets(source: &str, member: &str) -> Vec<usize> {
         from = after;
     }
     found
+}
+
+/// Names of the structs decorated `@ComponentV2`: the V2-only decorators belong to those.
+fn v2_classes(program: &Program<'_>) -> std::collections::HashSet<String> {
+    struct Collect(std::collections::HashSet<String>);
+    impl<'a> Visit<'a> for Collect {
+        fn visit_class(&mut self, it: &Class<'a>) {
+            let v2 = it.decorators.iter().any(|decorator| {
+                matches!(&decorator.expression, Expression::Identifier(name) if name.name.as_str() == "ComponentV2")
+            });
+            if v2 {
+                if let Some(id) = &it.id {
+                    self.0.insert(id.name.to_string());
+                }
+            }
+            oxc_ast_visit::walk::walk_class(self, it);
+        }
+    }
+    let mut collect = Collect(std::collections::HashSet::new());
+    collect.visit_program(program);
+    collect.0
 }
 
 /// Names of the `struct`s this file declares, whatever decorators they carry. The masked view
