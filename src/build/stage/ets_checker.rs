@@ -824,7 +824,12 @@ impl Checker<'_> {
 
     fn check_system_request(&mut self, it: &ImportDeclaration<'_>) {
         let request = it.source.value.as_str();
-        if !(request.starts_with("@ohos.") || request.starts_with("@system.")) {
+        // `@hms.*` is the same shape of module, declared under the SDK's `hms/ets/api`
+        // (`fixtures/hms-missing-symbol` measures the same wording there).
+        if !(request.starts_with("@ohos.")
+            || request.starts_with("@system.")
+            || request.starts_with("@hms."))
+        {
             return;
         }
         if system_module_declared(request) == Some(false) {
