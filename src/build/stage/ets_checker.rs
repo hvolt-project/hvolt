@@ -315,6 +315,9 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         arrow_depth: 0,
         method_depth: 0,
     };
+    // Shared by the checks below: the component names, and the `@Extend`s no component answers.
+    let known = known_components();
+    let mut unknown_extends: Vec<String> = Vec::new();
     if checker.lints {
         // `validate_ui_syntax`: a `@Styles` takes no arguments (`10905105`, measured 8:3 of
         // `fixtures/ui-styles-arguments`, at the decorator). The mask blanks the whole member, so
@@ -323,7 +326,13 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         // An `@Extend` name is a style call too: `.fancy()` on a `Text` is the generated helper,
         // not an attribute the component lacks (`fixtures/ui-extend-duplicate`).
         for extend in &masked.extends {
+            // The name stays accepted by the attribute scan either way: an `@Extend` whose target
+            // no component answers is reported as its own warning instead
+            // (`fixtures/ui-extend-target`), not as a missing attribute error.
             checker.style_names.insert(extend.name.clone());
+            if !known.contains(extend.comp.as_str()) {
+                unknown_extends.push(extend.name.clone());
+            }
         }
         let styles = masked.styles;
         for style in &styles {
@@ -430,6 +439,21 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
                 "Argument of type 'number' is not assignable to parameter of type 'string | Resource'."
                     .to_string(),
             );
+        }
+        // An `@Extend(<component>)` whose target no component answers.
+        let components: std::collections::HashSet<String> = known.into_iter().collect();
+        for (offset, severity, message) in extend_target_violations(source, &components) {
+            checker.push(
+                severity,
+                if severity == "ERROR" { "10505001" } else { "-" },
+                offset,
+                message,
+            );
+        }
+        for (offset, message) in
+            unknown_extend_call_violations(source, &unknown_extends, &components)
+        {
+            checker.push("WARN", "-", offset, message);
         }
         // Two `@Extend(C)` functions of the same name emit one helper twice, which the reference
         // reports as `Duplicate function implementation.` at each name (`fixtures/ui-extend-duplicate`:
@@ -3639,6 +3663,157 @@ fn text_number_arguments(source: &str) -> Vec<usize> {
         }
         from = argument_at;
     }
+    found
+}
+
+/// An `@Extend(<component>)` whose target no component answers leaves its body as written, and the
+/// parser then trips over the attribute chain: `Declaration or statement expected.` at the `.` and
+/// `Cannot find name '<member>'.` at the member (measured 2:3 and 2:4 of
+/// `fixtures/ui-extend-target`).
+fn extend_target_violations(
+    source: &str,
+    components: &std::collections::HashSet<String>,
+) -> Vec<(usize, &'static str, String)> {
+    // No component list means no SDK was read: claiming a target is unknown would then be a guess.
+    if components.is_empty() {
+        return Vec::new();
+    }
+    let mut found: Vec<(usize, &'static str, String)> = Vec::new();
+    let mut from = 0usize;
+    while let Some(at) = source[from..].find("@Extend(") {
+        let start = from + at;
+        let rest = &source[start + "@Extend(".len()..];
+        let Some(close) = rest.find(')') else {
+            break;
+        };
+        let target = rest[..close].trim();
+        from = start + "@Extend(".len();
+        if components.contains(target) {
+            continue;
+        }
+        // The decorator itself is refused, at its name (`'Nope' parameter cannot be passed in the
+        // '@Extend' decorator.`, 1:2).
+        found.push((
+            start + 1,
+            "WARN",
+            format!("'{target}' parameter cannot be passed in the '@Extend' decorator."),
+        ));
+        // The declaration's body: from the first `{` after `function`, to its matching `}`.
+        let after = &rest[close + 1..];
+        let Some(body_start) = after.find('{') else {
+            continue;
+        };
+        let body_at = start + "@Extend(".len() + close + 1 + body_start;
+        let mut depth = 0usize;
+        let mut body_end = None;
+        for (offset, byte) in source[body_at..].bytes().enumerate() {
+            match byte {
+                b'{' => depth += 1,
+                b'}' => {
+                    depth -= 1;
+                    if depth == 0 {
+                        body_end = Some(body_at + offset);
+                        break;
+                    }
+                }
+                _ => {}
+            }
+        }
+        let Some(body_end) = body_end else {
+            continue;
+        };
+        let body = &source[body_at + 1..body_end];
+        let base = body_at + 1;
+        let mut cursor = 0usize;
+        for line in body.split_inclusive('\n') {
+            let trimmed = line.trim_start();
+            if let Some(chain) = trimmed.strip_prefix('.') {
+                let member: String = chain
+                    .chars()
+                    .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+                    .collect();
+                let dot_at = base + cursor + (line.len() - trimmed.len());
+                found.push((
+                    dot_at,
+                    "ERROR",
+                    "Declaration or statement expected.".to_string(),
+                ));
+                if !member.is_empty() {
+                    found.push((dot_at + 1, "ERROR", format!("Cannot find name '{member}'.")));
+                    found.push((
+                        dot_at + 1,
+                        "WARN",
+                        "Only UI component syntax can be written here.".to_string(),
+                    ));
+                }
+            }
+            cursor += line.len();
+        }
+    }
+    found.sort_unstable();
+    found
+}
+
+/// `.name(...)` where `name` belongs to an `@Extend` whose target no component answers: the call is
+/// a warning naming the receiver's attribute type
+/// (`Property 'fancy' does not exist on type 'TextAttribute'.`, 10:17 of
+/// `fixtures/ui-extend-target`).
+fn unknown_extend_call_violations(
+    source: &str,
+    names: &[String],
+    components: &std::collections::HashSet<String>,
+) -> Vec<(usize, String)> {
+    if components.is_empty() {
+        return Vec::new();
+    }
+    let mut found = Vec::new();
+    for name in names {
+        let needle = format!(".{name}(");
+        let mut from = 0usize;
+        while let Some(at) = source[from..].find(&needle) {
+            let dot = from + at;
+            from = dot + needle.len();
+            // The receiver: the identifier before the `.`, past its argument list when it has one
+            // (`Text("x").fancy()`).
+            let before = &source[..dot];
+            let mut end = before.len();
+            if before.trim_end().ends_with(')') {
+                let mut depth = 0usize;
+                let mut index = before.len();
+                while index > 0 {
+                    index -= 1;
+                    match before.as_bytes()[index] {
+                        b')' => depth += 1,
+                        b'(' => {
+                            depth -= 1;
+                            if depth == 0 {
+                                end = index;
+                                break;
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            let receiver: String = before[..end]
+                .trim_end()
+                .chars()
+                .rev()
+                .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+                .collect::<Vec<char>>()
+                .into_iter()
+                .rev()
+                .collect();
+            if !components.contains(&receiver) {
+                continue;
+            }
+            found.push((
+                dot + 1,
+                format!("Property '{name}' does not exist on type '{receiver}Attribute'."),
+            ));
+        }
+    }
+    found.sort_unstable();
     found
 }
 
