@@ -409,6 +409,9 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         for (offset, message) in component_argument_violations(source, &struct_fields) {
             checker.push("ERROR", "10505001", offset, message);
         }
+        for (offset, message) in field_assignment_violations(source, &struct_fields) {
+            checker.push("ERROR", "10505001", offset, message);
+        }
         // A `@Builder` method's declared parameter count, and the calls that disagree with it.
         let builders = builder_arities(source);
         for (offset, message) in builder_arity_violations(source, &builders) {
@@ -1977,7 +1980,19 @@ impl<'a> Visit<'a> for Checker<'_> {
 
     fn visit_method_definition(&mut self, it: &MethodDefinition<'a>) {
         self.method_depth += 1;
+        // A method's declared return type answers for a literal it returns, the same way a
+        // function's does (`fixtures/type-field-assign`: 6:5).
+        let previous_spelling = self.return_spelling.clone();
+        if let Some(annotation) = &it.value.return_type {
+            self.return_spelling = match &annotation.type_annotation {
+                TSType::TSNumberKeyword(_) => Some("number".to_string()),
+                TSType::TSStringKeyword(_) => Some("string".to_string()),
+                TSType::TSBooleanKeyword(_) => Some("boolean".to_string()),
+                _ => None,
+            };
+        }
         oxc_ast_visit::walk::walk_method_definition(self, it);
+        self.return_spelling = previous_spelling;
         self.method_depth -= 1;
     }
 
@@ -3696,6 +3711,64 @@ fn object_spelling(literal: &oxc_ast::ast::ObjectExpression<'_>) -> String {
         parts.push(format!("{}: {};", key.name, spelled));
     }
     format!("{{ {} }}", parts.join(" "))
+}
+
+/// `this.<field> = "s"` where the declaration types that field `number`: reported at the `this`
+/// (measured 16:5 of `fixtures/type-field-assign`).
+fn field_assignment_violations(
+    source: &str,
+    structs: &std::collections::HashMap<String, std::collections::HashMap<String, String>>,
+) -> Vec<(usize, String)> {
+    let mut found = Vec::new();
+    let mut from = 0usize;
+    while let Some(at) = source[from..].find("this.") {
+        let start = from + at;
+        let after = start + "this.".len();
+        let member: String = source[after..]
+            .chars()
+            .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+            .collect();
+        from = after;
+        if member.is_empty() {
+            continue;
+        }
+        // An assignment only: `=` that is not `==`, `===`, `=>`.
+        let rest = &source[after + member.len()..];
+        let trimmed = rest.trim_start();
+        if !trimmed.starts_with('=') {
+            continue;
+        }
+        let after_equals = &trimmed[1..];
+        if after_equals.starts_with('=') || after_equals.starts_with('>') {
+            continue;
+        }
+        let value = after_equals.trim_start();
+        let spelled = if value.starts_with('"') || value.starts_with('\'') {
+            "string"
+        } else if value.starts_with(|c: char| c.is_ascii_digit()) {
+            "number"
+        } else if value.starts_with("true") || value.starts_with("false") {
+            "boolean"
+        } else {
+            continue;
+        };
+        let Some(owner) = enclosing_declaration(source, start) else {
+            continue;
+        };
+        let Some(fields) = structs.get(&owner) else {
+            continue;
+        };
+        let Some(expected) = fields.get(&member) else {
+            continue;
+        };
+        if spelled != expected {
+            found.push((
+                start,
+                format!("Type '{spelled}' is not assignable to type '{expected}'."),
+            ));
+        }
+    }
+    found
 }
 
 /// `this.<name>` where the enclosing class or struct declares no such member: the reference reports
