@@ -1,0 +1,4 @@
+ERROR 10605038 ets/pages/Index.ets:5:16 Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)
+ERROR 10605087 ets/pages/Index.ets:2:3 "throw" statements cannot accept values of arbitrary types (arkts-limited-throw)
+ERROR 10605142 ets/pages/Index.ets:5:29 "as const" assertions are not supported (arkts-no-as-const)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

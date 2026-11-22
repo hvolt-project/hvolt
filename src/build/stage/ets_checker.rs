@@ -1084,6 +1084,30 @@ fn destructuring_parameter(it: &FormalParameter<'_>) -> Option<usize> {
 }
 
 impl<'a> Visit<'a> for Checker<'_> {
+    /// `throw "boom"` — only an `Error` may be thrown (`arkts-limited-throw`, 10605087 at the
+    /// `throw` — 2:3 of `fixtures/arkts-throw-as-const`).
+    fn visit_throw_statement(&mut self, it: &oxc_ast::ast::ThrowStatement<'a>) {
+        if self.lints {
+            let arbitrary = matches!(
+                &it.argument,
+                Expression::StringLiteral(_)
+                    | Expression::NumericLiteral(_)
+                    | Expression::BooleanLiteral(_)
+                    | Expression::TemplateLiteral(_)
+            );
+            if arbitrary {
+                self.push(
+                    "ERROR",
+                    "10605087",
+                    it.span.start as usize,
+                    "\"throw\" statements cannot accept values of arbitrary types (arkts-limited-throw)"
+                        .to_string(),
+                );
+            }
+        }
+        oxc_ast_visit::walk::walk_throw_statement(self, it);
+    }
+
     /// `for (const key in obj)` — at the `in` keyword (measured 2:18 of
     /// `fixtures/arkts-for-in`).
     fn visit_for_in_statement(&mut self, it: &oxc_ast::ast::ForInStatement<'a>) {
@@ -1787,6 +1811,17 @@ impl<'a> Visit<'a> for Checker<'_> {
                         offset,
                         "\"as const\" assertions are not supported (arkts-no-as-const)".to_string(),
                     );
+                    // The literal under the assertion has no contextual type either (10605038 at
+                    // the `{` — 5:16 of `fixtures/arkts-throw-as-const`).
+                    if let Expression::ObjectExpression(literal) = &it.expression {
+                        self.push(
+                            "ERROR",
+                            "10605038",
+                            literal.span.start as usize,
+                            "Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)"
+                                .to_string(),
+                        );
+                    }
                 }
             }
         }
