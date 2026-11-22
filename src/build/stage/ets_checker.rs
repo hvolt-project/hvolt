@@ -3927,6 +3927,26 @@ fn function_parameter_types(
             flags: oxc_syntax::scope::ScopeFlags,
         ) {
             if let Some(id) = &it.id {
+                // A parameter typed by the function's own type parameter takes the spelling of
+                // that parameter's constraint: `f<T extends number>(value: T)` called with a string
+                // is refused as `… parameter of type 'number'.` (measured 6:22 of
+                // `fixtures/type-generic-constraint`).
+                let mut constrained: std::collections::HashMap<String, String> =
+                    std::collections::HashMap::new();
+                if let Some(params) = &it.type_parameters {
+                    for parameter in &params.params {
+                        let Some(constraint) = &parameter.constraint else {
+                            continue;
+                        };
+                        let spelling = match constraint {
+                            TSType::TSNumberKeyword(_) => "number",
+                            TSType::TSStringKeyword(_) => "string",
+                            TSType::TSBooleanKeyword(_) => "boolean",
+                            _ => continue,
+                        };
+                        constrained.insert(parameter.name.to_string(), spelling.to_string());
+                    }
+                }
                 let spelled: Vec<String> = it
                     .params
                     .items
@@ -3944,6 +3964,13 @@ fn function_parameter_types(
                             TSType::TSNumberKeyword(_) => "number".to_string(),
                             TSType::TSStringKeyword(_) => "string".to_string(),
                             TSType::TSBooleanKeyword(_) => "boolean".to_string(),
+                            TSType::TSTypeReference(reference) => match &reference.type_name {
+                                oxc_ast::ast::TSTypeName::IdentifierReference(name) => constrained
+                                    .get(name.name.as_str())
+                                    .cloned()
+                                    .unwrap_or_else(|| "_".to_string()),
+                                _ => "_".to_string(),
+                            },
                             _ => "_".to_string(),
                         }
                     })
