@@ -301,6 +301,7 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         },
         parameter_types: function_parameter_types(&parsed.program),
         array_elements: array_element_types(&parsed.program),
+        enums: enum_names(&parsed.program),
         method_parameter_types: method_parameter_types(&parsed.program),
         return_type: None,
         return_spelling: None,
@@ -661,8 +662,9 @@ struct Checker<'a> {
     argument_types: std::collections::HashMap<String, Vec<String>>,
     /// Declared parameter types of the file's functions, by name.
     parameter_types: std::collections::HashMap<String, Vec<String>>,
-    /// Element type of each local declared as a primitive array: `xs -> "number"`.
     array_elements: std::collections::HashMap<String, String>,
+    /// Names of the file's enums: a string literal is not one of their values.
+    enums: std::collections::HashSet<String>,
 
     /// Declared parameter types of the file's class methods, keyed `Class.method`.
     method_parameter_types: std::collections::HashMap<String, Vec<String>>,
@@ -1670,6 +1672,31 @@ impl<'a> Visit<'a> for Checker<'_> {
         if let (oxc_ast::ast::BindingPatternKind::BindingIdentifier(name), Some(initialiser)) =
             (&it.id.kind, &it.init)
         {
+            // `const t: Tone = "s"` where `Tone` is an enum: the literal is spelled as written,
+            // quotes included (`Type '"s"' is not assignable to type 'Tone'.`, 7:9 of
+            // `fixtures/type-enum`).
+            if let Some(annotation) = &it.id.type_annotation {
+                if let TSType::TSTypeReference(reference) = &annotation.type_annotation {
+                    if let oxc_ast::ast::TSTypeName::IdentifierReference(type_name) =
+                        &reference.type_name
+                    {
+                        let spelled = type_name.name.to_string();
+                        if self.enums.contains(&spelled) {
+                            if let Expression::StringLiteral(literal) = initialiser {
+                                self.push(
+                                    "ERROR",
+                                    "10505001",
+                                    name.span.start as usize,
+                                    format!(
+                                        "Type '\"{}\"' is not assignable to type '{}'.",
+                                        literal.value, spelled
+                                    ),
+                                );
+                            }
+                        }
+                    }
+                }
+            }
             // `const h: Holder = { count: "s" }` — at the property name (measured 10:23 of
             // `fixtures/type-object-shape`).
             if let Some(annotation) = &it.id.type_annotation {
@@ -3815,6 +3842,21 @@ const ARRAY_MEMBERS: [&str; 40] = [
     "isPrototypeOf",
 ];
 
+/// Names of the enums this file declares.
+fn enum_names(program: &Program<'_>) -> std::collections::HashSet<String> {
+    struct Collect(std::collections::HashSet<String>);
+    impl<'a> Visit<'a> for Collect {
+        fn visit_ts_enum_declaration(&mut self, it: &oxc_ast::ast::TSEnumDeclaration<'a>) {
+            self.0.insert(it.id.name.to_string());
+            oxc_ast_visit::walk::walk_ts_enum_declaration(self, it);
+        }
+    }
+    let mut collect = Collect(std::collections::HashSet::new());
+    collect.visit_program(program);
+    collect.0
+}
+
+/// Element type of each local declared as a primitive array: `xs -> "number"`.
 /// The element type of each local declared as a primitive array: `xs -> "number"`.
 fn array_element_types(program: &Program<'_>) -> std::collections::HashMap<String, String> {
     struct Collect(std::collections::HashMap<String, String>);
