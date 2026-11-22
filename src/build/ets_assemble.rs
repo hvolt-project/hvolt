@@ -201,6 +201,7 @@ pub fn publish_global_declarations() {
                             .or_else(|| line.strip_prefix("interface "))
                             .or_else(|| line.strip_prefix("const "))
                             .or_else(|| line.strip_prefix("function "))
+                            .or_else(|| line.strip_prefix("enum "))
                         else {
                             continue;
                         };

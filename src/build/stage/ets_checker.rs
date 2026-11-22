@@ -1103,6 +1103,34 @@ impl<'a> Visit<'a> for Checker<'_> {
 
     fn visit_ts_enum_declaration(&mut self, it: &TSEnumDeclaration<'a>) {
         if self.lints {
+            // An enum that takes a name the SDK already declares: the merge is refused, and each
+            // of its members is a duplicate identifier (measured 1:1 and 2:3/3:3 of
+            // `fixtures/arkts-enum-merging` with `enum Color { Red, Green }`).
+            let name = it.id.name.to_string();
+            if sdk_declares(&name) == Some(true) {
+                self.push(
+                    "ERROR",
+                    "10605113",
+                    it.span.start as usize,
+                    "\"enum\" declaration merging is not supported (arkts-no-enum-merging)"
+                        .to_string(),
+                );
+                for member in &it.body.members {
+                    let member_name = match &member.id {
+                        oxc_ast::ast::TSEnumMemberName::Identifier(identifier) => {
+                            identifier.name.to_string()
+                        }
+                        oxc_ast::ast::TSEnumMemberName::String(name) => name.value.to_string(),
+                        _ => continue,
+                    };
+                    self.push(
+                        "ERROR",
+                        "10505001",
+                        member.id.span().start as usize,
+                        format!("Duplicate identifier '{member_name}'."),
+                    );
+                }
+            }
             let kind_of = |member: &oxc_ast::ast::TSEnumMember<'a>| -> u8 {
                 match member.initializer.as_ref() {
                     Some(Expression::NumericLiteral(_)) => 1,
