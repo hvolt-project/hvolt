@@ -1766,7 +1766,11 @@ impl<'a> Visit<'a> for Checker<'_> {
     /// 'virtual' cannot be found.` at the name — that this fixture does not reproduce, so only the
     /// rule is judged until the condition behind that one is measured.
     fn visit_ts_module_declaration(&mut self, it: &oxc_ast::ast::TSModuleDeclaration<'a>) {
-        if self.lints {
+        // `namespace Utils { … }` is not ambient and the reference accepts it
+        // (`fixtures/arkts-namespace` builds clean); only `declare module …` is this rule's
+        // business. The declaration is reset afterwards because a nested `namespace` inside a
+        // `declare module` inherits the flag.
+        if self.lints && it.declare {
             self.push(
                 "ERROR",
                 "10605128",
