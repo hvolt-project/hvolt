@@ -1,0 +1,3 @@
+ERROR 10505001 ets/pages/Index.ets:4:22 Type 'string' is not assignable to type 'number'.
+ERROR 10605038 ets/pages/Index.ets:4:20 Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

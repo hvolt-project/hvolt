@@ -1,0 +1,1 @@
+ERROR 10605999 ets/lib/barrel.ts:1:15 Importing ArkTS files in JS and TS files is forbidden.

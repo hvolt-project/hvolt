@@ -125,6 +125,14 @@ fn imports_of(text: &str) -> Vec<(Vec<String>, String)> {
         }
         out.push((names, caps[2].to_string()));
     }
+    // `export * from './x'` and `export { a } from './x'` name a module too. They are not imports,
+    // but they cross the same file boundary, and a TS file reaching an ArkTS one through them is
+    // refused the same way (`fixtures/import-ts-to-ets`: the barrel is a `.ts`).
+    let reexport = Regex::new(r#"(?m)^export\s+(?:\*|\{[^}]*\})\s+from\s+['"]([^'"]+)['"]"#)
+        .expect("re-export pattern");
+    for caps in reexport.captures_iter(text) {
+        out.push((Vec::new(), caps[1].to_string()));
+    }
     out
 }
 
@@ -160,6 +168,36 @@ fn resolve(from: &Path, specifier: &str) -> Option<PathBuf> {
     None
 }
 
+/// The 1-based line and column of `'<specifier>'` inside `text`, when it appears quoted.
+fn locate_specifier(text: &str, specifier: &str) -> Option<(usize, usize)> {
+    for quote in ['\'', '"'] {
+        let needle = format!("{quote}{specifier}{quote}");
+        if let Some(at) = text.find(&needle) {
+            let before = &text[..at];
+            let line = before.matches('\n').count() + 1;
+            let column = before
+                .rsplit('\n')
+                .next()
+                .map(|l| l.chars().count())
+                .unwrap_or(0)
+                + 1;
+            return Some((line, column));
+        }
+    }
+    None
+}
+
+/// The path of `path` under `root`, with `/` separators.
+fn relative_to(root: &Path, path: &Path) -> String {
+    let normalised = normalize(path);
+    let base = normalize(root);
+    normalised
+        .strip_prefix(&base)
+        .unwrap_or(&normalised)
+        .to_string_lossy()
+        .replace('\\', "/")
+}
+
 /// Checks every relative named import under `source_root`. Returns the number of modules checked
 /// or a message naming each import that cannot resolve.
 pub(crate) fn check(source_root: &Path) -> Result<usize, String> {
@@ -185,7 +223,32 @@ pub(crate) fn check(source_root: &Path) -> Result<usize, String> {
             if !specifier.starts_with('.') {
                 continue; // Kit and SDK packages are resolved by the compiler, not here.
             }
+            if let Some(target) = resolve(path, &specifier) {
+                // A `.ts` file may not pull in a `.ets` one: `Importing ArkTS files in JS and TS
+                // files is forbidden.` (10605999, at the specifier — 1:15 of
+                // `fixtures/import-ts-to-ets`).
+                let into_ets = path.extension().and_then(|e| e.to_str()) == Some("ts")
+                    && target.extension().and_then(|e| e.to_str()) == Some("ets");
+                if into_ets {
+                    if let Some((line, column)) = locate_specifier(&text, &specifier) {
+                        let file = format!("ets/{}", relative_to(source_root, path));
+                        eprintln!(
+                            "ERROR 10605999 {file}:{line}:{column} Importing ArkTS files in JS and TS files is forbidden."
+                        );
+                    }
+                }
+            }
             let Some(target) = resolve(path, &specifier) else {
+                // The reference reports this as a type-level diagnostic against the specifier
+                // (`Cannot find module '../utils/types' or its corresponding type declarations.`,
+                // 1:24 of `fixtures/import-missing-module`), so the console line is printed here
+                // too, in the shape `scripts/oracle/diagnostics.py` reads.
+                if let Some((line, column)) = locate_specifier(&text, &specifier) {
+                    let file = format!("ets/{}", relative_to(source_root, path));
+                    eprintln!(
+                        "ERROR 10505001 {file}:{line}:{column} Cannot find module '{specifier}' or its corresponding type declarations."
+                    );
+                }
                 problems.push(format!("{}: cannot resolve '{specifier}'", path.display()));
                 continue;
             };

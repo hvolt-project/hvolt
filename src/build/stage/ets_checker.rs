@@ -302,6 +302,7 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         parameter_types: function_parameter_types(&parsed.program),
         array_elements: array_element_types(&parsed.program),
         enums: enum_names(&parsed.program),
+        index_signatures: index_signature_types(source),
         method_parameter_types: method_parameter_types(&parsed.program),
         return_type: None,
         return_spelling: None,
@@ -427,6 +428,37 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         let builders = builder_arities(source);
         for (offset, message) in builder_arity_violations(source, &builders) {
             checker.push("ERROR", "10505001", offset, message);
+        }
+        // An interface with an index signature, and the literals declared to be it.
+        let signature_table = checker.index_signatures.clone();
+        let mut signature_offsets: Vec<usize> =
+            signature_table.values().map(|(at, _)| *at).collect();
+        signature_offsets.sort_unstable();
+        for at in signature_offsets {
+            checker.push(
+                "ERROR",
+                "10605017",
+                at,
+                "Indexed signatures are not supported (arkts-no-indexed-signatures)".to_string(),
+            );
+        }
+        for (offset, message) in
+            index_signature_literal_violations(source, &record_alias_types(source))
+        {
+            let code = if message.starts_with("Object literal must") {
+                "10605038"
+            } else {
+                "10505001"
+            };
+            checker.push("ERROR", code, offset, message);
+        }
+        for (offset, message) in index_signature_literal_violations(source, &signature_table) {
+            let code = if message.starts_with("Object literal must") {
+                "10605038"
+            } else {
+                "10505001"
+            };
+            checker.push("ERROR", code, offset, message);
         }
         // A `@Builder` method's declared parameter types, likewise.
         for (offset, message) in builder_type_violations(source, &builder_param_spellings(source)) {
@@ -693,6 +725,9 @@ struct Checker<'a> {
     array_elements: std::collections::HashMap<String, String>,
     /// Names of the file's enums: a string literal is not one of their values.
     enums: std::collections::HashSet<String>,
+    /// Interfaces of this file that declare an index signature, with its offset and type. Their
+    /// literals are judged by the index-signature scan, not by the member tables.
+    index_signatures: std::collections::HashMap<String, (usize, String)>,
 
     /// Declared parameter types of the file's class methods, keyed `Class.method`.
     method_parameter_types: std::collections::HashMap<String, Vec<String>>,
@@ -858,6 +893,11 @@ impl Checker<'_> {
         literal: &oxc_ast::ast::ObjectExpression<'_>,
         anchor: usize,
     ) {
+        // An index-signature interface answers every key, so the member tables do not describe it:
+        // its literals are covered by `index_signature_literal_violations`.
+        if self.index_signatures.contains_key(spelled) {
+            return;
+        }
         for (offset, message) in object_literal_violations(literal, expected) {
             self.push("ERROR", "10505001", offset, message);
         }
@@ -3530,10 +3570,202 @@ fn global_function_decorator_violations(source: &str) -> Vec<(usize, &'static st
     found
 }
 
+/// Interfaces of this file that declare an index signature, with the type it answers, and the
+/// offset of its `[`: ArkTS has no indexed signatures (`arkts-no-indexed-signatures`, 10605017 at
+/// the bracket — 2:3 of `fixtures/type-index-signature`), and a literal declared to be one of them
+/// counts as untyped (10605038 at the `{`, 6:18) with each value judged against that type (10505001
+/// at the key, 6:20).
+fn index_signature_types(source: &str) -> std::collections::HashMap<String, (usize, String)> {
+    let mut found = std::collections::HashMap::new();
+    let mut from = 0usize;
+    while let Some(at) = source[from..].find("interface ") {
+        let start = from + at;
+        let after = &source[start + "interface ".len()..];
+        let name_len = after
+            .chars()
+            .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+            .count();
+        from = start + "interface ".len() + name_len.max(1);
+        if name_len == 0 {
+            continue;
+        }
+        let name = after[..name_len].to_string();
+        let tail = &after[name_len..];
+        let Some(open) = tail.find('{') else {
+            continue;
+        };
+        let body_at = start + "interface ".len() + name_len + open;
+        let Some(body_end) = matching_brace(source, body_at) else {
+            continue;
+        };
+        let body = &source[body_at + 1..body_end];
+        // `[key: string]: number;`
+        let mut cursor = 0usize;
+        let bytes = body.as_bytes();
+        while cursor < bytes.len() {
+            if bytes[cursor] == b'[' {
+                let rest = &body[cursor..];
+                if let Some(close) = rest.find(']') {
+                    let after_close = &rest[close + 1..];
+                    if let Some(colon) = after_close.find(':') {
+                        let value = after_close[colon + 1..]
+                            .split([';', '\n'])
+                            .next()
+                            .unwrap_or("")
+                            .trim();
+                        let spelling = match value {
+                            "number" => Some("number"),
+                            "string" => Some("string"),
+                            "boolean" => Some("boolean"),
+                            _ => None,
+                        };
+                        if let Some(spelling) = spelling {
+                            found
+                                .insert(name.clone(), (body_at + 1 + cursor, spelling.to_string()));
+                            break;
+                        }
+                    }
+                }
+            }
+            cursor += 1;
+        }
+    }
+    found
+}
+
+/// Type aliases of the form `type Names = Record<string, T>`. ArkTS has no mapped types either: a
+/// literal declared to be one is untyped (10605038 at the `{`) and each value is judged against `T`
+/// (10505001 at the key — measured 4:20 and 4:22 of `fixtures/type-mapped-alias`). Unlike an
+/// interface index signature this shape draws no `10605017`.
+fn record_alias_types(source: &str) -> std::collections::HashMap<String, (usize, String)> {
+    let mut found = std::collections::HashMap::new();
+    let mut from = 0usize;
+    while let Some(at) = source[from..].find("type ") {
+        let start = from + at;
+        let after = &source[start + "type ".len()..];
+        let name_len = after
+            .chars()
+            .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+            .count();
+        from = start + "type ".len() + name_len.max(1);
+        if name_len == 0 {
+            continue;
+        }
+        let name = after[..name_len].to_string();
+        let rest = &after[name_len..];
+        let Some(equal) = rest.find('=') else {
+            continue;
+        };
+        let tail = rest[equal + 1..].trim_start();
+        let Some(inner) = tail.strip_prefix("Record<") else {
+            continue;
+        };
+        let Some(close) = inner.find(',') else {
+            continue;
+        };
+        let value = inner[close + 1..].split('>').next().unwrap_or("").trim();
+        let spelling = match value {
+            "number" => Some("number"),
+            "string" => Some("string"),
+            "boolean" => Some("boolean"),
+            _ => None,
+        };
+        if let Some(spelling) = spelling {
+            found.insert(name, (start, spelling.to_string()));
+        }
+    }
+    found
+}
+
+/// The offset of the `}` that closes the `{` at `open`.
+fn matching_brace(source: &str, open: usize) -> Option<usize> {
+    let mut depth = 0usize;
+    for (offset, byte) in source[open..].bytes().enumerate() {
+        match byte {
+            b'{' => depth += 1,
+            b'}' => {
+                depth -= 1;
+                if depth == 0 {
+                    return Some(open + offset);
+                }
+            }
+            _ => {}
+        }
+    }
+    None
+}
+
+/// Literals declared to be an index-signature interface: the `{` and each key whose literal
+/// disagrees with the index type.
+fn index_signature_literal_violations(
+    source: &str,
+    tables: &std::collections::HashMap<String, (usize, String)>,
+) -> Vec<(usize, String)> {
+    let mut found = Vec::new();
+    for (name, (_, spelling)) in tables {
+        let needle = format!(": {name} =");
+        let mut from = 0usize;
+        while let Some(at) = source[from..].find(&needle) {
+            let start = from + at + needle.len();
+            from = start;
+            let Some(brace_rel) = source[start..].find('{') else {
+                break;
+            };
+            let brace = start + brace_rel;
+            let Some(close) = matching_brace(source, brace) else {
+                break;
+            };
+            found.push((
+                brace,
+                "Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)"
+                    .to_string(),
+            ));
+            let body = &source[brace + 1..close];
+            let mut cursor = 0usize;
+            for part in body.split(',') {
+                let piece = part.trim();
+                if let Some(colon) = piece.find(':') {
+                    let key = piece[..colon].trim().trim_matches(['"', '\'']);
+                    if !key.is_empty() {
+                        let value = piece[colon + 1..].trim();
+                        let literal = if value.starts_with('"') || value.starts_with('\'') {
+                            Some("string")
+                        } else if value.starts_with(|c: char| c.is_ascii_digit()) {
+                            Some("number")
+                        } else if value.starts_with("true") || value.starts_with("false") {
+                            Some("boolean")
+                        } else {
+                            None
+                        };
+                        if let Some(literal) = literal {
+                            if literal != spelling {
+                                let key_at = body[cursor..]
+                                    .find(key)
+                                    .map(|found| brace + 1 + cursor + found);
+                                if let Some(key_at) = key_at {
+                                    found.push((
+                                        key_at,
+                                        format!(
+                                            "Type '{literal}' is not assignable to type '{spelling}'."
+                                        ),
+                                    ));
+                                }
+                            }
+                        }
+                    }
+                }
+                cursor += part.len() + 1;
+            }
+        }
+    }
+    found.sort_unstable();
+    found
+}
+
 /// Declared parameter spellings of every `@Builder` method, keyed by name, for the literal check
 /// `this.card(1)` against `@Builder card(title: string)` (measured 13:17 of
 /// `fixtures/ui-builder-type`).
-fn builder_param_spellings(source: &str) -> std::collections::HashMap<String, Vec<String>> {
+fn builder_param_spellings(source: &str) -> std::collections::HashMap<String, (bool, Vec<String>)> {
     let mut table = std::collections::HashMap::new();
     let mut from = 0usize;
     while let Some(at) = source[from..].find("@Builder") {
@@ -3541,9 +3773,11 @@ fn builder_param_spellings(source: &str) -> std::collections::HashMap<String, Ve
         let after = &source[start + "@Builder".len()..];
         let rest = after.trim_start();
         from = start + "@Builder".len();
-        if rest.starts_with("function") {
-            continue;
-        }
+        // `@Builder function card(...)` is called bare, `@Builder card(...)` as `this.card(...)`.
+        let (rest, bare) = match rest.strip_prefix("function") {
+            Some(rest) => (rest.trim_start(), true),
+            None => (rest, false),
+        };
         let name_len = rest
             .chars()
             .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
@@ -3562,7 +3796,7 @@ fn builder_param_spellings(source: &str) -> std::collections::HashMap<String, Ve
         };
         let inside = params[..close].trim();
         if inside.is_empty() {
-            table.insert(name, Vec::new());
+            table.insert(name, (bare, Vec::new()));
             continue;
         }
         let spelled: Vec<String> = split_top_level(inside)
@@ -3580,7 +3814,7 @@ fn builder_param_spellings(source: &str) -> std::collections::HashMap<String, Ve
                 }
             })
             .collect();
-        table.insert(name, spelled);
+        table.insert(name, (bare, spelled));
     }
     table
 }
@@ -3589,14 +3823,26 @@ fn builder_param_spellings(source: &str) -> std::collections::HashMap<String, Ve
 /// the offset of the argument and the message.
 fn builder_type_violations(
     source: &str,
-    builders: &std::collections::HashMap<String, Vec<String>>,
+    builders: &std::collections::HashMap<String, (bool, Vec<String>)>,
 ) -> Vec<(usize, String)> {
     let mut found = Vec::new();
-    for (name, spellings) in builders {
-        let needle = format!("this.{name}(");
+    for (name, (bare, spellings)) in builders {
+        let needle = if *bare {
+            format!("{name}(")
+        } else {
+            format!("this.{name}(")
+        };
         let mut from = 0usize;
         while let Some(at) = source[from..].find(&needle) {
             let start = from + at;
+            if *bare {
+                // The declaration itself, and a member call, are not calls of the global builder.
+                let head = &source[..start];
+                if head.trim_end().ends_with("function") || head.ends_with('.') {
+                    from = start + needle.len();
+                    continue;
+                }
+            }
             let open = start + needle.len() - 1;
             let Some(close) = matching_paren(source, open) else {
                 break;
