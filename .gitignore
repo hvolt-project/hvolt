@@ -60,3 +60,8 @@ screenshot-*.jpeg
 /HANDOFF.md
 /AGENTS.md
 /docs/agents/
+
+# A fixture’s run products: `actual/` is what this machine produced, `actual.ts` the
+# staged module. Both are read from the run, never committed.
+fixtures/*/actual/
+fixtures/*/actual.ts
