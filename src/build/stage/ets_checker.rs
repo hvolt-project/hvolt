@@ -846,6 +846,87 @@ impl Checker<'_> {
 }
 
 impl Checker<'_> {
+    /// Judges an object literal against the interface it is declared to be: value mismatches, a
+    /// member the interface does not declare (with the untyped-literal rule), and a member the
+    /// literal leaves out. `anchor` is where the missing-member line points — the declarator's name
+    /// (`fixtures/type-missing-member`: 6:9) or the field's name
+    /// (`fixtures/type-field-shape`: 8:10).
+    fn judge_literal(
+        &mut self,
+        spelled: &str,
+        expected: &std::collections::HashMap<String, String>,
+        literal: &oxc_ast::ast::ObjectExpression<'_>,
+        anchor: usize,
+    ) {
+        for (offset, message) in object_literal_violations(literal, expected) {
+            self.push("ERROR", "10505001", offset, message);
+        }
+        let provided: std::collections::HashSet<&str> = literal
+            .properties
+            .iter()
+            .filter_map(|property| match property {
+                ObjectPropertyKind::ObjectProperty(property) => match &property.key {
+                    PropertyKey::StaticIdentifier(key) => Some(key.name.as_str()),
+                    _ => None,
+                },
+                _ => None,
+            })
+            .collect();
+        let mut excess: Vec<&str> = provided
+            .iter()
+            .copied()
+            .filter(|member| !expected.contains_key(*member))
+            .collect();
+        excess.sort_unstable();
+        if let Some(member) = excess.first() {
+            let start = literal.span.start as usize;
+            let at = self
+                .source
+                .get(start..)
+                .and_then(|rest| rest.find(member))
+                .map(|found| start + found)
+                .unwrap_or(start);
+            self.push(
+                "ERROR",
+                "10505001",
+                at,
+                format!(
+                    "Type '{}' is not assignable to type '{spelled}'. Object literal may only specify known properties, and '{member}' does not exist in type '{spelled}'.",
+                    object_spelling(literal)
+                ),
+            );
+            self.push(
+                "ERROR",
+                "10605038",
+                start,
+                "Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)"
+                    .to_string(),
+            );
+        }
+        let optional = self
+            .optional_members
+            .get(spelled)
+            .cloned()
+            .unwrap_or_default();
+        let mut missing: Vec<&String> = expected
+            .keys()
+            .filter(|member| !provided.contains(member.as_str()))
+            .filter(|member| !optional.contains(member.as_str()))
+            .collect();
+        missing.sort();
+        if let Some(member) = missing.first() {
+            self.push(
+                "ERROR",
+                "10505001",
+                anchor,
+                format!(
+                    "Property '{member}' is missing in type '{}' but required in type '{spelled}'.",
+                    object_spelling(literal)
+                ),
+            );
+        }
+    }
+
     /// A cast that cannot be honest: `"s" as number` reports at the expression
     /// (`Conversion of type 'string' to type 'number' may be a mistake …`, 8:13 of
     /// `fixtures/type-union`). `as const` keeps its own rule.
@@ -1763,84 +1844,15 @@ impl<'a> Visit<'a> for Checker<'_> {
                         let spelled = type_name.name.to_string();
                         if let Some(expected) = self.member_types.get(&spelled).cloned() {
                             if let Expression::ObjectExpression(literal) = initialiser {
-                                for (offset, message) in
-                                    object_literal_violations(literal, &expected)
-                                {
-                                    self.push("ERROR", "10505001", offset, message);
-                                }
-                                // A member the literal leaves out: reported at the declarator's
-                                // name, with the literal spelled as the reference spells it —
-                                // `{}` when empty, `{ count: number; }` otherwise (measured 6:9 of
-                                // `fixtures/type-missing-member` and 8:9 of
-                                // `fixtures/type-missing-partial`).
-                                let provided: std::collections::HashSet<&str> = literal
-                                    .properties
-                                    .iter()
-                                    .filter_map(|property| match property {
-                                        ObjectPropertyKind::ObjectProperty(property) => {
-                                            match &property.key {
-                                                PropertyKey::StaticIdentifier(key) => {
-                                                    Some(key.name.as_str())
-                                                }
-                                                _ => None,
-                                            }
-                                        }
-                                        _ => None,
-                                    })
-                                    .collect();
-                                // A member the interface does not declare makes the literal a shape
-                                // of its own: the reference reports the assignability first, at the
-                                // excess property, then the untyped-literal rule at the `{`
-                                // (33 and 21 of line 6 in `fixtures/type-excess-property`).
-                                let mut excess: Vec<&str> = provided
-                                    .iter()
-                                    .copied()
-                                    .filter(|member| !expected.contains_key(*member))
-                                    .collect();
-                                excess.sort_unstable();
-                                if let Some(member) = excess.first() {
-                                    self.push(
-                                        "ERROR",
-                                        "10505001",
-                                        literal.span.start as usize
-                                            + self.source[literal.span.start as usize..]
-                                                .find(member)
-                                                .unwrap_or(0),
-                                        format!(
-                                            "Type '{}' is not assignable to type '{spelled}'. Object literal may only specify known properties, and '{member}' does not exist in type '{spelled}'.",
-                                            object_spelling(literal)
-                                        ),
-                                    );
-                                    self.push(
-                                        "ERROR",
-                                        "10605038",
-                                        literal.span.start as usize,
-                                        "Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)"
-                                            .to_string(),
-                                    );
-                                }
-                                let optional = self
-                                    .optional_members
-                                    .get(&spelled)
-                                    .cloned()
-                                    .unwrap_or_default();
-                                let mut missing: Vec<&String> = expected
-                                    .keys()
-                                    .filter(|member| !provided.contains(member.as_str()))
-                                    .filter(|member| !optional.contains(member.as_str()))
-                                    .collect();
-                                missing.sort();
-                                if let Some(member) = missing.first() {
-                                    self.push(
-                                        "ERROR",
-                                        "10505001",
-                                        name.span.start as usize,
-                                        format!(
-                                            "Property '{member}' is missing in type '{}' but required in type '{spelled}'.",
-                                            object_spelling(literal)
-                                        ),
-                                    );
-                                }
+                                // A member the literal leaves out is reported at the declarator's
+                                // name (measured 6:9 of `fixtures/type-missing-member`); the struct
+                                // field of `fixtures/type-field-shape` anchors at its own name.
+                                self.judge_literal(
+                                    &spelled,
+                                    &expected,
+                                    literal,
+                                    name.span.start as usize,
+                                );
                             }
                         }
                     }
@@ -2654,6 +2666,23 @@ impl<'a> Visit<'a> for Checker<'_> {
             }
         }
         if self.lints {
+            // A field whose annotation names an interface and whose initialiser is an object
+            // literal: judged like a declaration (`fixtures/type-field-shape`: 8:10).
+            if let Some(annotation) = &it.type_annotation {
+                if let TSType::TSTypeReference(reference) = &annotation.type_annotation {
+                    if let oxc_ast::ast::TSTypeName::IdentifierReference(type_name) =
+                        &reference.type_name
+                    {
+                        let spelled = type_name.name.to_string();
+                        if let Some(expected) = self.member_types.get(&spelled).cloned() {
+                            if let Some(Expression::ObjectExpression(literal)) = &it.value {
+                                let anchor = it.key.span().start as usize;
+                                self.judge_literal(&spelled, &expected, literal, anchor);
+                            }
+                        }
+                    }
+                }
+            }
             // `10905313`: a `static` field of a struct cannot carry a built-in decorator
             // (measured 4:3 of `fixtures/ui-static-state`, at the decorator).
             let in_struct = self
