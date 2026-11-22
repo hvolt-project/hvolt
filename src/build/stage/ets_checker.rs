@@ -300,6 +300,7 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
             function_parameter_named_types(&parsed.program, &known)
         },
         parameter_types: function_parameter_types(&parsed.program),
+        array_elements: array_element_types(&parsed.program),
         method_parameter_types: method_parameter_types(&parsed.program),
         return_type: None,
         return_spelling: None,
@@ -660,6 +661,9 @@ struct Checker<'a> {
     argument_types: std::collections::HashMap<String, Vec<String>>,
     /// Declared parameter types of the file's functions, by name.
     parameter_types: std::collections::HashMap<String, Vec<String>>,
+    /// Element type of each local declared as a primitive array: `xs -> "number"`.
+    array_elements: std::collections::HashMap<String, String>,
+
     /// Declared parameter types of the file's class methods, keyed `Class.method`.
     method_parameter_types: std::collections::HashMap<String, Vec<String>>,
     /// The declared return type of the function being walked, when it names such an interface.
@@ -1206,6 +1210,38 @@ impl<'a> Visit<'a> for Checker<'_> {
                 }
             }
         }
+        // `xs.push("s")` on a `number[]`: at the argument (measured 3:11 of `fixtures/type-array`).
+        if self.lints {
+            if let Expression::StaticMemberExpression(member) = &it.callee {
+                if let Expression::Identifier(object) = &member.object {
+                    if let Some(element) = self.array_elements.get(object.name.as_str()).cloned() {
+                        if matches!(member.property.name.as_str(), "push" | "unshift") {
+                            for argument in &it.arguments {
+                                let Some(expression) = argument.as_expression() else {
+                                    continue;
+                                };
+                                let found = match expression {
+                                    Expression::StringLiteral(_) => "string",
+                                    Expression::NumericLiteral(_) => "number",
+                                    Expression::BooleanLiteral(_) => "boolean",
+                                    _ => continue,
+                                };
+                                if found != element {
+                                    self.push(
+                                        "ERROR",
+                                        "10505001",
+                                        expression.span().start as usize,
+                                        format!(
+                                            "Argument of type '{found}' is not assignable to parameter of type '{element}'."
+                                        ),
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         // `counter.bump("x")` where the method takes a `number`: at the argument (measured 12:16 of
         // `fixtures/type-return`).
         if self.lints {
@@ -1531,6 +1567,22 @@ impl<'a> Visit<'a> for Checker<'_> {
     /// 'string'.`, 7:24 of `fixtures/type-primitive-member`).
     fn visit_static_member_expression(&mut self, it: &oxc_ast::ast::StaticMemberExpression<'a>) {
         if self.lints {
+            // An element of an array local: `xs.push("s")` is refused at the argument and
+            // `xs.notAReal` as a member the array does not have (3:11 and 4:13 of
+            // `fixtures/type-array`).
+            if let Expression::Identifier(object) = &it.object {
+                if let Some(element) = self.array_elements.get(object.name.as_str()).cloned() {
+                    let member = it.property.name.as_str();
+                    if !ARRAY_MEMBERS.contains(&member) {
+                        self.push(
+                            "ERROR",
+                            "10505001",
+                            it.property.span.start as usize,
+                            format!("Property '{member}' does not exist on type '{element}[]'."),
+                        );
+                    }
+                }
+            }
             if let Expression::Identifier(object) = &it.object {
                 // `Property 'notAReal' does not exist on type 'Holder'.` — a class of this file,
                 // reached through a local or a parameter annotated with it (measured 10:51 of
@@ -2050,7 +2102,12 @@ impl<'a> Visit<'a> for Checker<'_> {
                             _ => None,
                         })
                         .collect();
-                    if returns_limited_type(body, &self.unannotated_fns, &any_params) {
+                    if returns_limited_type(
+                        body,
+                        &self.unannotated_fns,
+                        &any_params,
+                        &self.array_elements,
+                    ) {
                         self.push(
                             "ERROR",
                             "10605090",
@@ -3713,6 +3770,79 @@ fn object_spelling(literal: &oxc_ast::ast::ObjectExpression<'_>) -> String {
     format!("{{ {} }}", parts.join(" "))
 }
 
+/// Members `Array` has, for the element-type checks: a name outside this list is not one
+/// (`Property 'notAReal' does not exist on type 'number[]'.`, 4:13 of `fixtures/type-array`).
+const ARRAY_MEMBERS: [&str; 40] = [
+    "at",
+    "concat",
+    "copyWithin",
+    "entries",
+    "every",
+    "fill",
+    "filter",
+    "find",
+    "findIndex",
+    "flat",
+    "flatMap",
+    "forEach",
+    "includes",
+    "indexOf",
+    "join",
+    "keys",
+    "lastIndexOf",
+    "length",
+    "map",
+    "pop",
+    "push",
+    "reduce",
+    "reduceRight",
+    "reverse",
+    "shift",
+    "slice",
+    "some",
+    "sort",
+    "splice",
+    "toString",
+    "unshift",
+    "values",
+    "toLocaleString",
+    "toReversed",
+    "toSorted",
+    "toSpliced",
+    "with",
+    "constructor",
+    "hasOwnProperty",
+    "isPrototypeOf",
+];
+
+/// The element type of each local declared as a primitive array: `xs -> "number"`.
+fn array_element_types(program: &Program<'_>) -> std::collections::HashMap<String, String> {
+    struct Collect(std::collections::HashMap<String, String>);
+    impl<'a> Visit<'a> for Collect {
+        fn visit_variable_declarator(&mut self, it: &VariableDeclarator<'a>) {
+            if let oxc_ast::ast::BindingPatternKind::BindingIdentifier(name) = &it.id.kind {
+                if let Some(annotation) = &it.id.type_annotation {
+                    if let TSType::TSArrayType(array) = &annotation.type_annotation {
+                        let spelling = match array.element_type {
+                            TSType::TSNumberKeyword(_) => "number",
+                            TSType::TSStringKeyword(_) => "string",
+                            TSType::TSBooleanKeyword(_) => "boolean",
+                            _ => "",
+                        };
+                        if !spelling.is_empty() {
+                            self.0.insert(name.name.to_string(), spelling.to_string());
+                        }
+                    }
+                }
+            }
+            oxc_ast_visit::walk::walk_variable_declarator(self, it);
+        }
+    }
+    let mut collect = Collect(std::collections::HashMap::new());
+    collect.visit_program(program);
+    collect.0
+}
+
 /// `this.<field> = "s"` where the declaration types that field `number`: reported at the `this`
 /// (measured 16:5 of `fixtures/type-field-assign`).
 fn field_assignment_violations(
@@ -4547,6 +4677,7 @@ fn returns_limited_type(
     body: &FunctionBody<'_>,
     unannotated: &std::collections::BTreeSet<String>,
     any_params: &std::collections::HashSet<String>,
+    arrays: &std::collections::HashMap<String, String>,
 ) -> bool {
     body.statements.iter().any(|statement| {
         let Statement::ReturnStatement(ret) = statement else {
@@ -4570,6 +4701,16 @@ fn returns_limited_type(
             // `return param;` where the parameter carries no type: the return type would have to
             // come from an `any` (measured 1:10 of `fixtures/type-implicit-any`).
             Expression::Identifier(id) => any_params.contains(id.name.as_str()),
+            // `return xs.notAReal;` — a member read the array does not have, so the return type
+            // cannot be inferred (`fixtures/type-array`: 1:10). A member the array *does* have
+            // (`return xs.length`) is fine, which the fixtures that returned one measure.
+            Expression::StaticMemberExpression(member) => match &member.object {
+                Expression::Identifier(object) => {
+                    arrays.contains_key(object.name.as_str())
+                        && !ARRAY_MEMBERS.contains(&member.property.name.as_str())
+                }
+                _ => false,
+            },
             _ => false,
         }
     })
