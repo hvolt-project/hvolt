@@ -292,6 +292,7 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         arity: declared_arity(&parsed.program),
         primitives: std::collections::HashMap::new(),
         inferred_numbers: std::collections::HashSet::new(),
+        union_types: std::collections::HashMap::new(),
         member_types: interface_member_types(&parsed.program),
         optional_members: optional_members(&parsed.program),
         argument_types: {
@@ -646,6 +647,8 @@ struct Checker<'a> {
     primitives: std::collections::HashMap<String, &'static str>,
     /// Locals whose type is a number only by their initialiser: `let x = 1`.
     inferred_numbers: std::collections::HashSet<String>,
+    /// Locals declared with a primitive union: `u -> [number, string]`.
+    union_types: std::collections::HashMap<String, Vec<String>>,
     /// Property types of the file's interfaces: `Holder -> {count: "number"}`.
     member_types: std::collections::HashMap<String, std::collections::HashMap<String, String>>,
     /// Members each interface declares optional (`?`).
@@ -806,6 +809,35 @@ impl Checker<'_> {
 }
 
 impl Checker<'_> {
+    /// A cast that cannot be honest: `"s" as number` reports at the expression
+    /// (`Conversion of type 'string' to type 'number' may be a mistake …`, 8:13 of
+    /// `fixtures/type-union`). `as const` keeps its own rule.
+    fn judge_conversion(&mut self, it: &oxc_ast::ast::TSAsExpression<'_>) {
+        let found = match &it.expression {
+            Expression::StringLiteral(_) => "string",
+            Expression::NumericLiteral(_) => "number",
+            Expression::BooleanLiteral(_) => "boolean",
+            _ => return,
+        };
+        let wanted = match &it.type_annotation {
+            TSType::TSNumberKeyword(_) => "number",
+            TSType::TSStringKeyword(_) => "string",
+            TSType::TSBooleanKeyword(_) => "boolean",
+            _ => return,
+        };
+        if found == wanted {
+            return;
+        }
+        self.push(
+            "ERROR",
+            "10505001",
+            it.expression.span().start as usize,
+            format!(
+                "Conversion of type '{found}' to type '{wanted}' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first."
+            ),
+        );
+    }
+
     /// `this.name(` where `name` is a decorated data field, at the member name.
     ///
     /// The parsed tree cannot answer this: a `build()` body is blanked so the parser accepts the
@@ -1469,6 +1501,7 @@ impl<'a> Visit<'a> for Checker<'_> {
                 }
             }
         }
+        self.judge_conversion(it);
         oxc_ast_visit::walk::walk_ts_as_expression(self, it);
     }
 
@@ -1544,6 +1577,30 @@ impl<'a> Visit<'a> for Checker<'_> {
                         target.span.start as usize,
                         "Type 'string' is not assignable to type 'number'.".to_string(),
                     );
+                }
+                // `u = true` against `let u: number | string` — the union is spelled in the order
+                // the reference prints it, which is the declaration's reversed (measured 3:3 of
+                // `fixtures/type-union`: declared `number | string`, reported `string | number`).
+                if let Some(members) = self.union_types.get(target.name.as_str()).cloned() {
+                    let found = match &it.right {
+                        Expression::StringLiteral(_) => "string",
+                        Expression::NumericLiteral(_) => "number",
+                        Expression::BooleanLiteral(_) => "boolean",
+                        _ => "",
+                    };
+                    if !found.is_empty() && !members.iter().any(|member| member == found) {
+                        let mut spelled = members.clone();
+                        spelled.reverse();
+                        self.push(
+                            "ERROR",
+                            "10505001",
+                            target.span.start as usize,
+                            format!(
+                                "Type '{found}' is not assignable to type '{}'.",
+                                spelled.join(" | ")
+                            ),
+                        );
+                    }
                 }
             }
         }
@@ -1654,6 +1711,25 @@ impl<'a> Visit<'a> for Checker<'_> {
             // `const n: number = "s"` — at the declarator's name (measured 2:9 of
             // `fixtures/type-declaration`); `const s: string = 1` at 10:9 of
             // `fixtures/type-call-argument`.
+            // `let u: number | string = 1` — remember the union so a later assignment can be
+            // judged against it (`fixtures/type-union`).
+            if let Some(annotation) = &it.id.type_annotation {
+                if let TSType::TSUnionType(union) = &annotation.type_annotation {
+                    let members: Vec<String> = union
+                        .types
+                        .iter()
+                        .filter_map(|member| match member {
+                            TSType::TSNumberKeyword(_) => Some("number".to_string()),
+                            TSType::TSStringKeyword(_) => Some("string".to_string()),
+                            TSType::TSBooleanKeyword(_) => Some("boolean".to_string()),
+                            _ => None,
+                        })
+                        .collect();
+                    if !members.is_empty() {
+                        self.union_types.insert(name.name.to_string(), members);
+                    }
+                }
+            }
             if let Some(annotation) = &it.id.type_annotation {
                 let mismatch = match (&annotation.type_annotation, initialiser) {
                     (TSType::TSNumberKeyword(_), Expression::StringLiteral(_)) => {
@@ -1673,7 +1749,12 @@ impl<'a> Visit<'a> for Checker<'_> {
                     );
                 }
             }
-            if matches!(initialiser, Expression::NumericLiteral(_)) {
+            // Only an *unannotated* declaration infers its type from the initialiser: `let u:
+            // number | string = 1` is a union, not a number (`fixtures/type-union` caught this —
+            // the union local drew a spurious `string is not assignable to number`).
+            if it.id.type_annotation.is_none()
+                && matches!(initialiser, Expression::NumericLiteral(_))
+            {
                 self.inferred_numbers.insert(name.name.to_string());
             }
             // `const arr: number[] = ["a"]` — the literal is refused at the `[` (measured 8:26 of
