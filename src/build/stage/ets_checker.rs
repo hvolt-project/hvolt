@@ -302,6 +302,11 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         parameter_types: function_parameter_types(&parsed.program),
         array_elements: array_element_types(&parsed.program),
         enums: enum_names(&parsed.program),
+        any_locals: any_typed_locals(&parsed.program),
+        merged_types: declaration_merges(&parsed.program)
+            .into_iter()
+            .map(|(name, _)| name)
+            .collect(),
         index_signatures: index_signature_types(source),
         method_parameter_types: method_parameter_types(&parsed.program),
         return_type: None,
@@ -428,6 +433,15 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         let builders = builder_arities(source);
         for (offset, message) in builder_arity_violations(source, &builders) {
             checker.push("ERROR", "10505001", offset, message);
+        }
+        // A name declared twice in this file.
+        for (_, at) in declaration_merges(&parsed.program) {
+            checker.push(
+                "ERROR",
+                "10605103",
+                at,
+                "Declaration merging is not supported (arkts-no-decl-merging)".to_string(),
+            );
         }
         // An interface with an index signature, and the literals declared to be it.
         let signature_table = checker.index_signatures.clone();
@@ -725,6 +739,11 @@ struct Checker<'a> {
     array_elements: std::collections::HashMap<String, String>,
     /// Names of the file's enums: a string literal is not one of their values.
     enums: std::collections::HashSet<String>,
+    /// Locals the file declares as `any`/`unknown`, or as `x as any`: a function returning what
+    /// they hold cannot have its return type inferred (`fixtures/arkts-any-unknown`, 1:10).
+    any_locals: std::collections::HashSet<String>,
+    /// Names this file declares more than once; their literals are not judged.
+    merged_types: std::collections::HashSet<String>,
     /// Interfaces of this file that declare an index signature, with its offset and type. Their
     /// literals are judged by the index-signature scan, not by the member tables.
     index_signatures: std::collections::HashMap<String, (usize, String)>,
@@ -896,6 +915,11 @@ impl Checker<'_> {
         // An index-signature interface answers every key, so the member tables do not describe it:
         // its literals are covered by `index_signature_literal_violations`.
         if self.index_signatures.contains_key(spelled) {
+            return;
+        }
+        // A merged declaration has no single member list either; the reference reports the merge
+        // itself and stops (`fixtures/type-declaration-merge`).
+        if self.merged_types.contains(spelled) {
             return;
         }
         for (offset, message) in object_literal_violations(literal, expected) {
@@ -1849,6 +1873,46 @@ impl<'a> Visit<'a> for Checker<'_> {
         if let (oxc_ast::ast::BindingPatternKind::BindingIdentifier(name), Some(initialiser)) =
             (&it.id.kind, &it.init)
         {
+            // `const x: any = 1` — at the annotation (2:12), and `const y = 2 as any` at both the
+            // declarator's name and the assertion's type (3:9 and 3:18 of
+            // `fixtures/arkts-any-unknown`).
+            if let Some(annotation) = &it.id.type_annotation {
+                let is_any = matches!(
+                    annotation.type_annotation,
+                    TSType::TSAnyKeyword(_) | TSType::TSUnknownKeyword(_)
+                );
+                if is_any {
+                    self.push(
+                        "ERROR",
+                        "10605008",
+                        annotation.type_annotation.span().start as usize,
+                        "Use explicit types instead of \"any\", \"unknown\" (arkts-no-any-unknown)"
+                            .to_string(),
+                    );
+                }
+            }
+            if let Some(Expression::TSAsExpression(assertion)) = &it.init {
+                let is_any = matches!(
+                    assertion.type_annotation,
+                    TSType::TSAnyKeyword(_) | TSType::TSUnknownKeyword(_)
+                );
+                if is_any {
+                    self.push(
+                        "ERROR",
+                        "10605008",
+                        name.span.start as usize,
+                        "Use explicit types instead of \"any\", \"unknown\" (arkts-no-any-unknown)"
+                            .to_string(),
+                    );
+                    self.push(
+                        "ERROR",
+                        "10605008",
+                        assertion.type_annotation.span().start as usize,
+                        "Use explicit types instead of \"any\", \"unknown\" (arkts-no-any-unknown)"
+                            .to_string(),
+                    );
+                }
+            }
             // `const t: Tone = "s"` where `Tone` is an enum: the literal is spelled as written,
             // quotes included (`Type '"s"' is not assignable to type 'Tone'.`, 7:9 of
             // `fixtures/type-enum`).
@@ -2242,6 +2306,7 @@ impl<'a> Visit<'a> for Checker<'_> {
                         &self.unannotated_fns,
                         &any_params,
                         &self.array_elements,
+                        &self.any_locals,
                     ) {
                         self.push(
                             "ERROR",
@@ -4427,6 +4492,94 @@ const ARRAY_MEMBERS: [&str; 40] = [
     "isPrototypeOf",
 ];
 
+/// Locals declared `: any`/`: unknown`, or initialised from an `as any` assertion.
+fn any_typed_locals(program: &Program<'_>) -> std::collections::HashSet<String> {
+    struct Collect(std::collections::HashSet<String>);
+    impl<'a> Visit<'a> for Collect {
+        fn visit_variable_declarator(&mut self, it: &VariableDeclarator<'a>) {
+            let annotated = it
+                .id
+                .type_annotation
+                .as_ref()
+                .map(|annotation| {
+                    matches!(
+                        annotation.type_annotation,
+                        TSType::TSAnyKeyword(_) | TSType::TSUnknownKeyword(_)
+                    )
+                })
+                .unwrap_or(false);
+            let asserted = matches!(
+                &it.init,
+                Some(Expression::TSAsExpression(assertion))
+                    if matches!(
+                        assertion.type_annotation,
+                        TSType::TSAnyKeyword(_) | TSType::TSUnknownKeyword(_)
+                    )
+            );
+            if annotated || asserted {
+                if let oxc_ast::ast::BindingPatternKind::BindingIdentifier(identifier) = &it.id.kind
+                {
+                    self.0.insert(identifier.name.to_string());
+                }
+            }
+            oxc_ast_visit::walk::walk_variable_declarator(self, it);
+        }
+    }
+    let mut collect = Collect(std::collections::HashSet::new());
+    collect.visit_program(program);
+    collect.0
+}
+
+/// Declarations of the same name in one file. ArkTS refuses the merge
+/// (`arkts-no-decl-merging`, 10605103 at each declaration's start — measured 1:1 and 5:1 of
+/// `fixtures/type-declaration-merge` with two `interface Bag` blocks).
+fn declaration_merges(program: &Program<'_>) -> Vec<(String, usize)> {
+    struct Collect(std::collections::HashMap<String, Vec<usize>>);
+    impl<'a> Visit<'a> for Collect {
+        fn visit_ts_interface_declaration(
+            &mut self,
+            it: &oxc_ast::ast::TSInterfaceDeclaration<'a>,
+        ) {
+            self.0
+                .entry(it.id.name.to_string())
+                .or_default()
+                .push(it.span.start as usize);
+            oxc_ast_visit::walk::walk_ts_interface_declaration(self, it);
+        }
+        fn visit_class(&mut self, it: &oxc_ast::ast::Class<'a>) {
+            if let Some(id) = &it.id {
+                self.0
+                    .entry(id.name.to_string())
+                    .or_default()
+                    .push(it.span.start as usize);
+            }
+            oxc_ast_visit::walk::walk_class(self, it);
+        }
+        fn visit_ts_type_alias_declaration(
+            &mut self,
+            it: &oxc_ast::ast::TSTypeAliasDeclaration<'a>,
+        ) {
+            self.0
+                .entry(it.id.name.to_string())
+                .or_default()
+                .push(it.span.start as usize);
+            oxc_ast_visit::walk::walk_ts_type_alias_declaration(self, it);
+        }
+    }
+    let mut collect = Collect(std::collections::HashMap::new());
+    collect.visit_program(program);
+    let mut found: Vec<(String, usize)> = Vec::new();
+    for (name, declarations) in collect.0 {
+        if declarations.len() > 1 {
+            for at in declarations {
+                found.push((name.clone(), at));
+            }
+        }
+    }
+    found.sort_unstable_by_key(|(_, at)| *at);
+    found
+}
+
 /// Names of the enums this file declares.
 fn enum_names(program: &Program<'_>) -> std::collections::HashSet<String> {
     struct Collect(std::collections::HashSet<String>);
@@ -5305,6 +5458,7 @@ fn returns_limited_type(
     unannotated: &std::collections::BTreeSet<String>,
     any_params: &std::collections::HashSet<String>,
     arrays: &std::collections::HashMap<String, String>,
+    any_locals: &std::collections::HashSet<String>,
 ) -> bool {
     body.statements.iter().any(|statement| {
         let Statement::ReturnStatement(ret) = statement else {
@@ -5327,7 +5481,17 @@ fn returns_limited_type(
             },
             // `return param;` where the parameter carries no type: the return type would have to
             // come from an `any` (measured 1:10 of `fixtures/type-implicit-any`).
-            Expression::Identifier(id) => any_params.contains(id.name.as_str()),
+            Expression::Identifier(id) => {
+                any_params.contains(id.name.as_str()) || any_locals.contains(id.name.as_str())
+            }
+            // `return x + y;` where either side is an `any` local (1:10 of
+            // `fixtures/arkts-any-unknown`).
+            Expression::BinaryExpression(binary) => {
+                [&binary.left, &binary.right].iter().any(|side| match side {
+                    Expression::Identifier(id) => any_locals.contains(id.name.as_str()),
+                    _ => false,
+                })
+            }
             // `return xs.notAReal;` — a member read the array does not have, so the return type
             // cannot be inferred (`fixtures/type-array`: 1:10). A member the array *does* have
             // (`return xs.length`) is fine, which the fixtures that returned one measure.

@@ -1,0 +1,3 @@
+ERROR 10605103 ets/pages/Index.ets:1:1 Declaration merging is not supported (arkts-no-decl-merging)
+ERROR 10605103 ets/pages/Index.ets:5:1 Declaration merging is not supported (arkts-no-decl-merging)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs
