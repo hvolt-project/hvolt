@@ -198,6 +198,77 @@ fn relative_to(root: &Path, path: &Path) -> String {
         .replace('\\', "/")
 }
 
+/// The packages installed under `root/oh_modules`: name -> its entry file.
+///
+/// A bare specifier that names one of them is resolved here rather than by the compiler, so that a
+/// named import the package does not export is caught at build time
+/// (`Module '"mylib"' has no exported member 'nope'.`, 1:18 of `fixtures/import-package-symbol`).
+fn packages_under(root: &Path) -> HashMap<String, PathBuf> {
+    let mut found = HashMap::new();
+    let Ok(entries) = fs::read_dir(root.join("oh_modules")) else {
+        return found;
+    };
+    for entry in entries.flatten() {
+        let dir = entry.path();
+        if !dir.is_dir() {
+            continue;
+        }
+        let Some(name) = dir.file_name().and_then(|n| n.to_str()) else {
+            continue;
+        };
+        let name = name.trim_start_matches('@').to_string();
+        // `oh-package.json5` names the entry; without one the usual file names are tried.
+        let mut entry_file = None;
+        if let Ok(text) = fs::read_to_string(dir.join("oh-package.json5")) {
+            if let Some(main) = manifest_value(&text, "main") {
+                let candidate = dir.join(&main);
+                if candidate.is_file() {
+                    entry_file = Some(candidate);
+                }
+            }
+        }
+        if entry_file.is_none() {
+            for candidate in ["index.ets", "Index.ets", "index.ts", "Index.ts"] {
+                let path = dir.join(candidate);
+                if path.is_file() {
+                    entry_file = Some(path);
+                    break;
+                }
+            }
+        }
+        if let Some(entry_file) = entry_file {
+            found.insert(name, entry_file);
+        }
+    }
+    found
+}
+
+/// The string value of `"<key>": "<value>"` in a JSON-with-comments manifest.
+fn manifest_value(text: &str, key: &str) -> Option<String> {
+    let needle = format!("\"{key}\"");
+    let at = text.find(&needle)?;
+    let after = &text[at + needle.len()..];
+    let colon = after.find(':')?;
+    let rest = after[colon + 1..].trim_start();
+    let rest = rest.strip_prefix('"')?;
+    let end = rest.find('"')?;
+    Some(rest[..end].to_string())
+}
+
+/// The 1-based line and column of a bare identifier inside an import list.
+fn locate_name(text: &str, name: &str) -> Option<(usize, usize)> {
+    let at = text.find(name)?;
+    let before = &text[..at];
+    let line = before.matches('\n').count() + 1;
+    let column = before
+        .rsplit('\n')
+        .next()
+        .map(|l| l.chars().count())
+        .unwrap_or(0)
+        + 1;
+    Some((line, column))
+}
+
 /// Checks every relative named import under `source_root`. Returns the number of modules checked
 /// or a message naming each import that cannot resolve.
 pub(crate) fn check(source_root: &Path) -> Result<usize, String> {
@@ -215,12 +286,36 @@ pub(crate) fn check(source_root: &Path) -> Result<usize, String> {
         declared.insert(path.clone(), exports_of(&text));
     }
 
+    let packages = packages_under(source_root);
     let mut problems: Vec<String> = Vec::new();
     for path in &files {
         let text =
             fs::read_to_string(path).map_err(|e| format!("read {}: {}", path.display(), e))?;
         for (names, specifier) in imports_of(&text) {
             if !specifier.starts_with('.') {
+                // A package installed under `oh_modules` is resolved here: its named exports are
+                // known from the entry file.
+                let package = specifier.split('/').next().unwrap_or(&specifier);
+                let package = package.trim_start_matches('@');
+                if let Some(entry) = packages.get(package) {
+                    // The package directory is not walked as part of the module's own sources, so
+                    // its entry file is read here when the collected set has no record of it.
+                    let exported = declared.get(entry).cloned().unwrap_or_else(|| {
+                        fs::read_to_string(entry)
+                            .map(|text| exports_of(&text))
+                            .unwrap_or_default()
+                    });
+                    for name in names {
+                        if !exported.contains(&name) {
+                            if let Some((line, column)) = locate_name(&text, &name) {
+                                let file = format!("ets/{}", relative_to(source_root, path));
+                                eprintln!(
+                                    "ERROR 10505001 {file}:{line}:{column} Module '\"{specifier}\"' has no exported member '{name}'."
+                                );
+                            }
+                        }
+                    }
+                }
                 continue; // Kit and SDK packages are resolved by the compiler, not here.
             }
             if let Some(target) = resolve(path, &specifier) {
