@@ -428,6 +428,10 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         for (offset, message) in builder_arity_violations(source, &builders) {
             checker.push("ERROR", "10505001", offset, message);
         }
+        // A `@Builder` method's declared parameter types, likewise.
+        for (offset, message) in builder_type_violations(source, &builder_param_spellings(source)) {
+            checker.push("ERROR", "10505001", offset, message);
+        }
         // `component_map` carries each component's constructor signature; `Text` takes
         // `string | Resource`, so a numeric literal is refused at the argument
         // (measured 7:12 of `fixtures/ui-text-argument`).
@@ -3494,6 +3498,109 @@ fn global_function_decorator_violations(source: &str) -> Vec<(usize, &'static st
         }
         from = start + 1 + name_len;
     }
+    found
+}
+
+/// Declared parameter spellings of every `@Builder` method, keyed by name, for the literal check
+/// `this.card(1)` against `@Builder card(title: string)` (measured 13:17 of
+/// `fixtures/ui-builder-type`).
+fn builder_param_spellings(source: &str) -> std::collections::HashMap<String, Vec<String>> {
+    let mut table = std::collections::HashMap::new();
+    let mut from = 0usize;
+    while let Some(at) = source[from..].find("@Builder") {
+        let start = from + at;
+        let after = &source[start + "@Builder".len()..];
+        let rest = after.trim_start();
+        from = start + "@Builder".len();
+        if rest.starts_with("function") {
+            continue;
+        }
+        let name_len = rest
+            .chars()
+            .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+            .count();
+        if name_len == 0 {
+            continue;
+        }
+        let name = rest[..name_len].to_string();
+        let tail = &rest[name_len..];
+        let Some(params_at) = tail.find('(') else {
+            continue;
+        };
+        let params = &tail[params_at + 1..];
+        let Some(close) = params.find(')') else {
+            continue;
+        };
+        let inside = params[..close].trim();
+        if inside.is_empty() {
+            table.insert(name, Vec::new());
+            continue;
+        }
+        let spelled: Vec<String> = split_top_level(inside)
+            .iter()
+            .map(|parameter| {
+                let Some(colon) = parameter.find(':') else {
+                    return "_".to_string();
+                };
+                let type_text = parameter[colon + 1..].trim();
+                match type_text {
+                    "number" => "number".to_string(),
+                    "string" => "string".to_string(),
+                    "boolean" => "boolean".to_string(),
+                    _ => "_".to_string(),
+                }
+            })
+            .collect();
+        table.insert(name, spelled);
+    }
+    table
+}
+
+/// `this.<builder>(<literal>)` whose literal disagrees with the declared parameter spelling:
+/// the offset of the argument and the message.
+fn builder_type_violations(
+    source: &str,
+    builders: &std::collections::HashMap<String, Vec<String>>,
+) -> Vec<(usize, String)> {
+    let mut found = Vec::new();
+    for (name, spellings) in builders {
+        let needle = format!("this.{name}(");
+        let mut from = 0usize;
+        while let Some(at) = source[from..].find(&needle) {
+            let start = from + at;
+            let open = start + needle.len() - 1;
+            let Some(close) = matching_paren(source, open) else {
+                break;
+            };
+            from = close;
+            let arguments = argument_offsets(&source[open + 1..close]);
+            for (index, offset) in arguments.iter().enumerate() {
+                let Some(expected) = spellings.get(index) else {
+                    continue;
+                };
+                if expected == "_" {
+                    continue;
+                }
+                let value = &source[open + 1 + offset..close];
+                let spelled = if value.starts_with('"') || value.starts_with('\'') {
+                    "string"
+                } else if value.starts_with(|c: char| c.is_ascii_digit()) {
+                    "number"
+                } else if value.starts_with("true") || value.starts_with("false") {
+                    "boolean"
+                } else {
+                    continue;
+                };
+                if spelled != expected {
+                    found.push((
+                        open + 1 + offset,
+                        format!("Argument of type '{spelled}' is not assignable to parameter of type '{expected}'."),
+                    ));
+                }
+            }
+        }
+    }
+    found.sort_unstable();
     found
 }
 
