@@ -1084,6 +1084,35 @@ fn destructuring_parameter(it: &FormalParameter<'_>) -> Option<usize> {
 }
 
 impl<'a> Visit<'a> for Checker<'_> {
+    /// `h["count"]` on an object: ArkTS has no indexed access to fields
+    /// (`arkts-no-props-by-index`, 10605029 at the object — measured 7:13 of
+    /// `fixtures/arkts-props-by-index`). An array read by index is not this rule's business.
+    fn visit_computed_member_expression(
+        &mut self,
+        it: &oxc_ast::ast::ComputedMemberExpression<'a>,
+    ) {
+        if self.lints && matches!(&it.expression, Expression::StringLiteral(_)) {
+            {
+                if let Expression::Identifier(object) = &it.object {
+                    // `delete o["a"]` is the delete rule's business; the reference reports
+                    // `arkts-no-delete` there and not this one (`fixtures/unsupported-syntax`).
+                    let head = &self.source[..object.span.start as usize];
+                    let is_delete = head.trim_end().ends_with("delete");
+                    if !is_delete && !self.array_elements.contains_key(object.name.as_str()) {
+                        self.push(
+                            "ERROR",
+                            "10605029",
+                            object.span.start as usize,
+                            "Indexed access is not supported for fields (arkts-no-props-by-index)"
+                                .to_string(),
+                        );
+                    }
+                }
+            }
+        }
+        oxc_ast_visit::walk::walk_computed_member_expression(self, it);
+    }
+
     /// `arkts-no-any-unknown`: the annotation names the type `any` or `unknown`.
     fn visit_ts_type_annotation(&mut self, it: &TSTypeAnnotation<'a>) {
         if self.lints
