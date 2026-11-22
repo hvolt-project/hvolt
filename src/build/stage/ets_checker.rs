@@ -1084,6 +1084,24 @@ fn destructuring_parameter(it: &FormalParameter<'_>) -> Option<usize> {
 }
 
 impl<'a> Visit<'a> for Checker<'_> {
+    /// `for (const key in obj)` — at the `in` keyword (measured 2:18 of
+    /// `fixtures/arkts-for-in`).
+    fn visit_for_in_statement(&mut self, it: &oxc_ast::ast::ForInStatement<'a>) {
+        if self.lints {
+            let from = it.left.span().end as usize;
+            let to = it.right.span().start as usize;
+            let window = self.source.get(from..to).unwrap_or("");
+            let at = window.find("in").map(|found| from + found).unwrap_or(from);
+            self.push(
+                "ERROR",
+                "10605080",
+                at,
+                "\"for .. in\" is not supported (arkts-no-for-in)".to_string(),
+            );
+        }
+        oxc_ast_visit::walk::walk_for_in_statement(self, it);
+    }
+
     /// `h["count"]` on an object: ArkTS has no indexed access to fields
     /// (`arkts-no-props-by-index`, 10605029 at the object — measured 7:13 of
     /// `fixtures/arkts-props-by-index`). An array read by index is not this rule's business.
