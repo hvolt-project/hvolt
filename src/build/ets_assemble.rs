@@ -238,6 +238,63 @@ pub fn publish_global_declarations() {
 /// set it accepts comes from the same files the compiler reads: every `interface String`,
 /// `interface Number` and `interface Boolean` in `<ets>/build-tools/ets-loader/node_modules/
 /// typescript/lib/lib.es*.d.ts`.
+/// 发布本模块的资源名表：`$r('app.<kind>.<name>')` 与 `$rawfile('<name>')` 的缺失诊断要靠它
+/// （参考侧 10903329 / 10904333）。
+///
+/// 名字来自模块的 `resources/<kind>/` 目录：JSON 资源取文件名，`rawfile` 取相对路径。
+pub fn publish_resource_names(project_dir: &Path, member: &str) {
+    use std::collections::HashSet;
+    let root = project_dir.join(member).join("resources");
+    let root = if root.is_dir() {
+        root
+    } else {
+        project_dir.join("resources")
+    };
+    let mut names: HashSet<(String, String)> = HashSet::new();
+    let mut rawfiles: HashSet<String> = HashSet::new();
+    let Ok(kinds) = std::fs::read_dir(&root) else {
+        return;
+    };
+    for kind in kinds.flatten() {
+        let path = kind.path();
+        if !path.is_dir() {
+            continue;
+        }
+        let kind_name = kind.file_name().to_string_lossy().to_string();
+        if kind_name == "rawfile" {
+            collect_rawfiles(&path, &path, &mut rawfiles);
+            continue;
+        }
+        let Ok(files) = std::fs::read_dir(&path) else {
+            continue;
+        };
+        for file in files.flatten() {
+            let name = file.file_name().to_string_lossy().to_string();
+            if let Some(stem) = name.strip_suffix(".json") {
+                names.insert((kind_name.clone(), stem.to_string()));
+            }
+        }
+    }
+    crate::build::stage::ets_checker::set_resource_names(names, rawfiles);
+}
+
+/// `rawfile` 下的相对路径。
+fn collect_rawfiles(root: &Path, dir: &Path, out: &mut std::collections::HashSet<String>) {
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            collect_rawfiles(root, &path, out);
+            continue;
+        }
+        if let Ok(rel) = path.strip_prefix(root) {
+            out.insert(rel.to_string_lossy().replace('\\', "/"));
+        }
+    }
+}
+
 pub fn publish_primitive_members() {
     use std::collections::{HashMap, HashSet};
     let Some(sdk) = crate::sdk::manage::sdk_root() else {

@@ -122,6 +122,97 @@ thread_local! {
 /// A component's non-method members: name and the type text the reference prints for it.
 type ExternalMembers = std::collections::HashMap<String, Vec<(String, String)>>;
 
+/// 一个模块的资源名：`(kind, name)` 与 `rawfile` 下的相对路径。
+type ModuleResources = (
+    std::collections::HashSet<(String, String)>,
+    std::collections::HashSet<String>,
+);
+
+thread_local! {
+    /// 本模块的资源名：`(kind, name)`，例如 `("string", "app_name")`；以及 `rawfile` 下的文件名。
+    /// `$r('app.string.x')` / `$rawfile('y')` 指向不存在的资源时，参考侧报 10903329 / 10904333。
+    static RESOURCE_NAMES: std::cell::RefCell<Option<ModuleResources>> =
+        const { std::cell::RefCell::new(None) };
+}
+
+/// 发布本模块的资源名表（见 `ets_assemble::publish_resource_names`）。
+pub(crate) fn set_resource_names(
+    table: std::collections::HashSet<(String, String)>,
+    rawfiles: std::collections::HashSet<String>,
+) {
+    RESOURCE_NAMES.with(|cell| *cell.borrow_mut() = Some((table, rawfiles)));
+}
+
+/// `$r('app.<kind>.<name>')` / `$rawfile('<name>')` 的缺失诊断。
+///
+/// 参考侧：`Unknown resource name 'not_exist'.`（10903329，锚点在字符串起始 6:15）、
+/// `No such 'missing.png' resource in current module.`（10904333，7:13）。
+fn missing_resource_refs(source: &str) -> Vec<(usize, &'static str, String)> {
+    let Some((names, rawfiles)) = RESOURCE_NAMES.with(|cell| cell.borrow().clone()) else {
+        return Vec::new();
+    };
+    let mut found = Vec::new();
+    let mut from = 0usize;
+    while let Some(at) = source[from..].find("$r(") {
+        let start = from + at;
+        let after = &source[start + 3..];
+        let Some(close) = after.find(')') else {
+            break;
+        };
+        from = start + 3;
+        let inner = after[..close].trim();
+        let Some(quoted) = inner.strip_prefix('\'') else {
+            continue;
+        };
+        let Some(value) = quoted.strip_suffix('\'') else {
+            continue;
+        };
+        let resource_at = start + 3 + (after.len() - after.trim_start().len());
+        let Some(rest) = value.strip_prefix("app.") else {
+            continue;
+        };
+        let Some((kind, name)) = rest.split_once('.') else {
+            continue;
+        };
+        if names.contains(&(kind.to_string(), name.to_string())) {
+            continue;
+        }
+        found.push((
+            resource_at,
+            "10903329",
+            format!("Unknown resource name '{name}'."),
+        ));
+    }
+    let mut from = 0usize;
+    while let Some(at) = source[from..].find("$rawfile(") {
+        let start = from + at;
+        let after = &source[start + "$rawfile(".len()..];
+        let Some(close) = after.find(')') else {
+            break;
+        };
+        from = start + "$rawfile(".len();
+        let inner = after[..close].trim();
+        let Some(quoted) = inner.strip_prefix('\'') else {
+            continue;
+        };
+        let Some(value) = quoted.strip_suffix('\'') else {
+            continue;
+        };
+        // 参考侧的锚点是 `$rawfile` 的 `$`（7:13），不是参数字符串。
+        let at = start;
+        if rawfiles.contains(value) {
+            continue;
+        }
+        found.push((
+            at,
+            "10904333",
+            format!("No such '{value}' resource in current module."),
+        ));
+    }
+    found.sort_unstable();
+    found
+}
+
 thread_local! {
     /// Components the SDK declares outside the ArkUI component metadata: the `@Component struct`s
     /// under `hms/ets/api` that `external_component_map` covers.
@@ -558,6 +649,10 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         let calls_with_spread = spread_argument_violations(source, &rest_functions);
         for (offset, message) in calls_with_spread {
             checker.push("ERROR", "10505001", offset, message);
+        }
+        // `$r` / `$rawfile` 指向不存在的资源。
+        for (offset, code, message) in missing_resource_refs(source) {
+            checker.push("ERROR", code, offset, message);
         }
         // A name declared twice in this file.
         for (_, at) in declaration_merges(&parsed.program) {

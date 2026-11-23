@@ -1,0 +1,2 @@
+ERROR 10903329 ets/pages/Index.ets:6:15 Unknown resource name 'not_exist'.
+ERROR 10904333 ets/pages/Index.ets:7:13 No such 'missing.png' resource in current module.

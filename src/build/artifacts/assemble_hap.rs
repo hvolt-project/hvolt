@@ -30,6 +30,15 @@ pub fn run_with(
         .map_err(|e| format!("discover modules: {e}"))?;
     // Third-party packages compiled into the abc also need a package context entry.
     let packages = crate::build::deps::npm::discover(app, project)?;
+    // `$r('app.<kind>.<name>')` / `$rawfile('<name>')` 的缺失诊断要靠本模块的资源名表
+    // （参考侧 10903329 / 10904333），资源在这一步已经确定。
+    if let Some((module_dir_for_resources, _)) = modules
+        .iter()
+        .find(|(name, _)| module_arg.is_empty() || name == module_arg)
+        .or_else(|| modules.first())
+    {
+        crate::build::ets_assemble::publish_resource_names(project, module_dir_for_resources);
+    }
     // The source directory is only a lookup key here: everything the package records comes
     // from the module's declared name.
     let (module_dir, module_cfg) = if module_arg.is_empty() {
