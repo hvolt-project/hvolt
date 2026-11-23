@@ -4610,6 +4610,9 @@ fn check_lowered(rel: &std::path::Path, source: &str, text: &str) {
                 | "this"
                 | "true"
                 | "false"
+                // 内置名：参考侧对 `arguments` 不报未定义
+                // （`fixtures/type-spread-argument` 只报 spread 实参那条）。
+                | "arguments"
         ) {
             continue;
         };

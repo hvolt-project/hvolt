@@ -545,6 +545,12 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
                 }
             }
         }
+        // 只有剩余参数的函数接受展开实参；其余调用报在 `...` 上。
+        let rest_functions = functions_with_rest(&parsed.program);
+        let calls_with_spread = spread_argument_violations(source, &rest_functions);
+        for (offset, message) in calls_with_spread {
+            checker.push("ERROR", "10505001", offset, message);
+        }
         // A name declared twice in this file.
         for (_, at) in declaration_merges(&parsed.program) {
             checker.push(
@@ -4743,6 +4749,71 @@ fn any_typed_locals(program: &Program<'_>) -> std::collections::HashSet<String> 
                 }
             }
             oxc_ast_visit::walk::walk_variable_declarator(self, it);
+        }
+    }
+    let mut collect = Collect(std::collections::HashSet::new());
+    collect.visit_program(program);
+    collect.0
+}
+
+/// 展开实参：`f(...xs)` 只在被调函数有剩余参数（或形参是元组）时成立
+/// （`A spread argument must either have a tuple type or be passed to a rest parameter.`，
+/// `fixtures/type-spread-argument` 的 6:19）。
+fn spread_argument_violations(
+    source: &str,
+    rest_functions: &std::collections::HashSet<String>,
+) -> Vec<(usize, String)> {
+    let mut found = Vec::new();
+    for name in rest_functions {
+        let needle = format!("{name}(");
+        let mut from = 0usize;
+        while let Some(at) = source[from..].find(&needle) {
+            let start = from + at;
+            // 函数声明本身不是调用（`function withArgs(...rest)` 的形参也带 `...`）。
+            if source[..start].trim_end().ends_with("function") {
+                from = start + needle.len();
+                continue;
+            }
+            let open = start + needle.len() - 1;
+            let Some(close) = matching_paren(source, open) else {
+                break;
+            };
+            from = close;
+            let inside = &source[open + 1..close];
+            let mut cursor = 0usize;
+            for argument in split_top_level(inside) {
+                if argument.trim_start().starts_with("...") {
+                    let offset = open + 1 + cursor + argument.find("...").unwrap_or(0);
+                    found.push((
+                        offset,
+                        "A spread argument must either have a tuple type or be passed to a rest parameter."
+                            .to_string(),
+                    ));
+                }
+                cursor += argument.len() + 1;
+            }
+        }
+    }
+    found.sort_unstable();
+    found
+}
+
+/// 带剩余参数的函数名。
+fn functions_with_rest(program: &Program<'_>) -> std::collections::HashSet<String> {
+    struct Collect(std::collections::HashSet<String>);
+    impl<'a> Visit<'a> for Collect {
+        fn visit_function(
+            &mut self,
+            it: &oxc_ast::ast::Function<'a>,
+            flags: oxc_syntax::scope::ScopeFlags,
+        ) {
+            let has_rest = it.params.rest.is_some();
+            if has_rest {
+                if let Some(id) = &it.id {
+                    self.0.insert(id.name.to_string());
+                }
+            }
+            oxc_ast_visit::walk::walk_function(self, it, flags);
         }
     }
     let mut collect = Collect(std::collections::HashSet::new());
