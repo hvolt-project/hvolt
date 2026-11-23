@@ -650,6 +650,10 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         for (offset, message) in calls_with_spread {
             checker.push("ERROR", "10505001", offset, message);
         }
+        // `CustomDialogController` 的选项对象里出现未知名。
+        for (offset, message) in dialog_option_violations(source) {
+            checker.push("ERROR", "10505001", offset, message);
+        }
         // 没有 `build()` 的结构体里出现 UI 组件调用。
         let components_for_ui = known_components();
         for (offset, code, message) in ui_in_struct_without_build(source, &components_for_ui) {
@@ -3997,6 +4001,67 @@ fn global_function_decorator_violations(source: &str) -> Vec<(usize, &'static st
             ));
         }
         from = start + 1 + name_len;
+    }
+    found
+}
+
+thread_local! {
+    /// `CustomDialogControllerOptions` 的合法键，由构建从 SDK 发布。
+    static DIALOG_OPTIONS: std::cell::RefCell<Option<std::collections::HashSet<String>>> =
+        const { std::cell::RefCell::new(None) };
+}
+
+/// 发布对话框选项的合法键（见 `ets_assemble::publish_dialog_options`）。
+pub(crate) fn set_dialog_options(names: std::collections::HashSet<String>) {
+    DIALOG_OPTIONS.with(|cell| *cell.borrow_mut() = Some(names));
+}
+
+/// `new CustomDialogController({ nope: … })`：未知名报在键上，两条句子合成一条
+/// （`fixtures/ui-dialog-options` 的 15:65）。
+fn dialog_option_violations(source: &str) -> Vec<(usize, String)> {
+    let Some(names) = DIALOG_OPTIONS.with(|cell| cell.borrow().clone()) else {
+        return Vec::new();
+    };
+    let mut found = Vec::new();
+    let mut from = 0usize;
+    while let Some(at) = source[from..].find("new CustomDialogController(") {
+        let start = from + at;
+        let open = start + "new CustomDialogController".len();
+        let Some(close) = matching_paren(source, open) else {
+            break;
+        };
+        from = close;
+        let inside = &source[open + 1..close];
+        let trimmed = inside.trim_start();
+        let Some(body) = trimmed.strip_prefix('{') else {
+            continue;
+        };
+        let Some(end) = body.rfind('}') else {
+            continue;
+        };
+        let body_start = open + 1 + (inside.len() - trimmed.len()) + 1;
+        for item in split_top_level(&body[..end]) {
+            // `split_top_level` 剥掉了每项的首尾空白，锚点按它在 `body` 里的实际位置算，
+            // 不能按长度累加（否则整体偏一列）。
+            let item_at = body_start + body[..end].find(item.as_str()).unwrap_or(0);
+            let Some(colon) = item.find(':') else {
+                continue;
+            };
+            let key = item[..colon].trim();
+            if key.is_empty() || names.contains(key) {
+                continue;
+            }
+            let value = item[colon + 1..].trim();
+            let spelled = value.split('(').next().unwrap_or(value).trim().to_string();
+            let literal = format!("{{ {key}: {spelled}; }}");
+            let key_at = item_at + item.find(key).unwrap_or(0);
+            found.push((
+                key_at,
+                format!(
+                    "Argument of type '{literal}' is not assignable to parameter of type 'CustomDialogControllerOptions'. Object literal may only specify known properties, and '{key}' does not exist in type 'CustomDialogControllerOptions'."
+                ),
+            ));
+        }
     }
     found
 }

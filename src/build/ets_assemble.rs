@@ -295,6 +295,54 @@ fn collect_rawfiles(root: &Path, dir: &Path, out: &mut std::collections::HashSet
     }
 }
 
+/// 发布 `CustomDialogControllerOptions` 的合法键：SDK 的 `component/custom_dialog_controller.d.ts`
+/// 里那个接口的成员名。参考侧对未知名报
+/// `Argument of type '{ … }' is not assignable to parameter of type 'CustomDialogControllerOptions'.`
+pub fn publish_dialog_options() {
+    use std::collections::HashSet;
+    let Some(sdk) = crate::sdk::manage::sdk_root() else {
+        return;
+    };
+    let mut names: HashSet<String> = HashSet::new();
+    let Ok(entries) = std::fs::read_dir(&sdk) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        for base in [
+            entry.path().join("openharmony/ets/component"),
+            entry.path().join("ets/component"),
+        ] {
+            let Ok(text) = std::fs::read_to_string(base.join("custom_dialog_controller.d.ts"))
+            else {
+                continue;
+            };
+            let mut inside = false;
+            for line in text.lines() {
+                let trimmed = line.trim();
+                // 声明行是 `declare interface CustomDialogControllerOptions {`。
+                if trimmed.contains("interface CustomDialogControllerOptions") {
+                    inside = true;
+                    continue;
+                }
+                if inside {
+                    if trimmed == "}" {
+                        break;
+                    }
+                    if let Some(colon) = trimmed.find(':') {
+                        let name = trimmed[..colon].trim().trim_end_matches('?').trim();
+                        if !name.is_empty() && !name.starts_with('*') && !name.starts_with('/') {
+                            names.insert(name.to_string());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if !names.is_empty() {
+        crate::build::stage::ets_checker::set_dialog_options(names);
+    }
+}
+
 pub fn publish_primitive_members() {
     use std::collections::{HashMap, HashSet};
     let Some(sdk) = crate::sdk::manage::sdk_root() else {
@@ -782,6 +830,7 @@ pub fn assemble_packages(
     publish_component_attributes();
     publish_external_components();
     publish_primitive_members();
+    publish_dialog_options();
     publish_global_declarations();
     // `$r('app.<kind>.<name>')` has to become the object literal the runtime expects: left
     // as a call it resolves against the system table only, and an app resource comes back as
