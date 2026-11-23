@@ -50,6 +50,16 @@ fn collect(root: &Path, out: &mut Vec<PathBuf>) {
 }
 
 /// The names a module declares with `export`.
+/// `export * from './x'` 的目标：转发导出的模块本身不写名字，要看目标文件有什么。
+fn star_export_targets(text: &str) -> Vec<String> {
+    let pattern =
+        Regex::new(r#"(?m)^export\s+\*\s+from\s+['"]([^'"]+)['"]"#).expect("star export pattern");
+    pattern
+        .captures_iter(text)
+        .map(|caps| caps[1].to_string())
+        .collect()
+}
+
 fn exports_of(text: &str) -> HashSet<String> {
     let mut names = HashSet::new();
     // export function/class/interface/const/let/var/enum/type/struct, with optional `async`/`type`.
@@ -287,6 +297,44 @@ pub(crate) fn check(source_root: &Path) -> Result<usize, String> {
     }
 
     let packages = packages_under(source_root);
+    // `export * from './x'`：转发文件自己不写名字，把目标文件的导出并进来
+    // （`fixtures/export-star-ets` 里 `barrel.ets` 只写 `export * from './utils'`）。
+    let mut stars: HashMap<PathBuf, Vec<String>> = HashMap::new();
+    for (path, names) in &declared {
+        let Ok(text) = fs::read_to_string(path) else {
+            continue;
+        };
+        let targets = star_export_targets(&text);
+        if !targets.is_empty() {
+            stars.insert(path.clone(), targets);
+        }
+        let _ = names;
+    }
+    for _ in 0..8 {
+        let mut changed = false;
+        for (path, targets) in &stars {
+            let mut added: Vec<String> = Vec::new();
+            for specifier in targets {
+                let Some(target) = resolve(path, specifier) else {
+                    continue;
+                };
+                if let Some(names) = declared.get(&target) {
+                    added.extend(names.iter().cloned());
+                }
+            }
+            if let Some(own) = declared.get_mut(path) {
+                for name in added {
+                    if own.insert(name) {
+                        changed = true;
+                    }
+                }
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
+
     let mut problems: Vec<String> = Vec::new();
     for path in &files {
         let text =
