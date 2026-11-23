@@ -650,6 +650,11 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         for (offset, message) in calls_with_spread {
             checker.push("ERROR", "10505001", offset, message);
         }
+        // 没有 `build()` 的结构体里出现 UI 组件调用。
+        let components_for_ui = known_components();
+        for (offset, code, message) in ui_in_struct_without_build(source, &components_for_ui) {
+            checker.push("ERROR", code, offset, message);
+        }
         // `$r` / `$rawfile` 指向不存在的资源。
         for (offset, code, message) in missing_resource_refs(source) {
             checker.push("ERROR", code, offset, message);
@@ -3987,6 +3992,69 @@ fn global_function_decorator_violations(source: &str) -> Vec<(usize, &'static st
             ));
         }
         from = start + 1 + name_len;
+    }
+    found
+}
+
+/// 没有 `build()` 的结构体里，方法体中的 UI 组件调用会被拒：
+/// `UI component 'Column' cannot be used in this place.`（10905236，锚点是组件名），
+/// 其后的 `{` 另报 `';' expected.`（10505001，锚点是 `{`）——
+/// `fixtures/ui-missing-build` 的 6:5 / 6:14 / 7:7。
+fn ui_in_struct_without_build(
+    source: &str,
+    components: &std::collections::HashSet<String>,
+) -> Vec<(usize, &'static str, String)> {
+    let mut found = Vec::new();
+    let mut from = 0usize;
+    while let Some(at) = source[from..].find("struct ") {
+        let start = from + at;
+        let after = &source[start + "struct ".len()..];
+        let name_len = after
+            .chars()
+            .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+            .count();
+        from = start + "struct ".len() + name_len.max(1);
+        if name_len == 0 {
+            continue;
+        }
+        let Some(open_rel) = after.find('{') else {
+            continue;
+        };
+        let open = start + "struct ".len() + open_rel;
+        let Some(close) = matching_brace(source, open) else {
+            continue;
+        };
+        let body = &source[open + 1..close];
+        if body.contains("build(") {
+            continue;
+        }
+        for component in components {
+            let needle = format!("{component}(");
+            let mut cursor = 0usize;
+            while let Some(hit) = body[cursor..].find(&needle) {
+                let name_at = open + 1 + cursor + hit;
+                let boundary = !source[..name_at]
+                    .chars()
+                    .next_back()
+                    .is_some_and(|c| c.is_alphanumeric() || c == '_' || c == '$' || c == '.');
+                cursor += hit + needle.len();
+                if !boundary {
+                    continue;
+                }
+                found.push((
+                    name_at,
+                    "10905236",
+                    format!("UI component '{component}' cannot be used in this place."),
+                ));
+                let line_end = source[name_at..]
+                    .find('\n')
+                    .map(|offset| name_at + offset)
+                    .unwrap_or(close);
+                if let Some(brace) = source[name_at..line_end].find('{') {
+                    found.push((name_at + brace, "10505001", "';' expected.".to_string()));
+                }
+            }
+        }
     }
     found
 }
