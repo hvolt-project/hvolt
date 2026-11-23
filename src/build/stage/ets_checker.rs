@@ -650,6 +650,20 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         for (offset, message) in calls_with_spread {
             checker.push("ERROR", "10505001", offset, message);
         }
+        // `@ObjectLink` 收到普通字段。
+        let (link_fields, regular_fields) = struct_link_and_regular_fields(&parsed.program);
+        let struct_names_all: std::collections::HashSet<String> =
+            checker.structs.iter().cloned().collect();
+        let owner = enclosing_declaration(source, source.len().saturating_sub(1));
+        for (offset, message) in object_link_violations(
+            source,
+            &struct_names_all,
+            &link_fields,
+            &regular_fields,
+            owner.as_deref(),
+        ) {
+            checker.push("ERROR", "10905315", offset, message);
+        }
         // `CustomDialogController` 的选项对象里出现未知名。
         for (offset, message) in dialog_option_violations(source) {
             checker.push("ERROR", "10505001", offset, message);
@@ -4061,6 +4075,139 @@ fn dialog_option_violations(source: &str) -> Vec<(usize, String)> {
                     "Argument of type '{literal}' is not assignable to parameter of type 'CustomDialogControllerOptions'. Object literal may only specify known properties, and '{key}' does not exist in type 'CustomDialogControllerOptions'."
                 ),
             ));
+        }
+    }
+    found
+}
+
+/// `(struct, 字段)` 的集合：`@ObjectLink` 字段与普通字段各一份。
+type StructLinkFields = (
+    std::collections::HashSet<(String, String)>,
+    std::collections::HashSet<(String, String)>,
+);
+
+/// 每个 struct 的 `@ObjectLink` 字段名，以及没有状态装饰器的普通字段名。
+///
+/// 父组件把普通字段绑给子组件的 `@ObjectLink` 时，参考侧报
+/// `The 'regular' property 'plain' cannot be assigned to the '@ObjectLink' property 'model'.`
+/// （10905315，锚点在传入值，`fixtures/ui-object-link-plain` 的 23:22）。
+fn struct_link_and_regular_fields(program: &Program<'_>) -> StructLinkFields {
+    struct Collect {
+        links: std::collections::HashSet<(String, String)>,
+        regular: std::collections::HashSet<(String, String)>,
+    }
+    impl<'a> Visit<'a> for Collect {
+        fn visit_class(&mut self, it: &oxc_ast::ast::Class<'a>) {
+            let name = it.id.as_ref().map(|id| id.name.to_string());
+            if let Some(name) = name {
+                for element in &it.body.body {
+                    let ClassElement::PropertyDefinition(property) = element else {
+                        continue;
+                    };
+                    let Some(field) = property.key.static_name().map(|n| n.to_string()) else {
+                        continue;
+                    };
+                    let link = property.decorators.iter().any(|decorator| {
+                        matches!(&decorator.expression,
+                            Expression::Identifier(id) if id.name.as_str() == "ObjectLink")
+                    });
+                    if link {
+                        self.links.insert((name.clone(), field));
+                        continue;
+                    }
+                    let decorated = property.decorators.iter().any(|decorator| {
+                        let Expression::Identifier(id) = &decorator.expression else {
+                            return false;
+                        };
+                        matches!(
+                            id.name.as_str(),
+                            "State"
+                                | "Link"
+                                | "Prop"
+                                | "Provide"
+                                | "Consume"
+                                | "ObjectLink"
+                                | "StorageLink"
+                                | "StorageProp"
+                                | "Local"
+                                | "Param"
+                                | "Event"
+                                | "Monitor"
+                                | "Computed"
+                                | "Trace"
+                        )
+                    });
+                    if !decorated {
+                        self.regular.insert((name.clone(), field));
+                    }
+                }
+            }
+            oxc_ast_visit::walk::walk_class(self, it);
+        }
+    }
+    let mut collect = Collect {
+        links: std::collections::HashSet::new(),
+        regular: std::collections::HashSet::new(),
+    };
+    collect.visit_program(program);
+    (collect.links, collect.regular)
+}
+
+/// `Child({ model: this.plain })`：普通字段绑给 `@ObjectLink`。
+fn object_link_violations(
+    source: &str,
+    structs: &std::collections::HashSet<String>,
+    links: &std::collections::HashSet<(String, String)>,
+    regular: &std::collections::HashSet<(String, String)>,
+    owner: Option<&str>,
+) -> Vec<(usize, String)> {
+    let Some(owner) = owner else {
+        return Vec::new();
+    };
+    let mut found = Vec::new();
+    for child in structs {
+        let needle = format!("{child}(");
+        let mut from = 0usize;
+        while let Some(at) = source[from..].find(&needle) {
+            let start = from + at;
+            let open = start + needle.len() - 1;
+            let Some(close) = matching_paren(source, open) else {
+                break;
+            };
+            from = close;
+            let inside = &source[open + 1..close];
+            let trimmed = inside.trim_start();
+            let Some(body) = trimmed.strip_prefix('{') else {
+                continue;
+            };
+            let Some(end) = body.rfind('}') else {
+                continue;
+            };
+            let body_start = open + 1 + (inside.len() - trimmed.len()) + 1;
+            for item in split_top_level(&body[..end]) {
+                let Some(colon) = item.find(':') else {
+                    continue;
+                };
+                let field = item[..colon].trim();
+                let value = item[colon + 1..].trim();
+                if !links.contains(&(child.clone(), field.to_string())) {
+                    continue;
+                }
+                let Some(local) = value.strip_prefix("this.") else {
+                    continue;
+                };
+                if !regular.contains(&(owner.to_string(), local.to_string())) {
+                    continue;
+                }
+                let item_at = body_start + body[..end].find(item.as_str()).unwrap_or(0);
+                let value_at = item_at + item.find(value).unwrap_or(0);
+                found.push((
+                    value_at,
+                    format!(
+                        "The 'regular' property '{local}' cannot be assigned to the '@ObjectLink' property '{field}'."
+                    ),
+                ));
+            }
         }
     }
     found
