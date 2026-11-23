@@ -149,6 +149,23 @@ PY
 cd "$WORK/layout"
 export NODE_V8_COVERAGE="$WORK/v8cov"
 mkdir -p "$NODE_V8_COVERAGE"
+# A project may carry more members than the one being described here: a shared (HSP) member has to
+# be built first, or the described module's import of it resolves against nothing. Those builds run
+# before it, and their logs join the diagnostic harvest below.
+while IFS=$'\t' read -r PRE_NAME PRE_DIR PRE_TASK; do
+  [ -n "$PRE_NAME" ] || continue
+  timeout 900 "$HVIGORW" --mode module -p module="$PRE_NAME@default" -p product=default "$PRE_TASK" --no-daemon \
+    > "$WORK/hvigor-$PRE_NAME.log" 2>&1 || true
+done < <(python3 - "$WORK/layout.modules.json" "$MODULE" <<'PY'
+import json, sys
+modules = json.load(open(sys.argv[1]))["modules"]
+described = sys.argv[2]
+for m in modules:
+    if m["name"] == described or m["kind"] == "entry":
+        continue
+    print("\t".join([m["name"], m["dir"], m["task"]]))
+PY
+)
 # `assembleHap` fails late on this machine because packaging needs a JRE, but the ArkTS compile
 # and the resource stage run first; judge success by the artifacts, not by the exit code.
 # `JAVA_HOME` is exported above so the packaged artifacts exist too; set `ORACLE_NO_JAVA_HOME=1`
@@ -218,7 +235,12 @@ if [ -n "$SOURCE_MAP" ] && [ "$FAILS" = "0" ]; then cp "$SOURCE_MAP" "$FIXTURE/g
 
 # The diagnostics are an artifact too, and for a failing fixture the only one: the reference's
 # `ArkTS:ERROR` / `ArkTS:WARN` entries in one canonical line each (`diagnostics.py`).
-python3 "$ROOT/scripts/oracle/diagnostics.py" "$WORK/hvigor.log" > "$FIXTURE/golden/diagnostics.txt"
+{
+  for log in "$WORK"/hvigor-*.log; do
+    [ -f "$log" ] && cat "$log"
+  done
+  cat "$WORK/hvigor.log"
+} | python3 "$ROOT/scripts/oracle/diagnostics.py" - > "$FIXTURE/golden/diagnostics.txt"
 
 # Record what this build actually produced. `compare-artifacts.py` reads this list so a file
 # left in `golden/` by an older harvest is not compared as if it were current.

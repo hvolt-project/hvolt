@@ -14,7 +14,7 @@ basename; `line`/`col` are `-` when the diagnostic names no position. The set is
 order the compiler happened to report in is not part of the judgement.
 
 Usage:
-    diagnostics.py <log file>
+    diagnostics.py <log file>             # `-` reads stdin, for several logs read as one build
     diagnostics.py --status <log file>    # `fail` / `ok`, from the build's own verdict line
 """
 
@@ -153,7 +153,10 @@ def main(argv):
         text = open(argv[2], encoding="utf-8", errors="replace").read()
         print(status(text))
         return 0
-    text = open(argv[1], encoding="utf-8", errors="replace").read()
+    if argv[1] == "-":
+        text = sys.stdin.read()
+    else:
+        text = open(argv[1], encoding="utf-8", errors="replace").read()
     for line in parse(text):
         print(line)
     return 0
