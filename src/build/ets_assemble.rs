@@ -1231,6 +1231,27 @@ pub fn assemble_packages(
                             module,
                             package_module,
                         );
+                        // 目录导入：`from '../utils'` 落在 `utils/index.ets` 上时，url 的路径带
+                        // `index`，与参考侧的模块记录一致（`fixtures/import-directory-index`）。
+                        let expanded;
+                        let request = if !request.starts_with('@')
+                            && !request.ends_with(".so")
+                            && request != "BuildProfile"
+                            && !["ets", "ts", "js"]
+                                .iter()
+                                .any(|ext| request.ends_with(&format!(".{ext}")))
+                        {
+                            let candidate = format!("{request}/index");
+                            match resolve(&candidate) {
+                                Some(_) => {
+                                    expanded = candidate;
+                                    expanded.as_str()
+                                }
+                                None => request,
+                            }
+                        } else {
+                            request
+                        };
                         rewrite_spec(
                             request,
                             file_dir,
