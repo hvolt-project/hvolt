@@ -119,6 +119,30 @@ thread_local! {
         const { std::cell::RefCell::new(None) };
 }
 
+/// A component's non-method members: name and the type text the reference prints for it.
+type ExternalMembers = std::collections::HashMap<String, Vec<(String, String)>>;
+
+thread_local! {
+    /// Components the SDK declares outside the ArkUI component metadata: the `@Component struct`s
+    /// under `hms/ets/api` that `external_component_map` covers.
+    static EXTERNAL_COMPONENTS: std::cell::RefCell<Option<ExternalMembers>> =
+        const { std::cell::RefCell::new(None) };
+}
+
+/// Publishes the external component table; see `ets_assemble::publish_external_components`.
+pub(crate) fn set_external_components(table: ExternalMembers) {
+    EXTERNAL_COMPONENTS.with(|cell| *cell.borrow_mut() = Some(table));
+}
+
+/// The members of one external component, when the SDK declared it.
+fn external_component(name: &str) -> Option<Vec<(String, String)>> {
+    EXTERNAL_COMPONENTS.with(|cell| {
+        cell.borrow()
+            .as_ref()
+            .and_then(|table| table.get(name).cloned())
+    })
+}
+
 thread_local! {
     /// Members of the primitive types, published by the build from the TypeScript standard library
     /// the loader ships (`publish_primitive_members`).
@@ -433,6 +457,93 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         let builders = builder_arities(source);
         for (offset, message) in builder_arity_violations(source, &builders) {
             checker.push("ERROR", "10505001", offset, message);
+        }
+        // An SDK component declared outside the ArkUI metadata (`hms/ets/api`): its parameter
+        // literal is checked against the members the declaration lists, and the message spells the
+        // whole expected type the way the reference does (8:22 of `fixtures/hms-component-params`).
+        let imported_names: Vec<(String, String)> = parsed
+            .program
+            .body
+            .iter()
+            .filter_map(|statement| match statement {
+                oxc_ast::ast::Statement::ImportDeclaration(import) => Some(import),
+                _ => None,
+            })
+            .flat_map(|import| import.specifiers.iter().flatten())
+            .filter_map(|specifier| match specifier {
+                ImportDeclarationSpecifier::ImportSpecifier(specifier) => Some((
+                    specifier.local.name.to_string(),
+                    specifier.imported.name().to_string(),
+                )),
+                _ => None,
+            })
+            .collect();
+        for (local, imported) in imported_names {
+            let (local, imported) = (local, imported);
+            if let Some(members) = external_component(imported.as_str()) {
+                let expected = format!(
+                    "{{ {} }}",
+                    members
+                        .iter()
+                        .map(|(name, spelling)| format!("{name}?: {spelling};"))
+                        .collect::<Vec<_>>()
+                        .join(" ")
+                );
+                let needle = format!("{local}(");
+                let mut from = 0usize;
+                while let Some(at) = source[from..].find(&needle) {
+                    let start = from + at;
+                    let open = start + needle.len() - 1;
+                    let Some(close) = matching_paren(source, open) else {
+                        break;
+                    };
+                    from = close;
+                    let inside = &source[open + 1..close];
+                    let trimmed = inside.trim_start();
+                    let Some(body) = trimmed.strip_prefix('{') else {
+                        continue;
+                    };
+                    let Some(end) = body.rfind('}') else {
+                        continue;
+                    };
+                    let body_start = open + 1 + (inside.len() - trimmed.len()) + 1;
+                    // The reference spells the literal's type, not its source: `{ nope: number; }`.
+                    let spelled_items: Vec<String> = split_top_level(&body[..end])
+                        .iter()
+                        .filter_map(|item| {
+                            let colon = item.find(':')?;
+                            let key = item[..colon].trim();
+                            let spelling = literal_spelling(item[colon + 1..].trim());
+                            if key.is_empty() || spelling.is_empty() {
+                                return None;
+                            }
+                            Some(format!("{key}: {spelling};"))
+                        })
+                        .collect();
+                    let literal = format!("{{ {} }}", spelled_items.join(" "));
+                    for item in split_top_level(&body[..end]) {
+                        let Some(colon) = item.find(':') else {
+                            continue;
+                        };
+                        let key = item[..colon].trim();
+                        if members.iter().any(|(name, _)| name == key) {
+                            continue;
+                        }
+                        let key_at = body[..end]
+                            .find(key)
+                            .map(|offset| body_start + offset)
+                            .unwrap_or(body_start);
+                        checker.push(
+                            "ERROR",
+                            "10505001",
+                            key_at,
+                            format!(
+                                "Argument of type '{literal}' is not assignable to parameter of type '{expected}'. Object literal may only specify known properties, and '{key}' does not exist in type '{expected}'."
+                            ),
+                        );
+                    }
+                }
+            }
         }
         // A name declared twice in this file.
         for (_, at) in declaration_merges(&parsed.program) {

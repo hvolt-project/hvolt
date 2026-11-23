@@ -94,7 +94,12 @@ fn publish_system_modules() {
             for file in files.flatten() {
                 let name = file.file_name();
                 let Some(name) = name.to_str() else { continue };
-                let Some(module) = name.strip_suffix(".d.ts") else {
+                // `@hms.core.map.MapComponent` is declared as `.d.ets`, the ArkUI-shaped
+                // declaration file; both suffixes name a module.
+                let Some(module) = name
+                    .strip_suffix(".d.ts")
+                    .or_else(|| name.strip_suffix(".d.ets"))
+                else {
                     continue;
                 };
                 if module.starts_with('@') {
@@ -127,7 +132,10 @@ fn publish_system_modules() {
             for file in files.flatten() {
                 let name = file.file_name();
                 let Some(name) = name.to_str() else { continue };
-                let Some(module) = name.strip_suffix(".d.ts") else {
+                let Some(module) = name
+                    .strip_suffix(".d.ts")
+                    .or_else(|| name.strip_suffix(".d.ets"))
+                else {
                     continue;
                 };
                 if !modules.contains(module) || symbols.contains_key(module) {
@@ -300,6 +308,128 @@ pub fn publish_primitive_members() {
 /// attributes (`Text` → `fontColor`, `fontSize`, …), and `component/common.d.ts` gives the ones
 /// every component inherits (`CommonMethod`: `width`, `height`, `onClick`, …). Measured message:
 /// `Property 'notARealAttribute' does not exist on type 'TextAttribute'.`
+/// The components the SDK declares outside the ArkUI component metadata: `@Component struct`s under
+/// `hms/ets/api/*.d.ets` (`external_component_map`). Each carries its non-method members with the
+/// type text the reference prints, so a parameter literal can be judged against it.
+pub fn publish_external_components() {
+    use std::collections::HashMap;
+    let Some(sdk) = crate::sdk::manage::sdk_root() else {
+        return;
+    };
+    let mut table: HashMap<String, Vec<(String, String)>> = HashMap::new();
+    let Ok(entries) = std::fs::read_dir(&sdk) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        for base in [
+            entry.path().join("hms/ets/api"),
+            entry.path().join("ets/api"),
+        ] {
+            let Ok(files) = std::fs::read_dir(&base) else {
+                continue;
+            };
+            for file in files.flatten() {
+                let name = file.file_name();
+                let Some(name) = name.to_str() else { continue };
+                if !(name.ends_with(".d.ets") || name.ends_with(".d.ts")) {
+                    continue;
+                }
+                let Ok(text) = std::fs::read_to_string(file.path()) else {
+                    continue;
+                };
+                for (component, members) in external_structs(&text) {
+                    table.entry(component).or_insert(members);
+                }
+            }
+        }
+    }
+    if !table.is_empty() {
+        crate::build::stage::ets_checker::set_external_components(table);
+    }
+}
+
+/// Every `@Component … struct Name { … }` in one declaration file, with its non-method members.
+fn external_structs(text: &str) -> Vec<(String, Vec<(String, String)>)> {
+    let mut found = Vec::new();
+    let lines: Vec<&str> = text.lines().collect();
+    let mut index = 0usize;
+    while index < lines.len() {
+        let line = lines[index].trim();
+        if line.starts_with("@Component") && index + 1 < lines.len() {
+            let next = lines[index + 1].trim();
+            if let Some(rest) = next.strip_prefix("export struct ") {
+                let name: String = rest
+                    .chars()
+                    .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+                    .collect();
+                if !name.is_empty() {
+                    let mut members: Vec<(String, String)> = Vec::new();
+                    let mut depth = 0usize;
+                    let mut cursor = index + 1;
+                    while cursor < lines.len() {
+                        let inner = lines[cursor].trim();
+                        depth += inner.matches('{').count();
+                        depth = depth.saturating_sub(inner.matches('}').count());
+                        if cursor > index + 1 && depth == 0 {
+                            break;
+                        }
+                        if depth == 1 {
+                            if let Some((member, spelling)) = struct_member(inner) {
+                                members.push((member, spelling));
+                            }
+                        }
+                        cursor += 1;
+                    }
+                    found.push((name, members));
+                    index = cursor;
+                    continue;
+                }
+            }
+        }
+        index += 1;
+    }
+    found
+}
+
+/// One `name: Type;` member line, reduced to the reference's spelling: optional, namespace
+/// prefixes dropped, `AsyncCallback<T>` widened to `AsyncCallback<T, void>`.
+fn struct_member(line: &str) -> Option<(String, String)> {
+    if line.starts_with('@')
+        || line.starts_with("build")
+        || line.starts_with('/')
+        || line.starts_with('*')
+        || line.is_empty()
+    {
+        return None;
+    }
+    let colon = line.find(':')?;
+    let name = line[..colon].trim();
+    if name.is_empty() || name.contains('(') {
+        return None;
+    }
+    let mut spelling = line[colon + 1..]
+        .trim()
+        .trim_end_matches(';')
+        .trim()
+        .to_string();
+    if spelling.contains('(') {
+        return None;
+    }
+    if let Some(open) = spelling.find('<') {
+        let head = spelling[..open].to_string();
+        let inner = spelling[open + 1..].trim_end_matches('>').to_string();
+        let inner = inner.rsplit('.').next().unwrap_or(&inner).to_string();
+        spelling = if head == "AsyncCallback" && !inner.contains(',') {
+            format!("{head}<{inner}, void>")
+        } else {
+            format!("{head}<{inner}>")
+        };
+    } else if let Some((_, tail)) = spelling.rsplit_once('.') {
+        spelling = tail.to_string();
+    }
+    Some((name.to_string(), spelling))
+}
+
 pub fn publish_component_attributes() {
     use std::collections::{HashMap, HashSet};
     let Some(sdk) = crate::sdk::manage::sdk_root() else {
@@ -411,6 +541,9 @@ fn declared_names(text: &str) -> Option<std::collections::HashSet<String>> {
             "enum ",
             "namespace ",
             "module ",
+            // `@Component export struct MapComponent { … }` is how an ArkUI-shaped module
+            // declares a component (`fixtures/hms-component-params`).
+            "struct ",
         ] {
             let Some(rest) = line.strip_prefix(keyword) else {
                 continue;
@@ -590,6 +723,7 @@ pub fn assemble_packages(
     let kits = load_kit_configs(kit_configs_dir).unwrap_or_default();
     publish_system_modules();
     publish_component_attributes();
+    publish_external_components();
     publish_primitive_members();
     publish_global_declarations();
     // `$r('app.<kind>.<name>')` has to become the object literal the runtime expects: left
