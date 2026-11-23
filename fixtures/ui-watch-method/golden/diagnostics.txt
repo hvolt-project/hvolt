@@ -1,0 +1,1 @@
+ERROR 10905112 ets/pages/Index.ets:11:3 '@Watch("onCount")' can not decorate the method.

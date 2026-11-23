@@ -441,7 +441,15 @@ pub(crate) fn check(file: &str, source: &str) -> Vec<Diagnostic> {
         }
         // `this.<name>` that no struct of the file declares (measured 8:35 of
         // `fixtures/type-struct-member`).
-        for (offset, message) in struct_member_violations(source, &checker.members) {
+        // `@Styles` 方法在文件级登记，结构体成员表里也要有，否则 `this.<style>` 会被当成
+        // 不存在的成员（`fixtures/ui-watch-method` 的参考侧对此不报）。
+        let mut members_with_styles = checker.members.clone();
+        for set in members_with_styles.values_mut() {
+            for style in &checker.style_names {
+                set.insert(style.clone());
+            }
+        }
+        for (offset, message) in struct_member_violations(source, &members_with_styles) {
             checker.push("ERROR", "10505001", offset, message);
         }
         // A child instantiation that hands a literal of the wrong type to a declared member
@@ -2456,6 +2464,33 @@ impl<'a> Visit<'a> for Checker<'_> {
     }
 
     fn visit_method_definition(&mut self, it: &MethodDefinition<'a>) {
+        if self.lints {
+            // `@Watch("onCount")` 装饰在方法上：`'@Watch("onCount")' can not decorate the method.`
+            // （10905112，锚点在装饰器起始，`fixtures/ui-watch-method` 的 11:3）。
+            for decorator in &it.decorators {
+                let Expression::CallExpression(call) = &decorator.expression else {
+                    continue;
+                };
+                let Expression::Identifier(callee) = &call.callee else {
+                    continue;
+                };
+                if callee.name.as_str() != "Watch" {
+                    continue;
+                }
+                let text = &self.source[decorator.span.start as usize..decorator.span.end as usize];
+                let name = text
+                    .split('(')
+                    .nth(1)
+                    .map(|rest| rest.trim_end_matches(')').trim())
+                    .unwrap_or("");
+                self.push(
+                    "ERROR",
+                    "10905112",
+                    decorator.span.start as usize,
+                    format!("'@Watch({name})' can not decorate the method."),
+                );
+            }
+        }
         self.method_depth += 1;
         // A method's declared return type answers for a literal it returns, the same way a
         // function's does (`fixtures/type-field-assign`: 6:5).
