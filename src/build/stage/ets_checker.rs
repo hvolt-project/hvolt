@@ -3692,6 +3692,11 @@ fn non_component_statements(
         if method.is_empty() || builders.contains(&method) {
             continue;
         }
+        // 只有调用形式才算 UI 语法问题：`this.value = v;` 是赋值，参考侧不报
+        // （`fixtures/ui-component-props` 的 exit=0）。
+        if !rest[method.len()..].trim_start().starts_with('(') {
+            continue;
+        }
         let Some(close) = text[index..].find(';') else {
             continue;
         };
