@@ -241,6 +241,76 @@ fn module_dependency_names(
     names
 }
 
+/// Every import of a name in `missing`, with its position and the path the reference prints:
+/// `ets/pages/Index.ets` for `<member>/pages/Index.ets`.
+fn unresolved_bare_imports(
+    project_dir: &Path,
+    missing: &[&String],
+) -> Vec<(String, usize, usize, String)> {
+    let mut found = Vec::new();
+    let mut files = Vec::new();
+    let src = project_dir.join("src");
+    collect_sources(&src, &mut files);
+    for path in files {
+        let Ok(text) = std::fs::read_to_string(&path) else {
+            continue;
+        };
+        for name in missing {
+            for quote in ['\'', '"'] {
+                let needle = format!("{quote}{name}{quote}");
+                let Some(at) = text.find(&needle) else {
+                    continue;
+                };
+                let before = &text[..at];
+                let line = before.matches('\n').count() + 1;
+                let column = before
+                    .rsplit('\n')
+                    .next()
+                    .map(|l| l.chars().count())
+                    .unwrap_or(0)
+                    + 1;
+                let rel = path
+                    .strip_prefix(project_dir.join("src"))
+                    .unwrap_or(&path)
+                    .to_string_lossy()
+                    .replace('\\', "/");
+                found.push((format!("ets/{rel}"), line, column, name.to_string()));
+            }
+        }
+    }
+    found.sort();
+    found
+}
+
+/// Source files under `dir`, without the paths that hold no project source.
+fn collect_sources(dir: &Path, out: &mut Vec<std::path::PathBuf>) {
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        let name = entry.file_name().to_string_lossy().to_string();
+        if path.is_dir() {
+            if name.starts_with('.')
+                || matches!(
+                    name.as_str(),
+                    "build" | "oh_modules" | "node_modules" | "signing" | "output"
+                )
+            {
+                continue;
+            }
+            collect_sources(&path, out);
+            continue;
+        }
+        if matches!(
+            path.extension().and_then(|e| e.to_str()),
+            Some("ets") | Some("ts")
+        ) {
+            out.push(path);
+        }
+    }
+}
+
 /// Fail when a source imports a third-party package `[dependencies]` does not declare.
 ///
 /// Build time reads no hvigor manifest: the dependency table in `hvolt.toml` is the only
@@ -270,6 +340,15 @@ fn verify_imported(
         return Ok(());
     }
     missing.sort();
+    // The reference reports the unresolved import as a type-level diagnostic against the
+    // specifier (`Cannot find module 'lib' or its corresponding type declarations.`, 1:24 of
+    // `fixtures/import-file-dependency`), so the same line is printed here before the build
+    // stops with its own message.
+    for (file, line, column, specifier) in unresolved_bare_imports(project_dir, &missing) {
+        eprintln!(
+            "ERROR 10505001 {file}:{line}:{column} Cannot find module '{specifier}' or its corresponding type declarations."
+        );
+    }
     let names: Vec<String> = missing.iter().map(|name| format!("'{name}'")).collect();
     Err(format!(
         "sources import {} but hvolt.toml [dependencies] does not declare it: hvolt reads no \

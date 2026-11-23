@@ -297,6 +297,27 @@ pub(crate) fn check(source_root: &Path) -> Result<usize, String> {
                 // known from the entry file.
                 let package = specifier.split('/').next().unwrap_or(&specifier);
                 let package = package.trim_start_matches('@');
+                // A bare specifier that no installed package answers: the reference reports it the
+                // same way it reports a missing relative module (`fixtures/import-file-dependency`:
+                // `file:` in `oh-package.json5` installs nothing, so `Cannot find module 'lib'`).
+                // `@`-scoped names are the SDK's own (kit/system/hms) and stay with the compiler.
+                // A member of the same project (`shared/` next to the importing module's `src/`)
+                // is reached through the module manifest, not through `oh_modules`
+                // (`fixtures/hsp-member-import`).
+                let sibling_member = source_root
+                    .parent()
+                    .map(|project| project.join(package).is_dir())
+                    .unwrap_or(false);
+                if !packages.contains_key(package) && !sibling_member && !specifier.starts_with('@')
+                {
+                    if let Some((line, column)) = locate_specifier(&text, &specifier) {
+                        let file = format!("ets/{}", relative_to(source_root, path));
+                        eprintln!(
+                            "ERROR 10505001 {file}:{line}:{column} Cannot find module '{specifier}' or its corresponding type declarations."
+                        );
+                    }
+                    continue;
+                }
                 if let Some(entry) = packages.get(package) {
                     // The package directory is not walked as part of the module's own sources, so
                     // its entry file is read here when the collected set has no record of it.
