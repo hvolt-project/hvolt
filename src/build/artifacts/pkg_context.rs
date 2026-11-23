@@ -174,6 +174,23 @@ pub fn render(input: &PkgContextInput<'_>) -> Value {
             }
         } else if package.kind == crate::build::deps::npm::Kind::ByteCode {
             package.entry.clone()
+        } else if ext == "ets"
+            && !package
+                .source_root
+                .join(format!("{}.ets", package.entry))
+                .is_file()
+            && !package.dir.join(format!("{}.ets", package.entry)).is_file()
+        {
+            // 只带声明的包（`index.d.ets`）：记录写入口名本身，不带扩展名
+            // （`fixtures/import-package-dets` 的 `entryPath` 是 `index`）。
+            match package.source_root.strip_prefix(&package.dir) {
+                Ok(rest) if !rest.as_os_str().is_empty() => format!(
+                    "{}/{}",
+                    rest.to_string_lossy().replace('\\', "/"),
+                    package.entry
+                ),
+                _ => package.entry.clone(),
+            }
         } else {
             match package.source_root.strip_prefix(&package.dir) {
                 Ok(rest) if !rest.as_os_str().is_empty() => format!(

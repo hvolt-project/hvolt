@@ -153,8 +153,19 @@ impl Package {
 pub fn discover(app: &AppConfig, project_dir: &Path) -> Result<Vec<Package>, String> {
     let lock = Lock::read(project_dir);
     let mut packages: Vec<Package> = Vec::new();
+    // 根表的依赖加上每个成员模块自己声明的依赖：两者都由这个模块编译进 abc，也都要有
+    // `pkgContextInfo.json` 记录。
+    let mut declared: Vec<(String, crate::support::config::Dependency, PathBuf)> = Vec::new();
     for (name, dep) in &app.dependencies {
-        let Some(dir) = resolve_dir(dep, name, project_dir, &lock)? else {
+        declared.push((name.clone(), dep.clone(), project_dir.to_path_buf()));
+    }
+    for (name, dep, base) in member_dependencies(project_dir, &app.app.members) {
+        if !declared.iter().any(|(known, _, _)| *known == name) {
+            declared.push((name, dep, base));
+        }
+    }
+    for (name, dep, base) in &declared {
+        let Some(dir) = resolve_dir(dep, name, base, &lock)? else {
             continue;
         };
         let kind = dep
@@ -218,6 +229,35 @@ pub fn discover(app: &AppConfig, project_dir: &Path) -> Result<Vec<Package>, Str
     packages.sort_by(|a, b| a.name.cmp(&b.name));
     packages.dedup_by(|a, b| a.name == b.name);
     Ok(packages)
+}
+
+/// 每个成员模块自己在 `src/hvolt.toml` 里声明的 `[dependencies]`。
+fn member_dependencies(
+    project_dir: &Path,
+    members: &[String],
+) -> Vec<(String, crate::support::config::Dependency, PathBuf)> {
+    let mut found = Vec::new();
+    for member in members {
+        let path = project_dir.join(member).join("hvolt.toml");
+        let Ok(text) = std::fs::read_to_string(&path) else {
+            continue;
+        };
+        let Ok(value) = text.parse::<toml::Value>() else {
+            continue;
+        };
+        let Some(table) = value.get("dependencies").and_then(|deps| deps.as_table()) else {
+            continue;
+        };
+        for (name, raw) in table {
+            let Ok(dep) = raw.clone().try_into::<crate::support::config::Dependency>() else {
+                continue;
+            };
+            // 成员表里的相对路径以成员目录为准：`path = "oh_modules/typedlib"` 指的是
+            // `<member>/oh_modules/typedlib`。
+            found.push((name.clone(), dep, project_dir.join(member)));
+        }
+    }
+    found
 }
 
 /// Dependency keys every member module declares in its own `hvolt.toml`.
@@ -536,6 +576,16 @@ fn manifest_kind(dir: &Path) -> Option<Kind> {
     }
 }
 
+/// 只带声明的包（`index.d.ets` / `index.d.ts`）的入口名：`index`。
+fn declaration_entry(dir: &Path) -> Option<String> {
+    for candidate in ["index.d.ets", "Index.d.ets", "index.d.ts", "Index.d.ts"] {
+        if dir.join(candidate).is_file() {
+            return Some(strip_js_ext(candidate));
+        }
+    }
+    None
+}
+
 /// The entry a package declares for itself.
 fn manifest_main(dir: &Path) -> Option<String> {
     let module = package_manifest(dir)?;
@@ -553,7 +603,14 @@ fn detect_kind(dir: &Path) -> Kind {
     {
         return Kind::ByteCode;
     }
-    if dir.join("src/main/ets").is_dir() || dir.join("Index.ets").is_file() {
+    if dir.join("src/main/ets").is_dir()
+        || dir.join("Index.ets").is_file()
+        // 只带声明的包（`index.d.ets`、`index.d.ts`）同样是 ArkTS 包：判成 JS 会让它连
+        // `pkgContextInfo.json` 的记录都拿不到（`fixtures/import-package-dets`）。
+        || dir.join("index.d.ets").is_file()
+        || dir.join("Index.d.ets").is_file()
+        || dir.join("index.d.ts").is_file()
+    {
         return Kind::Arkts;
     }
     if dir.join("CMakeLists.txt").is_file() || dir.join("cpp").is_dir() {
@@ -600,6 +657,7 @@ fn layout(
                 .entry
                 .clone()
                 .or_else(|| manifest_main(dir))
+                .or_else(|| declaration_entry(dir))
                 .map(|e| strip_source(&e))
                 .unwrap_or_else(default_arkts_entry);
             (root, entry)
@@ -804,6 +862,13 @@ fn strip_source(entry: &str) -> String {
 
 fn strip_js_ext(entry: &str) -> String {
     let entry = entry.trim_start_matches("./");
+    // 先剥声明后缀：`index.d.ets` 的入口名是 `index`，`pkgContextInfo.json` 的 `entryPath`
+    // 也按这个写（`fixtures/import-package-dets`）。
+    for suffix in [".d.ets", ".d.ts"] {
+        if let Some(stem) = entry.strip_suffix(suffix) {
+            return stem.to_string();
+        }
+    }
     for suffix in [".ets", ".ts", ".js", ".mjs", ".cjs"] {
         if let Some(stem) = entry.strip_suffix(suffix) {
             return stem.to_string();
@@ -815,6 +880,13 @@ fn strip_js_ext(entry: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_declaration_entry_is_named_without_its_suffix() {
+        assert_eq!(strip_js_ext("./index.d.ets"), "index");
+        assert_eq!(strip_js_ext("index.d.ts"), "index");
+        assert_eq!(strip_js_ext("index.ets"), "index");
+    }
 
     #[test]
     fn kind_parses_the_declared_type() {
