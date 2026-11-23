@@ -1200,6 +1200,24 @@ fn destructuring_parameter(it: &FormalParameter<'_>) -> Option<usize> {
 }
 
 impl<'a> Visit<'a> for Checker<'_> {
+    /// `"size" in bag` —— ArkTS 不支持 `in` 运算符（`arkts-no-in`，10605066，锚点是 `in`
+    /// 关键字，`fixtures/arkts-in-and-dynamic-import` 的 10:17）。
+    fn visit_binary_expression(&mut self, it: &oxc_ast::ast::BinaryExpression<'a>) {
+        if self.lints && matches!(it.operator, oxc_syntax::operator::BinaryOperator::In) {
+            let from = it.left.span().end as usize;
+            let to = it.right.span().start as usize;
+            let window = self.source.get(from..to).unwrap_or("");
+            let at = window.find("in").map(|found| from + found).unwrap_or(from);
+            self.push(
+                "ERROR",
+                "10605066",
+                at,
+                "\"in\" operator is not supported (arkts-no-in)".to_string(),
+            );
+        }
+        oxc_ast_visit::walk::walk_binary_expression(self, it);
+    }
+
     /// `throw "boom"` — only an `Error` may be thrown (`arkts-limited-throw`, 10605087 at the
     /// `throw` — 2:3 of `fixtures/arkts-throw-as-const`).
     fn visit_throw_statement(&mut self, it: &oxc_ast::ast::ThrowStatement<'a>) {
@@ -5686,6 +5704,9 @@ fn returns_limited_type(
             Expression::Identifier(id) => {
                 any_params.contains(id.name.as_str()) || any_locals.contains(id.name.as_str())
             }
+            // `return import('…')`：动态导入的结果要由库的签名回答，返回类型同样推不出来
+            // （`fixtures/arkts-in-and-dynamic-import` 的 17:10）。
+            Expression::ImportExpression(_) => true,
             // `return x + y;` where either side is an `any` local (1:10 of
             // `fixtures/arkts-any-unknown`).
             Expression::BinaryExpression(binary) => {
