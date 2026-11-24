@@ -242,6 +242,39 @@ fn native_build(project_dir: &Path, product: Option<&str>) -> Result<(AppConfig,
         .filter(|(_, cfg)| cfg.module.module_type == "har")
         .map(|(_, cfg)| cfg.module.name.clone())
         .collect();
+
+    /// 该模块的源文件里是否出现对 `name` 的 import 说明符（`'name'` / `"name"`）。
+    ///
+    /// 用来决定一个 HAR 成员的源码要不要并入这个包的 abc。
+    fn module_text_mentions(dir: &std::path::Path, name: &str) -> bool {
+        let root = dir.join("ets");
+        let needles = [format!("'{name}'"), format!("\"{name}\"")];
+        fn walk(path: &std::path::Path, needles: &[String]) -> bool {
+            let Ok(entries) = std::fs::read_dir(path) else {
+                return false;
+            };
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_dir() {
+                    if walk(&path, needles) {
+                        return true;
+                    }
+                } else if path
+                    .extension()
+                    .is_some_and(|ext| ext == "ets" || ext == "ts")
+                {
+                    if let Ok(text) = std::fs::read_to_string(&path) {
+                        if needles.iter().any(|needle| text.contains(needle.as_str())) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            false
+        }
+        walk(&root, &needles)
+    }
+
     let mut planned: Vec<PlannedPackage> = Vec::new();
     for (dir, cfg) in &modules {
         if cfg.module.module_type == "har" {
@@ -250,7 +283,15 @@ fn native_build(project_dir: &Path, product: Option<&str>) -> Result<(AppConfig,
         let primary = planned.is_empty();
         let mut abc_modules = vec![cfg.module.name.clone()];
         if primary {
-            abc_modules.extend(har_names.iter().cloned());
+            // A HAR's sources join this package's abc only when the package imports it: the
+            // reference leaves an unreferenced HAR out entirely
+            // (`fixtures/har-member-present`: golden's `sourceMaps.map` has no
+            // `entry|harlib|…` key and no extra record).
+            for har in &har_names {
+                if module_text_mentions(std::path::Path::new(dir), har) {
+                    abc_modules.push(har.clone());
+                }
+            }
         }
         planned.push(PlannedPackage {
             dir: dir.clone(),
@@ -363,6 +404,26 @@ fn native_build(project_dir: &Path, product: Option<&str>) -> Result<(AppConfig,
         files.dedup();
         libs_by_out.insert(package.out_dir.clone(), files);
     }
+
+    // 编译前核对每个具名 import 在源模块里确有对应导出。设备端只会在启动时打
+    // "Cannot execute ark file 'entry/ets/pages/Index.abc'"，那时拿不到原因，
+    // 所以判据必须落在构建期；位置在打包之前，参考侧在这类输入上不产出任何产物
+    // （`fixtures/import-unresolved-rollup` 的 golden 只有一条 `diagnostics.txt`）。
+    {
+        let source_root = project_dir.join("src");
+        if let Err(problem) = crate::build::imports::check(&source_root) {
+            return Err(format!("具名 import 解析失败:\n{}", problem));
+        }
+    }
+
+    // 类型检查在 stage 阶段跑，而 `$r(…)` 的资源名表原来只在打包时发布：检查时表还是空的，
+    // 于是 `Text($r('app.string.module_desc'))` 被当成缺失资源
+    // （`fixtures/resource-audit` 的 8:15）。编译前先发布一次。
+    for package in &planned {
+        crate::build::ets_assemble::publish_resource_names(project_dir, &package.dir);
+    }
+    // `@Extend` 定义在别的文件里时页面也要认得这个属性名。
+    crate::build::ets_assemble::publish_extend_styles(&project_dir.join("src"));
 
     // 3) resources + module metadata, one output directory per package
     for package in &planned {
@@ -537,16 +598,6 @@ fn native_build(project_dir: &Path, product: Option<&str>) -> Result<(AppConfig,
         compile_contexts.push(context);
     }
     // Third-party packages the app declares; their records are part of the same abc.
-    // 编译前核对每个具名 import 在源模块里确有对应导出。设备端只会在启动时打
-    // "Cannot execute ark file 'entry/ets/pages/Index.abc'"，那时拿不到原因，
-    // 所以判据必须落在构建期。
-    {
-        let source_root = project_dir.join("src");
-        if let Err(problem) = crate::build::imports::check(&source_root) {
-            return Err(format!("具名 import 解析失败:\n{}", problem));
-        }
-    }
-
     let packages = crate::build::deps::npm::discover(&app_config, project_dir)?;
     let es2abc = crate::build::ets_assemble::sdk_es2abc()?;
     let kit_configs = crate::build::ets_assemble::sdk_kit_configs()?;
@@ -782,6 +833,20 @@ fn native_install(target: &str, hap: &std::path::Path) -> Result<(), String> {
 ///
 /// `product` is `--product`; None selects the config's `default_product`, then `default`.
 pub fn build_and_sign(project_dir: &Path, product: Option<&str>) -> Result<(), String> {
+    // 资源名表必须在编译链开始之前就位：stage 的类型检查比打包早，表还空着的时候
+    // `Text($r('app.string.module_desc'))` 会被判成缺失资源
+    // （`fixtures/resource-audit` 的 8:15）。
+    if let Ok(declared) =
+        crate::support::config::AppConfig::from_file(&project_dir.join("hvolt.toml"))
+    {
+        if let Ok(app) = declared.with_product(declared.default_product_name()) {
+            if let Ok((modules, _)) = crate::translator::discover_modules(project_dir, &app) {
+                for (module_dir, _) in &modules {
+                    crate::build::ets_assemble::publish_resource_names(project_dir, module_dir);
+                }
+            }
+        }
+    }
     let (app_config, sdk_env) = native_build(project_dir, product)?;
     let product_name = app_config
         .resolved

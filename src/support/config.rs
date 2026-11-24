@@ -869,6 +869,12 @@ impl ModuleInfo {
         matches!(self.module_type.as_str(), "shared" | "hsp")
     }
 
+    /// A HAR is a static library: built with `assembleHar`, shipped as `.har`, and left out of
+    /// a consumer's `pkgContextInfo` unless that consumer depends on it.
+    pub fn is_har(&self) -> bool {
+        self.module_type.as_str() == "har"
+    }
+
     /// The package entry as a shared package declares it: `./Index.ets` at the module root,
     /// i.e. relative to `src/main/` rather than to the source root (`src/main/ets/`).
     ///

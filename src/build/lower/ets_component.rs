@@ -173,6 +173,11 @@ pub(crate) fn read_component_file(
                 format!("line {line}: {shown}")
             })
             .unwrap_or_default();
+        // 组件体解析失败时构建在这里收口，走不到 `fail_on_types` 的 FAQ 行；参考侧对
+        // 同一文件上已报的 linter 诊断仍打出它（`fixtures/arkts-sendable-typealias-decorator`）。
+        if crate::build::stage::ets_checker::took_file_level_linter() {
+            eprintln!("WARN - -:-:- For details about ArkTS syntax errors, see FAQs");
+        }
         return Err(format!("struct parse failed: {first}\n  near: {snippet}"));
     }
 
@@ -697,12 +702,20 @@ pub(crate) fn read_component_file(
         // (measured: `GlobalStyleShadowProbe` expands its own 21/22, not the global 98/99),
         // so the struct's own styles come first and the global ones follow as the fallback
         // the lookup's `find` never reaches when a member answers.
+        // A `@Styles` that declares parameters is refused (`10905105`) and is not expanded: the
+        // reference stops there, and expanding it would emit the body with unbound names
+        // (`Column.width(width)` from `fixtures/ui-styles-arguments`).
         let mut visible_styles: Vec<crate::build::ets::StyleFn> = styles
             .iter()
-            .filter(|decl| decl.comp == component_name)
+            .filter(|decl| decl.comp == component_name && decl.params_text.is_empty())
             .cloned()
             .collect();
-        visible_styles.extend(styles.iter().filter(|decl| decl.comp.is_empty()).cloned());
+        visible_styles.extend(
+            styles
+                .iter()
+                .filter(|decl| decl.comp.is_empty() && decl.params_text.is_empty())
+                .cloned(),
+        );
         components.push(ComponentInfo {
             name: component_name,
             declaration,

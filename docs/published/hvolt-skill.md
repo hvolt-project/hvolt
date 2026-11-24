@@ -13,7 +13,6 @@ hvolt（HarmonyOS Volt）是一个社区构建工具，将扁平化项目结构�
 从 DevEco 工程到设备上跑起来，五步：
 
 ```bash
-hvolt doctor                       # 1. 环境自检：SDK、node、设备后端
 hvolt migrate --dry-run --from .   # 2. 看它打算怎么迁（不落盘）
 hvolt migrate --from .             # 3. 迁成扁平工程，输出目录在 <name>-flat/
 cd <name>-flat && hvolt build      # 4. 编译打包；没配 [app.signing] 时只出 unsigned
@@ -204,7 +203,6 @@ hvolt 也不改写 CMake 文件。
 ```json
 {
   "sdk_path": "/path/to/sdk",
-  "node_home": "/path/to/node",
   "device_target": "192.168.3.5:8710"
 }
 ```
@@ -285,14 +283,12 @@ cargo test
 | `hvolt check [PATH]` | 包侧质量门：重复文件、超大文件、后缀统计（缺省取最新 signed 包） |
 | `hvolt hap info [PATH]` | 读出 HAP 的 module.json / 条目数 / 大小 |
 | `hvolt clean` | 清掉 `build/` |
-| `hvolt doctor` | 环境自检（SDK / node / 设备后端），有警告时 Summary 会分开报 |
 
 ### 配置命令
 
 | 命令 | 说明 |
 |---|---|
 | `hvolt config get` | 显示全部配置 |
-| `hvolt config set node_home <path>` | 设置 Node.js 路径 |
 | `hvolt config set sdk_path <path>` | 设置 SDK 路径 |
 | `hvolt config unset <key>` | 删除配置项 |
 
@@ -330,7 +326,6 @@ cargo test
 ```rust
 pub struct SdkEnv {
     pub ohos_sdk: PathBuf,          // SDK 根目录
-    pub node_home: PathBuf,         // Node.js 家目录（LSP/模拟器包装用）
     pub emulator: Option<PathBuf>,  // 模拟器
 }
 ```
@@ -338,7 +333,7 @@ pub struct SdkEnv {
 ### 发现优先级
 
 1. `hvolt config` 中的配置
-2. 环境变量（`NODE_HOME`, `JAVA_HOME`）
+2. 环境变量（`JAVA_HOME`）
 3. `PATH` 查找
 
 ## 已知限制

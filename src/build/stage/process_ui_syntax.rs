@@ -128,6 +128,8 @@ fn mask(source: &str) -> Masked {
                             // (measured: fixtures/reusable-guard-boundary, `StylesScopeProbe`
                             // expands its own `cardStyle` 11/12, not `StyleProbe`'s 40/20/5).
                             styles.push(StyleFn {
+                                params_text: member_params.clone(),
+                                order: tokens[index].start,
                                 comp: class_bodies
                                     .iter()
                                     .find(|(_, open, end)| {
@@ -171,6 +173,8 @@ fn mask(source: &str) -> Masked {
                     // file, so it is filed under no owner (measured: `GlobalOnlyProbe`
                     // expands the global body 98/99).
                     styles.push(StyleFn {
+                        params_text: String::new(),
+                        order: tokens[index].start,
                         comp: String::new(),
                         name: function_name,
                         body: chain,

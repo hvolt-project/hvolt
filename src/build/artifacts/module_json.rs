@@ -83,13 +83,22 @@ pub fn module_dependencies(
 /// The `app.*` block.
 fn app_block(
     app: &AppConfig,
-    _ids: &ResourceTable,
+    ids: &ResourceTable,
     build_mode: &str,
-    _compile_sdk_version: &str,
+    compile_sdk_version: &str,
     api_release_type: &str,
+    runtime_os: &str,
 ) -> Value {
     let appf = &app.app;
     let debug = build_mode == "debug";
+    // Measured against `fixtures/*/golden/module.json` (hvigor 26.0.0.23): the reference writes
+    // the SDK it compiled with, the build mode it compiled for, and the four sub-version fields
+    // as zero — the encoded `targetAPIVersion`/`minAPIVersion` carry only the level.
+    let compile_sdk_type = if runtime_os.eq_ignore_ascii_case("openharmony") {
+        "OpenHarmony"
+    } else {
+        "HarmonyOS"
+    };
     let mut app_json = json!({
         "bundleName": appf.bundle,
         "vendor": appf.vendor,
@@ -98,12 +107,27 @@ fn app_block(
         "icon": appf.icon.reference(),
         "label": "$string:app_name",
         "apiReleaseType": release_type_with_stage(api_release_type),
+        "compileSdkVersion": compile_sdk_version,
         "targetAPIVersion": appf.target_api_version(),
         "minAPIVersion": appf.min_api_version(),
+        "compileSdkType": compile_sdk_type,
+        "targetMinorAPIVersion": 0,
+        "targetPatchAPIVersion": 0,
+        "minMinorAPIVersion": 0,
+        "minPatchAPIVersion": 0,
         "appEnvironments": [],
         "bundleType": appf.bundle_type,
+        "buildMode": build_mode,
         "debug": debug,
     });
+    // The installer reads the numeric id, not the reference; the reference copies both. A
+    // resource the table does not have is left out rather than guessed at.
+    if let Some(id) = res_id(ids, appf.icon.reference()) {
+        app_json["iconId"] = json!(id);
+    }
+    if let Some(id) = res_id(ids, "$string:app_name") {
+        app_json["labelId"] = json!(id);
+    }
     // hvigor records a build version only when the project declares one; the key is absent
     // otherwise, and an explicit `null` still counts as a different document.
     if !appf.build_version.is_empty() {
@@ -175,7 +199,7 @@ struct AbilitySpec<'a> {
 }
 
 /// One ability entry: name, source path, resource references and their ids.
-fn ability_block(spec: &AbilitySpec<'_>, _ids: &ResourceTable, runtime_os: &str) -> Value {
+fn ability_block(spec: &AbilitySpec<'_>, ids: &ResourceTable, runtime_os: &str) -> Value {
     let mut out = json!({
         "name": spec.name,
         "srcEntry": spec.src_entry,
@@ -188,6 +212,22 @@ fn ability_block(spec: &AbilitySpec<'_>, _ids: &ResourceTable, runtime_os: &str)
     merge_extra(&mut out, spec.extra);
     if let Some(desc) = spec.description {
         out["description"] = json!(desc);
+    }
+    // Measured on `fixtures/*/golden/module.json`: every resource reference an ability carries
+    // is also stamped with its numeric id, in this order of names.
+    for (reference, key) in [
+        (spec.description, "descriptionId"),
+        (Some(spec.icon), "iconId"),
+        (Some(spec.label), "labelId"),
+        (Some(spec.start_window_icon), "startWindowIconId"),
+        (
+            Some(spec.start_window_background),
+            "startWindowBackgroundId",
+        ),
+    ] {
+        if let Some(id) = reference.and_then(|reference| res_id(ids, reference)) {
+            out[key] = json!(id);
+        }
     }
     if spec.skills.is_empty() {
         // A HarmonyOS build declares the home skill under `action.system.home`; the
@@ -548,6 +588,13 @@ pub fn render(input: &RenderInput<'_>) -> Value {
         module["requestPermissions"] = json!(permissions);
     }
     module["description"] = json!("$string:module_desc");
+    // Measured on `fixtures/*/golden/module.json`: the packaged module names itself as a package
+    // and states the module format the abc is in.
+    module["packageName"] = json!(info.name);
+    module["compileMode"] = json!("esmodule");
+    if let Some(id) = res_id(input.ids, "$string:module_desc") {
+        module["descriptionId"] = json!(id);
+    }
     json!({
         "app": app_block(
             input.app,
@@ -555,6 +602,7 @@ pub fn render(input: &RenderInput<'_>) -> Value {
             input.build_mode,
             input.compile_sdk_version,
             input.api_release_type,
+            runtime_os,
         ),
         "module": module,
     })
@@ -648,10 +696,15 @@ color start_window_background 0x01000008
             api_release_type: "Beta1",
             dependencies: &[],
         });
-        // The schema has no id-suffixed mirrors: references stay `$string:`/`$media:`.
+        // Both forms are written: the reference, which the schema documents, and the numeric id
+        // the installer resolves. Measured against `fixtures/*/golden/module.json`.
         let ability = &out["module"]["abilities"][0];
         assert_eq!(ability["label"], "$string:EntryAbility_label");
-        assert_eq!(out["module"].get("descriptionId"), None);
+        assert_eq!(ability["labelId"], json!(0x01000006));
+        assert_eq!(ability["descriptionId"], json!(0x01000005));
+        assert_eq!(out["module"]["descriptionId"], json!(0x01000004));
+        assert_eq!(out["app"]["labelId"], json!(0x01000000));
+        assert_eq!(out["app"]["iconId"], json!(0x01000003));
     }
 
     /// A key with no modelled behaviour reaches the manifest under the camelCase name the

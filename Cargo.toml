@@ -71,6 +71,7 @@ oxc_allocator = "0.75.0"
 oxc_span = "0.75.0"
 oxc_ast = "0.75.0"
 oxc_ast_visit = "0.75.1"
+oxc_syntax = "0.75.1"
 oxc_semantic = "0.75.1"
 oxc_codegen = "0.75.0"
 rcgen = { version = "0.14.7", features = ["pem"] }

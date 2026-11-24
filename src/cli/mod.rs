@@ -188,6 +188,7 @@ pub(crate) fn dispatch(command: Command) {
         Command::Uninstall { bundle, device } => deploy::uninstall(bundle, device),
         Command::Doctor { product } => project::doctor(product),
         Command::ExportReport { ts_root } => project::export_report(ts_root),
+        Command::IndexDump { file } => project::index_dump(file),
         Command::ParseReport { dir } => project::parse_report(dir),
         Command::Check {
             package,

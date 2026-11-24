@@ -114,6 +114,9 @@ pub(crate) fn assign_with(
         "module id {module_id} is outside restool's 0x01..=0x06 high byte"
     );
 
+    // restool numbers directories in `applicationResource -> moduleResources -> dependencies`
+    // order and sorts each directory by (type code, name); one counter runs through them all
+    // (`res_ids::tests::assigns_one_counter_across_application_module_and_dependencies`).
     let mut ordered: Vec<&(GroupKind, Vec<(ResourceType, String)>)> = groups.iter().collect();
     ordered.sort_by_key(|(kind, _)| kind.rank());
 

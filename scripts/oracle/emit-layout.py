@@ -5,6 +5,14 @@ The repository holds hvolt projects only (`hvolt.toml` + `src/` + `resources/`).
 oracle needs a reference build, this script materialises the equivalent standard layout in a
 temporary directory so hvigor can consume it; nothing it writes belongs in the repository.
 
+A project may declare more than one member in `[app].members` (an entry module plus a shared
+HSP, say). Each member directory carries its own `hvolt.toml`, its own `resources/`, and its
+own module shape: the member whose `[module].type` is `shared`/`hsp` is emitted as a library
+module (`hspTasks`, `module.json5` with `"type": "shared"`), every other member as an entry
+module (`hapTasks`). The module list, with the hvigor module name and task kind, is written
+next to the layout as `<out>.modules.json` so the caller can drive one hvigor invocation per
+module without re-parsing the hvolt sources.
+
 Usage: emit-layout.py <hvolt-project-dir> <out-dir>
 """
 
@@ -15,6 +23,11 @@ import sys
 import tomllib
 
 APP_SDK_TARGET = "6.0.0(20)"
+# hvolt spells a shared package either way; hvigor's module type is `shared` in both cases.
+HSP_TYPES = {"shared", "hsp"}
+# A HAR is a static library: `harTasks`, `type: har`, and every module that depends on it links
+# its sources rather than a runtime package.
+HAR_TYPES = {"har"}
 
 
 def load(path):
@@ -27,17 +40,258 @@ def write_json(path, value):
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
+def read_modules(src_root, app_cfg):
+    """Resolve every member of `[app].members` to its own `[module]` table."""
+    members = app_cfg.get("members") or ["src"]
+    modules = []
+    for member in members:
+        cfg = load(src_root / member / "hvolt.toml")["module"]
+        modules.append({
+            "member": member,
+            "name": cfg.get("name", "entry"),
+            "type": cfg.get("type", ""),
+            "entry": cfg.get("entry", "EntryAbility.ets"),
+            "routes": [r if r.endswith(".ets") else f"{r}.ets" for r in cfg.get("routes", [])],
+            "device_types": cfg.get("device_types", ["phone", "tablet"]),
+            "module_cfg": cfg,
+        })
+    return modules
+
+
+def module_resources(src_root, member):
+    """A member's own `resources/`; a single-module project keeps them at the project root."""
+    own = src_root / member / "resources"
+    return own if own.is_dir() else src_root / "resources"
+
+
+def staged_packages(src_root, member):
+    """Packages a fixture installs under `project/oh_modules` (or `<member>/oh_modules`).
+
+    hvigor resolves `oh_modules` from the module directory, so the packages are copied next to
+    the module and named in the generated manifest: a package the manifest does not list is not
+    resolvable, so a fixture could not import one at all.
+    """
+    root = src_root / member / "oh_modules"
+    if not root.is_dir():
+        root = src_root / "oh_modules"
+    packages = {}
+    if not root.is_dir():
+        return packages
+    for entry_dir in sorted(root.iterdir()):
+        if not entry_dir.is_dir() or entry_dir.name.startswith("."):
+            continue
+        # Scoped names (`@demo/kinds`) sit one level down.
+        if entry_dir.name.startswith("@"):
+            for scoped in sorted(entry_dir.iterdir()):
+                if not scoped.is_dir():
+                    continue
+                packages[f"{entry_dir.name}/{scoped.name}"] = scoped
+            continue
+        packages[entry_dir.name] = entry_dir
+    return packages
+
+
+def emit_shared(src_root, out, mod, app_cfg):
+    """A shared (HSP) member: `hspTasks`, `type: shared`, source at `src/main/`."""
+    name = mod["name"]
+    mod_root = out / name
+    mod_root.mkdir(parents=True, exist_ok=True)
+    entry = mod["entry"]
+    (mod_root / "hvigorfile.ts").write_text(
+        "import { hspTasks } from '@ohos/hvigor-ohos-plugin';\n"
+        "export default { system: hspTasks, plugins: [] };\n", encoding="utf-8")
+    write_json(mod_root / "build-profile.json5",
+               {"apiType": "stageMode", "buildOption": {}, "targets": [{"name": "default"}]})
+
+    main_out = mod_root / "src" / "main"
+    main_out.mkdir(parents=True, exist_ok=True)
+    # The library's source root is `src/main`; its entry file is declared in `srcEntry` and the
+    # package's `main` points at it, which is the shape a DevEco shared module has.
+    for source in (src_root / mod["member"]).rglob("*"):
+        if not source.is_file() or source.suffix not in {".ets", ".ts"}:
+            continue
+        if source.name.endswith((".d.ets", ".d.ts")):
+            continue
+        rel = source.relative_to(src_root / mod["member"])
+        target = main_out / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+    shutil.copy2(src_root / mod["member"] / entry, main_out / entry)
+
+    res_src = module_resources(src_root, mod["member"])
+    if res_src.is_dir():
+        shutil.copytree(res_src, main_out / "resources", dirs_exist_ok=True)
+
+    packages = staged_packages(src_root, mod["member"])
+    write_json(mod_root / "oh-package.json5", {
+        "name": name, "version": "1.0.0", "description": "",
+        "main": f"src/main/{entry}",
+        "author": "", "license": "Apache-2.0",
+        "dependencies": {pkg: "1.0.0" for pkg in packages},
+    })
+    for pkg, source in packages.items():
+        shutil.copytree(source, mod_root / "oh_modules" / pkg, dirs_exist_ok=True)
+
+    write_json(main_out / "module.json5", {"module": {
+        "name": name,
+        "type": "shared",
+        "description": "$string:module_desc",
+        "srcEntry": f"./{entry}",
+        "deviceTypes": mod["device_types"],
+        "deliveryWithInstall": True,
+        "installationFree": False,
+    }})
+
+
+def emit_har(src_root, out, mod, app_cfg):
+    """A HAR member: `harTasks`, `type: har`, source at `src/main/`."""
+    name = mod["name"]
+    mod_root = out / name
+    mod_root.mkdir(parents=True, exist_ok=True)
+    entry = mod["entry"]
+    (mod_root / "hvigorfile.ts").write_text(
+        "import { harTasks } from '@ohos/hvigor-ohos-plugin';\n"
+        "export default { system: harTasks, plugins: [] };\n", encoding="utf-8")
+    write_json(mod_root / "build-profile.json5",
+               {"apiType": "stageMode", "buildOption": {}, "targets": [{"name": "default"}]})
+
+    main_out = mod_root / "src" / "main"
+    main_out.mkdir(parents=True, exist_ok=True)
+    for source in (src_root / mod["member"]).rglob("*"):
+        if not source.is_file() or source.suffix not in {".ets", ".ts"}:
+            continue
+        rel = source.relative_to(src_root / mod["member"])
+        target = main_out / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+    shutil.copy2(src_root / mod["member"] / entry, main_out / entry)
+
+    res_src = module_resources(src_root, mod["member"])
+    if res_src.is_dir():
+        shutil.copytree(res_src, main_out / "resources", dirs_exist_ok=True)
+
+    packages = staged_packages(src_root, mod["member"])
+    write_json(mod_root / "oh-package.json5", {
+        "name": name, "version": "1.0.0", "description": "",
+        "main": f"src/main/{entry}",
+        "author": "", "license": "Apache-2.0",
+        "dependencies": {pkg: "1.0.0" for pkg in packages},
+    })
+    for pkg, source in packages.items():
+        shutil.copytree(source, mod_root / "oh_modules" / pkg, dirs_exist_ok=True)
+
+    # A HAR's `module.json5` carries no `srcEntry` and no install flags: hvigor's schema
+    # rejects them (`Schema validate failed` on the first attempt with the shared module's
+    # shape). The package's `main` in `oh-package.json5` is what names the entry file.
+    write_json(main_out / "module.json5", {"module": {
+        "name": name,
+        "type": "har",
+        "deviceTypes": mod["device_types"],
+    }})
+
+
+def emit_entry(src_root, out, mod, app_cfg, hsp_names):
+    """An entry (HAP) member: `hapTasks`, abilities, pages, and its HSP dependencies."""
+    name = mod["name"]
+    mod_root = out / name
+    entry = mod["entry"]
+    (mod_root / "src" / "main" / "ets").mkdir(parents=True, exist_ok=True)
+    (mod_root / "hvigorfile.ts").write_text(
+        "import { hapTasks } from '@ohos/hvigor-ohos-plugin';\n"
+        "export default { system: hapTasks, plugins: [] };\n", encoding="utf-8")
+    write_json(mod_root / "build-profile.json5",
+               {"apiType": "stageMode", "buildOption": {}, "targets": [{"name": "default"}]})
+
+    packages = staged_packages(src_root, mod["member"])
+    # A shared member is reached through the module manifest, not through `oh_modules`: the
+    # dependency is a sibling module of the same project, so the specifier is a relative path.
+    dependencies = {pkg: "1.0.0" for pkg in packages}
+    for shared_name in hsp_names:
+        dependencies[shared_name] = f"file:../{shared_name}"
+    write_json(mod_root / "oh-package.json5", {
+        "name": name, "version": "1.0.0", "description": "", "main": "",
+        "author": "", "license": "Apache-2.0",
+        "dependencies": dependencies,
+    })
+    for pkg, source in packages.items():
+        shutil.copytree(source, mod_root / "oh_modules" / pkg, dirs_exist_ok=True)
+
+    ets_out = mod_root / "src" / "main" / "ets"
+    entry_file = src_root / mod["member"] / entry
+    (ets_out / "entryability").mkdir(parents=True, exist_ok=True)
+    shutil.copy2(entry_file, ets_out / "entryability" / entry)
+    for route in mod["routes"]:
+        target = ets_out / route
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src_root / mod["member"] / route, target)
+    # Sources that are neither the entry ability nor a page still exist in a real project: a
+    # helper or component module is reached only through the import graph. They are copied
+    # verbatim so the reference builds the same source tree; a file no entry reaches stays in
+    # the layout and must stay out of the compiled abc (the `unused-source` fixture).
+    copied = {entry, *mod["routes"]}
+    for source in (src_root / mod["member"]).rglob("*"):
+        if not source.is_file() or source.suffix not in {".ets", ".ts"}:
+            continue
+        rel = source.relative_to(src_root / mod["member"])
+        # `.d.ts` / `.d.ets` are copied too: they are type declarations the compiler reads, and
+        # dropping them made an import of a declaration-only module fail to resolve — the
+        # reference then reported `Cannot find module …` against a layout artefact rather than
+        # against the source (`fixtures/dts-only-module`).
+        if rel.as_posix() in copied:
+            continue
+        target = ets_out / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+
+    res_src = module_resources(src_root, mod["member"])
+    res_out = mod_root / "src" / "main" / "resources"
+    if res_src.is_dir():
+        shutil.copytree(res_src, res_out, dirs_exist_ok=True)
+    (res_out / "base" / "profile").mkdir(parents=True, exist_ok=True)
+    write_json(res_out / "base" / "profile" / "main_pages.json",
+               {"src": [r[: -len(".ets")] for r in mod["routes"]]})
+
+    write_json(mod_root / "src" / "main" / "module.json5", {"module": {
+        "name": name,
+        "type": "entry",
+        "description": "$string:module_desc",
+        "mainElement": entry[: -len(".ets")],
+        "deviceTypes": mod["device_types"],
+        "deliveryWithInstall": True,
+        "installationFree": False,
+        "pages": "$profile:main_pages",
+        # A project that ships a router-map profile declares it here. Without this key hvigor
+        # never reads `route_map.json`, so `createNavigationInit` has no entries and emits no
+        # `NavigationBuilderRegister` IIFE — measured by adding the key by hand to a scratch
+        # layout and watching the tail of the emitted file grow one.
+        **({"routerMap": "$profile:route_map"}
+           if (res_src / "base" / "profile" / "route_map.json").exists() else {}),
+        # A HAP that consumes a shared module names it here; the runtime resolves the package
+        # from this list, and the packer copies it into the packed `module.json`.
+        **({"dependencies": [
+            {"bundleName": app_cfg["bundle"], "moduleName": shared_name, "versionCode": 1000000}
+            for shared_name in hsp_names
+        ]} if hsp_names else {}),
+        "abilities": [{
+            "name": entry[: -len(".ets")],
+            "srcEntry": f"./ets/entryability/{entry}",
+            "description": "$string:EntryAbility_desc",
+            "icon": app_cfg.get("icon", "$media:layered_image"),
+            "label": "$string:EntryAbility_label",
+            "startWindowIcon": "$media:startIcon",
+            "startWindowBackground": "$color:start_window_background",
+            "exported": True,
+            "skills": [{"entities": ["entity.system.home"], "actions": ["action.system.home"]}],
+        }],
+    }})
+
+
 def main():
     src_root = pathlib.Path(sys.argv[1]).resolve()
     out = pathlib.Path(sys.argv[2]).resolve()
     app_cfg = load(src_root / "hvolt.toml")["app"]
-    members = app_cfg.get("members") or ["src"]
-
-    module_dir = members[0]
-    module_cfg = load(src_root / module_dir / "hvolt.toml")["module"]
-    module_name = module_cfg.get("name", "entry")
-    routes = [r if r.endswith(".ets") else f"{r}.ets" for r in module_cfg.get("routes", [])]
-    entry = module_cfg.get("entry", "EntryAbility.ets")
+    modules = read_modules(src_root, app_cfg)
+    hsp_names = [m["name"] for m in modules if m["type"] in HSP_TYPES]
 
     out.mkdir(parents=True, exist_ok=True)
     # hvigor scaffolding
@@ -71,10 +325,10 @@ def main():
             "buildModeSet": [{"name": "debug"}, {"name": "release"}],
         },
         "modules": [{
-            "name": module_name,
-            "srcPath": f"./{module_name}",
+            "name": mod["name"],
+            "srcPath": f"./{mod['name']}",
             "targets": [{"name": "default", "applyToProducts": ["default"]}],
-        }],
+        } for mod in modules],
     })
 
     # AppScope
@@ -110,99 +364,45 @@ def main():
         if png.is_file():
             shutil.copy2(png, app_media / png.name)
 
-    # module
-    mod_root = out / module_name
-    (mod_root / "src" / "main" / "ets").mkdir(parents=True, exist_ok=True)
-    (mod_root / "hvigorfile.ts").write_text(
-        "import { hapTasks } from '@ohos/hvigor-ohos-plugin';\n"
-        "export default { system: hapTasks, plugins: [] };\n", encoding="utf-8")
-    write_json(mod_root / "build-profile.json5", {"apiType": "stageMode", "buildOption": {}, "targets": [{"name": "default"}]})
-    # Packages the fixture installs under `project/oh_modules` are copied next to the module,
-    # where hvigor resolves `oh_modules` from, and named in the generated manifest: a package
-    # the manifest does not list is not resolvable, so a fixture could not import one at all.
-    # A fixture without that directory gets exactly the layout it got before (empty map, no copy).
-    package_root = src_root / "oh_modules"
-    packages = {}
-    if package_root.is_dir():
-        for entry_dir in sorted(package_root.iterdir()):
-            if not entry_dir.is_dir() or entry_dir.name.startswith("."):
-                continue
-            # Scoped names (`@demo/kinds`) sit one level down.
-            if entry_dir.name.startswith("@"):
-                for scoped in sorted(entry_dir.iterdir()):
-                    if not scoped.is_dir():
-                        continue
-                    packages[f"{entry_dir.name}/{scoped.name}"] = str(scoped)
-                continue
-            packages[entry_dir.name] = str(entry_dir)
-    write_json(mod_root / "oh-package.json5", {
-        "name": module_name, "version": "1.0.0", "description": "", "main": "",
-        "author": "", "license": "Apache-2.0",
-        "dependencies": {name: "1.0.0" for name in packages},
-    })
-    if packages:
-        staged_packages = mod_root / "oh_modules"
-        for name, source in packages.items():
-            target = staged_packages / name
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copytree(source, target, dirs_exist_ok=True)
+    for mod in modules:
+        if mod["type"] in HSP_TYPES:
+            emit_shared(src_root, out, mod, app_cfg)
+        elif mod["type"] in HAR_TYPES:
+            emit_har(src_root, out, mod, app_cfg)
+        else:
+            emit_entry(src_root, out, mod, app_cfg, hsp_names)
 
-    ets_out = mod_root / "src" / "main" / "ets"
-    entry_file = src_root / module_dir / entry
-    (ets_out / "entryability").mkdir(parents=True, exist_ok=True)
-    shutil.copy2(entry_file, ets_out / "entryability" / "EntryAbility.ets")
-    for route in routes:
-        target = ets_out / route
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(src_root / module_dir / route, target)
-    # Sources that are neither the entry ability nor a page still exist in a real project: a
-    # helper or component module is reached only through the import graph. They are copied
-    # verbatim so the reference builds the same source tree; a file no entry reaches stays in
-    # the layout and must stay out of the compiled abc (the `unused-source` fixture).
-    copied = {entry, *routes}
-    for source in (src_root / module_dir).rglob("*"):
-        if not source.is_file() or source.suffix not in {".ets", ".ts"}:
+    # A `.hap` resolves its `.hsp` through `oh_modules`, the same way a package is resolved: the
+    # manifest names the dependency (`"file:../shared"`) and the link is what `ohpm install`
+    # would have created. Without it the ArkTS compile reports `"shared" is imported by ... but
+    # could not be resolved – treating it as an external dependency` and then `Cannot find
+    # module 'shared'`; with it, the entry build compiles the shared module's own tasks and
+    # links against its abc instead of inlining its sources.
+    for mod in modules:
+        if mod["type"] in HSP_TYPES:
             continue
-        rel = source.relative_to(src_root / module_dir)
-        if rel.as_posix() in copied or rel.name.endswith((".d.ets", ".d.ts")):
-            continue
-        target = ets_out / rel
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, target)
+        for shared_name in hsp_names:
+            link = out / mod["name"] / "oh_modules" / shared_name
+            link.parent.mkdir(parents=True, exist_ok=True)
+            if link.exists() or link.is_symlink():
+                continue
+            link.symlink_to(f"../../{shared_name}")
 
-    res_out = mod_root / "src" / "main" / "resources"
-    shutil.copytree(src_root / "resources", res_out, dirs_exist_ok=True)
-    (res_out / "base" / "profile").mkdir(parents=True, exist_ok=True)
-    write_json(res_out / "base" / "profile" / "main_pages.json",
-               {"src": [r[: -len(".ets")] for r in routes]})
-
-    write_json(mod_root / "src" / "main" / "module.json5", {"module": {
-        "name": module_name,
-        "type": "entry",
-        "description": "$string:module_desc",
-        "mainElement": entry[: -len(".ets")],
-        "deviceTypes": module_cfg.get("device_types", ["phone", "tablet"]),
-        "deliveryWithInstall": True,
-        "installationFree": False,
-        "pages": "$profile:main_pages",
-        # A project that ships a router-map profile declares it here. Without this key hvigor
-        # never reads `route_map.json`, so `createNavigationInit` has no entries and emits no
-        # `NavigationBuilderRegister` IIFE — measured by adding the key by hand to a scratch
-        # layout and watching the tail of the emitted file grow one.
-        **({"routerMap": "$profile:route_map"}
-           if (src_root / "resources" / "base" / "profile" / "route_map.json").exists() else {}),
-        "abilities": [{
-            "name": entry[: -len(".ets")],
-            "srcEntry": f"./ets/entryability/{entry}",
-            "description": "$string:EntryAbility_desc",
-            "icon": app_cfg.get("icon", "$media:layered_image"),
-            "label": "$string:EntryAbility_label",
-            "startWindowIcon": "$media:startIcon",
-            "startWindowBackground": "$color:start_window_background",
-            "exported": True,
-            "skills": [{"entities": ["entity.system.home"], "actions": ["action.system.home"]}],
-        }],
-    }})
+    # The caller runs one hvigor invocation per module and needs the hvigor module name, the
+    # task that packages it, and the artifact extension that task produces.
+    write_json(out.parent / f"{out.name}.modules.json", {"modules": [{
+        "name": mod["name"],
+        "dir": mod["name"],
+        "kind": ("shared" if mod["type"] in HSP_TYPES
+                 else "har" if mod["type"] in HAR_TYPES
+                 else "entry"),
+        "task": ("assembleHsp" if mod["type"] in HSP_TYPES
+                 else "assembleHar" if mod["type"] in HAR_TYPES
+                 else "assembleHap"),
+        "extension": ("hsp" if mod["type"] in HSP_TYPES
+                      else "har" if mod["type"] in HAR_TYPES
+                      else "hap"),
+    } for mod in modules]})
     print(f"layout: {out}")
 
 
