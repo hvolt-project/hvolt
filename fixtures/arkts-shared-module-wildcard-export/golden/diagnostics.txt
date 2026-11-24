@@ -1,0 +1,2 @@
+ERROR 10605164 ets/pages/Index.ets:4:1 "export * from ..." is not allowed in shared module (arkts-shared-module-no-wildcard-export)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

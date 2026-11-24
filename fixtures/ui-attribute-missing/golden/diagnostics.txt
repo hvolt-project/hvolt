@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:7:10 Property 'notARealAttribute' does not exist on type 'TextAttribute'.

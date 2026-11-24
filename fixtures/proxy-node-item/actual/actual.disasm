@@ -3,45 +3,46 @@
 # ====================
 # LITERALS
 
-0 0xa4f { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-1 0x1ce8 { 2 [ string:"checkedBackgroundColor", null_value:0, ]}
-10 0xaa6 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-11 0x1dad { 1 [ i32:0, ]}
-12 0x1f83 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-13 0x1db6 { 4 [ string:"on", method:#~@4<#on, method_affiliate:3, i32:0, ]}
-14 0x1dff { 4 [ string:"getColorForLatency", method:#~@5<#getColorForLatency, method_affiliate:1, i32:0, ]}
-15 0x1cbd { 2 [ string:"overflow", null_value:0, ]}
-16 0x1d54 { 4 [ string:"left", i32:14, string:"right", i32:16, ]}
-17 0x1ecc { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-18 0x1cd6 { 4 [ string:"value", null_value:0, string:"group", null_value:0, ]}
-19 0x1d92 { 1 [ i32:0, ]}
-2 0x1da4 { 1 [ i32:0, ]}
-20 0x1ca0 { 4 [ string:"value", null_value:0, string:"group", null_value:0, ]}
-21 0x1d2d { 2 [ string:"space", i32:3, ]}
-22 0x1cb2 { 2 [ string:"checkedBackgroundColor", null_value:0, ]}
-23 0x1dcc { 10 [ string:"id", i32:125830983, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-24 0x1fe9 { 2 [ string:"maxWidth", null_value:0, ]}
-25 0x1c79 { 2 [ string:"overflow", null_value:0, ]}
-26 0x1fde { 2 [ string:"overflow", null_value:0, ]}
-27 0x1e1e { 16 [ string:"setInitiallyProvidedValue", method:#~@7>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@7>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@7>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@7>#aboutToBeDeleted, method_affiliate:0, string:"updateRecycleElmtId", method:#~@7>#updateRecycleElmtId, method_affiliate:2, i32:5, ]}
-28 0x1cf3 { 2 [ string:"space", i32:5, ]}
-29 0x1fd3 { 2 [ string:"checkedBackgroundColor", null_value:0, ]}
-3 0x1d3b { 6 [ string:"direction", null_value:0, string:"alignItems", null_value:0, string:"justifyContent", null_value:0, ]}
-30 0x1d7f { 3 [ i32:1, string:"this", i32:0, ]}
-31 0x1fc1 { 4 [ string:"value", null_value:0, string:"group", null_value:0, ]}
-32 0x1c04 { 11 [ string:"DelayInfo", string:"ProxyItem", string:"AppConfig", string:"UIConfig", string:"EventHub", string:"ProxyData", string:"ClashViewModel", string:"ProxyNode", string:"aboutToAppear", string:"initialRender", string:"ProxyNodeItemPage", ]}
-33 0x1d01 { 8 [ string:"left", i32:14, string:"right", i32:8, string:"top", i32:5, string:"bottom", i32:5, ]}
-34 0x1fb6 { 2 [ string:"overflow", null_value:0, ]}
-36 0x1c84 { 2 [ string:"space", i32:3, ]}
-37 0x1e15 { 1 [ i32:0, ]}
-39 0xa01 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-4 0x1cc8 { 2 [ string:"bottom", i32:5, ]}
-5 0x1e68 { 22 [ string:"setInitiallyProvidedValue", method:#~@a>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@a>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@a>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@a>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@a>#initialRender, method_affiliate:0, string:"rerender", method:#~@a>#rerender, method_affiliate:0, string:"getEntryName", method:#~@a<#getEntryName, method_affiliate:0, i32:6, ]}
-6 0x1c92 { 2 [ string:"space", i32:3, ]}
-7 0x1f0c { 23 [ i32:11, string:"ProxyCardSize", i32:0, string:"UIConfig", i32:1, string:"AppConfig", i32:2, string:"ClashViewModel", i32:3, string:"EventHub", i32:4, string:"EventKey", i32:5, string:"__Text__ItemTextStyle", i32:6, string:"__Text__ItemTypeStyle", i32:7, string:"ProxyData", i32:8, string:"__Row__ListRowStyle", i32:9, string:"ProxyNodeItemPage", i32:10, ]}
-8 0x1d9b { 1 [ i32:0, ]}
-9 0x1d6c { 3 [ i32:1, string:"this", i32:0, ]}
-35 0xa0f { 3 [
+0 0x1fdf { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+1 0x1eb7 { 1 [ i32:0, ]}
+10 0x1f28 { 1 [ i32:0, ]}
+11 0xc55 
+12 0x1dfb { 2 [ string:"checkedBackgroundColor", null_value:0, ]}
+14 0x1f31 { 16 [ string:"setInitiallyProvidedValue", method:#~@7>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@7>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@7>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@7>#aboutToBeDeleted, method_affiliate:0, string:"updateRecycleElmtId", method:#~@7>#updateRecycleElmtId, method_affiliate:2, i32:5, ]}
+15 0x1ddb { 2 [ string:"bottom", i32:5, ]}
+16 0x1d8c { 2 [ string:"overflow", null_value:0, ]}
+17 0x20f1 { 2 [ string:"overflow", null_value:0, ]}
+18 0x1d17 { 11 [ string:"DelayInfo", string:"ProxyItem", string:"AppConfig", string:"UIConfig", string:"EventHub", string:"ProxyData", string:"ClashViewModel", string:"ProxyNode", string:"aboutToAppear", string:"initialRender", string:"ProxyNodeItemPage", ]}
+19 0x1eae { 1 [ i32:0, ]}
+2 0x1f12 { 4 [ string:"getColorForLatency", method:#~@5<#getColorForLatency, method_affiliate:1, i32:0, ]}
+21 0x1f7b { 22 [ string:"setInitiallyProvidedValue", method:#~@a>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@a>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@a>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@a>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@a>#initialRender, method_affiliate:0, string:"rerender", method:#~@a>#rerender, method_affiliate:0, string:"getEntryName", method:#~@a<#getEntryName, method_affiliate:0, i32:6, ]}
+23 0x1de9 { 4 [ string:"value", null_value:0, string:"group", null_value:0, ]}
+24 0x20fc { 2 [ string:"maxWidth", null_value:0, ]}
+25 0x1d97 { 2 [ string:"space", i32:3, ]}
+26 0x1e06 { 2 [ string:"space", i32:5, ]}
+27 0x1ea5 { 1 [ i32:0, ]}
+28 0x201f { 23 [ i32:11, string:"ProxyCardSize", i32:0, string:"UIConfig", i32:1, string:"AppConfig", i32:2, string:"ClashViewModel", i32:3, string:"EventHub", i32:4, string:"EventKey", i32:5, string:"__Text__ItemTextStyle", i32:6, string:"__Text__ItemTypeStyle", i32:7, string:"ProxyData", i32:8, string:"__Row__ListRowStyle", i32:9, string:"ProxyNodeItemPage", i32:10, ]}
+29 0xa57 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+3 0x20d4 { 4 [ string:"value", null_value:0, string:"group", null_value:0, ]}
+30 0xa09 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+31 0x1e67 { 4 [ string:"left", i32:14, string:"right", i32:16, ]}
+32 0x20e6 { 2 [ string:"checkedBackgroundColor", null_value:0, ]}
+33 0x1dd0 { 2 [ string:"overflow", null_value:0, ]}
+34 0xaae { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+35 0x1e4e { 6 [ string:"direction", null_value:0, string:"alignItems", null_value:0, string:"justifyContent", null_value:0, ]}
+36 0x1e40 { 2 [ string:"space", i32:3, ]}
+37 0x1ec0 { 1 [ i32:0, ]}
+38 0x1e7f { 3 [ i32:1, string:"this", i32:0, ]}
+39 0x1ec9 { 4 [ string:"on", method:#~@4<#on, method_affiliate:3, i32:0, ]}
+4 0x1e92 { 3 [ i32:1, string:"this", i32:0, ]}
+40 0x1e14 { 8 [ string:"left", i32:14, string:"right", i32:8, string:"top", i32:5, string:"bottom", i32:5, ]}
+41 0x1dc5 { 2 [ string:"checkedBackgroundColor", null_value:0, ]}
+5 0x1da5 { 2 [ string:"space", i32:3, ]}
+6 0x1edf { 10 [ string:"id", i32:125830983, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+7 0x2096 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+8 0x1db3 { 4 [ string:"value", null_value:0, string:"group", null_value:0, ]}
+9 0x20c9 { 2 [ string:"overflow", null_value:0, ]}
+13 0xa17 { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -50,7 +51,11 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
-38 0x1c3f { 3 [
+20 0xc59 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+22 0x1d52 { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:hilog,
 	};
@@ -63,13 +68,23 @@
 # RECORDS
 
 .language ArkTS
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0xc55
+	u32 moduleRecordIdx = 0xc59
+}
+
+.language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
 	u8 pkgName@entry = 0x0
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xa01
-	u32 moduleRecordIdx = 0xa0f
+	u32 scopeNames = 0xa09
+	u32 moduleRecordIdx = 0xa17
 }
 
 .language ArkTS
@@ -78,8 +93,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x1c04
-	u32 moduleRecordIdx = 0x1c3f
+	u32 scopeNames = 0x1d17
+	u32 moduleRecordIdx = 0x1d52
 }
 
 .language ECMAScript
@@ -131,6 +146,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -4611,150 +4637,150 @@ jump_label_6:
 # ====================
 # STRING
 
-[offset:0xaf8, name_value:UIAbility]
-[offset:0xb0c, name_value:hilog]
-[offset:0xb5a, name_value:DOMAIN]
-[offset:0x1572, name_value:delay]
-[offset:0x167a, name_value:params]
-[offset:0x1bac, name_value:AppConfig]
-[offset:0x1bb7, name_value:UIConfig]
-[offset:0x1bc1, name_value:EventHub]
-[offset:0x1bcb, name_value:ProxyData]
-[offset:0x1bd6, name_value:ClashViewModel]
-[offset:0x1bf1, name_value:ProxyNodeItemPage]
-[offset:0x1ff4, name_value:aboutToAppear]
-[offset:0x2003, name_value:initialRender]
-[offset:0x201d, name_value:overflow]
-[offset:0x202e, name_value:value]
-[offset:0x2035, name_value:group]
-[offset:0x203c, name_value:checkedBackgroundColor]
-[offset:0x206e, name_value:direction]
-[offset:0x2079, name_value:alignItems]
-[offset:0x2085, name_value:justifyContent]
-[offset:0x2095, name_value:on]
-[offset:0x209d, name_value:type]
-[offset:0x20d4, name_value:getColorForLatency]
-[offset:0x20e8, name_value:setInitiallyProvidedValue]
-[offset:0x2137, name_value:aboutToBeDeleted]
-[offset:0x215e, name_value:rerender]
-[offset:0x2180, name_value:pages/Index]
-[offset:0x222f, name_value:maxWidth]
-[offset:0x2245, name_value:info]
-[offset:0x224b, name_value:testTag]
-[offset:0x2254, name_value:%{public}s]
-[offset:0x2260, name_value:Ability onBackground]
-[offset:0x2276, name_value:Ability onCreate]
-[offset:0x2288, name_value:Ability onDestroy]
-[offset:0x229b, name_value:Ability onForeground]
-[offset:0x22b1, name_value:Ability onWindowStageCreate]
-[offset:0x22ce, name_value:loadContent]
-[offset:0x22db, name_value:Ability onWindowStageDestroy]
-[offset:0x22f9, name_value:code]
-[offset:0x22ff, name_value:error]
-[offset:0x2306, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x2335, name_value:JSON]
-[offset:0x233b, name_value:stringify]
-[offset:0x2346, name_value:Succeeded in loading the content.]
-[offset:0x2369, name_value:prototype]
-[offset:0x2374, name_value:TestDelay]
-[offset:0x237f, name_value:Small]
-[offset:0x2386, name_value:Large]
-[offset:0x238d, name_value:Row]
-[offset:0x2392, name_value:width]
-[offset:0x2399, name_value:100%]
-[offset:0x239f, name_value:padding]
-[offset:0x23a8, name_value:Text]
-[offset:0x23ae, name_value:fontColor]
-[offset:0x23b9, name_value:fontSize]
-[offset:0x23c3, name_value:fontWeight]
-[offset:0x23cf, name_value:FontWeight]
-[offset:0x23db, name_value:Medium]
-[offset:0x23e3, name_value:textOverflow]
-[offset:0x23f1, name_value:TextOverflow]
-[offset:0x23ff, name_value:Ellipsis]
-[offset:0x2409, name_value:]
-[offset:0x240b, name_value:timeout]
-[offset:0x2414, name_value:ms]
-[offset:0x2418, name_value:name]
-[offset:0x2435, name_value:g]
-[offset:0x2438, name_value:proxyCardSize]
-[offset:0x2447, name_value:stringDisplayIndex]
-[offset:0x245b, name_value:Color]
-[offset:0x2462, name_value:Black]
-[offset:0x2469, name_value:Map]
-[offset:0x246e, name_value:delayMap]
-[offset:0x2478, name_value:function]
-[offset:0x2482, name_value:paramsGenerator_]
-[offset:0x2494, name_value:initializeConsume]
-[offset:0x24a7, name_value:icon_emphasize]
-[offset:0x24b7, name_value:__icon_emphasize]
-[offset:0x24c9, name_value:createStorageLink]
-[offset:0x24dc, name_value:uiConfig]
-[offset:0x24e6, name_value:__uiConfig]
-[offset:0x24f2, name_value:SynchedPropertyObjectOneWayPU]
-[offset:0x2511, name_value:item]
-[offset:0x2517, name_value:__item]
-[offset:0x251f, name_value:SynchedPropertySimpleOneWayPU]
-[offset:0x253e, name_value:disabled]
-[offset:0x2548, name_value:__disabled]
-[offset:0x2554, name_value:ObservedPropertySimplePU]
-[offset:0x256e, name_value:__delay]
-[offset:0x2577, name_value:selected]
-[offset:0x2581, name_value:__selected]
-[offset:0x258d, name_value:appConfig]
-[offset:0x2598, name_value:__appConfig]
-[offset:0x25a5, name_value:isPXSecScreen]
-[offset:0x25b4, name_value:__isPXSecScreen]
-[offset:0x25c5, name_value:selectProxy]
-[offset:0x25d2, name_value:onLatencyChange]
-[offset:0x25e3, name_value:finalizeConstruction]
-[offset:0x25f9, name_value:get]
-[offset:0x25fe, name_value:SubscriberManager]
-[offset:0x2611, name_value:Get]
-[offset:0x2616, name_value:delete]
-[offset:0x261e, name_value:id__]
-[offset:0x2624, name_value:aboutToBeDeletedInternal]
-[offset:0x263e, name_value:set]
-[offset:0x2643, name_value:observeComponentCreation2]
-[offset:0x265e, name_value:If]
-[offset:0x2662, name_value:pop]
-[offset:0x2667, name_value:purgeDependencyOnElmtId]
-[offset:0x2680, name_value:updateDirtyElements]
-[offset:0x2695, name_value:updateElmtId]
-[offset:0x26a3, name_value:reset]
-[offset:0x26aa, name_value:create]
-[offset:0x26b2, name_value:ifElseBranchUpdateFunction]
-[offset:0x26ce, name_value:Flex]
-[offset:0x26d4, name_value:Column]
-[offset:0x26dc, name_value:Radio]
-[offset:0x26e3, name_value:FlexDirection]
-[offset:0x26f2, name_value:ItemAlign]
-[offset:0x26fd, name_value:Center]
-[offset:0x2705, name_value:FlexAlign]
-[offset:0x2710, name_value:SpaceBetween]
-[offset:0x271e, name_value:layoutWeight]
-[offset:0x272c, name_value:HorizontalAlign]
-[offset:0x273d, name_value:Start]
-[offset:0x2744, name_value:maxLines]
-[offset:0x274e, name_value:textAlign]
-[offset:0x2759, name_value:TextAlign]
-[offset:0x2764, name_value:End]
-[offset:0x2769, name_value:checked]
-[offset:0x2772, name_value:radioStyle]
-[offset:0x277e, name_value:hitTestBehavior]
-[offset:0x278f, name_value:HitTestMode]
-[offset:0x279c, name_value:None]
-[offset:0x27a2, name_value:70%]
-[offset:0x27a7, name_value:constraintSize]
-[offset:0x27b7, name_value:55%]
-[offset:0x27bc, name_value:Clip]
-[offset:0x27c2, name_value:MARQUEE]
-[offset:0x27cb, name_value:onChange]
-[offset:0x27d5, name_value:debug]
-[offset:0x27dc, name_value:ProxyPageGroupTag]
-[offset:0x27ef, name_value:ProxyNodeItem #onChange %{public}s的选中状态%{public}s]
-[offset:0x282c, name_value:ViewPU]
-[offset:0x2834, name_value:Reflect]
-[offset:0x283d, name_value:aboutToReuse]
-[offset:0x284b, name_value:aboutToDisappear]
-[offset:0x285d, name_value:registerNamedRoute]
+[offset:0xb00, name_value:UIAbility]
+[offset:0xb14, name_value:hilog]
+[offset:0xb62, name_value:DOMAIN]
+[offset:0x1685, name_value:delay]
+[offset:0x178d, name_value:params]
+[offset:0x1cbf, name_value:AppConfig]
+[offset:0x1cca, name_value:UIConfig]
+[offset:0x1cd4, name_value:EventHub]
+[offset:0x1cde, name_value:ProxyData]
+[offset:0x1ce9, name_value:ClashViewModel]
+[offset:0x1d04, name_value:ProxyNodeItemPage]
+[offset:0x2107, name_value:aboutToAppear]
+[offset:0x2116, name_value:initialRender]
+[offset:0x2130, name_value:overflow]
+[offset:0x2141, name_value:value]
+[offset:0x2148, name_value:group]
+[offset:0x214f, name_value:checkedBackgroundColor]
+[offset:0x2181, name_value:direction]
+[offset:0x218c, name_value:alignItems]
+[offset:0x2198, name_value:justifyContent]
+[offset:0x21a8, name_value:on]
+[offset:0x21b0, name_value:type]
+[offset:0x21e7, name_value:getColorForLatency]
+[offset:0x21fb, name_value:setInitiallyProvidedValue]
+[offset:0x224a, name_value:aboutToBeDeleted]
+[offset:0x2271, name_value:rerender]
+[offset:0x2293, name_value:pages/Index]
+[offset:0x2342, name_value:maxWidth]
+[offset:0x2358, name_value:info]
+[offset:0x235e, name_value:testTag]
+[offset:0x2367, name_value:%{public}s]
+[offset:0x2373, name_value:Ability onBackground]
+[offset:0x2389, name_value:Ability onCreate]
+[offset:0x239b, name_value:Ability onDestroy]
+[offset:0x23ae, name_value:Ability onForeground]
+[offset:0x23c4, name_value:Ability onWindowStageCreate]
+[offset:0x23e1, name_value:loadContent]
+[offset:0x23ee, name_value:Ability onWindowStageDestroy]
+[offset:0x240c, name_value:code]
+[offset:0x2412, name_value:error]
+[offset:0x2419, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x2448, name_value:JSON]
+[offset:0x244e, name_value:stringify]
+[offset:0x2459, name_value:Succeeded in loading the content.]
+[offset:0x247c, name_value:prototype]
+[offset:0x2487, name_value:TestDelay]
+[offset:0x2492, name_value:Small]
+[offset:0x2499, name_value:Large]
+[offset:0x24a0, name_value:Row]
+[offset:0x24a5, name_value:width]
+[offset:0x24ac, name_value:100%]
+[offset:0x24b2, name_value:padding]
+[offset:0x24bb, name_value:Text]
+[offset:0x24c1, name_value:fontColor]
+[offset:0x24cc, name_value:fontSize]
+[offset:0x24d6, name_value:fontWeight]
+[offset:0x24e2, name_value:FontWeight]
+[offset:0x24ee, name_value:Medium]
+[offset:0x24f6, name_value:textOverflow]
+[offset:0x2504, name_value:TextOverflow]
+[offset:0x2512, name_value:Ellipsis]
+[offset:0x251c, name_value:]
+[offset:0x251e, name_value:timeout]
+[offset:0x2527, name_value:ms]
+[offset:0x252b, name_value:name]
+[offset:0x2548, name_value:g]
+[offset:0x254b, name_value:proxyCardSize]
+[offset:0x255a, name_value:stringDisplayIndex]
+[offset:0x256e, name_value:Color]
+[offset:0x2575, name_value:Black]
+[offset:0x257c, name_value:Map]
+[offset:0x2581, name_value:delayMap]
+[offset:0x258b, name_value:function]
+[offset:0x2595, name_value:paramsGenerator_]
+[offset:0x25a7, name_value:initializeConsume]
+[offset:0x25ba, name_value:icon_emphasize]
+[offset:0x25ca, name_value:__icon_emphasize]
+[offset:0x25dc, name_value:createStorageLink]
+[offset:0x25ef, name_value:uiConfig]
+[offset:0x25f9, name_value:__uiConfig]
+[offset:0x2605, name_value:SynchedPropertyObjectOneWayPU]
+[offset:0x2624, name_value:item]
+[offset:0x262a, name_value:__item]
+[offset:0x2632, name_value:SynchedPropertySimpleOneWayPU]
+[offset:0x2651, name_value:disabled]
+[offset:0x265b, name_value:__disabled]
+[offset:0x2667, name_value:ObservedPropertySimplePU]
+[offset:0x2681, name_value:__delay]
+[offset:0x268a, name_value:selected]
+[offset:0x2694, name_value:__selected]
+[offset:0x26a0, name_value:appConfig]
+[offset:0x26ab, name_value:__appConfig]
+[offset:0x26b8, name_value:isPXSecScreen]
+[offset:0x26c7, name_value:__isPXSecScreen]
+[offset:0x26d8, name_value:selectProxy]
+[offset:0x26e5, name_value:onLatencyChange]
+[offset:0x26f6, name_value:finalizeConstruction]
+[offset:0x270c, name_value:get]
+[offset:0x2711, name_value:SubscriberManager]
+[offset:0x2724, name_value:Get]
+[offset:0x2729, name_value:delete]
+[offset:0x2731, name_value:id__]
+[offset:0x2737, name_value:aboutToBeDeletedInternal]
+[offset:0x2751, name_value:set]
+[offset:0x2756, name_value:observeComponentCreation2]
+[offset:0x2771, name_value:If]
+[offset:0x2775, name_value:pop]
+[offset:0x277a, name_value:purgeDependencyOnElmtId]
+[offset:0x2793, name_value:updateDirtyElements]
+[offset:0x27a8, name_value:updateElmtId]
+[offset:0x27b6, name_value:reset]
+[offset:0x27bd, name_value:create]
+[offset:0x27c5, name_value:ifElseBranchUpdateFunction]
+[offset:0x27e1, name_value:Flex]
+[offset:0x27e7, name_value:Column]
+[offset:0x27ef, name_value:Radio]
+[offset:0x27f6, name_value:FlexDirection]
+[offset:0x2805, name_value:ItemAlign]
+[offset:0x2810, name_value:Center]
+[offset:0x2818, name_value:FlexAlign]
+[offset:0x2823, name_value:SpaceBetween]
+[offset:0x2831, name_value:layoutWeight]
+[offset:0x283f, name_value:HorizontalAlign]
+[offset:0x2850, name_value:Start]
+[offset:0x2857, name_value:maxLines]
+[offset:0x2861, name_value:textAlign]
+[offset:0x286c, name_value:TextAlign]
+[offset:0x2877, name_value:End]
+[offset:0x287c, name_value:checked]
+[offset:0x2885, name_value:radioStyle]
+[offset:0x2891, name_value:hitTestBehavior]
+[offset:0x28a2, name_value:HitTestMode]
+[offset:0x28af, name_value:None]
+[offset:0x28b5, name_value:70%]
+[offset:0x28ba, name_value:constraintSize]
+[offset:0x28ca, name_value:55%]
+[offset:0x28cf, name_value:Clip]
+[offset:0x28d5, name_value:MARQUEE]
+[offset:0x28de, name_value:onChange]
+[offset:0x28e8, name_value:debug]
+[offset:0x28ef, name_value:ProxyPageGroupTag]
+[offset:0x2902, name_value:ProxyNodeItem #onChange %{public}s的选中状态%{public}s]
+[offset:0x293f, name_value:ViewPU]
+[offset:0x2947, name_value:Reflect]
+[offset:0x2950, name_value:aboutToReuse]
+[offset:0x295e, name_value:aboutToDisappear]
+[offset:0x2970, name_value:registerNamedRoute]

@@ -1,0 +1,2 @@
+ERROR 10605176 ets/pages/Index.ets:5:7 Only "Sendable" function or "Sendable" typeAlias object can be assigned to "Sendable" typeAlias (arkts-sendable-function-assignment)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

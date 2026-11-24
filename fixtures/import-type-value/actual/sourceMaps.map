@@ -18,7 +18,7 @@
       "entry/src/main/ets/pages/Index.ets"
     ],
     "names": [],
-    "mappings": ";;;;;;;;;;;AAKA;EACE;EACA;;MAKK;;;;;;OACE;;;;;;QAAA;;;;;OAAA;;;;;;;SAAA;KAAA;;;KAAA;;;CAEP;;GACE;;;GACE",
+    "mappings": ";;;;;;;;;;;AAKA;IACE;IACA;;MAKK;;;;;;OACE;;;;;;QAAA;;;;;OAAA;;;;;;;SAAA;KAAA;;;KAAA;;;CAEP;;GACE;;;GACE",
     "entry-package-info": "entry|1.0.0"
   },
   "entry|entry|1.0.0|src/main/ets/pages/Model.ts": {

@@ -5,7 +5,7 @@ interface KitImport_Params {}
 import hilog from '@ohos:hilog';
 import curves from '@native:ohos.curves';
 import { ErrorCode } from '@ohos:ability.errorCode';
-import { Action as KeyAction } from '@ohos:multimodalInput.touchEvent';
+import { Action as KeyAction } from "@ohos:multimodalInput.touchEvent";
 const CURVE = curves.cubicBezierCurve(.1, 0, .9, 1);
 class KitImport extends ViewPU {
 	constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {

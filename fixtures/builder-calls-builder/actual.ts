@@ -37,9 +37,17 @@ class BuilderCalls extends ViewPU {
 	}
 	Badge(parent = null) {
 		this.observeComponentCreation2((elmtId, isInitialRender) => {
-			Text.create('badge');
-		}, Text);
-		Text.pop();
+			ForEach.create();
+			const forEachItemGenFunction = (_item) => {
+				const item = _item;
+				this.observeComponentCreation2((elmtId, isInitialRender) => {
+					Text.create(item);
+				}, Text);
+				Text.pop();
+			};
+			this.forEachUpdateFunction(elmtId, ['badge'], forEachItemGenFunction);
+		}, ForEach);
+		ForEach.pop();
 	}
 	Panel(parent = null) {
 		this.observeComponentCreation2((elmtId, isInitialRender) => {

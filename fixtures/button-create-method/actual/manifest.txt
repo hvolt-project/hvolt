@@ -4,4 +4,5 @@ pkgContextInfo.json
 resources.index
 modules.abc
 sourceMaps.map
+diagnostics.txt
 Index.ts

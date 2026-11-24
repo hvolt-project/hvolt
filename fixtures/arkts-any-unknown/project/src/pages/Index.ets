@@ -1,12 +1,11 @@
-function anyUse() {
-  const x: any = 1;
-  const y = 2 as any;
-  return x + y;
+
+function echo(value) {
+  return value;
 }
 
 @Entry
 @Component
-struct AnyProbe {
+struct BatchProbe50 {
   build() {
     Column() {
       Text("x")

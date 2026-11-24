@@ -11,7 +11,7 @@ interface Index_Params {
 // of `process_component_member.js`'s `simpleTypes` — `string`, `number`, `boolean`, an enum — is
 // not, and neither is a read that only takes part in a larger expression.
 class Options {
-  series: string[] = []
+    series: string[] = []
 }
 enum Mode {
 	Off = 0,

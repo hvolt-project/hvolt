@@ -10,8 +10,8 @@ import type { Shape } from '@normalized:N&&&entry/src/main/ets/pages/Model&';
 // even though a syntactic reading counts the `implements` clause as a value position. `Mode`
 // is an enum and stays a value import — the two are split into their own statements.
 class Circle implements Shape {
-  kind: string = 'circle';
-  mode: Mode = Mode.Fast;
+    kind: string = 'circle';
+    mode: Mode = Mode.Fast;
 }
 class ImportTypeValue extends ViewPU {
 	constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {

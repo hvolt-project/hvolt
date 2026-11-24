@@ -3,23 +3,28 @@
 # ====================
 # LITERALS
 
-0 0x7bb { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-1 0xa3b { 2 [ string:"seed", i32:1, ]}
-10 0xe8a { 2 [ string:"MapTypeArgs", string:"initialRender", ]}
-11 0x76d { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-13 0xa0e { 1 [ string:"MapHolder", ]}
-2 0xf52 { 3 [ i32:1, string:"MapTypeArgs", i32:0, ]}
-3 0xed5 { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-4 0xf12 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-6 0xec2 { 3 [ i32:1, string:"this", i32:0, ]}
-8 0xa49 { 4 [ string:"total", method:#~@0>#total, method_affiliate:0, i32:1, ]}
-9 0x812 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-12 0xa17 { 1 [
+0 0xfe8 { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+1 0xb4e { 2 [ string:"seed", i32:1, ]}
+10 0x1025 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+11 0xf9d { 2 [ string:"MapTypeArgs", string:"initialRender", ]}
+15 0xb21 { 1 [ string:"MapHolder", ]}
+2 0xb5c { 4 [ string:"total", method:#~@0>#total, method_affiliate:0, i32:1, ]}
+3 0x81a { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+4 0xfd5 { 3 [ i32:1, string:"this", i32:0, ]}
+6 0x1065 { 3 [ i32:1, string:"MapTypeArgs", i32:0, ]}
+7 0x7c3 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+8 0x9c1 
+9 0x775 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+12 0x9c5 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+13 0xb2a { 1 [
 	MODULE_REQUEST_ARRAY: {
 	};
 	ModuleTag: LOCAL_EXPORT, local_name: MapHolder, export_name: MapHolder;
 ]}
-5 0x77b { 3 [
+14 0x783 { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -28,7 +33,7 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
-7 0xe98 { 1 [
+5 0xfab { 1 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @normalized:N&&&entry/src/main/ets/common/MapHolder&,
 	};
@@ -38,14 +43,24 @@
 # ====================
 # RECORDS
 
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x9c1
+	u32 moduleRecordIdx = 0x9c5
+}
+
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
 	u8 pkgName@entry = 0x0
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x76d
-	u32 moduleRecordIdx = 0x77b
+	u32 scopeNames = 0x775
+	u32 moduleRecordIdx = 0x783
 }
 
 .language ArkTS
@@ -54,8 +69,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xa0e
-	u32 moduleRecordIdx = 0xa17
+	u32 scopeNames = 0xb21
+	u32 moduleRecordIdx = 0xb2a
 }
 
 .language ArkTS
@@ -64,8 +79,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xe8a
-	u32 moduleRecordIdx = 0xe98
+	u32 scopeNames = 0xf9d
+	u32 moduleRecordIdx = 0xfab
 }
 
 .language ECMAScript
@@ -117,6 +132,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -1151,64 +1177,64 @@ jump_label_2:
 # ====================
 # STRING
 
-[offset:0x864, name_value:UIAbility]
-[offset:0x878, name_value:hilog]
-[offset:0x8c6, name_value:DOMAIN]
-[offset:0xa03, name_value:MapHolder]
-[offset:0xa65, name_value:total]
-[offset:0xe7d, name_value:MapTypeArgs]
-[offset:0xf65, name_value:initialRender]
-[offset:0xfaa, name_value:setInitiallyProvidedValue]
-[offset:0xff9, name_value:aboutToBeDeleted]
-[offset:0x1046, name_value:pages/Index]
-[offset:0x10be, name_value:info]
-[offset:0x10c4, name_value:testTag]
-[offset:0x10cd, name_value:%{public}s]
-[offset:0x10d9, name_value:Ability onBackground]
-[offset:0x10ef, name_value:Ability onCreate]
-[offset:0x1101, name_value:Ability onDestroy]
-[offset:0x1114, name_value:Ability onForeground]
-[offset:0x112a, name_value:Ability onWindowStageCreate]
-[offset:0x1147, name_value:loadContent]
-[offset:0x1154, name_value:Ability onWindowStageDestroy]
-[offset:0x1172, name_value:code]
-[offset:0x1178, name_value:error]
-[offset:0x117f, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x11ae, name_value:JSON]
-[offset:0x11b4, name_value:stringify]
-[offset:0x11bf, name_value:Succeeded in loading the content.]
-[offset:0x11e2, name_value:prototype]
-[offset:0x11ed, name_value:Map]
-[offset:0x11f2, name_value:cache]
-[offset:0x1210, name_value:size]
-[offset:0x1216, name_value:Observed]
-[offset:0x1220, name_value:function]
-[offset:0x122a, name_value:paramsGenerator_]
-[offset:0x123c, name_value:createStorageLink]
-[offset:0x124f, name_value:mapProfiles]
-[offset:0x125c, name_value:profiles]
-[offset:0x1266, name_value:__profiles]
-[offset:0x1272, name_value:ObservedPropertyObjectPU]
-[offset:0x128c, name_value:holder]
-[offset:0x1294, name_value:__holder]
-[offset:0x129e, name_value:finalizeConstruction]
-[offset:0x12b4, name_value:SubscriberManager]
-[offset:0x12c7, name_value:Get]
-[offset:0x12cc, name_value:delete]
-[offset:0x12d4, name_value:id__]
-[offset:0x12da, name_value:aboutToBeDeletedInternal]
-[offset:0x12f4, name_value:get]
-[offset:0x12f9, name_value:set]
-[offset:0x12fe, name_value:observeComponentCreation2]
-[offset:0x1319, name_value:Column]
-[offset:0x1321, name_value:Text]
-[offset:0x1327, name_value:pop]
-[offset:0x132c, name_value:purgeDependencyOnElmtId]
-[offset:0x1345, name_value:updateDirtyElements]
-[offset:0x135a, name_value:create]
-[offset:0x1362, name_value:]
-[offset:0x1364, name_value:ViewPU]
-[offset:0x136c, name_value:Reflect]
-[offset:0x1375, name_value:rerender]
-[offset:0x137f, name_value:getEntryName]
-[offset:0x138d, name_value:registerNamedRoute]
+[offset:0x86c, name_value:UIAbility]
+[offset:0x880, name_value:hilog]
+[offset:0x8ce, name_value:DOMAIN]
+[offset:0xb16, name_value:MapHolder]
+[offset:0xb78, name_value:total]
+[offset:0xf90, name_value:MapTypeArgs]
+[offset:0x1078, name_value:initialRender]
+[offset:0x10bd, name_value:setInitiallyProvidedValue]
+[offset:0x110c, name_value:aboutToBeDeleted]
+[offset:0x1159, name_value:pages/Index]
+[offset:0x11d1, name_value:info]
+[offset:0x11d7, name_value:testTag]
+[offset:0x11e0, name_value:%{public}s]
+[offset:0x11ec, name_value:Ability onBackground]
+[offset:0x1202, name_value:Ability onCreate]
+[offset:0x1214, name_value:Ability onDestroy]
+[offset:0x1227, name_value:Ability onForeground]
+[offset:0x123d, name_value:Ability onWindowStageCreate]
+[offset:0x125a, name_value:loadContent]
+[offset:0x1267, name_value:Ability onWindowStageDestroy]
+[offset:0x1285, name_value:code]
+[offset:0x128b, name_value:error]
+[offset:0x1292, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x12c1, name_value:JSON]
+[offset:0x12c7, name_value:stringify]
+[offset:0x12d2, name_value:Succeeded in loading the content.]
+[offset:0x12f5, name_value:prototype]
+[offset:0x1300, name_value:Map]
+[offset:0x1305, name_value:cache]
+[offset:0x1323, name_value:size]
+[offset:0x1329, name_value:Observed]
+[offset:0x1333, name_value:function]
+[offset:0x133d, name_value:paramsGenerator_]
+[offset:0x134f, name_value:createStorageLink]
+[offset:0x1362, name_value:mapProfiles]
+[offset:0x136f, name_value:profiles]
+[offset:0x1379, name_value:__profiles]
+[offset:0x1385, name_value:ObservedPropertyObjectPU]
+[offset:0x139f, name_value:holder]
+[offset:0x13a7, name_value:__holder]
+[offset:0x13b1, name_value:finalizeConstruction]
+[offset:0x13c7, name_value:SubscriberManager]
+[offset:0x13da, name_value:Get]
+[offset:0x13df, name_value:delete]
+[offset:0x13e7, name_value:id__]
+[offset:0x13ed, name_value:aboutToBeDeletedInternal]
+[offset:0x1407, name_value:get]
+[offset:0x140c, name_value:set]
+[offset:0x1411, name_value:observeComponentCreation2]
+[offset:0x142c, name_value:Column]
+[offset:0x1434, name_value:Text]
+[offset:0x143a, name_value:pop]
+[offset:0x143f, name_value:purgeDependencyOnElmtId]
+[offset:0x1458, name_value:updateDirtyElements]
+[offset:0x146d, name_value:create]
+[offset:0x1475, name_value:]
+[offset:0x1477, name_value:ViewPU]
+[offset:0x147f, name_value:Reflect]
+[offset:0x1488, name_value:rerender]
+[offset:0x1492, name_value:getEntryName]
+[offset:0x14a0, name_value:registerNamedRoute]

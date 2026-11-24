@@ -2,15 +2,16 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 	Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {});
 }
 interface BarrelPage_Params {}
+export { Helper } from '@normalized:N&&&entry/src/main/ets/pages/Helper&';
 // FUNCTION_COMMENT
 export function helperFn(): number {
-  return 1
+    return 1
 }
 // CONST_COMMENT
 export const helperConst: number = 2
 // CLASS_COMMENT
 export class HelperClass {
-  value: number = 3
+    value: number = 3
 }
 class BarrelPage extends ViewPU {
 	constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
@@ -45,7 +46,6 @@ class BarrelPage extends ViewPU {
 		return 'BarrelPage';
 	}
 }
-export { Helper } from '@normalized:N&&&entry/src/main/ets/pages/Helper&';
 registerNamedRoute(() => new BarrelPage(undefined, {}), '', {
 	bundleName: 'com.example.demo',
 	moduleName: 'entry',

@@ -13,9 +13,17 @@ class V2Builder extends ViewV2 {
 	@Local label: string;
 	chip(t: string, parent = null) {
 		this.observeComponentCreation2((elmtId, isInitialRender) => {
-			Text.create(t);
-		}, Text);
-		Text.pop();
+			ForEach.create();
+			const forEachItemGenFunction = (_item) => {
+				const item = _item;
+				this.observeComponentCreation2((elmtId, isInitialRender) => {
+					Text.create(item);
+				}, Text);
+				Text.pop();
+			};
+			this.forEachUpdateFunction(elmtId, [t], forEachItemGenFunction);
+		}, ForEach);
+		ForEach.pop();
 	}
 	initialRender() {
 		this.observeComponentCreation2((elmtId, isInitialRender) => {

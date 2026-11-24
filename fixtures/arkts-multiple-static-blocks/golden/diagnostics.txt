@@ -1,0 +1,2 @@
+ERROR 10605016 ets/pages/Index.ets:6:3 Only one static block is supported (arkts-no-multiple-static-blocks)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

@@ -50,7 +50,7 @@ class ButtonCreateMethod extends ViewPU {
 		}, Button);
 		Button.pop();
 		this.observeComponentCreation2((elmtId, isInitialRender) => {
-			Button.createWithLabel({ "id": 16777216, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+			Button.createWithLabel({ "id": 16777218, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
 		}, Button);
 		Button.pop();
 		this.observeComponentCreation2((elmtId, isInitialRender) => {

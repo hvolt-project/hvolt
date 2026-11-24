@@ -3,20 +3,17 @@
 # ====================
 # LITERALS
 
-0 0xd5e { 13 [ string:"setInitiallyProvidedValue", method:#~@1>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@1>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@1>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@1>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-10 0x75d { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-2 0xddb { 5 [ i32:2, string:"animWidth", i32:0, string:"AnimatableExtendPage", i32:1, ]}
-3 0x7ab { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-4 0xd41 { 5 [ i32:2, string:"elmtId", i32:0, string:"parent", i32:1, ]}
-5 0xcff { 3 [ string:"animWidth", string:"AnimatableExtendPage", string:"initialRender", ]}
-6 0xd2e { 3 [ i32:1, string:"this", i32:0, ]}
-7 0xd9b { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-9 0x802 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-1 0xd12 { 0 [
-	MODULE_REQUEST_ARRAY: {
-	};
-]}
-8 0x76b { 3 [
+0 0xeae { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+1 0x80a { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+11 0xe12 { 3 [ string:"animWidth", string:"AnimatableExtendPage", string:"initialRender", ]}
+2 0xe71 { 13 [ string:"setInitiallyProvidedValue", method:#~@1>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@1>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@1>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@1>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+3 0xe54 { 5 [ i32:2, string:"elmtId", i32:0, string:"parent", i32:1, ]}
+4 0xeee { 5 [ i32:2, string:"animWidth", i32:0, string:"AnimatableExtendPage", i32:1, ]}
+5 0xe41 { 3 [ i32:1, string:"this", i32:0, ]}
+6 0x7b3 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+7 0x9b1 
+8 0x765 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+10 0x773 { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -25,9 +22,27 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
+12 0xe25 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+9 0x9b5 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
 
 # ====================
 # RECORDS
+
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x9b1
+	u32 moduleRecordIdx = 0x9b5
+}
 
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
@@ -35,8 +50,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x75d
-	u32 moduleRecordIdx = 0x76b
+	u32 scopeNames = 0x765
+	u32 moduleRecordIdx = 0x773
 }
 
 .language ArkTS
@@ -45,8 +60,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xcff
-	u32 moduleRecordIdx = 0xd12
+	u32 scopeNames = 0xe12
+	u32 moduleRecordIdx = 0xe25
 }
 
 .language ECMAScript
@@ -98,6 +113,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -1040,64 +1066,64 @@ jump_label_2:
 # ====================
 # STRING
 
-[offset:0x854, name_value:UIAbility]
-[offset:0x868, name_value:hilog]
-[offset:0x8b6, name_value:DOMAIN]
-[offset:0xb63, name_value:width]
-[offset:0xce9, name_value:AnimatableExtendPage]
-[offset:0xdf8, name_value:animWidth]
-[offset:0xe03, name_value:initialRender]
-[offset:0xe12, name_value:setInitiallyProvidedValue]
-[offset:0xe61, name_value:aboutToBeDeleted]
-[offset:0xeae, name_value:pages/Index]
-[offset:0xf26, name_value:info]
-[offset:0xf2c, name_value:testTag]
-[offset:0xf35, name_value:%{public}s]
-[offset:0xf41, name_value:Ability onBackground]
-[offset:0xf57, name_value:Ability onCreate]
-[offset:0xf69, name_value:Ability onDestroy]
-[offset:0xf7c, name_value:Ability onForeground]
-[offset:0xf92, name_value:Ability onWindowStageCreate]
-[offset:0xfaf, name_value:loadContent]
-[offset:0xfbc, name_value:Ability onWindowStageDestroy]
-[offset:0xfda, name_value:code]
-[offset:0xfe0, name_value:error]
-[offset:0xfe7, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x1016, name_value:JSON]
-[offset:0x101c, name_value:stringify]
-[offset:0x1027, name_value:Succeeded in loading the content.]
-[offset:0x104a, name_value:prototype]
-[offset:0x1055, name_value:Text]
-[offset:0x105b, name_value:createAnimatableProperty]
-[offset:0x1075, name_value:updateAnimatableProperty]
-[offset:0x108f, name_value:ViewStackProcessor]
-[offset:0x10a3, name_value:StartGetAccessRecordingFor]
-[offset:0x10bf, name_value:GetAndPushFrameNode]
-[offset:0x10d4, name_value:StopGetAccessRecording]
-[offset:0x10ec, name_value:finishUpdateFunc]
-[offset:0x10fe, name_value:function]
-[offset:0x1108, name_value:paramsGenerator_]
-[offset:0x111a, name_value:ObservedPropertySimplePU]
-[offset:0x1134, name_value:target]
-[offset:0x113c, name_value:__target]
-[offset:0x1146, name_value:finalizeConstruction]
-[offset:0x1173, name_value:SubscriberManager]
-[offset:0x1186, name_value:Get]
-[offset:0x118b, name_value:delete]
-[offset:0x1193, name_value:id__]
-[offset:0x1199, name_value:aboutToBeDeletedInternal]
-[offset:0x11b3, name_value:observeComponentCreation2]
-[offset:0x11ce, name_value:Column]
-[offset:0x11d6, name_value:pop]
-[offset:0x11db, name_value:purgeDependencyOnElmtId]
-[offset:0x11f4, name_value:updateDirtyElements]
-[offset:0x1209, name_value:get]
-[offset:0x120e, name_value:set]
-[offset:0x1213, name_value:create]
-[offset:0x121b, name_value:x]
-[offset:0x121e, name_value:ViewPU]
-[offset:0x1226, name_value:Reflect]
-[offset:0x122f, name_value:rerender]
-[offset:0x1239, name_value:getEntryName]
-[offset:0x1247, name_value:registerNamedRoute]
-[offset:0x125b, name_value:]
+[offset:0x85c, name_value:UIAbility]
+[offset:0x870, name_value:hilog]
+[offset:0x8be, name_value:DOMAIN]
+[offset:0xc76, name_value:width]
+[offset:0xdfc, name_value:AnimatableExtendPage]
+[offset:0xf0b, name_value:animWidth]
+[offset:0xf16, name_value:initialRender]
+[offset:0xf25, name_value:setInitiallyProvidedValue]
+[offset:0xf74, name_value:aboutToBeDeleted]
+[offset:0xfc1, name_value:pages/Index]
+[offset:0x1039, name_value:info]
+[offset:0x103f, name_value:testTag]
+[offset:0x1048, name_value:%{public}s]
+[offset:0x1054, name_value:Ability onBackground]
+[offset:0x106a, name_value:Ability onCreate]
+[offset:0x107c, name_value:Ability onDestroy]
+[offset:0x108f, name_value:Ability onForeground]
+[offset:0x10a5, name_value:Ability onWindowStageCreate]
+[offset:0x10c2, name_value:loadContent]
+[offset:0x10cf, name_value:Ability onWindowStageDestroy]
+[offset:0x10ed, name_value:code]
+[offset:0x10f3, name_value:error]
+[offset:0x10fa, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x1129, name_value:JSON]
+[offset:0x112f, name_value:stringify]
+[offset:0x113a, name_value:Succeeded in loading the content.]
+[offset:0x115d, name_value:prototype]
+[offset:0x1168, name_value:Text]
+[offset:0x116e, name_value:createAnimatableProperty]
+[offset:0x1188, name_value:updateAnimatableProperty]
+[offset:0x11a2, name_value:ViewStackProcessor]
+[offset:0x11b6, name_value:StartGetAccessRecordingFor]
+[offset:0x11d2, name_value:GetAndPushFrameNode]
+[offset:0x11e7, name_value:StopGetAccessRecording]
+[offset:0x11ff, name_value:finishUpdateFunc]
+[offset:0x1211, name_value:function]
+[offset:0x121b, name_value:paramsGenerator_]
+[offset:0x122d, name_value:ObservedPropertySimplePU]
+[offset:0x1247, name_value:target]
+[offset:0x124f, name_value:__target]
+[offset:0x1259, name_value:finalizeConstruction]
+[offset:0x1286, name_value:SubscriberManager]
+[offset:0x1299, name_value:Get]
+[offset:0x129e, name_value:delete]
+[offset:0x12a6, name_value:id__]
+[offset:0x12ac, name_value:aboutToBeDeletedInternal]
+[offset:0x12c6, name_value:observeComponentCreation2]
+[offset:0x12e1, name_value:Column]
+[offset:0x12e9, name_value:pop]
+[offset:0x12ee, name_value:purgeDependencyOnElmtId]
+[offset:0x1307, name_value:updateDirtyElements]
+[offset:0x131c, name_value:get]
+[offset:0x1321, name_value:set]
+[offset:0x1326, name_value:create]
+[offset:0x132e, name_value:x]
+[offset:0x1331, name_value:ViewPU]
+[offset:0x1339, name_value:Reflect]
+[offset:0x1342, name_value:rerender]
+[offset:0x134c, name_value:getEntryName]
+[offset:0x135a, name_value:registerNamedRoute]
+[offset:0x136e, name_value:]

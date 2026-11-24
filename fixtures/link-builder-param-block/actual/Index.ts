@@ -129,9 +129,17 @@ class Index extends ViewPU {
 						copied: this.flag,
 						content: () => {
 							this.observeComponentCreation2((elmtId, isInitialRender) => {
-								Text.create('body');
-							}, Text);
-							Text.pop();
+								ForEach.create();
+								const forEachItemGenFunction = (_item) => {
+									const item = _item;
+									this.observeComponentCreation2((elmtId, isInitialRender) => {
+										Text.create(item);
+									}, Text);
+									Text.pop();
+								};
+								this.forEachUpdateFunction(elmtId, ['body'], forEachItemGenFunction);
+							}, ForEach);
+							ForEach.pop();
 						}
 					}, undefined, elmtId, () => {}, {
 						page: 'entry/src/main/ets/pages/Index.ets',
@@ -145,9 +153,17 @@ class Index extends ViewPU {
 							copied: this.flag,
 							content: () => {
 								this.observeComponentCreation2((elmtId, isInitialRender) => {
-									Text.create('body');
-								}, Text);
-								Text.pop();
+									ForEach.create();
+									const forEachItemGenFunction = (_item) => {
+										const item = _item;
+										this.observeComponentCreation2((elmtId, isInitialRender) => {
+											Text.create(item);
+										}, Text);
+										Text.pop();
+									};
+									this.forEachUpdateFunction(elmtId, ['body'], forEachItemGenFunction);
+								}, ForEach);
+								ForEach.pop();
 							}
 						};
 					};

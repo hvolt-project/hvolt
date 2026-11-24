@@ -23,13 +23,13 @@
   },
   "entry|entry|1.0.0|src/main/ets/util/Pair.ts": {
     "version": 3,
-    "file": "Pair.ets",
+    "file": "Pair.ts",
     "sourceRoot": "",
     "sources": [
-      "entry/src/main/ets/util/Pair.ets"
+      "entry/src/main/ets/util/Pair.ts"
     ],
     "names": [],
-    "mappings": "AAAA;CACE;CACA;;AAGF;EACE;EACA;EACA;;AAGF;EACE;EACA;EACA",
+    "mappings": "AAAA;CACE;CACA;;AAGF;IACE;IACA;IACA;;AAGF;IACE;IACA;IACA",
     "entry-package-info": "entry|1.0.0"
   }
 }

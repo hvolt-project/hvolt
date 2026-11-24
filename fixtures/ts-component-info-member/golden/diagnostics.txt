@@ -1,0 +1,3 @@
+ERROR 10505001 ets/pages/Index.ets:6:15 Property 'width' does not exist on type 'ComponentInfo'.
+WARN - ets/pages/Index.ets:5:31 'getRectangleById' has been deprecated.
+WARN - ets/pages/Index.ets:5:31 Function may throw exceptions. Special handling is required.

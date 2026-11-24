@@ -3,20 +3,25 @@
 # ====================
 # LITERALS
 
-0 0x84e { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-1 0x7f7 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-10 0x1078 { 3 [ i32:1, string:"this", i32:0, ]}
-11 0xfee { 3 [ string:"UnicodeComments", string:"initialRender", string:"Index", ]}
-13 0x1118 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-14 0x7a9 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-2 0x10db { 13 [ string:"setInitiallyProvidedValue", method:#~@2>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@2>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@2>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@2>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-3 0x103a { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:31, string:"col", i32:7, ]}
-4 0x101d { 5 [ i32:2, string:"UnicodeComments", i32:0, string:"Index", i32:1, ]}
-6 0x108b { 3 [ i32:1, string:"this", i32:0, ]}
-7 0x106a { 2 [ string:"name", string:"UnicodeComments", ]}
-8 0x105c { 2 [ string:"space", i32:8, ]}
-9 0x109e { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-12 0x7b7 { 3 [
+0 0x11b1 { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+10 0x117d { 2 [ string:"name", string:"UnicodeComments", ]}
+11 0x119e { 3 [ i32:1, string:"this", i32:0, ]}
+12 0x11ee { 13 [ string:"setInitiallyProvidedValue", method:#~@2>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@2>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@2>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@2>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+13 0x856 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+14 0x116f { 2 [ string:"space", i32:8, ]}
+15 0x122b { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+16 0x114d { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:31, string:"col", i32:7, ]}
+2 0x118b { 3 [ i32:1, string:"this", i32:0, ]}
+5 0x7b1 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+6 0x1130 { 5 [ i32:2, string:"UnicodeComments", i32:0, string:"Index", i32:1, ]}
+7 0x9fd 
+8 0x7ff { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+9 0x1101 { 3 [ string:"UnicodeComments", string:"initialRender", string:"Index", ]}
+1 0x1114 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+3 0x7bf { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -25,7 +30,7 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
-5 0x1001 { 0 [
+4 0xa01 { 0 [
 	MODULE_REQUEST_ARRAY: {
 	};
 ]}
@@ -33,14 +38,24 @@
 # ====================
 # RECORDS
 
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x9fd
+	u32 moduleRecordIdx = 0xa01
+}
+
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
 	u8 pkgName@entry = 0x0
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x7a9
-	u32 moduleRecordIdx = 0x7b7
+	u32 scopeNames = 0x7b1
+	u32 moduleRecordIdx = 0x7bf
 }
 
 .language ArkTS
@@ -49,8 +64,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xfee
-	u32 moduleRecordIdx = 0x1001
+	u32 scopeNames = 0x1101
+	u32 moduleRecordIdx = 0x1114
 }
 
 .language ECMAScript
@@ -102,6 +117,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -1536,69 +1562,69 @@ jump_label_2:
 # ====================
 # STRING
 
-[offset:0x8a0, name_value:UIAbility]
-[offset:0x8b4, name_value:hilog]
-[offset:0x902, name_value:DOMAIN]
-[offset:0xfd6, name_value:UnicodeComments]
-[offset:0xfe7, name_value:Index]
-[offset:0x1158, name_value:initialRender]
-[offset:0x11a9, name_value:setInitiallyProvidedValue]
-[offset:0x11f8, name_value:aboutToBeDeleted]
-[offset:0x1245, name_value:pages/Index]
-[offset:0x12bd, name_value:info]
-[offset:0x12c3, name_value:testTag]
-[offset:0x12cc, name_value:%{public}s]
-[offset:0x12d8, name_value:Ability onBackground]
-[offset:0x12ee, name_value:Ability onCreate]
-[offset:0x1300, name_value:Ability onDestroy]
-[offset:0x1313, name_value:Ability onForeground]
-[offset:0x1329, name_value:Ability onWindowStageCreate]
-[offset:0x1346, name_value:loadContent]
-[offset:0x1353, name_value:Ability onWindowStageDestroy]
-[offset:0x1371, name_value:code]
-[offset:0x1377, name_value:error]
-[offset:0x137e, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x13ad, name_value:JSON]
-[offset:0x13b3, name_value:stringify]
-[offset:0x13be, name_value:Succeeded in loading the content.]
-[offset:0x13e1, name_value:prototype]
-[offset:0x13ec, name_value:function]
-[offset:0x13f6, name_value:paramsGenerator_]
-[offset:0x1408, name_value:ObservedPropertySimplePU]
-[offset:0x1422, name_value:计数]
-[offset:0x142a, name_value:__计数]
-[offset:0x1434, name_value:finalizeConstruction]
-[offset:0x1461, name_value:SubscriberManager]
-[offset:0x1474, name_value:Get]
-[offset:0x1479, name_value:delete]
-[offset:0x1481, name_value:id__]
-[offset:0x1487, name_value:aboutToBeDeletedInternal]
-[offset:0x14a1, name_value:observeComponentCreation2]
-[offset:0x14bc, name_value:Column]
-[offset:0x14c4, name_value:Text]
-[offset:0x14ca, name_value:pop]
-[offset:0x14cf, name_value:Button]
-[offset:0x14d7, name_value:purgeDependencyOnElmtId]
-[offset:0x14f0, name_value:updateDirtyElements]
-[offset:0x1505, name_value:get]
-[offset:0x150a, name_value:set]
-[offset:0x150f, name_value:create]
-[offset:0x1517, name_value:width]
-[offset:0x151e, name_value:100%]
-[offset:0x1524, name_value:当前值：]
-[offset:0x1532, name_value:，单位“个”]
-[offset:0x1546, name_value:fontSize]
-[offset:0x1550, name_value:createWithLabel]
-[offset:0x1561, name_value:点一下加一]
-[offset:0x1572, name_value:onClick]
-[offset:0x157b, name_value:中文标题]
-[offset:0x1589, name_value:标题]
-[offset:0x1591, name_value:__标题]
-[offset:0x159b, name_value:padding]
-[offset:0x15a4, name_value:ViewPU]
-[offset:0x15ac, name_value:updateStateVarsOfChildByElmtId]
-[offset:0x15cc, name_value:Reflect]
-[offset:0x15d5, name_value:rerender]
-[offset:0x15df, name_value:getEntryName]
-[offset:0x15ed, name_value:registerNamedRoute]
-[offset:0x1601, name_value:]
+[offset:0x8a8, name_value:UIAbility]
+[offset:0x8bc, name_value:hilog]
+[offset:0x90a, name_value:DOMAIN]
+[offset:0x10e9, name_value:UnicodeComments]
+[offset:0x10fa, name_value:Index]
+[offset:0x126b, name_value:initialRender]
+[offset:0x12bc, name_value:setInitiallyProvidedValue]
+[offset:0x130b, name_value:aboutToBeDeleted]
+[offset:0x1358, name_value:pages/Index]
+[offset:0x13d0, name_value:info]
+[offset:0x13d6, name_value:testTag]
+[offset:0x13df, name_value:%{public}s]
+[offset:0x13eb, name_value:Ability onBackground]
+[offset:0x1401, name_value:Ability onCreate]
+[offset:0x1413, name_value:Ability onDestroy]
+[offset:0x1426, name_value:Ability onForeground]
+[offset:0x143c, name_value:Ability onWindowStageCreate]
+[offset:0x1459, name_value:loadContent]
+[offset:0x1466, name_value:Ability onWindowStageDestroy]
+[offset:0x1484, name_value:code]
+[offset:0x148a, name_value:error]
+[offset:0x1491, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x14c0, name_value:JSON]
+[offset:0x14c6, name_value:stringify]
+[offset:0x14d1, name_value:Succeeded in loading the content.]
+[offset:0x14f4, name_value:prototype]
+[offset:0x14ff, name_value:function]
+[offset:0x1509, name_value:paramsGenerator_]
+[offset:0x151b, name_value:ObservedPropertySimplePU]
+[offset:0x1535, name_value:计数]
+[offset:0x153d, name_value:__计数]
+[offset:0x1547, name_value:finalizeConstruction]
+[offset:0x1574, name_value:SubscriberManager]
+[offset:0x1587, name_value:Get]
+[offset:0x158c, name_value:delete]
+[offset:0x1594, name_value:id__]
+[offset:0x159a, name_value:aboutToBeDeletedInternal]
+[offset:0x15b4, name_value:observeComponentCreation2]
+[offset:0x15cf, name_value:Column]
+[offset:0x15d7, name_value:Text]
+[offset:0x15dd, name_value:pop]
+[offset:0x15e2, name_value:Button]
+[offset:0x15ea, name_value:purgeDependencyOnElmtId]
+[offset:0x1603, name_value:updateDirtyElements]
+[offset:0x1618, name_value:get]
+[offset:0x161d, name_value:set]
+[offset:0x1622, name_value:create]
+[offset:0x162a, name_value:width]
+[offset:0x1631, name_value:100%]
+[offset:0x1637, name_value:当前值：]
+[offset:0x1645, name_value:，单位“个”]
+[offset:0x1659, name_value:fontSize]
+[offset:0x1663, name_value:createWithLabel]
+[offset:0x1674, name_value:点一下加一]
+[offset:0x1685, name_value:onClick]
+[offset:0x168e, name_value:中文标题]
+[offset:0x169c, name_value:标题]
+[offset:0x16a4, name_value:__标题]
+[offset:0x16ae, name_value:padding]
+[offset:0x16b7, name_value:ViewPU]
+[offset:0x16bf, name_value:updateStateVarsOfChildByElmtId]
+[offset:0x16df, name_value:Reflect]
+[offset:0x16e8, name_value:rerender]
+[offset:0x16f2, name_value:getEntryName]
+[offset:0x1700, name_value:registerNamedRoute]
+[offset:0x1714, name_value:]

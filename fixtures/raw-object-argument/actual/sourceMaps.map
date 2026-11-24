@@ -18,7 +18,7 @@
       "entry/src/main/ets/pages/Index.ets"
     ],
     "names": [],
-    "mappings": ";;;;;;;;;;;;AAIA;EACE;;AAGF;CACE;CACA;;MAKK;;;;;;OACE;OACA;OACA;;;;;;QAFA;;;QACA;;;QACA;;;;;OAFA;OACA;OACA;;;;;;;;;SAFA;KAAA;;;KAAA;;;SACA;KAAA;;;KAAA;;;SACA;KAAA;;;KAAA;;;CAEP;;GACE;;;GACE;;;;GACA;;;;GACA;;;;GACA",
+    "mappings": ";;;;;;;;;;;;AAIA;IACE;;AAGF;CACE;CACA;;MAKK;;;;;;OACE;OACA;OACA;;;;;;QAFA;;;QACA;;;QACA;;;;;OAFA;OACA;OACA;;;;;;;;;SAFA;KAAA;;;KAAA;;;SACA;KAAA;;;KAAA;;;SACA;KAAA;;;KAAA;;;CAEP;;GACE;;;GACE;;;;GACA;;;;GACA;;;;GACA",
     "entry-package-info": "entry|1.0.0"
   }
 }

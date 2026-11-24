@@ -18,7 +18,7 @@
       "entry/src/main/ets/common/MapHolder.ets"
     ],
     "names": [],
-    "mappings": ";;;AAGA;AACA;EACE;;EAEA;IACE",
+    "mappings": ";;;AAGA;AACA;IACE;;IAEA;QACE",
     "entry-package-info": "entry|1.0.0"
   },
   "entry|entry|1.0.0|src/main/ets/pages/Index.ts": {

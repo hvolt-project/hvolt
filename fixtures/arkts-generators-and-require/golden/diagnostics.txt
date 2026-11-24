@@ -1,0 +1,5 @@
+ERROR 10505001 ets/pages/Index.ets:5:18 Cannot find name 'require'. Did you mean 'Require'?
+ERROR 10605008 ets/pages/Index.ets:5:7 Use explicit types instead of "any", "unknown" (arkts-no-any-unknown)
+ERROR 10605094 ets/pages/Index.ets:1:1 Generator functions are not supported (arkts-no-generators)
+ERROR 10605094 ets/pages/Index.ets:2:3 Generator functions are not supported (arkts-no-generators)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

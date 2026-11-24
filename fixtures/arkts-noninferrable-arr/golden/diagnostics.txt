@@ -1,0 +1,4 @@
+ERROR 10605038 ets/pages/Index.ets:2:16 Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)
+ERROR 10605038 ets/pages/Index.ets:2:30 Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)
+ERROR 10605043 ets/pages/Index.ets:2:15 Array literals must contain elements of only inferrable types (arkts-no-noninferrable-arr-literals)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

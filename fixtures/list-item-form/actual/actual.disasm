@@ -3,18 +3,23 @@
 # ====================
 # LITERALS
 
-0 0x83a { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-1 0xfca { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-10 0x7e3 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-11 0xeef { 4 [ string:"Index", string:"initialRender", string:"deepRenderFunction", string:"forEachItemGenFunction", ]}
-12 0x795 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-2 0x100a { 3 [ i32:1, string:"Index", i32:0, ]}
-3 0xf7f { 2 [ string:"a", string:"b", ]}
-4 0xf23 { 7 [ i32:3, string:"deepRenderFunction", i32:0, string:"itemCreation", i32:1, string:"row", i32:2, ]}
-5 0xf4a { 2 [ string:"space", i32:4, ]}
-6 0xf8d { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-9 0xf58 { 7 [ i32:3, string:"deepRenderFunction", i32:0, string:"itemCreation", i32:1, string:"this", i32:2, ]}
-7 0x7a3 { 3 [
+0 0x111d { 3 [ i32:1, string:"Index", i32:0, ]}
+1 0x105d { 2 [ string:"space", i32:4, ]}
+10 0x79d { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+11 0x1002 { 4 [ string:"Index", string:"initialRender", string:"deepRenderFunction", string:"forEachItemGenFunction", ]}
+2 0x10a0 { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+3 0x842 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+4 0x1092 { 2 [ string:"a", string:"b", ]}
+5 0x10dd { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+6 0x1036 { 7 [ i32:3, string:"deepRenderFunction", i32:0, string:"itemCreation", i32:1, string:"row", i32:2, ]}
+7 0x7eb { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+8 0x106b { 7 [ i32:3, string:"deepRenderFunction", i32:0, string:"itemCreation", i32:1, string:"this", i32:2, ]}
+9 0x9e9 
+12 0x9ed { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+13 0x7ab { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -23,7 +28,7 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
-8 0xf07 { 0 [
+14 0x101a { 0 [
 	MODULE_REQUEST_ARRAY: {
 	};
 ]}
@@ -32,13 +37,23 @@
 # RECORDS
 
 .language ArkTS
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x9e9
+	u32 moduleRecordIdx = 0x9ed
+}
+
+.language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
 	u8 pkgName@entry = 0x0
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x795
-	u32 moduleRecordIdx = 0x7a3
+	u32 scopeNames = 0x79d
+	u32 moduleRecordIdx = 0x7ab
 }
 
 .language ArkTS
@@ -47,8 +62,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xeef
-	u32 moduleRecordIdx = 0xf07
+	u32 scopeNames = 0x1002
+	u32 moduleRecordIdx = 0x101a
 }
 
 .language ECMAScript
@@ -100,6 +115,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -1364,68 +1390,68 @@ jump_label_2:
 # ====================
 # STRING
 
-[offset:0x88c, name_value:UIAbility]
-[offset:0x8a0, name_value:hilog]
-[offset:0x8ee, name_value:DOMAIN]
-[offset:0xe37, name_value:row]
-[offset:0xee8, name_value:Index]
-[offset:0x101d, name_value:initialRender]
-[offset:0x102c, name_value:deepRenderFunction]
-[offset:0x1040, name_value:itemCreation]
-[offset:0x105b, name_value:setInitiallyProvidedValue]
-[offset:0x10aa, name_value:aboutToBeDeleted]
-[offset:0x10f7, name_value:pages/Index]
-[offset:0x116f, name_value:info]
-[offset:0x1175, name_value:testTag]
-[offset:0x117e, name_value:%{public}s]
-[offset:0x118a, name_value:Ability onBackground]
-[offset:0x11a0, name_value:Ability onCreate]
-[offset:0x11b2, name_value:Ability onDestroy]
-[offset:0x11c5, name_value:Ability onForeground]
-[offset:0x11db, name_value:Ability onWindowStageCreate]
-[offset:0x11f8, name_value:loadContent]
-[offset:0x1205, name_value:Ability onWindowStageDestroy]
-[offset:0x1223, name_value:code]
-[offset:0x1229, name_value:error]
-[offset:0x1230, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x125f, name_value:JSON]
-[offset:0x1265, name_value:stringify]
-[offset:0x1270, name_value:Succeeded in loading the content.]
-[offset:0x1293, name_value:prototype]
-[offset:0x129e, name_value:function]
-[offset:0x12a8, name_value:paramsGenerator_]
-[offset:0x12ba, name_value:ObservedPropertyObjectPU]
-[offset:0x12d4, name_value:rows]
-[offset:0x12da, name_value:__rows]
-[offset:0x12e2, name_value:finalizeConstruction]
-[offset:0x130f, name_value:SubscriberManager]
-[offset:0x1322, name_value:Get]
-[offset:0x1327, name_value:delete]
-[offset:0x132f, name_value:id__]
-[offset:0x1335, name_value:aboutToBeDeletedInternal]
-[offset:0x134f, name_value:observeComponentCreation2]
-[offset:0x136a, name_value:List]
-[offset:0x1370, name_value:ListItem]
-[offset:0x137a, name_value:pop]
-[offset:0x137f, name_value:ForEach]
-[offset:0x1388, name_value:purgeDependencyOnElmtId]
-[offset:0x13a1, name_value:updateDirtyElements]
-[offset:0x13b6, name_value:get]
-[offset:0x13bb, name_value:set]
-[offset:0x13c0, name_value:create]
-[offset:0x13c8, name_value:width]
-[offset:0x13cf, name_value:100%]
-[offset:0x13d5, name_value:forEachUpdateFunction]
-[offset:0x13ec, name_value:Text]
-[offset:0x13f2, name_value:ViewStackProcessor]
-[offset:0x1406, name_value:StartGetAccessRecordingFor]
-[offset:0x1422, name_value:StopGetAccessRecording]
-[offset:0x143a, name_value:padding]
-[offset:0x1443, name_value:static]
-[offset:0x144b, name_value:height]
-[offset:0x1453, name_value:ViewPU]
-[offset:0x145b, name_value:Reflect]
-[offset:0x1464, name_value:rerender]
-[offset:0x146e, name_value:getEntryName]
-[offset:0x147c, name_value:registerNamedRoute]
-[offset:0x1490, name_value:]
+[offset:0x894, name_value:UIAbility]
+[offset:0x8a8, name_value:hilog]
+[offset:0x8f6, name_value:DOMAIN]
+[offset:0xf4a, name_value:row]
+[offset:0xffb, name_value:Index]
+[offset:0x1130, name_value:initialRender]
+[offset:0x113f, name_value:deepRenderFunction]
+[offset:0x1153, name_value:itemCreation]
+[offset:0x116e, name_value:setInitiallyProvidedValue]
+[offset:0x11bd, name_value:aboutToBeDeleted]
+[offset:0x120a, name_value:pages/Index]
+[offset:0x1282, name_value:info]
+[offset:0x1288, name_value:testTag]
+[offset:0x1291, name_value:%{public}s]
+[offset:0x129d, name_value:Ability onBackground]
+[offset:0x12b3, name_value:Ability onCreate]
+[offset:0x12c5, name_value:Ability onDestroy]
+[offset:0x12d8, name_value:Ability onForeground]
+[offset:0x12ee, name_value:Ability onWindowStageCreate]
+[offset:0x130b, name_value:loadContent]
+[offset:0x1318, name_value:Ability onWindowStageDestroy]
+[offset:0x1336, name_value:code]
+[offset:0x133c, name_value:error]
+[offset:0x1343, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x1372, name_value:JSON]
+[offset:0x1378, name_value:stringify]
+[offset:0x1383, name_value:Succeeded in loading the content.]
+[offset:0x13a6, name_value:prototype]
+[offset:0x13b1, name_value:function]
+[offset:0x13bb, name_value:paramsGenerator_]
+[offset:0x13cd, name_value:ObservedPropertyObjectPU]
+[offset:0x13e7, name_value:rows]
+[offset:0x13ed, name_value:__rows]
+[offset:0x13f5, name_value:finalizeConstruction]
+[offset:0x1422, name_value:SubscriberManager]
+[offset:0x1435, name_value:Get]
+[offset:0x143a, name_value:delete]
+[offset:0x1442, name_value:id__]
+[offset:0x1448, name_value:aboutToBeDeletedInternal]
+[offset:0x1462, name_value:observeComponentCreation2]
+[offset:0x147d, name_value:List]
+[offset:0x1483, name_value:ListItem]
+[offset:0x148d, name_value:pop]
+[offset:0x1492, name_value:ForEach]
+[offset:0x149b, name_value:purgeDependencyOnElmtId]
+[offset:0x14b4, name_value:updateDirtyElements]
+[offset:0x14c9, name_value:get]
+[offset:0x14ce, name_value:set]
+[offset:0x14d3, name_value:create]
+[offset:0x14db, name_value:width]
+[offset:0x14e2, name_value:100%]
+[offset:0x14e8, name_value:forEachUpdateFunction]
+[offset:0x14ff, name_value:Text]
+[offset:0x1505, name_value:ViewStackProcessor]
+[offset:0x1519, name_value:StartGetAccessRecordingFor]
+[offset:0x1535, name_value:StopGetAccessRecording]
+[offset:0x154d, name_value:padding]
+[offset:0x1556, name_value:static]
+[offset:0x155e, name_value:height]
+[offset:0x1566, name_value:ViewPU]
+[offset:0x156e, name_value:Reflect]
+[offset:0x1577, name_value:rerender]
+[offset:0x1581, name_value:getEntryName]
+[offset:0x158f, name_value:registerNamedRoute]
+[offset:0x15a3, name_value:]

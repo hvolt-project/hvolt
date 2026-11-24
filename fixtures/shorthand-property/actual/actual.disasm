@@ -3,43 +3,40 @@
 # ====================
 # LITERALS
 
-0 0x1696 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:50, string:"col", i32:7, ]}
-1 0x165f { 3 [ i32:1, string:"recycleNode", i32:0, ]}
-10 0x1767 { 16 [ string:"setInitiallyProvidedValue", method:#~@2>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@2>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@2>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@2>#aboutToBeDeleted, method_affiliate:0, string:"updateRecycleElmtId", method:#~@2>#updateRecycleElmtId, method_affiliate:2, i32:5, ]}
-11 0x17ee { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-12 0x18aa { 6 [ string:"name", null_value:0, string:"key", null_value:0, string:"value", null_value:0, ]}
-13 0x1878 { 6 [ string:"name", null_value:0, string:"key", null_value:0, string:"value", null_value:0, ]}
-14 0x16d1 { 4 [ string:"name", null_value:0, string:"tag", null_value:0, ]}
-15 0x1704 { 3 [ i32:1, string:"this", i32:0, ]}
-16 0x15ea { 7 [ i32:3, string:"name", i32:0, string:"key", i32:1, string:"value", i32:2, ]}
-17 0x185f { 6 [ string:"name", null_value:0, string:"key", null_value:0, string:"value", null_value:0, ]}
-18 0x16b8 { 6 [ string:"name", null_value:0, string:"key", null_value:0, string:"value", null_value:0, ]}
-19 0x1611 { 2 [ string:"name", null_value:0, ]}
-2 0x18c3 { 2 [ string:"inner", null_value:0, ]}
-20 0x18e7 { 6 [ string:"name", null_value:0, string:"key", null_value:0, string:"value", null_value:0, ]}
-21 0x1684 { 4 [ string:"name", null_value:0, string:"tag", null_value:0, ]}
-23 0x1717 { 3 [ i32:1, string:"this", i32:0, ]}
-24 0x1672 { 4 [ string:"name", null_value:0, string:"tag", null_value:0, ]}
-25 0x18ce { 6 [ string:"name", null_value:0, string:"key", null_value:0, string:"value", null_value:0, ]}
-26 0x161c { 2 [ string:"name", null_value:0, ]}
-27 0x1891 { 6 [ string:"name", null_value:0, string:"key", null_value:0, string:"value", null_value:0, ]}
-28 0x15b1 { 5 [ string:"ChildRow", string:"initialRender", string:"ReusableRow", string:"ShorthandProperty", string:"describe", ]}
-29 0x1654 { 2 [ string:"name", null_value:0, ]}
-3 0x1627 { 2 [ string:"name", null_value:0, ]}
-31 0x17b1 { 13 [ string:"setInitiallyProvidedValue", method:#~@3>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@3>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@3>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@3>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-32 0x16f1 { 3 [ i32:1, string:"this", i32:0, ]}
-33 0x881 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-4 0x16e3 { 2 [ string:"name", string:"ChildRow", ]}
-5 0x1632 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:51, string:"col", i32:7, ]}
-6 0x8cf { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-7 0x182e { 9 [ i32:4, string:"ChildRow", i32:0, string:"ReusableRow", i32:1, string:"getFn", i32:2, string:"ShorthandProperty", i32:3, ]}
-8 0x172a { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-9 0x926 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-22 0x15ce { 0 [
-	MODULE_REQUEST_ARRAY: {
-	};
-]}
-30 0x88f { 3 [
+0 0x1901 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+1 0x1745 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:51, string:"col", i32:7, ]}
+10 0x17cb { 6 [ string:"name", null_value:0, string:"key", null_value:0, string:"value", null_value:0, ]}
+11 0x1941 { 9 [ i32:4, string:"ChildRow", i32:0, string:"ReusableRow", i32:1, string:"getFn", i32:2, string:"ShorthandProperty", i32:3, ]}
+12 0x198b { 6 [ string:"name", null_value:0, string:"key", null_value:0, string:"value", null_value:0, ]}
+13 0x19fa { 6 [ string:"name", null_value:0, string:"key", null_value:0, string:"value", null_value:0, ]}
+14 0x1785 { 4 [ string:"name", null_value:0, string:"tag", null_value:0, ]}
+15 0x92e { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+16 0x16c4 { 5 [ string:"ChildRow", string:"initialRender", string:"ReusableRow", string:"ShorthandProperty", string:"describe", ]}
+17 0x17f6 { 2 [ string:"name", string:"ChildRow", ]}
+19 0x16fd { 7 [ i32:3, string:"name", i32:0, string:"key", i32:1, string:"value", i32:2, ]}
+2 0x18c4 { 13 [ string:"setInitiallyProvidedValue", method:#~@3>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@3>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@3>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@3>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+20 0x1972 { 6 [ string:"name", null_value:0, string:"key", null_value:0, string:"value", null_value:0, ]}
+21 0x19e1 { 6 [ string:"name", null_value:0, string:"key", null_value:0, string:"value", null_value:0, ]}
+23 0x889 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+24 0xad5 
+25 0x172f { 2 [ string:"name", null_value:0, ]}
+26 0x19a4 { 6 [ string:"name", null_value:0, string:"key", null_value:0, string:"value", null_value:0, ]}
+27 0x1724 { 2 [ string:"name", null_value:0, ]}
+28 0x1817 { 3 [ i32:1, string:"this", i32:0, ]}
+3 0x187a { 16 [ string:"setInitiallyProvidedValue", method:#~@2>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@2>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@2>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@2>#aboutToBeDeleted, method_affiliate:0, string:"updateRecycleElmtId", method:#~@2>#updateRecycleElmtId, method_affiliate:2, i32:5, ]}
+30 0x17e4 { 4 [ string:"name", null_value:0, string:"tag", null_value:0, ]}
+31 0x182a { 3 [ i32:1, string:"this", i32:0, ]}
+32 0x19d6 { 2 [ string:"inner", null_value:0, ]}
+33 0x1797 { 4 [ string:"name", null_value:0, string:"tag", null_value:0, ]}
+34 0x1772 { 3 [ i32:1, string:"recycleNode", i32:0, ]}
+35 0x19bd { 6 [ string:"name", null_value:0, string:"key", null_value:0, string:"value", null_value:0, ]}
+4 0x183d { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+5 0x17a9 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:50, string:"col", i32:7, ]}
+6 0x173a { 2 [ string:"name", null_value:0, ]}
+7 0x1767 { 2 [ string:"name", null_value:0, ]}
+8 0x8d7 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+9 0x1804 { 3 [ i32:1, string:"this", i32:0, ]}
+18 0x897 { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -48,9 +45,27 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
+22 0xad9 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+29 0x16e1 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
 
 # ====================
 # RECORDS
+
+.language ArkTS
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0xad5
+	u32 moduleRecordIdx = 0xad9
+}
 
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
@@ -58,8 +73,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x881
-	u32 moduleRecordIdx = 0x88f
+	u32 scopeNames = 0x889
+	u32 moduleRecordIdx = 0x897
 }
 
 .language ArkTS
@@ -68,8 +83,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x15b1
-	u32 moduleRecordIdx = 0x15ce
+	u32 scopeNames = 0x16c4
+	u32 moduleRecordIdx = 0x16e1
 }
 
 .language ECMAScript
@@ -121,6 +136,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -2873,84 +2899,84 @@ jump_label_2:
 # ====================
 # STRING
 
-[offset:0x978, name_value:UIAbility]
-[offset:0x98c, name_value:hilog]
-[offset:0x9da, name_value:DOMAIN]
-[offset:0x1587, name_value:ChildRow]
-[offset:0x1591, name_value:ReusableRow]
-[offset:0x159e, name_value:ShorthandProperty]
-[offset:0x1900, name_value:initialRender]
-[offset:0x190f, name_value:describe]
-[offset:0x1919, name_value:name]
-[offset:0x191f, name_value:key]
-[offset:0x1924, name_value:value]
-[offset:0x196d, name_value:tag]
-[offset:0x1972, name_value:setInitiallyProvidedValue]
-[offset:0x19c1, name_value:aboutToBeDeleted]
-[offset:0x1a23, name_value:pages/Index]
-[offset:0x1a96, name_value:inner]
-[offset:0x1aa9, name_value:info]
-[offset:0x1aaf, name_value:testTag]
-[offset:0x1ab8, name_value:%{public}s]
-[offset:0x1ac4, name_value:Ability onBackground]
-[offset:0x1ada, name_value:Ability onCreate]
-[offset:0x1aec, name_value:Ability onDestroy]
-[offset:0x1aff, name_value:Ability onForeground]
-[offset:0x1b15, name_value:Ability onWindowStageCreate]
-[offset:0x1b32, name_value:loadContent]
-[offset:0x1b3f, name_value:Ability onWindowStageDestroy]
-[offset:0x1b5d, name_value:code]
-[offset:0x1b63, name_value:error]
-[offset:0x1b6a, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x1b99, name_value:JSON]
-[offset:0x1b9f, name_value:stringify]
-[offset:0x1baa, name_value:Succeeded in loading the content.]
-[offset:0x1bcd, name_value:prototype]
-[offset:0x1bd8, name_value:from-fn]
-[offset:0x1be1, name_value:function]
-[offset:0x1beb, name_value:paramsGenerator_]
-[offset:0x1bfd, name_value:SynchedPropertySimpleOneWayPU]
-[offset:0x1c1c, name_value:__name]
-[offset:0x1c24, name_value:__tag]
-[offset:0x1c2b, name_value:finalizeConstruction]
-[offset:0x1c58, name_value:SubscriberManager]
-[offset:0x1c6b, name_value:Get]
-[offset:0x1c70, name_value:delete]
-[offset:0x1c78, name_value:id__]
-[offset:0x1c7e, name_value:aboutToBeDeletedInternal]
-[offset:0x1c98, name_value:observeComponentCreation2]
-[offset:0x1cb3, name_value:Row]
-[offset:0x1cb8, name_value:Text]
-[offset:0x1cbe, name_value:pop]
-[offset:0x1cc3, name_value:get]
-[offset:0x1cc8, name_value:set]
-[offset:0x1ccd, name_value:purgeDependencyOnElmtId]
-[offset:0x1ce6, name_value:updateDirtyElements]
-[offset:0x1cfb, name_value:]
-[offset:0x1cfd, name_value:reset]
-[offset:0x1d04, name_value:create]
-[offset:0x1d0c, name_value:updateElmtId]
-[offset:0x1d1a, name_value:ObservedPropertySimplePU]
-[offset:0x1d34, name_value:n]
-[offset:0x1d37, name_value:i]
-[offset:0x1d3a, name_value:ident]
-[offset:0x1d41, name_value:__ident]
-[offset:0x1d4a, name_value:ObservedPropertyObjectPU]
-[offset:0x1d64, name_value:items]
-[offset:0x1d6b, name_value:__items]
-[offset:0x1d74, name_value:k]
-[offset:0x1d77, name_value:Column]
-[offset:0x1d7f, name_value:__Recycle__]
-[offset:0x1d8c, name_value:observeRecycleComponentCreation]
-[offset:0x1dad, name_value:ViewPU]
-[offset:0x1db5, name_value:updateStateVarsOfChildByElmtId]
-[offset:0x1dd5, name_value:ViewStackProcessor]
-[offset:0x1de9, name_value:StartGetAccessRecordingFor]
-[offset:0x1e05, name_value:createRecycle]
-[offset:0x1e14, name_value:StopGetAccessRecording]
-[offset:0x1e2c, name_value:aboutToReuseInternal]
-[offset:0x1e42, name_value:aboutToReuse]
-[offset:0x1e50, name_value:rerender]
-[offset:0x1e5a, name_value:Reflect]
-[offset:0x1e63, name_value:getEntryName]
-[offset:0x1e71, name_value:registerNamedRoute]
+[offset:0x980, name_value:UIAbility]
+[offset:0x994, name_value:hilog]
+[offset:0x9e2, name_value:DOMAIN]
+[offset:0x169a, name_value:ChildRow]
+[offset:0x16a4, name_value:ReusableRow]
+[offset:0x16b1, name_value:ShorthandProperty]
+[offset:0x1a13, name_value:initialRender]
+[offset:0x1a22, name_value:describe]
+[offset:0x1a2c, name_value:name]
+[offset:0x1a32, name_value:key]
+[offset:0x1a37, name_value:value]
+[offset:0x1a80, name_value:tag]
+[offset:0x1a85, name_value:setInitiallyProvidedValue]
+[offset:0x1ad4, name_value:aboutToBeDeleted]
+[offset:0x1b36, name_value:pages/Index]
+[offset:0x1ba9, name_value:inner]
+[offset:0x1bbc, name_value:info]
+[offset:0x1bc2, name_value:testTag]
+[offset:0x1bcb, name_value:%{public}s]
+[offset:0x1bd7, name_value:Ability onBackground]
+[offset:0x1bed, name_value:Ability onCreate]
+[offset:0x1bff, name_value:Ability onDestroy]
+[offset:0x1c12, name_value:Ability onForeground]
+[offset:0x1c28, name_value:Ability onWindowStageCreate]
+[offset:0x1c45, name_value:loadContent]
+[offset:0x1c52, name_value:Ability onWindowStageDestroy]
+[offset:0x1c70, name_value:code]
+[offset:0x1c76, name_value:error]
+[offset:0x1c7d, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x1cac, name_value:JSON]
+[offset:0x1cb2, name_value:stringify]
+[offset:0x1cbd, name_value:Succeeded in loading the content.]
+[offset:0x1ce0, name_value:prototype]
+[offset:0x1ceb, name_value:from-fn]
+[offset:0x1cf4, name_value:function]
+[offset:0x1cfe, name_value:paramsGenerator_]
+[offset:0x1d10, name_value:SynchedPropertySimpleOneWayPU]
+[offset:0x1d2f, name_value:__name]
+[offset:0x1d37, name_value:__tag]
+[offset:0x1d3e, name_value:finalizeConstruction]
+[offset:0x1d6b, name_value:SubscriberManager]
+[offset:0x1d7e, name_value:Get]
+[offset:0x1d83, name_value:delete]
+[offset:0x1d8b, name_value:id__]
+[offset:0x1d91, name_value:aboutToBeDeletedInternal]
+[offset:0x1dab, name_value:observeComponentCreation2]
+[offset:0x1dc6, name_value:Row]
+[offset:0x1dcb, name_value:Text]
+[offset:0x1dd1, name_value:pop]
+[offset:0x1dd6, name_value:get]
+[offset:0x1ddb, name_value:set]
+[offset:0x1de0, name_value:purgeDependencyOnElmtId]
+[offset:0x1df9, name_value:updateDirtyElements]
+[offset:0x1e0e, name_value:]
+[offset:0x1e10, name_value:reset]
+[offset:0x1e17, name_value:create]
+[offset:0x1e1f, name_value:updateElmtId]
+[offset:0x1e2d, name_value:ObservedPropertySimplePU]
+[offset:0x1e47, name_value:n]
+[offset:0x1e4a, name_value:i]
+[offset:0x1e4d, name_value:ident]
+[offset:0x1e54, name_value:__ident]
+[offset:0x1e5d, name_value:ObservedPropertyObjectPU]
+[offset:0x1e77, name_value:items]
+[offset:0x1e7e, name_value:__items]
+[offset:0x1e87, name_value:k]
+[offset:0x1e8a, name_value:Column]
+[offset:0x1e92, name_value:__Recycle__]
+[offset:0x1e9f, name_value:observeRecycleComponentCreation]
+[offset:0x1ec0, name_value:ViewPU]
+[offset:0x1ec8, name_value:updateStateVarsOfChildByElmtId]
+[offset:0x1ee8, name_value:ViewStackProcessor]
+[offset:0x1efc, name_value:StartGetAccessRecordingFor]
+[offset:0x1f18, name_value:createRecycle]
+[offset:0x1f27, name_value:StopGetAccessRecording]
+[offset:0x1f3f, name_value:aboutToReuseInternal]
+[offset:0x1f55, name_value:aboutToReuse]
+[offset:0x1f63, name_value:rerender]
+[offset:0x1f6d, name_value:Reflect]
+[offset:0x1f76, name_value:getEntryName]
+[offset:0x1f84, name_value:registerNamedRoute]

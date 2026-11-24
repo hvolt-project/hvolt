@@ -71,13 +71,18 @@ class LbPanel extends ViewV2 {
 	title = (g: string) => {
 		const parent = PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.length ? PUV2ViewBase.contextStack[PUV2ViewBase.contextStack.length - 1] : null;
 		this.observeComponentCreation2((elmtId, isInitialRender) => {
-			Text.create(g);
-			Text.fontSize(16);
-			Text.onClick(() => {
-				this.count += 1;
-			});
-		}, Text);
-		Text.pop();
+			ForEach.create();
+			const forEachItemGenFunction = (_item) => {
+				const item = _item;
+				this.observeComponentCreation2((elmtId, isInitialRender) => {
+					Text.create(item);
+					Text.fontSize(16);
+				}, Text);
+				Text.pop();
+			};
+			this.forEachUpdateFunction(elmtId, [g], forEachItemGenFunction);
+		}, ForEach);
+		ForEach.pop();
 	};
 	content = () => {
 		const parent = PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.length ? PUV2ViewBase.contextStack[PUV2ViewBase.contextStack.length - 1] : null;
@@ -86,7 +91,7 @@ class LbPanel extends ViewV2 {
 				if (isInitialRender) {
 					let componentCall = new LbChip(parent ? parent : this, { label: 'x' }, undefined, elmtId, () => {}, {
 						page: 'entry/src/main/ets/pages/Index.ets',
-						line: 39,
+						line: 28,
 						col: 5
 					});
 					ViewPU.create(componentCall);
@@ -165,7 +170,7 @@ class Index extends ViewPU {
 				if (isInitialRender) {
 					let componentCall = new LbPanel(this, {}, undefined, elmtId, () => {}, {
 						page: 'entry/src/main/ets/pages/Index.ets',
-						line: 54,
+						line: 53,
 						col: 7
 					});
 					ViewV2.create(componentCall);

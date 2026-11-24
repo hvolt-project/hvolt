@@ -1,0 +1,4 @@
+ERROR 10505001 ets/pages/Index.ets:3:3 Duplicate identifier 'Red'.
+ERROR 10505001 ets/pages/Index.ets:4:3 Duplicate identifier 'Blue'.
+ERROR 10605113 ets/pages/Index.ets:2:1 "enum" declaration merging is not supported (arkts-no-enum-merging)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

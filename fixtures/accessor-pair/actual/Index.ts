@@ -26,12 +26,6 @@ class AccessorPair extends ViewPU {
 		this.aboutToBeDeletedInternal();
 	}
 	private _value: string;
-	get value(): string {
-		return this._value;
-	}
-	set value(next: string) {
-		this._value = next;
-	}
 	initialRender() {
 		this.observeComponentCreation2((elmtId, isInitialRender) => {
 			Column.create();

@@ -3,19 +3,24 @@
 # ====================
 # LITERALS
 
-0 0xf2a { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-1 0xf67 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-2 0xf17 { 3 [ i32:1, string:"this", i32:0, ]}
-4 0x7cb { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-5 0xeed { 2 [ string:"BranchForms", string:"initialRender", ]}
-7 0x822 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-8 0xfa7 { 3 [ i32:1, string:"BranchForms", i32:0, ]}
-9 0x77d { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-3 0xefb { 0 [
+0 0x102a { 3 [ i32:1, string:"this", i32:0, ]}
+1 0x107a { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+10 0x1000 { 2 [ string:"BranchForms", string:"initialRender", ]}
+2 0x10ba { 3 [ i32:1, string:"BranchForms", i32:0, ]}
+3 0x103d { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+4 0x7d3 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+5 0x9d1 
+6 0x785 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+9 0x82a { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+11 0x100e { 0 [
 	MODULE_REQUEST_ARRAY: {
 	};
 ]}
-6 0x78b { 3 [
+7 0x9d5 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+8 0x793 { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -28,14 +33,24 @@
 # ====================
 # RECORDS
 
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x9d1
+	u32 moduleRecordIdx = 0x9d5
+}
+
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
 	u8 pkgName@entry = 0x0
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x77d
-	u32 moduleRecordIdx = 0x78b
+	u32 scopeNames = 0x785
+	u32 moduleRecordIdx = 0x793
 }
 
 .language ArkTS
@@ -44,8 +59,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xeed
-	u32 moduleRecordIdx = 0xefb
+	u32 scopeNames = 0x1000
+	u32 moduleRecordIdx = 0x100e
 }
 
 .language ECMAScript
@@ -97,6 +112,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -1354,62 +1380,62 @@ jump_label_2:
 # ====================
 # STRING
 
-[offset:0x874, name_value:UIAbility]
-[offset:0x888, name_value:hilog]
-[offset:0x8d6, name_value:DOMAIN]
-[offset:0xee0, name_value:BranchForms]
-[offset:0xfba, name_value:initialRender]
-[offset:0xfc9, name_value:setInitiallyProvidedValue]
-[offset:0x1018, name_value:aboutToBeDeleted]
-[offset:0x1065, name_value:pages/Index]
-[offset:0x10dd, name_value:info]
-[offset:0x10e3, name_value:testTag]
-[offset:0x10ec, name_value:%{public}s]
-[offset:0x10f8, name_value:Ability onBackground]
-[offset:0x110e, name_value:Ability onCreate]
-[offset:0x1120, name_value:Ability onDestroy]
-[offset:0x1133, name_value:Ability onForeground]
-[offset:0x1149, name_value:Ability onWindowStageCreate]
-[offset:0x1166, name_value:loadContent]
-[offset:0x1173, name_value:Ability onWindowStageDestroy]
-[offset:0x1191, name_value:code]
-[offset:0x1197, name_value:error]
-[offset:0x119e, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x11cd, name_value:JSON]
-[offset:0x11d3, name_value:stringify]
-[offset:0x11de, name_value:Succeeded in loading the content.]
-[offset:0x1201, name_value:prototype]
-[offset:0x120c, name_value:function]
-[offset:0x1216, name_value:paramsGenerator_]
-[offset:0x1228, name_value:ObservedPropertySimplePU]
-[offset:0x1242, name_value:step]
-[offset:0x1248, name_value:__step]
-[offset:0x1250, name_value:finalizeConstruction]
-[offset:0x127d, name_value:SubscriberManager]
-[offset:0x1290, name_value:Get]
-[offset:0x1295, name_value:delete]
-[offset:0x129d, name_value:id__]
-[offset:0x12a3, name_value:aboutToBeDeletedInternal]
-[offset:0x12bd, name_value:observeComponentCreation2]
-[offset:0x12d8, name_value:Column]
-[offset:0x12e0, name_value:If]
-[offset:0x12e4, name_value:pop]
-[offset:0x12e9, name_value:purgeDependencyOnElmtId]
-[offset:0x1302, name_value:updateDirtyElements]
-[offset:0x1317, name_value:get]
-[offset:0x131c, name_value:set]
-[offset:0x1321, name_value:create]
-[offset:0x1329, name_value:ifElseBranchUpdateFunction]
-[offset:0x1345, name_value:Text]
-[offset:0x134b, name_value:Row]
-[offset:0x1350, name_value:zero]
-[offset:0x1356, name_value:big]
-[offset:0x135b, name_value:small]
-[offset:0x1362, name_value:two]
-[offset:0x1367, name_value:many]
-[offset:0x136d, name_value:ViewPU]
-[offset:0x1375, name_value:Reflect]
-[offset:0x137e, name_value:rerender]
-[offset:0x1388, name_value:getEntryName]
-[offset:0x1396, name_value:registerNamedRoute]
-[offset:0x13aa, name_value:]
+[offset:0x87c, name_value:UIAbility]
+[offset:0x890, name_value:hilog]
+[offset:0x8de, name_value:DOMAIN]
+[offset:0xff3, name_value:BranchForms]
+[offset:0x10cd, name_value:initialRender]
+[offset:0x10dc, name_value:setInitiallyProvidedValue]
+[offset:0x112b, name_value:aboutToBeDeleted]
+[offset:0x1178, name_value:pages/Index]
+[offset:0x11f0, name_value:info]
+[offset:0x11f6, name_value:testTag]
+[offset:0x11ff, name_value:%{public}s]
+[offset:0x120b, name_value:Ability onBackground]
+[offset:0x1221, name_value:Ability onCreate]
+[offset:0x1233, name_value:Ability onDestroy]
+[offset:0x1246, name_value:Ability onForeground]
+[offset:0x125c, name_value:Ability onWindowStageCreate]
+[offset:0x1279, name_value:loadContent]
+[offset:0x1286, name_value:Ability onWindowStageDestroy]
+[offset:0x12a4, name_value:code]
+[offset:0x12aa, name_value:error]
+[offset:0x12b1, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x12e0, name_value:JSON]
+[offset:0x12e6, name_value:stringify]
+[offset:0x12f1, name_value:Succeeded in loading the content.]
+[offset:0x1314, name_value:prototype]
+[offset:0x131f, name_value:function]
+[offset:0x1329, name_value:paramsGenerator_]
+[offset:0x133b, name_value:ObservedPropertySimplePU]
+[offset:0x1355, name_value:step]
+[offset:0x135b, name_value:__step]
+[offset:0x1363, name_value:finalizeConstruction]
+[offset:0x1390, name_value:SubscriberManager]
+[offset:0x13a3, name_value:Get]
+[offset:0x13a8, name_value:delete]
+[offset:0x13b0, name_value:id__]
+[offset:0x13b6, name_value:aboutToBeDeletedInternal]
+[offset:0x13d0, name_value:observeComponentCreation2]
+[offset:0x13eb, name_value:Column]
+[offset:0x13f3, name_value:If]
+[offset:0x13f7, name_value:pop]
+[offset:0x13fc, name_value:purgeDependencyOnElmtId]
+[offset:0x1415, name_value:updateDirtyElements]
+[offset:0x142a, name_value:get]
+[offset:0x142f, name_value:set]
+[offset:0x1434, name_value:create]
+[offset:0x143c, name_value:ifElseBranchUpdateFunction]
+[offset:0x1458, name_value:Text]
+[offset:0x145e, name_value:Row]
+[offset:0x1463, name_value:zero]
+[offset:0x1469, name_value:big]
+[offset:0x146e, name_value:small]
+[offset:0x1475, name_value:two]
+[offset:0x147a, name_value:many]
+[offset:0x1480, name_value:ViewPU]
+[offset:0x1488, name_value:Reflect]
+[offset:0x1491, name_value:rerender]
+[offset:0x149b, name_value:getEntryName]
+[offset:0x14a9, name_value:registerNamedRoute]
+[offset:0x14bd, name_value:]

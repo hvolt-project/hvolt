@@ -3,19 +3,24 @@
 # ====================
 # LITERALS
 
-0 0x737 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-1 0xbd8 { 3 [ i32:1, string:"V2Static", i32:0, ]}
-2 0xb5b { 13 [ string:"resetStateVarsOnReuse", method:#~@0>#resetStateVarsOnReuse, method_affiliate:1, string:"initialRender", method:#~@0>#initialRender, method_affiliate:0, string:"rerender", method:#~@0>#rerender, method_affiliate:0, string:"getEntryName", method:#~@0<#getEntryName, method_affiliate:0, i32:3, ]}
-4 0xb1e { 2 [ string:"V2Static", string:"initialRender", ]}
-5 0xb48 { 3 [ i32:1, string:"this", i32:0, ]}
-7 0xb98 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-8 0x78e { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-9 0x6e9 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-3 0xb2c { 0 [
+0 0x796 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+1 0xc6e { 13 [ string:"resetStateVarsOnReuse", method:#~@0>#resetStateVarsOnReuse, method_affiliate:1, string:"initialRender", method:#~@0>#initialRender, method_affiliate:0, string:"rerender", method:#~@0>#rerender, method_affiliate:0, string:"getEntryName", method:#~@0<#getEntryName, method_affiliate:0, i32:3, ]}
+10 0xc31 { 2 [ string:"V2Static", string:"initialRender", ]}
+2 0xcab { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+3 0xc5b { 3 [ i32:1, string:"this", i32:0, ]}
+4 0x73f { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+5 0x93d 
+6 0xceb { 3 [ i32:1, string:"V2Static", i32:0, ]}
+7 0x6f1 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+11 0xc3f { 0 [
 	MODULE_REQUEST_ARRAY: {
 	};
 ]}
-6 0x6f7 { 3 [
+8 0x941 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+9 0x6ff { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -28,14 +33,24 @@
 # ====================
 # RECORDS
 
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x93d
+	u32 moduleRecordIdx = 0x941
+}
+
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
 	u8 pkgName@entry = 0x0
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x6e9
-	u32 moduleRecordIdx = 0x6f7
+	u32 scopeNames = 0x6f1
+	u32 moduleRecordIdx = 0x6ff
 }
 
 .language ArkTS
@@ -44,8 +59,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xb1e
-	u32 moduleRecordIdx = 0xb2c
+	u32 scopeNames = 0xc31
+	u32 moduleRecordIdx = 0xc3f
 }
 
 .language ECMAScript
@@ -97,6 +112,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -741,42 +767,42 @@ jump_label_2:
 # ====================
 # STRING
 
-[offset:0x7e0, name_value:UIAbility]
-[offset:0x7f4, name_value:hilog]
-[offset:0x842, name_value:DOMAIN]
-[offset:0xb14, name_value:V2Static]
-[offset:0xc64, name_value:pages/Index]
-[offset:0xcdc, name_value:info]
-[offset:0xce2, name_value:testTag]
-[offset:0xceb, name_value:%{public}s]
-[offset:0xcf7, name_value:Ability onBackground]
-[offset:0xd0d, name_value:Ability onCreate]
-[offset:0xd1f, name_value:Ability onDestroy]
-[offset:0xd32, name_value:Ability onForeground]
-[offset:0xd48, name_value:Ability onWindowStageCreate]
-[offset:0xd65, name_value:loadContent]
-[offset:0xd72, name_value:Ability onWindowStageDestroy]
-[offset:0xd90, name_value:code]
-[offset:0xd96, name_value:error]
-[offset:0xd9d, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0xdcc, name_value:JSON]
-[offset:0xdd2, name_value:stringify]
-[offset:0xddd, name_value:Succeeded in loading the content.]
-[offset:0xe00, name_value:prototype]
-[offset:0xe0b, name_value:count]
-[offset:0xe12, name_value:finalizeConstruction]
-[offset:0xe3f, name_value:observeComponentCreation2]
-[offset:0xe5a, name_value:Column]
-[offset:0xe62, name_value:Text]
-[offset:0xe68, name_value:pop]
-[offset:0xe6d, name_value:updateDirtyElements]
-[offset:0xe82, name_value:stat]
-[offset:0xe88, name_value:TAG]
-[offset:0xe8d, name_value:create]
-[offset:0xe95, name_value:]
-[offset:0xe97, name_value:ViewPU]
-[offset:0xe9f, name_value:Reflect]
-[offset:0xea8, name_value:set]
-[offset:0xead, name_value:ViewV2]
-[offset:0xeb5, name_value:Local]
-[offset:0xebc, name_value:registerNamedRoute]
+[offset:0x7e8, name_value:UIAbility]
+[offset:0x7fc, name_value:hilog]
+[offset:0x84a, name_value:DOMAIN]
+[offset:0xc27, name_value:V2Static]
+[offset:0xd77, name_value:pages/Index]
+[offset:0xdef, name_value:info]
+[offset:0xdf5, name_value:testTag]
+[offset:0xdfe, name_value:%{public}s]
+[offset:0xe0a, name_value:Ability onBackground]
+[offset:0xe20, name_value:Ability onCreate]
+[offset:0xe32, name_value:Ability onDestroy]
+[offset:0xe45, name_value:Ability onForeground]
+[offset:0xe5b, name_value:Ability onWindowStageCreate]
+[offset:0xe78, name_value:loadContent]
+[offset:0xe85, name_value:Ability onWindowStageDestroy]
+[offset:0xea3, name_value:code]
+[offset:0xea9, name_value:error]
+[offset:0xeb0, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0xedf, name_value:JSON]
+[offset:0xee5, name_value:stringify]
+[offset:0xef0, name_value:Succeeded in loading the content.]
+[offset:0xf13, name_value:prototype]
+[offset:0xf1e, name_value:count]
+[offset:0xf25, name_value:finalizeConstruction]
+[offset:0xf52, name_value:observeComponentCreation2]
+[offset:0xf6d, name_value:Column]
+[offset:0xf75, name_value:Text]
+[offset:0xf7b, name_value:pop]
+[offset:0xf80, name_value:updateDirtyElements]
+[offset:0xf95, name_value:stat]
+[offset:0xf9b, name_value:TAG]
+[offset:0xfa0, name_value:create]
+[offset:0xfa8, name_value:]
+[offset:0xfaa, name_value:ViewPU]
+[offset:0xfb2, name_value:Reflect]
+[offset:0xfbb, name_value:set]
+[offset:0xfc0, name_value:ViewV2]
+[offset:0xfc8, name_value:Local]
+[offset:0xfcf, name_value:registerNamedRoute]

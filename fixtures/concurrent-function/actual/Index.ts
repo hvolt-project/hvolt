@@ -6,8 +6,8 @@ interface ConcurrentPage_Params {}
 // body of a `@Concurrent` function declaration.
            
 function computeTask(value: number): number {
-    "use concurrent";
-  return value * 2;
+        "use concurrent";
+    return value * 2;
 }
 class ConcurrentPage extends ViewPU {
 	constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {

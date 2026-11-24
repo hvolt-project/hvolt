@@ -3,14 +3,15 @@
 # ====================
 # LITERALS
 
-0 0x743 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-1 0xdc3 { 22 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@0>#initialRender, method_affiliate:0, string:"rerender", method:#~@0>#rerender, method_affiliate:0, string:"getEntryName", method:#~@0<#getEntryName, method_affiliate:0, i32:6, ]}
-3 0xe27 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-4 0xe67 { 3 [ i32:1, string:"Index", i32:0, ]}
-5 0xba7 { 2 [ string:"Index", string:"initialRender", ]}
-7 0x79a { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-8 0x6f5 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-2 0xbb5 { 81 [
+0 0xf86 { 3 [ i32:1, string:"Index", i32:0, ]}
+1 0x7a2 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+2 0xee2 { 22 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@0>#initialRender, method_affiliate:0, string:"rerender", method:#~@0>#rerender, method_affiliate:0, string:"getEntryName", method:#~@0<#getEntryName, method_affiliate:0, i32:6, ]}
+3 0xf46 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+4 0x74b { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+5 0x949 
+6 0x6fd { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+9 0xcba { 2 [ string:"Index", string:"initialRender", ]}
+10 0xcc8 { 83 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @native:ohos.curves,
 		1 : @ohos:ability.ability,
@@ -92,6 +93,8 @@
 		77 : @ohos:app.agent.AgentUIExtensionAbility,
 		78 : @ohos:app.agent.agentConstant,
 		79 : @ohos:app.ability.hyperSnapManager,
+		80 : @ohos:bundle.pluginBundleManager,
+		81 : @ohos:app.ability.appMemoryOptimizer,
 	};
 	ModuleTag: REGULAR_IMPORT, local_name: curves, import_name: default, module_request: @native:ohos.curves;
 	ModuleTag: INDIRECT_EXPORT, export_name: curves, import_name: default, module_request: @native:ohos.curves;
@@ -174,8 +177,14 @@
 	ModuleTag: STAR_EXPORT, module_request: @ohos:app.agent.AgentUIExtensionAbility;
 	ModuleTag: STAR_EXPORT, module_request: @ohos:app.agent.agentConstant;
 	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.hyperSnapManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:bundle.pluginBundleManager;
+	ModuleTag: STAR_EXPORT, module_request: @ohos:app.ability.appMemoryOptimizer;
 ]}
-6 0x703 { 3 [
+7 0x94d { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+8 0x70b { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -188,14 +197,24 @@
 # ====================
 # RECORDS
 
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x949
+	u32 moduleRecordIdx = 0x94d
+}
+
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
 	u8 pkgName@entry = 0x0
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x6f5
-	u32 moduleRecordIdx = 0x703
+	u32 scopeNames = 0x6fd
+	u32 moduleRecordIdx = 0x70b
 }
 
 .language ArkTS
@@ -204,8 +223,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xba7
-	u32 moduleRecordIdx = 0xbb5
+	u32 scopeNames = 0xcba
+	u32 moduleRecordIdx = 0xcc8
 }
 
 .language ECMAScript
@@ -257,6 +276,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -968,48 +998,48 @@ jump_label_2:
 # ====================
 # STRING
 
-[offset:0x7ec, name_value:UIAbility]
-[offset:0x800, name_value:hilog]
-[offset:0x84e, name_value:DOMAIN]
-[offset:0xba0, name_value:Index]
-[offset:0x1966, name_value:curves]
-[offset:0x196e, name_value:setInitiallyProvidedValue]
-[offset:0x1a22, name_value:pages/Index]
-[offset:0x1a9a, name_value:info]
-[offset:0x1aa0, name_value:testTag]
-[offset:0x1aa9, name_value:%{public}s]
-[offset:0x1ab5, name_value:Ability onBackground]
-[offset:0x1acb, name_value:Ability onCreate]
-[offset:0x1add, name_value:Ability onDestroy]
-[offset:0x1af0, name_value:Ability onForeground]
-[offset:0x1b06, name_value:Ability onWindowStageCreate]
-[offset:0x1b23, name_value:loadContent]
-[offset:0x1b30, name_value:Ability onWindowStageDestroy]
-[offset:0x1b4e, name_value:code]
-[offset:0x1b54, name_value:error]
-[offset:0x1b5b, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x1b8a, name_value:JSON]
-[offset:0x1b90, name_value:stringify]
-[offset:0x1b9b, name_value:Succeeded in loading the content.]
-[offset:0x1bbe, name_value:prototype]
-[offset:0x1bc9, name_value:function]
-[offset:0x1bd3, name_value:paramsGenerator_]
-[offset:0x1be5, name_value:finalizeConstruction]
-[offset:0x1bfb, name_value:SubscriberManager]
-[offset:0x1c0e, name_value:Get]
-[offset:0x1c13, name_value:delete]
-[offset:0x1c1b, name_value:id__]
-[offset:0x1c21, name_value:aboutToBeDeletedInternal]
-[offset:0x1c3b, name_value:observeComponentCreation2]
-[offset:0x1c56, name_value:Column]
-[offset:0x1c5e, name_value:Text]
-[offset:0x1c64, name_value:pop]
-[offset:0x1c69, name_value:updateDirtyElements]
-[offset:0x1c7e, name_value:create]
-[offset:0x1c86, name_value:]
-[offset:0x1c88, name_value:cubicBezierCurve]
-[offset:0x1c9a, name_value:interpolate]
-[offset:0x1ca7, name_value:ViewPU]
-[offset:0x1caf, name_value:Reflect]
-[offset:0x1cb8, name_value:set]
-[offset:0x1cbd, name_value:registerNamedRoute]
+[offset:0x7f4, name_value:UIAbility]
+[offset:0x808, name_value:hilog]
+[offset:0x856, name_value:DOMAIN]
+[offset:0xcb3, name_value:Index]
+[offset:0x1acd, name_value:curves]
+[offset:0x1ad5, name_value:setInitiallyProvidedValue]
+[offset:0x1b89, name_value:pages/Index]
+[offset:0x1c01, name_value:info]
+[offset:0x1c07, name_value:testTag]
+[offset:0x1c10, name_value:%{public}s]
+[offset:0x1c1c, name_value:Ability onBackground]
+[offset:0x1c32, name_value:Ability onCreate]
+[offset:0x1c44, name_value:Ability onDestroy]
+[offset:0x1c57, name_value:Ability onForeground]
+[offset:0x1c6d, name_value:Ability onWindowStageCreate]
+[offset:0x1c8a, name_value:loadContent]
+[offset:0x1c97, name_value:Ability onWindowStageDestroy]
+[offset:0x1cb5, name_value:code]
+[offset:0x1cbb, name_value:error]
+[offset:0x1cc2, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x1cf1, name_value:JSON]
+[offset:0x1cf7, name_value:stringify]
+[offset:0x1d02, name_value:Succeeded in loading the content.]
+[offset:0x1d25, name_value:prototype]
+[offset:0x1d30, name_value:function]
+[offset:0x1d3a, name_value:paramsGenerator_]
+[offset:0x1d4c, name_value:finalizeConstruction]
+[offset:0x1d62, name_value:SubscriberManager]
+[offset:0x1d75, name_value:Get]
+[offset:0x1d7a, name_value:delete]
+[offset:0x1d82, name_value:id__]
+[offset:0x1d88, name_value:aboutToBeDeletedInternal]
+[offset:0x1da2, name_value:observeComponentCreation2]
+[offset:0x1dbd, name_value:Column]
+[offset:0x1dc5, name_value:Text]
+[offset:0x1dcb, name_value:pop]
+[offset:0x1dd0, name_value:updateDirtyElements]
+[offset:0x1de5, name_value:create]
+[offset:0x1ded, name_value:]
+[offset:0x1def, name_value:cubicBezierCurve]
+[offset:0x1e01, name_value:interpolate]
+[offset:0x1e0e, name_value:ViewPU]
+[offset:0x1e16, name_value:Reflect]
+[offset:0x1e1f, name_value:set]
+[offset:0x1e24, name_value:registerNamedRoute]

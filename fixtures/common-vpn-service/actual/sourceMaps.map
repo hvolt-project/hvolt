@@ -12,13 +12,13 @@
   },
   "entry|entry|1.0.0|src/main/ets/common/CommonVpnService.ts": {
     "version": 3,
-    "file": "CommonVpnService.ets",
+    "file": "CommonVpnService.ts",
     "sourceRoot": "",
     "sources": [
-      "entry/src/main/ets/common/CommonVpnService.ets"
+      "entry/src/main/ets/common/CommonVpnService.ts"
     ],
     "names": [],
-    "mappings": ";;;AAGA;CACE;CACA;CACA;CACA;;EAEE;EACA;;;;CAIF;CACA;CACA;;EAEE;;;AAGJ;;CAEE;CACA;CACA;CACA;CACA;;AAEF;CACE;CACA;CACA;CACA;;;;;;;EAYE;EACA;EACA;;;;;;CAQF;;;;;;;;;;;CAQA;;EAEE;;;;GAIE;;;;;;;;;;;;;;;;;;AAmBN;;;;AAKA;;;;;AAMA;;CAEE;;;;;CAKA;;;CAGA;;;CAGA;;;;;AAMF;EACE;EACA;;;EAGA;EACA;EACA;IACE;IACA;IACA;IACA;IACA",
+    "mappings": ";;;AAGA;CACE;CACA;CACA;CACA;;EAEE;EACA;;;;CAIF;CACA;CACA;;EAEE;;;AAGJ;;CAEE;CACA;CACA;CACA;CACA;;AAEF;CACE;CACA;CACA;CACA;;;;;;;EAYE;EACA;EACA;;;;;;CAQF;;;;;;;;;;;CAQA;;EAEE;;;;GAIE;;;;;;;;;;;;;;;;;;AAmBN;;;;AAKA;;;;;AAMA;;CAEE;;;;;CAKA;;;CAGA;;;CAGA;;;;;AAMF;IACE;IACA;;;IAGA;IACA;IACA;QACE;QACA;QACA;QACA;QACA",
     "entry-package-info": "entry|1.0.0"
   },
   "entry|entry|1.0.0|src/main/ets/pages/Index.ts": {

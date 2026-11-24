@@ -3,93 +3,94 @@
 # ====================
 # LITERALS
 
-0 0x480a { 10 [ string:"id", i32:16777230, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-1 0x4489 { 4 [ string:"vibratorTriggerOfHapticClockTimer", method:#~@7<#vibratorTriggerOfHapticClockTimer, method_affiliate:0, i32:0, ]}
-10 0x3e6f { 4 [ string:"color", null_value:0, string:"strokeWidth", null_value:0, ]}
-11 0x45c7 { 13 [ string:"setInitiallyProvidedValue", method:#~@d>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@d>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@d>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@d>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-12 0x3eb4 { 10 [ string:"id", i32:16777230, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-13 0x437b { 1 [ i32:0, ]}
-14 0x4433 { 7 [ string:"isScaleTranFast", method:#~@6<#isScaleTranFast, method_affiliate:2, string:"isClickEffect", method:#~@6<#isClickEffect, method_affiliate:1, i32:0, ]}
-15 0x41ed { 6 [ string:"symbolStartIcon", null_value:0, string:"content", string:"收藏", string:"callback", null_value:0, ]}
-16 0x4384 { 25 [ string:"totalCount", method:#~@1>#totalCount, method_affiliate:0, string:"getData", method:#~@1>#getData, method_affiliate:1, string:"registerDataChangeListener", method:#~@1>#registerDataChangeListener, method_affiliate:1, string:"unregisterDataChangeListener", method:#~@1>#unregisterDataChangeListener, method_affiliate:1, string:"clear", method:#~@1>#clear, method_affiliate:0, string:"DefaultSortItems", method:#~@1>#DefaultSortItems, method_affiliate:1, string:"NameSortItems", method:#~@1>#NameSortItems, method_affiliate:1, string:"LatencySortItems", method:#~@1>#LatencySortItems, method_affiliate:1, i32:8, ]}
-17 0x440b { 1 [ i32:0, ]}
-18 0x3ee7 { 5 [ i32:2, string:"item", i32:0, string:"this", i32:1, ]}
-19 0x434f { 3 [ i32:1, string:"tip", i32:0, ]}
-2 0xfde { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-20 0x4414 { 1 [ i32:0, ]}
-21 0x42f1 { 3 [ i32:1, string:"this", i32:0, ]}
-22 0x44b5 { 3 [ string:"", string:"", string:"", ]}
-23 0x426f { 6 [ string:"symbolStartIcon", null_value:0, string:"content", string:"取消收藏", string:"callback", null_value:0, ]}
-24 0x3f04 { 4 [ string:"src", string:"https://speed.cloudflare.com", string:"controller", null_value:0, ]}
-25 0x41ab { 16 [ string:"builder", null_value:0, string:"alignment", null_value:0, string:"customStyle", u1:0, string:"cornerRadius", i32:32, string:"gridCount", i32:4, string:"cancel", null_value:0, string:"autoCancel", u1:1, string:"onWillDismiss", null_value:0, ]}
-26 0x3cbe { 10 [ string:"id", i32:16777229, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-27 0x441d { 4 [ string:"fetchFavoriteProxys", method:#~@5<#fetchFavoriteProxys, method_affiliate:2, i32:0, ]}
-28 0x449f { 4 [ string:"testDelay", method:#~@8<#testDelay, method_affiliate:1, i32:0, ]}
-29 0x44c8 { 4 [ string:"showToast", method:#~@a<#showToast, method_affiliate:1, i32:0, ]}
-3 0xf87 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-30 0x3f19 { 10 [ string:"id", i32:16777230, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-31 0x44de { 13 [ string:"setInitiallyProvidedValue", method:#~@b>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@b>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@b>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@b>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-32 0x451b { 10 [ string:"id", i32:125832654, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-33 0x454e { 10 [ string:"id", i32:125832304, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-34 0x4612 { 13 [ string:"setInitiallyProvidedValue", method:#~@17>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@17>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@17>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@17>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-35 0x464f { 22 [ string:"setInitiallyProvidedValue", method:#~@18>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@18>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@18>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@18>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@18>#initialRender, method_affiliate:0, string:"rerender", method:#~@18>#rerender, method_affiliate:0, string:"getEntryName", method:#~@18<#getEntryName, method_affiliate:0, i32:6, ]}
-36 0x3d7f { 10 [ string:"id", i32:16777226, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-37 0x4189 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:368, string:"col", i32:14, ]}
-38 0x45b4 { 3 [ i32:1, string:"ProxyGroupItem", i32:0, ]}
-39 0x3e81 { 10 [ string:"id", i32:16777231, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-4 0x3d6d { 4 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, ]}
-40 0x3d3a { 10 [ string:"id", i32:16777227, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-41 0x46b3 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-42 0x4604 { 2 [ string:"bottom", i32:15, ]}
-43 0x4581 { 10 [ string:"id", i32:125832644, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-44 0x4156 { 10 [ string:"id", i32:16777224, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-45 0x40f5 { 4 [ string:"space", i32:10, string:"initialIndex", i32:0, ]}
-46 0x4362 { 2 [ string:"level", null_value:0, ]}
-47 0x405a { 10 [ string:"id", i32:16777225, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-48 0x3cf1 { 2 [ string:"message", null_value:0, ]}
-49 0x400f { 10 [ string:"preview", null_value:0, string:"placement", null_value:0, string:"aboutToAppear", null_value:0, string:"previewAnimationOptions", null_value:0, string:"aboutToDisappear", null_value:0, ]}
-5 0x410d { 4 [ string:"scrollForward", null_value:0, string:"scrollBackward", null_value:0, ]}
-50 0x3e2a { 4 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, ]}
-51 0x4132 { 4 [ string:"cancel", null_value:0, string:"confirm", null_value:0, ]}
-52 0x46f3 { 55 [ i32:27, string:"ProxySort", i32:0, string:"ClashCore", i32:1, string:"ProxyGroupType", i32:2, string:"ProxyItemDataSource", i32:3, string:"AppConfig", i32:4, string:"UIConfig", i32:5, string:"ProxyCustomDialog", i32:6, string:"TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE", i32:7, string:"ProxyCardSize", i32:8, string:"ProxyListLanes", i32:9, string:"ListGutter", i32:10, string:"__List__ListStyle", i32:11, string:"CONTENT_END_OFFSET_150", i32:12, string:"customAnimationUtil", i32:13, string:"__ListItem__ListItemStyle", i32:14, string:"LIST_ITEM_HEIGHT", i32:15, string:"customVibrator", i32:16, string:"PopupBuilder", i32:17, string:"PopTips", i32:18, string:"ProxyNode", i32:19, string:"componentName", i32:20, string:"BORDER_RADIUS_20", i32:21, string:"startIconModifier1", i32:22, string:"ClashViewModel", i32:23, string:"AppState", i32:24, string:"Xb_ToastUtil", i32:25, string:"ProxyGroupItemPage", i32:26, ]}
-53 0x3e3c { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-54 0x4144 { 4 [ string:"cancel", null_value:0, string:"confirm", null_value:0, ]}
-55 0x3de5 { 4 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, ]}
-56 0x4456 { 10 [ string:"id", i32:16777223, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-57 0x43f5 { 4 [ string:"getAllData", method:#~@2>#getAllData, method_affiliate:0, i32:1, ]}
-58 0x4004 { 2 [ string:"builder", null_value:0, ]}
-59 0x3cfc { 10 [ string:"id", i32:16777220, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-6 0x4341 { 2 [ string:"bottom", i32:8, ]}
-60 0x436d { 2 [ string:"duration", i32:100, ]}
-61 0x3d2f { 2 [ string:"message", null_value:0, ]}
-62 0x4304 { 12 [ string:"name", string:"", string:"latency", i32:0, string:"type", string:"", string:"id", string:"", string:"g", string:"", string:"isShowFavoriteProxy", u1:0, ]}
-63 0x411f { 3 [ i32:1, string:"this", i32:0, ]}
-64 0x3fbb { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:266, string:"col", i32:11, ]}
-65 0x3cb3 { 2 [ string:"message", null_value:0, ]}
-66 0x3f5a { 3 [ i32:1, string:"this", i32:0, ]}
-67 0x3ff6 { 2 [ string:"name", string:"ProxyNode", ]}
-68 0x40b8 { 2 [ string:"builder", null_value:0, ]}
-69 0x423c { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-7 0x3c74 { 8 [ string:"left", i32:24, string:"right", i32:24, string:"top", i32:16, string:"bottom", i32:16, ]}
-70 0x3f4c { 2 [ string:"minHeight", i32:120, ]}
-71 0x40ea { 2 [ string:"offsetRemain", null_value:0, ]}
-73 0x3ca0 { 3 [ i32:1, string:"this", i32:0, ]}
-74 0x4209 { 10 [ string:"id", i32:125831520, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-75 0x4048 { 2 [ i32:1, f64:1.1, ]}
-76 0x3df7 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-77 0x3f94 { 10 [ string:"item", null_value:0, string:"disabled", null_value:0, string:"selected", null_value:0, string:"selectProxy", null_value:0, string:"onLatencyChange", null_value:0, ]}
-78 0x428b { 10 [ string:"id", i32:125831521, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-79 0x3db2 { 10 [ string:"id", i32:16777230, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-8 0x3fdd { 6 [ string:"item", null_value:0, string:"disabled", null_value:0, string:"selected", null_value:0, ]}
-80 0x40c3 { 7 [ i32:3, string:"index", i32:0, string:"item", i32:1, string:"itemCreation2", i32:2, ]}
-81 0x4036 { 4 [ string:"scale", null_value:0, string:"transition", null_value:0, ]}
-82 0x408d { 2 [ string:"tempo", f64:1.5, ]}
-83 0x3f6d { 10 [ string:"item", null_value:0, string:"disabled", null_value:0, string:"selected", null_value:0, string:"selectProxy", null_value:0, string:"onLatencyChange", null_value:0, ]}
-84 0x42be { 10 [ string:"id", i32:125831041, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-86 0x3b97 { 25 [ string:"ProxyItem", string:"ProxyItemDataSource", string:"ProxyGroupItemDataSource", string:"AppConfig", string:"UIConfig", string:"AppState", string:"customAnimationUtil", string:"customVibrator", string:"ClashViewModel", string:"PopupBuilder", string:"Xb_ToastUtil", string:"ProxyNode", string:"initialRender", string:"ProxyGroupItem", string:"builder", string:"paramsLambda", string:"__lazyForEachItemGenFunction", string:"itemCreation2", string:"observedDeepRender", string:"BindSheetNetworkSpeed", string:"MyMenu", string:"favoriteProxy", string:"cancelFavoriteProxy", string:"ProxyCustomDialog", string:"ProxyGroupItemPage", ]}
-87 0xf39 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-9 0x409f { 6 [ string:"builder", null_value:0, string:"onWillDismiss", u1:0, string:"autoCancel", u1:0, ]}
-72 0xf47 { 3 [
+0 0x41a0 { 2 [ string:"tempo", f64:1.5, ]}
+1 0x415b { 2 [ i32:1, f64:1.1, ]}
+10 0x434f { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+11 0x3f82 { 4 [ string:"color", null_value:0, string:"strokeWidth", null_value:0, ]}
+12 0x4404 { 3 [ i32:1, string:"this", i32:0, ]}
+13 0x45db { 4 [ string:"showToast", method:#~@a<#showToast, method_affiliate:1, i32:0, ]}
+14 0x4717 { 2 [ string:"bottom", i32:15, ]}
+15 0x3ec5 { 10 [ string:"id", i32:16777227, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+16 0x4208 { 4 [ string:"space", i32:10, string:"initialIndex", i32:0, ]}
+17 0x4527 { 1 [ i32:0, ]}
+18 0x4480 { 2 [ string:"duration", i32:100, ]}
+19 0x451e { 1 [ i32:0, ]}
+2 0x4149 { 4 [ string:"scale", null_value:0, string:"transition", null_value:0, ]}
+20 0x42be { 16 [ string:"builder", null_value:0, string:"alignment", null_value:0, string:"customStyle", u1:0, string:"cornerRadius", i32:32, string:"gridCount", i32:4, string:"cancel", null_value:0, string:"autoCancel", u1:1, string:"onWillDismiss", null_value:0, ]}
+21 0x3f0a { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+22 0x4220 { 4 [ string:"scrollForward", null_value:0, string:"scrollBackward", null_value:0, ]}
+23 0x4508 { 4 [ string:"getAllData", method:#~@2>#getAllData, method_affiliate:0, i32:1, ]}
+24 0x45c8 { 3 [ string:"", string:"", string:"", ]}
+25 0x4417 { 12 [ string:"name", string:"", string:"latency", i32:0, string:"type", string:"", string:"id", string:"", string:"g", string:"", string:"isShowFavoriteProxy", u1:0, ]}
+26 0x45f1 { 13 [ string:"setInitiallyProvidedValue", method:#~@b>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@b>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@b>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@b>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+27 0x4661 { 10 [ string:"id", i32:125832304, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+28 0x4122 { 10 [ string:"preview", null_value:0, string:"placement", null_value:0, string:"aboutToAppear", null_value:0, string:"previewAnimationOptions", null_value:0, string:"aboutToDisappear", null_value:0, ]}
+29 0x3caa { 25 [ string:"ProxyItem", string:"ProxyItemDataSource", string:"ProxyGroupItemDataSource", string:"AppConfig", string:"UIConfig", string:"AppState", string:"customAnimationUtil", string:"customVibrator", string:"ClashViewModel", string:"PopupBuilder", string:"Xb_ToastUtil", string:"ProxyNode", string:"initialRender", string:"ProxyGroupItem", string:"builder", string:"paramsLambda", string:"__lazyForEachItemGenFunction", string:"itemCreation2", string:"observedDeepRender", string:"BindSheetNetworkSpeed", string:"MyMenu", string:"favoriteProxy", string:"cancelFavoriteProxy", string:"ProxyCustomDialog", string:"ProxyGroupItemPage", ]}
+3 0x491d { 10 [ string:"id", i32:16777227, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+30 0x47c6 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+33 0x4117 { 2 [ string:"builder", null_value:0, ]}
+34 0x4569 { 10 [ string:"id", i32:16777219, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+35 0xf41 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+36 0x40f0 { 6 [ string:"item", null_value:0, string:"disabled", null_value:0, string:"selected", null_value:0, ]}
+37 0x118d 
+38 0xf8f { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+39 0x4454 { 2 [ string:"bottom", i32:8, ]}
+4 0x3dc6 { 2 [ string:"message", null_value:0, ]}
+40 0x41d6 { 7 [ i32:3, string:"index", i32:0, string:"item", i32:1, string:"itemCreation2", i32:2, ]}
+41 0x41cb { 2 [ string:"builder", null_value:0, ]}
+42 0x4269 { 10 [ string:"id", i32:16777220, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+43 0x3d87 { 8 [ string:"left", i32:24, string:"right", i32:24, string:"top", i32:16, string:"bottom", i32:16, ]}
+44 0x46c7 { 3 [ i32:1, string:"ProxyGroupItem", i32:0, ]}
+45 0x4530 { 4 [ string:"fetchFavoriteProxys", method:#~@5<#fetchFavoriteProxys, method_affiliate:2, i32:0, ]}
+46 0x4725 { 13 [ string:"setInitiallyProvidedValue", method:#~@17>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@17>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@17>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@17>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+47 0x402c { 10 [ string:"id", i32:16777227, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+48 0xfe6 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+49 0x4762 { 22 [ string:"setInitiallyProvidedValue", method:#~@18>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@18>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@18>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@18>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@18>#initialRender, method_affiliate:0, string:"rerender", method:#~@18>#rerender, method_affiliate:0, string:"getEntryName", method:#~@18<#getEntryName, method_affiliate:0, i32:6, ]}
+5 0x4257 { 4 [ string:"cancel", null_value:0, string:"confirm", null_value:0, ]}
+50 0x3ffa { 5 [ i32:2, string:"item", i32:0, string:"this", i32:1, ]}
+51 0x3dd1 { 10 [ string:"id", i32:16777226, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+52 0x406d { 3 [ i32:1, string:"this", i32:0, ]}
+53 0x3f94 { 10 [ string:"id", i32:16777228, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+55 0x3fc7 { 10 [ string:"id", i32:16777227, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+56 0x4546 { 7 [ string:"isScaleTranFast", method:#~@6<#isScaleTranFast, method_affiliate:2, string:"isClickEffect", method:#~@6<#isClickEffect, method_affiliate:1, i32:0, ]}
+57 0x4694 { 10 [ string:"id", i32:125832644, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+58 0x448e { 1 [ i32:0, ]}
+59 0x3f4f { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+6 0x4109 { 2 [ string:"name", string:"ProxyNode", ]}
+60 0x4806 { 55 [ i32:27, string:"ProxySort", i32:0, string:"ClashCore", i32:1, string:"ProxyGroupType", i32:2, string:"ProxyItemDataSource", i32:3, string:"AppConfig", i32:4, string:"UIConfig", i32:5, string:"ProxyCustomDialog", i32:6, string:"TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE", i32:7, string:"ProxyCardSize", i32:8, string:"ProxyListLanes", i32:9, string:"ListGutter", i32:10, string:"__List__ListStyle", i32:11, string:"CONTENT_END_OFFSET_150", i32:12, string:"customAnimationUtil", i32:13, string:"__ListItem__ListItemStyle", i32:14, string:"LIST_ITEM_HEIGHT", i32:15, string:"customVibrator", i32:16, string:"PopupBuilder", i32:17, string:"PopTips", i32:18, string:"ProxyNode", i32:19, string:"componentName", i32:20, string:"BORDER_RADIUS_20", i32:21, string:"startIconModifier1", i32:22, string:"ClashViewModel", i32:23, string:"AppState", i32:24, string:"Xb_ToastUtil", i32:25, string:"ProxyGroupItemPage", i32:26, ]}
+61 0x41fd { 2 [ string:"offsetRemain", null_value:0, ]}
+62 0x3f3d { 4 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, ]}
+63 0x4475 { 2 [ string:"level", null_value:0, ]}
+64 0x4497 { 25 [ string:"totalCount", method:#~@1>#totalCount, method_affiliate:0, string:"getData", method:#~@1>#getData, method_affiliate:1, string:"registerDataChangeListener", method:#~@1>#registerDataChangeListener, method_affiliate:1, string:"unregisterDataChangeListener", method:#~@1>#unregisterDataChangeListener, method_affiliate:1, string:"clear", method:#~@1>#clear, method_affiliate:0, string:"DefaultSortItems", method:#~@1>#DefaultSortItems, method_affiliate:1, string:"NameSortItems", method:#~@1>#NameSortItems, method_affiliate:1, string:"LatencySortItems", method:#~@1>#LatencySortItems, method_affiliate:1, i32:8, ]}
+65 0x46da { 13 [ string:"setInitiallyProvidedValue", method:#~@d>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@d>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@d>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@d>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+66 0x4462 { 3 [ i32:1, string:"tip", i32:0, ]}
+67 0x405f { 2 [ string:"minHeight", i32:120, ]}
+68 0x45b2 { 4 [ string:"testDelay", method:#~@8<#testDelay, method_affiliate:1, i32:0, ]}
+69 0x416d { 10 [ string:"id", i32:16777221, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+7 0x431c { 10 [ string:"id", i32:125831520, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+70 0x4017 { 4 [ string:"src", string:"https://speed.cloudflare.com", string:"controller", null_value:0, ]}
+71 0x3e80 { 4 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, ]}
+72 0x3e92 { 10 [ string:"id", i32:16777222, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+73 0x4382 { 6 [ string:"symbolStartIcon", null_value:0, string:"content", string:"取消收藏", string:"callback", null_value:0, ]}
+74 0x43d1 { 10 [ string:"id", i32:125831041, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+75 0x3ef8 { 4 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, ]}
+76 0x3e04 { 2 [ string:"message", null_value:0, ]}
+77 0x3e0f { 10 [ string:"id", i32:16777216, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+78 0x3e42 { 2 [ string:"message", null_value:0, ]}
+79 0x4245 { 4 [ string:"cancel", null_value:0, string:"confirm", null_value:0, ]}
+8 0x4080 { 10 [ string:"item", null_value:0, string:"disabled", null_value:0, string:"selected", null_value:0, string:"selectProxy", null_value:0, string:"onLatencyChange", null_value:0, ]}
+80 0x3e4d { 10 [ string:"id", i32:16777224, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+81 0x4232 { 3 [ i32:1, string:"this", i32:0, ]}
+82 0x429c { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:368, string:"col", i32:14, ]}
+83 0x40a7 { 10 [ string:"item", null_value:0, string:"disabled", null_value:0, string:"selected", null_value:0, string:"selectProxy", null_value:0, string:"onLatencyChange", null_value:0, ]}
+84 0x40ce { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:266, string:"col", i32:11, ]}
+85 0x462e { 10 [ string:"id", i32:125832654, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+86 0x3db3 { 3 [ i32:1, string:"this", i32:0, ]}
+87 0x4300 { 6 [ string:"symbolStartIcon", null_value:0, string:"content", string:"收藏", string:"callback", null_value:0, ]}
+88 0x41b2 { 6 [ string:"builder", null_value:0, string:"onWillDismiss", u1:0, string:"autoCancel", u1:0, ]}
+89 0x459c { 4 [ string:"vibratorTriggerOfHapticClockTimer", method:#~@7<#vibratorTriggerOfHapticClockTimer, method_affiliate:0, i32:0, ]}
+9 0x439e { 10 [ string:"id", i32:125831521, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+31 0xf4f { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -98,7 +99,11 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
-85 0x3c18 { 5 [
+32 0x1191 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+54 0x3d2b { 5 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:hilog,
 		1 : @ohos:arkui.node,
@@ -116,13 +121,23 @@
 # RECORDS
 
 .language ArkTS
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x118d
+	u32 moduleRecordIdx = 0x1191
+}
+
+.language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
 	u8 pkgName@entry = 0x0
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xf39
-	u32 moduleRecordIdx = 0xf47
+	u32 scopeNames = 0xf41
+	u32 moduleRecordIdx = 0xf4f
 }
 
 .language ArkTS
@@ -131,8 +146,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x3b97
-	u32 moduleRecordIdx = 0x3c18
+	u32 scopeNames = 0x3caa
+	u32 moduleRecordIdx = 0x3d2b
 }
 
 .language ECMAScript
@@ -184,6 +199,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -792,7 +818,7 @@ L_ESSlotNumberAnnotation:
 	lda v5
 	ldobjbyname 0xb, "backgroundColor"
 	sta v4
-	createobjectwithbuffer 0xd, { 10 [ string:"id", i32:16777230, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0xd, { 10 [ string:"id", i32:16777227, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v6
 	createemptyarray 0xe
 	sta v7
@@ -1514,7 +1540,7 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	ldobjbyname 0x6, "backgroundColor"
 	sta v6
-	createobjectwithbuffer 0x8, { 10 [ string:"id", i32:16777230, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x8, { 10 [ string:"id", i32:16777227, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0x9
 	sta v9
@@ -1552,7 +1578,7 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	ldobjbyname 0x1, "create"
 	sta v6
-	createobjectwithbuffer 0x3, { 10 [ string:"id", i32:16777223, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x3, { 10 [ string:"id", i32:16777219, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0x4
 	sta v9
@@ -1608,7 +1634,7 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	ldobjbyname 0x1, "create"
 	sta v6
-	createobjectwithbuffer 0x3, { 10 [ string:"id", i32:16777224, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x3, { 10 [ string:"id", i32:16777220, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0x4
 	sta v9
@@ -1655,7 +1681,7 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	ldobjbyname 0x1, "createWithLabel"
 	sta v6
-	createobjectwithbuffer 0x3, { 10 [ string:"id", i32:16777225, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x3, { 10 [ string:"id", i32:16777221, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0x4
 	sta v9
@@ -4624,7 +4650,7 @@ L_ESSlotNumberAnnotation:
 	sta v5
 	createobjectwithbuffer 0x2, { 2 [ string:"message", null_value:0, ]}
 	sta v7
-	createobjectwithbuffer 0x3, { 10 [ string:"id", i32:16777229, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x3, { 10 [ string:"id", i32:16777226, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0x4
 	sta v9
@@ -4952,7 +4978,7 @@ L_ESSlotNumberAnnotation:
 	sta v5
 	createobjectwithbuffer 0x1f, { 2 [ string:"message", null_value:0, ]}
 	sta v7
-	createobjectwithbuffer 0x20, { 10 [ string:"id", i32:16777220, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x20, { 10 [ string:"id", i32:16777216, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0x21
 	sta v9
@@ -5033,7 +5059,7 @@ jump_label_0:
 	sta v5
 	createobjectwithbuffer 0x43, { 2 [ string:"message", null_value:0, ]}
 	sta v7
-	createobjectwithbuffer 0x44, { 10 [ string:"id", i32:16777227, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x44, { 10 [ string:"id", i32:16777224, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0x45
 	sta v9
@@ -6945,7 +6971,7 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	ldobjbyname 0x20, "backgroundColor"
 	sta v6
-	createobjectwithbuffer 0x22, { 10 [ string:"id", i32:16777230, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x22, { 10 [ string:"id", i32:16777227, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0x23
 	sta v9
@@ -7066,7 +7092,7 @@ L_ESSlotNumberAnnotation:
 	sta v6
 	createobjectwithbuffer 0x8, { 4 [ string:"color", null_value:0, string:"strokeWidth", null_value:0, ]}
 	sta v8
-	createobjectwithbuffer 0x9, { 10 [ string:"id", i32:16777231, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x9, { 10 [ string:"id", i32:16777228, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v9
 	createemptyarray 0xa
 	sta v10
@@ -7093,7 +7119,7 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	ldobjbyname 0x18, "backgroundColor"
 	sta v6
-	createobjectwithbuffer 0x1a, { 10 [ string:"id", i32:16777230, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x1a, { 10 [ string:"id", i32:16777227, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0x1b
 	sta v9
@@ -7644,7 +7670,7 @@ L_ESSlotNumberAnnotation:
 	ldlexvar 0x2, 0x16
 	throw.undefinedifholewithname "startIconModifier1"
 	definepropertybyname 0x4, "symbolStartIcon", v8
-	createobjectwithbuffer 0x6, { 10 [ string:"id", i32:16777226, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x6, { 10 [ string:"id", i32:16777222, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v9
 	createemptyarray 0x7
 	sta v10
@@ -9959,333 +9985,333 @@ handler_end_label_0_0:
 # ====================
 # STRING
 
-[offset:0x1030, name_value:UIAbility]
-[offset:0x1044, name_value:hilog]
-[offset:0x1092, name_value:DOMAIN]
-[offset:0x27c7, name_value:heightBp]
-[offset:0x27d1, name_value:widthBp]
-[offset:0x28c0, name_value:params]
-[offset:0x2b97, name_value:items]
-[offset:0x2d7d, name_value:name]
-[offset:0x31fc, name_value:id]
-[offset:0x351d, name_value:item]
-[offset:0x3a91, name_value:ProxyGroupItem]
-[offset:0x3aee, name_value:ProxyItemDataSource]
-[offset:0x3b03, name_value:AppConfig]
-[offset:0x3b0e, name_value:UIConfig]
-[offset:0x3b18, name_value:AppState]
-[offset:0x3b22, name_value:customAnimationUtil]
-[offset:0x3b37, name_value:customVibrator]
-[offset:0x3b47, name_value:ClashViewModel]
-[offset:0x3b57, name_value:Xb_ToastUtil]
-[offset:0x3b65, name_value:ProxyNode]
-[offset:0x3b70, name_value:ProxyCustomDialog]
-[offset:0x3b83, name_value:ProxyGroupItemPage]
-[offset:0x484b, name_value:initialRender]
-[offset:0x485a, name_value:builder]
-[offset:0x4863, name_value:itemCreation2]
-[offset:0x4872, name_value:BindSheetNetworkSpeed]
-[offset:0x4889, name_value:MyMenu]
-[offset:0x4891, name_value:favoriteProxy]
-[offset:0x48a0, name_value:cancelFavoriteProxy]
-[offset:0x48f0, name_value:LengthMetrics]
-[offset:0x48ff, name_value:SymbolGlyphModifier]
-[offset:0x4914, name_value:webview]
-[offset:0x4942, name_value:message]
-[offset:0x494b, name_value:type]
-[offset:0x4982, name_value:symbolStartIcon]
-[offset:0x4993, name_value:content]
-[offset:0x499c, name_value:color]
-[offset:0x49a3, name_value:strokeWidth]
-[offset:0x49d3, name_value:controller]
-[offset:0x49ea, name_value:disabled]
-[offset:0x49f4, name_value:selected]
-[offset:0x49fe, name_value:selectProxy]
-[offset:0x4a0b, name_value:onLatencyChange]
-[offset:0x4a51, name_value:preview]
-[offset:0x4a5a, name_value:placement]
-[offset:0x4a65, name_value:aboutToAppear]
-[offset:0x4a74, name_value:previewAnimationOptions]
-[offset:0x4a8d, name_value:aboutToDisappear]
-[offset:0x4a9f, name_value:scale]
-[offset:0x4aa6, name_value:transition]
-[offset:0x4ab9, name_value:onWillDismiss]
-[offset:0x4ad4, name_value:offsetRemain]
-[offset:0x4af7, name_value:scrollForward]
-[offset:0x4b06, name_value:scrollBackward]
-[offset:0x4b16, name_value:cancel]
-[offset:0x4b1e, name_value:confirm]
-[offset:0x4b27, name_value:alignment]
-[offset:0x4b60, name_value:callback]
-[offset:0x4b78, name_value:]
-[offset:0x4b7a, name_value:latency]
-[offset:0x4b83, name_value:g]
-[offset:0x4b86, name_value:isShowFavoriteProxy]
-[offset:0x4ba0, name_value:level]
-[offset:0x4bb1, name_value:totalCount]
-[offset:0x4c00, name_value:clear]
-[offset:0x4c07, name_value:DefaultSortItems]
-[offset:0x4c19, name_value:NameSortItems]
-[offset:0x4c28, name_value:LatencySortItems]
-[offset:0x4c3a, name_value:getAllData]
-[offset:0x4c46, name_value:fetchFavoriteProxys]
-[offset:0x4c5b, name_value:isScaleTranFast]
-[offset:0x4c6c, name_value:isClickEffect]
-[offset:0x4c7b, name_value:vibratorTriggerOfHapticClockTimer]
-[offset:0x4c9e, name_value:testDelay]
-[offset:0x4ca9, name_value:showToast]
-[offset:0x4cb4, name_value:setInitiallyProvidedValue]
-[offset:0x4d03, name_value:aboutToBeDeleted]
-[offset:0x4d15, name_value:rerender]
-[offset:0x4d37, name_value:pages/Index]
-[offset:0x4da3, name_value:TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE]
-[offset:0x4df6, name_value:CONTENT_END_OFFSET_150]
-[offset:0x4e29, name_value:LIST_ITEM_HEIGHT]
-[offset:0x4e3b, name_value:PopTips]
-[offset:0x4e44, name_value:componentName]
-[offset:0x4e53, name_value:BORDER_RADIUS_20]
-[offset:0x4e65, name_value:startIconModifier1]
-[offset:0x4e85, name_value:info]
-[offset:0x4e8b, name_value:testTag]
-[offset:0x4e94, name_value:%{public}s]
-[offset:0x4ea0, name_value:Ability onBackground]
-[offset:0x4eb6, name_value:Ability onCreate]
-[offset:0x4ec8, name_value:Ability onDestroy]
-[offset:0x4edb, name_value:Ability onForeground]
-[offset:0x4ef1, name_value:Ability onWindowStageCreate]
-[offset:0x4f0e, name_value:loadContent]
-[offset:0x4f1b, name_value:Ability onWindowStageDestroy]
-[offset:0x4f39, name_value:code]
-[offset:0x4f3f, name_value:error]
-[offset:0x4f46, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x4f75, name_value:JSON]
-[offset:0x4f7b, name_value:stringify]
-[offset:0x4f86, name_value:Succeeded in loading the content.]
-[offset:0x4fa9, name_value:prototype]
-[offset:0x4fb4, name_value:clash]
-[offset:0x4fbb, name_value:mihomo]
-[offset:0x4fc3, name_value:Small]
-[offset:0x4fca, name_value:Large]
-[offset:0x4fd1, name_value:List]
-[offset:0x4fd7, name_value:Grid]
-[offset:0x4fdd, name_value:Default]
-[offset:0x4fe6, name_value:Title]
-[offset:0x4fed, name_value:Delay]
-[offset:0x4ff4, name_value:observeComponentCreation2]
-[offset:0x500f, name_value:Column]
-[offset:0x5017, name_value:Text]
-[offset:0x501d, name_value:pop]
-[offset:0x5022, name_value:ListItem]
-[offset:0x502c, name_value:width]
-[offset:0x5033, name_value:100%]
-[offset:0x5039, name_value:borderRadius]
-[offset:0x5047, name_value:backgroundColor]
-[offset:0x5058, name_value:chainAnimation]
-[offset:0x5068, name_value:scrollBar]
-[offset:0x5073, name_value:BarState]
-[offset:0x507d, name_value:Off]
-[offset:0x5082, name_value:edgeEffect]
-[offset:0x508e, name_value:EdgeEffect]
-[offset:0x509a, name_value:Spring]
-[offset:0x50a2, name_value:constraintSize]
-[offset:0x50b2, name_value:alignListItem]
-[offset:0x50c1, name_value:ListItemAlign]
-[offset:0x50d0, name_value:Center]
-[offset:0x50d8, name_value:create]
-[offset:0x50f7, name_value:function]
-[offset:0x5101, name_value:paramsGenerator_]
-[offset:0x5113, name_value:initializeConsume]
-[offset:0x5126, name_value:isEnableIndexForegroundBlur]
-[offset:0x5143, name_value:__isEnableIndexForegroundBlur]
-[offset:0x5162, name_value:icon_emphasize]
-[offset:0x5172, name_value:__icon_emphasize]
-[offset:0x5184, name_value:finalizeConstruction]
-[offset:0x519a, name_value:SubscriberManager]
-[offset:0x51ad, name_value:Get]
-[offset:0x51b2, name_value:delete]
-[offset:0x51ba, name_value:id__]
-[offset:0x51c0, name_value:aboutToBeDeletedInternal]
-[offset:0x51da, name_value:get]
-[offset:0x51df, name_value:set]
-[offset:0x51e4, name_value:Button]
-[offset:0x51ec, name_value:purgeDependencyOnElmtId]
-[offset:0x5205, name_value:updateDirtyElements]
-[offset:0x521a, name_value:padding]
-[offset:0x5223, name_value:fontSize]
-[offset:0x522d, name_value:fontWeight]
-[offset:0x5239, name_value:createWithLabel]
-[offset:0x524a, name_value:onClick]
-[offset:0x5253, name_value:ObservedObject]
-[offset:0x5263, name_value:GetRawObject]
-[offset:0x5271, name_value:close]
-[offset:0x5278, name_value:listeners]
-[offset:0x5283, name_value:slice]
-[offset:0x528a, name_value:indexOf]
-[offset:0x5293, name_value:push]
-[offset:0x5299, name_value:length]
-[offset:0x52a1, name_value:splice]
-[offset:0x52a9, name_value:proxySort]
-[offset:0x52b4, name_value:currentProfileId]
-[offset:0x52c6, name_value:clashCore]
-[offset:0x52d1, name_value:proxyGroupType]
-[offset:0x52e1, name_value:isVibrate]
-[offset:0x52ec, name_value:isAnimation]
-[offset:0x52f9, name_value:ShowProxyPop]
-[offset:0x5307, name_value:ClickEffectLevel]
-[offset:0x5319, name_value:LIGHT]
-[offset:0x5320, name_value:TransitionEffect]
-[offset:0x5332, name_value:OPACITY]
-[offset:0x533b, name_value:animation]
-[offset:0x5346, name_value:SynchedPropertyObjectOneWayPU]
-[offset:0x5365, name_value:__item]
-[offset:0x536d, name_value:SynchedPropertySimpleOneWayPU]
-[offset:0x538c, name_value:__disabled]
-[offset:0x5398, name_value:__selected]
-[offset:0x53a4, name_value:Row]
-[offset:0x53a9, name_value:reset]
-[offset:0x53b0, name_value:ObservedPropertySimplePU]
-[offset:0x53ca, name_value:currentTouchIndex]
-[offset:0x53dd, name_value:__currentTouchIndex]
-[offset:0x53f2, name_value:tabCurrentPage]
-[offset:0x5402, name_value:__tabCurrentPage]
-[offset:0x5414, name_value:ProxyGroupItemSelected]
-[offset:0x542c, name_value:__ProxyGroupItemSelected]
-[offset:0x5446, name_value:isShowNetworkSpeed]
-[offset:0x545a, name_value:__isShowNetworkSpeed]
-[offset:0x5470, name_value:isShowMenu]
-[offset:0x547c, name_value:__isShowMenu]
-[offset:0x548a, name_value:WebviewController]
-[offset:0x549d, name_value:createStorageLink]
-[offset:0x54b0, name_value:SortChange]
-[offset:0x54bc, name_value:needChangeSort]
-[offset:0x54cc, name_value:__needChangeSort]
-[offset:0x54de, name_value:proxyitems]
-[offset:0x54ea, name_value:__proxyitems]
-[offset:0x54f8, name_value:proxyGroup]
-[offset:0x5504, name_value:__proxyGroup]
-[offset:0x5512, name_value:proxyGroups]
-[offset:0x551f, name_value:__proxyGroups]
-[offset:0x552e, name_value:ObservedPropertyObjectPU]
-[offset:0x5548, name_value:proxyLazyItems]
-[offset:0x5558, name_value:__proxyLazyItems]
-[offset:0x556a, name_value:currentProfile]
-[offset:0x557a, name_value:__currentProfile]
-[offset:0x558c, name_value:selectedProxy]
-[offset:0x559b, name_value:__selectedProxy]
-[offset:0x55ac, name_value:currentWidthBreakpoint]
-[offset:0x55c4, name_value:__widthBp]
-[offset:0x55cf, name_value:currentHeightBreakpoint]
-[offset:0x55e8, name_value:__heightBp]
-[offset:0x55f4, name_value:favoriteProxys]
-[offset:0x5604, name_value:Map]
-[offset:0x5609, name_value:__favoriteProxys]
-[offset:0x561b, name_value:appConfig]
-[offset:0x5626, name_value:__appConfig]
-[offset:0x5633, name_value:uiConfig]
-[offset:0x563d, name_value:__uiConfig]
-[offset:0x5649, name_value:showStart]
-[offset:0x5654, name_value:__showStart]
-[offset:0x5661, name_value:isShowDelayPop]
-[offset:0x5671, name_value:__isShowDelayPop]
-[offset:0x5683, name_value:isRolling]
-[offset:0x568e, name_value:__isRolling]
-[offset:0x569b, name_value:curOffsetRemain]
-[offset:0x56ac, name_value:__curOffsetRemain]
-[offset:0x56bf, name_value:isPXSecScreen]
-[offset:0x56ce, name_value:__isPXSecScreen]
-[offset:0x56df, name_value:CustomDialogController]
-[offset:0x56f7, name_value:DialogAlignment]
-[offset:0x5708, name_value:existApp]
-[offset:0x5712, name_value:ProxyDialogController]
-[offset:0x5729, name_value:OnProxyChange]
-[offset:0x5738, name_value:fontColor]
-[offset:0x5743, name_value:proxyListLongPressCtxMenuForFavorite]
-[offset:0x5769, name_value:proxyListLongPressCtxMenuForUnFavorite]
-[offset:0x5791, name_value:declareWatch]
-[offset:0x579f, name_value:onSortChange]
-[offset:0x57ad, name_value:setController]
-[offset:0x57bc, name_value:ViewPU]
-[offset:0x57c4, name_value:console]
-[offset:0x57cd, name_value:reason=]
-[offset:0x57d6, name_value:reason]
-[offset:0x57de, name_value:log]
-[offset:0x57e3, name_value:dialog onWillDismiss]
-[offset:0x57f9, name_value:DismissReason]
-[offset:0x5808, name_value:PRESS_BACK]
-[offset:0x5814, name_value:dismiss]
-[offset:0x581d, name_value:TOUCH_OUTSIDE]
-[offset:0x582c, name_value:onCancel]
-[offset:0x5836, name_value:onAccept]
-[offset:0x5840, name_value:Web]
-[offset:0x5845, name_value:Menu]
-[offset:0x584b, name_value:If]
-[offset:0x584f, name_value:ProxySort #ProxyGroupItem 代理节点：%{public}s]
-[offset:0x5884, name_value:currentTouchProxyData]
-[offset:0x589b, name_value:|]
-[offset:0x589e, name_value:forEach]
-[offset:0x58a7, name_value:Click the callback in the blank area]
-[offset:0x58cd, name_value:debug]
-[offset:0x58d4, name_value:FavoriteProxy [ProxyPage] 当前ProxyItem信息：]
-[offset:0x5908, name_value:charCodeAt]
-[offset:0x5914, name_value:LazyForEach]
-[offset:0x5921, name_value:1]
-[offset:0x5924, name_value:Callback when the second button is clicked]
-[offset:0x5950, name_value:Callback when the first button is clicked]
-[offset:0x597b, name_value:ProxySort 节点数据不存在]
-[offset:0x599c, name_value:ProxySort ProxyPageLatencyTag]
-[offset:0x59bb, name_value:延迟排序成功 %{public}s]
-[offset:0x59da, name_value:ProxySort 排序类型：]
-[offset:0x59f5, name_value:, 节点数量：]
-[offset:0x5a08, name_value:个]
-[offset:0x5a0d, name_value:height]
-[offset:0x5a15, name_value:alignItems]
-[offset:0x5a21, name_value:VerticalAlign]
-[offset:0x5a30, name_value:justifyContent]
-[offset:0x5a40, name_value:FlexAlign]
-[offset:0x5a4b, name_value:javaScriptAccess]
-[offset:0x5a5d, name_value:onlineImageAccess]
-[offset:0x5a70, name_value:imageAccess]
-[offset:0x5a7d, name_value:domStorageAccess]
-[offset:0x5a8f, name_value:menuItemDivider]
-[offset:0x5aa0, name_value:vp]
-[offset:0x5aa4, name_value:clickEffect]
-[offset:0x5ab1, name_value:has]
-[offset:0x5ab6, name_value:ifElseBranchUpdateFunction]
-[offset:0x5ad2, name_value:MenuItem]
-[offset:0x5adc, name_value:contentFontColor]
-[offset:0x5aee, name_value:FavoriteProxy [ProxyPage] favoriteProxys收藏信息：]
-[offset:0x5b27, name_value:: ]
-[offset:0x5b2b, name_value:cachedCount]
-[offset:0x5b38, name_value:onScrollFrameBegin]
-[offset:0x5b4c, name_value:lanes]
-[offset:0x5b53, name_value:nestedScroll]
-[offset:0x5b61, name_value:NestedScrollMode]
-[offset:0x5b73, name_value:SELF_FIRST]
-[offset:0x5b7f, name_value:PARENT_FIRST]
-[offset:0x5b8d, name_value:contentEndOffset]
-[offset:0x5b9f, name_value:getRestoreId]
-[offset:0x5bad, name_value:toString]
-[offset:0x5bb7, name_value:bindContextMenu]
-[offset:0x5bc8, name_value:MenuPreviewMode]
-[offset:0x5bd9, name_value:IMAGE]
-[offset:0x5be0, name_value:Placement]
-[offset:0x5beb, name_value:BottomRight]
-[offset:0x5bf8, name_value:onMouse]
-[offset:0x5c01, name_value:Gesture]
-[offset:0x5c0a, name_value:GesturePriority]
-[offset:0x5c1b, name_value:Low]
-[offset:0x5c20, name_value:LongPressGesture]
-[offset:0x5c32, name_value:onAction]
-[offset:0x5c3c, name_value:bindPopup]
-[offset:0x5c47, name_value:__Common__]
-[offset:0x5c53, name_value:button]
-[offset:0x5c5b, name_value:MouseButton]
-[offset:0x5c68, name_value:Right]
-[offset:0x5c6f, name_value:call]
-[offset:0x5c75, name_value:restoreId]
-[offset:0x5c80, name_value:updateStateVarsOfChildByElmtId]
-[offset:0x5ca0, name_value:Reflect]
-[offset:0x5ca9, name_value:16fp]
-[offset:0x5caf, name_value:ProxyPage]
-[offset:0x5cba, name_value:24vp]
-[offset:0x5cc0, name_value:registerNamedRoute]
+[offset:0x1038, name_value:UIAbility]
+[offset:0x104c, name_value:hilog]
+[offset:0x109a, name_value:DOMAIN]
+[offset:0x28da, name_value:heightBp]
+[offset:0x28e4, name_value:widthBp]
+[offset:0x29d3, name_value:params]
+[offset:0x2caa, name_value:items]
+[offset:0x2e90, name_value:name]
+[offset:0x330f, name_value:id]
+[offset:0x3630, name_value:item]
+[offset:0x3ba4, name_value:ProxyGroupItem]
+[offset:0x3c01, name_value:ProxyItemDataSource]
+[offset:0x3c16, name_value:AppConfig]
+[offset:0x3c21, name_value:UIConfig]
+[offset:0x3c2b, name_value:AppState]
+[offset:0x3c35, name_value:customAnimationUtil]
+[offset:0x3c4a, name_value:customVibrator]
+[offset:0x3c5a, name_value:ClashViewModel]
+[offset:0x3c6a, name_value:Xb_ToastUtil]
+[offset:0x3c78, name_value:ProxyNode]
+[offset:0x3c83, name_value:ProxyCustomDialog]
+[offset:0x3c96, name_value:ProxyGroupItemPage]
+[offset:0x495e, name_value:initialRender]
+[offset:0x496d, name_value:builder]
+[offset:0x4976, name_value:itemCreation2]
+[offset:0x4985, name_value:BindSheetNetworkSpeed]
+[offset:0x499c, name_value:MyMenu]
+[offset:0x49a4, name_value:favoriteProxy]
+[offset:0x49b3, name_value:cancelFavoriteProxy]
+[offset:0x4a03, name_value:LengthMetrics]
+[offset:0x4a12, name_value:SymbolGlyphModifier]
+[offset:0x4a27, name_value:webview]
+[offset:0x4a55, name_value:message]
+[offset:0x4a5e, name_value:type]
+[offset:0x4a95, name_value:symbolStartIcon]
+[offset:0x4aa6, name_value:content]
+[offset:0x4aaf, name_value:color]
+[offset:0x4ab6, name_value:strokeWidth]
+[offset:0x4ae6, name_value:controller]
+[offset:0x4afd, name_value:disabled]
+[offset:0x4b07, name_value:selected]
+[offset:0x4b11, name_value:selectProxy]
+[offset:0x4b1e, name_value:onLatencyChange]
+[offset:0x4b64, name_value:preview]
+[offset:0x4b6d, name_value:placement]
+[offset:0x4b78, name_value:aboutToAppear]
+[offset:0x4b87, name_value:previewAnimationOptions]
+[offset:0x4ba0, name_value:aboutToDisappear]
+[offset:0x4bb2, name_value:scale]
+[offset:0x4bb9, name_value:transition]
+[offset:0x4bcc, name_value:onWillDismiss]
+[offset:0x4be7, name_value:offsetRemain]
+[offset:0x4c0a, name_value:scrollForward]
+[offset:0x4c19, name_value:scrollBackward]
+[offset:0x4c29, name_value:cancel]
+[offset:0x4c31, name_value:confirm]
+[offset:0x4c3a, name_value:alignment]
+[offset:0x4c73, name_value:callback]
+[offset:0x4c8b, name_value:]
+[offset:0x4c8d, name_value:latency]
+[offset:0x4c96, name_value:g]
+[offset:0x4c99, name_value:isShowFavoriteProxy]
+[offset:0x4cb3, name_value:level]
+[offset:0x4cc4, name_value:totalCount]
+[offset:0x4d13, name_value:clear]
+[offset:0x4d1a, name_value:DefaultSortItems]
+[offset:0x4d2c, name_value:NameSortItems]
+[offset:0x4d3b, name_value:LatencySortItems]
+[offset:0x4d4d, name_value:getAllData]
+[offset:0x4d59, name_value:fetchFavoriteProxys]
+[offset:0x4d6e, name_value:isScaleTranFast]
+[offset:0x4d7f, name_value:isClickEffect]
+[offset:0x4d8e, name_value:vibratorTriggerOfHapticClockTimer]
+[offset:0x4db1, name_value:testDelay]
+[offset:0x4dbc, name_value:showToast]
+[offset:0x4dc7, name_value:setInitiallyProvidedValue]
+[offset:0x4e16, name_value:aboutToBeDeleted]
+[offset:0x4e28, name_value:rerender]
+[offset:0x4e4a, name_value:pages/Index]
+[offset:0x4eb6, name_value:TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE]
+[offset:0x4f09, name_value:CONTENT_END_OFFSET_150]
+[offset:0x4f3c, name_value:LIST_ITEM_HEIGHT]
+[offset:0x4f4e, name_value:PopTips]
+[offset:0x4f57, name_value:componentName]
+[offset:0x4f66, name_value:BORDER_RADIUS_20]
+[offset:0x4f78, name_value:startIconModifier1]
+[offset:0x4f98, name_value:info]
+[offset:0x4f9e, name_value:testTag]
+[offset:0x4fa7, name_value:%{public}s]
+[offset:0x4fb3, name_value:Ability onBackground]
+[offset:0x4fc9, name_value:Ability onCreate]
+[offset:0x4fdb, name_value:Ability onDestroy]
+[offset:0x4fee, name_value:Ability onForeground]
+[offset:0x5004, name_value:Ability onWindowStageCreate]
+[offset:0x5021, name_value:loadContent]
+[offset:0x502e, name_value:Ability onWindowStageDestroy]
+[offset:0x504c, name_value:code]
+[offset:0x5052, name_value:error]
+[offset:0x5059, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x5088, name_value:JSON]
+[offset:0x508e, name_value:stringify]
+[offset:0x5099, name_value:Succeeded in loading the content.]
+[offset:0x50bc, name_value:prototype]
+[offset:0x50c7, name_value:clash]
+[offset:0x50ce, name_value:mihomo]
+[offset:0x50d6, name_value:Small]
+[offset:0x50dd, name_value:Large]
+[offset:0x50e4, name_value:List]
+[offset:0x50ea, name_value:Grid]
+[offset:0x50f0, name_value:Default]
+[offset:0x50f9, name_value:Title]
+[offset:0x5100, name_value:Delay]
+[offset:0x5107, name_value:observeComponentCreation2]
+[offset:0x5122, name_value:Column]
+[offset:0x512a, name_value:Text]
+[offset:0x5130, name_value:pop]
+[offset:0x5135, name_value:ListItem]
+[offset:0x513f, name_value:width]
+[offset:0x5146, name_value:100%]
+[offset:0x514c, name_value:borderRadius]
+[offset:0x515a, name_value:backgroundColor]
+[offset:0x516b, name_value:chainAnimation]
+[offset:0x517b, name_value:scrollBar]
+[offset:0x5186, name_value:BarState]
+[offset:0x5190, name_value:Off]
+[offset:0x5195, name_value:edgeEffect]
+[offset:0x51a1, name_value:EdgeEffect]
+[offset:0x51ad, name_value:Spring]
+[offset:0x51b5, name_value:constraintSize]
+[offset:0x51c5, name_value:alignListItem]
+[offset:0x51d4, name_value:ListItemAlign]
+[offset:0x51e3, name_value:Center]
+[offset:0x51eb, name_value:create]
+[offset:0x520a, name_value:function]
+[offset:0x5214, name_value:paramsGenerator_]
+[offset:0x5226, name_value:initializeConsume]
+[offset:0x5239, name_value:isEnableIndexForegroundBlur]
+[offset:0x5256, name_value:__isEnableIndexForegroundBlur]
+[offset:0x5275, name_value:icon_emphasize]
+[offset:0x5285, name_value:__icon_emphasize]
+[offset:0x5297, name_value:finalizeConstruction]
+[offset:0x52ad, name_value:SubscriberManager]
+[offset:0x52c0, name_value:Get]
+[offset:0x52c5, name_value:delete]
+[offset:0x52cd, name_value:id__]
+[offset:0x52d3, name_value:aboutToBeDeletedInternal]
+[offset:0x52ed, name_value:get]
+[offset:0x52f2, name_value:set]
+[offset:0x52f7, name_value:Button]
+[offset:0x52ff, name_value:purgeDependencyOnElmtId]
+[offset:0x5318, name_value:updateDirtyElements]
+[offset:0x532d, name_value:padding]
+[offset:0x5336, name_value:fontSize]
+[offset:0x5340, name_value:fontWeight]
+[offset:0x534c, name_value:createWithLabel]
+[offset:0x535d, name_value:onClick]
+[offset:0x5366, name_value:ObservedObject]
+[offset:0x5376, name_value:GetRawObject]
+[offset:0x5384, name_value:close]
+[offset:0x538b, name_value:listeners]
+[offset:0x5396, name_value:slice]
+[offset:0x539d, name_value:indexOf]
+[offset:0x53a6, name_value:push]
+[offset:0x53ac, name_value:length]
+[offset:0x53b4, name_value:splice]
+[offset:0x53bc, name_value:proxySort]
+[offset:0x53c7, name_value:currentProfileId]
+[offset:0x53d9, name_value:clashCore]
+[offset:0x53e4, name_value:proxyGroupType]
+[offset:0x53f4, name_value:isVibrate]
+[offset:0x53ff, name_value:isAnimation]
+[offset:0x540c, name_value:ShowProxyPop]
+[offset:0x541a, name_value:ClickEffectLevel]
+[offset:0x542c, name_value:LIGHT]
+[offset:0x5433, name_value:TransitionEffect]
+[offset:0x5445, name_value:OPACITY]
+[offset:0x544e, name_value:animation]
+[offset:0x5459, name_value:SynchedPropertyObjectOneWayPU]
+[offset:0x5478, name_value:__item]
+[offset:0x5480, name_value:SynchedPropertySimpleOneWayPU]
+[offset:0x549f, name_value:__disabled]
+[offset:0x54ab, name_value:__selected]
+[offset:0x54b7, name_value:Row]
+[offset:0x54bc, name_value:reset]
+[offset:0x54c3, name_value:ObservedPropertySimplePU]
+[offset:0x54dd, name_value:currentTouchIndex]
+[offset:0x54f0, name_value:__currentTouchIndex]
+[offset:0x5505, name_value:tabCurrentPage]
+[offset:0x5515, name_value:__tabCurrentPage]
+[offset:0x5527, name_value:ProxyGroupItemSelected]
+[offset:0x553f, name_value:__ProxyGroupItemSelected]
+[offset:0x5559, name_value:isShowNetworkSpeed]
+[offset:0x556d, name_value:__isShowNetworkSpeed]
+[offset:0x5583, name_value:isShowMenu]
+[offset:0x558f, name_value:__isShowMenu]
+[offset:0x559d, name_value:WebviewController]
+[offset:0x55b0, name_value:createStorageLink]
+[offset:0x55c3, name_value:SortChange]
+[offset:0x55cf, name_value:needChangeSort]
+[offset:0x55df, name_value:__needChangeSort]
+[offset:0x55f1, name_value:proxyitems]
+[offset:0x55fd, name_value:__proxyitems]
+[offset:0x560b, name_value:proxyGroup]
+[offset:0x5617, name_value:__proxyGroup]
+[offset:0x5625, name_value:proxyGroups]
+[offset:0x5632, name_value:__proxyGroups]
+[offset:0x5641, name_value:ObservedPropertyObjectPU]
+[offset:0x565b, name_value:proxyLazyItems]
+[offset:0x566b, name_value:__proxyLazyItems]
+[offset:0x567d, name_value:currentProfile]
+[offset:0x568d, name_value:__currentProfile]
+[offset:0x569f, name_value:selectedProxy]
+[offset:0x56ae, name_value:__selectedProxy]
+[offset:0x56bf, name_value:currentWidthBreakpoint]
+[offset:0x56d7, name_value:__widthBp]
+[offset:0x56e2, name_value:currentHeightBreakpoint]
+[offset:0x56fb, name_value:__heightBp]
+[offset:0x5707, name_value:favoriteProxys]
+[offset:0x5717, name_value:Map]
+[offset:0x571c, name_value:__favoriteProxys]
+[offset:0x572e, name_value:appConfig]
+[offset:0x5739, name_value:__appConfig]
+[offset:0x5746, name_value:uiConfig]
+[offset:0x5750, name_value:__uiConfig]
+[offset:0x575c, name_value:showStart]
+[offset:0x5767, name_value:__showStart]
+[offset:0x5774, name_value:isShowDelayPop]
+[offset:0x5784, name_value:__isShowDelayPop]
+[offset:0x5796, name_value:isRolling]
+[offset:0x57a1, name_value:__isRolling]
+[offset:0x57ae, name_value:curOffsetRemain]
+[offset:0x57bf, name_value:__curOffsetRemain]
+[offset:0x57d2, name_value:isPXSecScreen]
+[offset:0x57e1, name_value:__isPXSecScreen]
+[offset:0x57f2, name_value:CustomDialogController]
+[offset:0x580a, name_value:DialogAlignment]
+[offset:0x581b, name_value:existApp]
+[offset:0x5825, name_value:ProxyDialogController]
+[offset:0x583c, name_value:OnProxyChange]
+[offset:0x584b, name_value:fontColor]
+[offset:0x5856, name_value:proxyListLongPressCtxMenuForFavorite]
+[offset:0x587c, name_value:proxyListLongPressCtxMenuForUnFavorite]
+[offset:0x58a4, name_value:declareWatch]
+[offset:0x58b2, name_value:onSortChange]
+[offset:0x58c0, name_value:setController]
+[offset:0x58cf, name_value:ViewPU]
+[offset:0x58d7, name_value:console]
+[offset:0x58e0, name_value:reason=]
+[offset:0x58e9, name_value:reason]
+[offset:0x58f1, name_value:log]
+[offset:0x58f6, name_value:dialog onWillDismiss]
+[offset:0x590c, name_value:DismissReason]
+[offset:0x591b, name_value:PRESS_BACK]
+[offset:0x5927, name_value:dismiss]
+[offset:0x5930, name_value:TOUCH_OUTSIDE]
+[offset:0x593f, name_value:onCancel]
+[offset:0x5949, name_value:onAccept]
+[offset:0x5953, name_value:Web]
+[offset:0x5958, name_value:Menu]
+[offset:0x595e, name_value:If]
+[offset:0x5962, name_value:ProxySort #ProxyGroupItem 代理节点：%{public}s]
+[offset:0x5997, name_value:currentTouchProxyData]
+[offset:0x59ae, name_value:|]
+[offset:0x59b1, name_value:forEach]
+[offset:0x59ba, name_value:Click the callback in the blank area]
+[offset:0x59e0, name_value:debug]
+[offset:0x59e7, name_value:FavoriteProxy [ProxyPage] 当前ProxyItem信息：]
+[offset:0x5a1b, name_value:charCodeAt]
+[offset:0x5a27, name_value:LazyForEach]
+[offset:0x5a34, name_value:1]
+[offset:0x5a37, name_value:Callback when the second button is clicked]
+[offset:0x5a63, name_value:Callback when the first button is clicked]
+[offset:0x5a8e, name_value:ProxySort 节点数据不存在]
+[offset:0x5aaf, name_value:ProxySort ProxyPageLatencyTag]
+[offset:0x5ace, name_value:延迟排序成功 %{public}s]
+[offset:0x5aed, name_value:ProxySort 排序类型：]
+[offset:0x5b08, name_value:, 节点数量：]
+[offset:0x5b1b, name_value:个]
+[offset:0x5b20, name_value:height]
+[offset:0x5b28, name_value:alignItems]
+[offset:0x5b34, name_value:VerticalAlign]
+[offset:0x5b43, name_value:justifyContent]
+[offset:0x5b53, name_value:FlexAlign]
+[offset:0x5b5e, name_value:javaScriptAccess]
+[offset:0x5b70, name_value:onlineImageAccess]
+[offset:0x5b83, name_value:imageAccess]
+[offset:0x5b90, name_value:domStorageAccess]
+[offset:0x5ba2, name_value:menuItemDivider]
+[offset:0x5bb3, name_value:vp]
+[offset:0x5bb7, name_value:clickEffect]
+[offset:0x5bc4, name_value:has]
+[offset:0x5bc9, name_value:ifElseBranchUpdateFunction]
+[offset:0x5be5, name_value:MenuItem]
+[offset:0x5bef, name_value:contentFontColor]
+[offset:0x5c01, name_value:FavoriteProxy [ProxyPage] favoriteProxys收藏信息：]
+[offset:0x5c3a, name_value:: ]
+[offset:0x5c3e, name_value:cachedCount]
+[offset:0x5c4b, name_value:onScrollFrameBegin]
+[offset:0x5c5f, name_value:lanes]
+[offset:0x5c66, name_value:nestedScroll]
+[offset:0x5c74, name_value:NestedScrollMode]
+[offset:0x5c86, name_value:SELF_FIRST]
+[offset:0x5c92, name_value:PARENT_FIRST]
+[offset:0x5ca0, name_value:contentEndOffset]
+[offset:0x5cb2, name_value:getRestoreId]
+[offset:0x5cc0, name_value:toString]
+[offset:0x5cca, name_value:bindContextMenu]
+[offset:0x5cdb, name_value:MenuPreviewMode]
+[offset:0x5cec, name_value:IMAGE]
+[offset:0x5cf3, name_value:Placement]
+[offset:0x5cfe, name_value:BottomRight]
+[offset:0x5d0b, name_value:onMouse]
+[offset:0x5d14, name_value:Gesture]
+[offset:0x5d1d, name_value:GesturePriority]
+[offset:0x5d2e, name_value:Low]
+[offset:0x5d33, name_value:LongPressGesture]
+[offset:0x5d45, name_value:onAction]
+[offset:0x5d4f, name_value:bindPopup]
+[offset:0x5d5a, name_value:__Common__]
+[offset:0x5d66, name_value:button]
+[offset:0x5d6e, name_value:MouseButton]
+[offset:0x5d7b, name_value:Right]
+[offset:0x5d82, name_value:call]
+[offset:0x5d88, name_value:restoreId]
+[offset:0x5d93, name_value:updateStateVarsOfChildByElmtId]
+[offset:0x5db3, name_value:Reflect]
+[offset:0x5dbc, name_value:16fp]
+[offset:0x5dc2, name_value:ProxyPage]
+[offset:0x5dcd, name_value:24vp]
+[offset:0x5dd3, name_value:registerNamedRoute]

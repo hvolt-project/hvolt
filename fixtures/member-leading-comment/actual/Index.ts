@@ -12,7 +12,9 @@ class V1CommentProbe extends ViewPU {
         if (typeof paramsLambda === "function") {
             this.paramsGenerator_ = paramsLambda;
         }
-        this.__count = new ObservedPropertySimplePU(0, this, "count");
+        this.__count = new ObservedPropertySimplePU(0
+        // 普通字段前面的注释
+        , this, "count");
         this.label = 'probe';
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();

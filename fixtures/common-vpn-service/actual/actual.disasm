@@ -3,23 +3,34 @@
 # ====================
 # LITERALS
 
-0 0x144f { 3 [ i32:1, string:"CommonVpnServicePage", i32:0, ]}
-1 0x88b { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-10 0xe03 { 10 [ string:"interface", string:"vpn-tun", string:"destination", null_value:0, string:"gateway", null_value:0, string:"hasGateway", u1:0, string:"isDefaultRoute", null_value:0, ]}
-11 0xe2d { 4 [ string:"data", null_value:0, string:"encoding", string:"utf-8", ]}
-12 0x13bf { 3 [ i32:1, string:"this", i32:0, ]}
-13 0x1387 { 2 [ string:"CommonVpnServicePage", string:"initialRender", ]}
-15 0xd81 { 4 [ string:"Address", string:"AddressWithPrefix", string:"VpnConfig", string:"CommonVpnService", ]}
-17 0xe42 { 1 [ string:"172.19.0.2", ]}
-18 0x83d { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-2 0xe4b { 1 [ i32:0, ]}
-3 0xe5d { 1 [ i32:0, ]}
-4 0x8e2 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-5 0x13d2 { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-6 0xe54 { 1 [ i32:0, ]}
-7 0x140f { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-8 0xe66 { 13 [ string:"sendClient", method:#~@3>#sendClient, method_affiliate:2, string:"getTunFd", method:#~@3>#getTunFd, method_affiliate:1, string:"protect", method:#~@3>#protect, method_affiliate:1, string:"stopVpn", method:#~@3>#stopVpn, method_affiliate:0, i32:4, ]}
-14 0xd99 { 9 [
+0 0x1562 { 3 [ i32:1, string:"CommonVpnServicePage", i32:0, ]}
+1 0x8ea { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+10 0x845 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+12 0x1522 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+14 0xf67 { 1 [ i32:0, ]}
+15 0x14e5 { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+17 0xf40 { 4 [ string:"data", null_value:0, string:"encoding", string:"utf-8", ]}
+18 0xf55 { 1 [ string:"172.19.0.2", ]}
+19 0xf16 { 10 [ string:"interface", string:"vpn-tun", string:"destination", null_value:0, string:"gateway", null_value:0, string:"hasGateway", u1:0, string:"isDefaultRoute", null_value:0, ]}
+2 0xe94 { 4 [ string:"Address", string:"AddressWithPrefix", string:"VpnConfig", string:"CommonVpnService", ]}
+20 0xf70 { 1 [ i32:0, ]}
+3 0xf79 { 13 [ string:"sendClient", method:#~@3>#sendClient, method_affiliate:2, string:"getTunFd", method:#~@3>#getTunFd, method_affiliate:1, string:"protect", method:#~@3>#protect, method_affiliate:1, string:"stopVpn", method:#~@3>#stopVpn, method_affiliate:0, i32:4, ]}
+4 0x14d2 { 3 [ i32:1, string:"this", i32:0, ]}
+6 0xa91 
+7 0xf5e { 1 [ i32:0, ]}
+8 0x893 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+9 0x149a { 2 [ string:"CommonVpnServicePage", string:"initialRender", ]}
+11 0xa95 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+13 0x14a8 { 1 [
+	MODULE_REQUEST_ARRAY: {
+		0 : @normalized:N&&&entry/src/main/ets/common/CommonVpnService&,
+	};
+	ModuleTag: REGULAR_IMPORT, local_name: CommonVpnService, import_name: CommonVpnService, module_request: @normalized:N&&&entry/src/main/ets/common/CommonVpnService&;
+]}
+16 0xeac { 9 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:net.vpnExtension,
 	};
@@ -33,7 +44,7 @@
 	ModuleTag: LOCAL_EXPORT, local_name: isIpv4, export_name: isIpv4;
 	ModuleTag: LOCAL_EXPORT, local_name: isIpv6, export_name: isIpv6;
 ]}
-16 0x84b { 3 [
+5 0x853 { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -42,15 +53,19 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
-9 0x1395 { 1 [
-	MODULE_REQUEST_ARRAY: {
-		0 : @normalized:N&&&entry/src/main/ets/common/CommonVpnService&,
-	};
-	ModuleTag: REGULAR_IMPORT, local_name: CommonVpnService, import_name: CommonVpnService, module_request: @normalized:N&&&entry/src/main/ets/common/CommonVpnService&;
-]}
 
 # ====================
 # RECORDS
+
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0xa91
+	u32 moduleRecordIdx = 0xa95
+}
 
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
@@ -58,8 +73,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x83d
-	u32 moduleRecordIdx = 0x84b
+	u32 scopeNames = 0x845
+	u32 moduleRecordIdx = 0x853
 }
 
 .language ArkTS
@@ -68,8 +83,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xd81
-	u32 moduleRecordIdx = 0xd99
+	u32 scopeNames = 0xe94
+	u32 moduleRecordIdx = 0xeac
 }
 
 .language ArkTS
@@ -78,8 +93,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x1387
-	u32 moduleRecordIdx = 0x1395
+	u32 scopeNames = 0x149a
+	u32 moduleRecordIdx = 0x14a8
 }
 
 .language ECMAScript
@@ -131,6 +146,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -1845,105 +1871,105 @@ jump_label_2:
 # ====================
 # STRING
 
-[offset:0x934, name_value:UIAbility]
-[offset:0x948, name_value:hilog]
-[offset:0x996, name_value:DOMAIN]
-[offset:0xbf0, name_value:address]
-[offset:0xc06, name_value:prefixLength]
-[offset:0xc24, name_value:destination]
-[offset:0xc31, name_value:family]
-[offset:0xc39, name_value:gateway]
-[offset:0xc6b, name_value:port]
-[offset:0xc9b, name_value:dnsAddresses]
-[offset:0xcc8, name_value:context]
-[offset:0xcf0, name_value:error]
-[offset:0xd24, name_value:message]
-[offset:0xd48, name_value:Address]
-[offset:0xd51, name_value:AddressWithPrefix]
-[offset:0xd6f, name_value:CommonVpnService]
-[offset:0xebb, name_value:vpnExtension]
-[offset:0xf1f, name_value:isDefaultRoute]
-[offset:0xf2f, name_value:data]
-[offset:0xf68, name_value:protect]
-[offset:0x1371, name_value:CommonVpnServicePage]
-[offset:0x1462, name_value:initialRender]
-[offset:0x14ae, name_value:setInitiallyProvidedValue]
-[offset:0x14fd, name_value:aboutToBeDeleted]
-[offset:0x154a, name_value:pages/Index]
-[offset:0x15c2, name_value:info]
-[offset:0x15c8, name_value:testTag]
-[offset:0x15d1, name_value:%{public}s]
-[offset:0x15dd, name_value:Ability onBackground]
-[offset:0x15f3, name_value:Ability onCreate]
-[offset:0x1605, name_value:Ability onDestroy]
-[offset:0x1618, name_value:Ability onForeground]
-[offset:0x162e, name_value:Ability onWindowStageCreate]
-[offset:0x164b, name_value:loadContent]
-[offset:0x1658, name_value:Ability onWindowStageDestroy]
-[offset:0x1676, name_value:code]
-[offset:0x167c, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x16ab, name_value:JSON]
-[offset:0x16b1, name_value:stringify]
-[offset:0x16bc, name_value:Succeeded in loading the content.]
-[offset:0x16df, name_value:prototype]
-[offset:0x16ea, name_value:split]
-[offset:0x16f1, name_value:/]
-[offset:0x16f4, name_value:length]
-[offset:0x16fc, name_value:trim]
-[offset:0x1702, name_value:parseInt]
-[offset:0x170c, name_value:Number]
-[offset:0x1714, name_value:isNaN]
-[offset:0x171b, name_value:fe80::]
-[offset:0x1723, name_value:172.19.0.1]
-[offset:0x172f, name_value:0.0.0.0/0]
-[offset:0x173a, name_value:::/0]
-[offset:0x1740, name_value:.]
-[offset:0x1743, name_value:indexOf]
-[offset:0x174c, name_value::]
-[offset:0x1766, name_value:isIPv4Accepted]
-[offset:0x1776, name_value:isIPv6Accepted]
-[offset:0x1786, name_value:trustedApplications]
-[offset:0x179b, name_value:blockedApplications]
-[offset:0x17b0, name_value:addresses]
-[offset:0x17bb, name_value:routes]
-[offset:0x17c3, name_value:mtu]
-[offset:0x17c8, name_value:createVpnConnection]
-[offset:0x17dd, name_value:vpnConnection]
-[offset:0x17ec, name_value:create]
-[offset:0x17f4, name_value:console]
-[offset:0x17fd, name_value:log]
-[offset:0x1802, name_value:ClashVPN]
-[offset:0x180c, name_value:获取tunFd: ]
-[offset:0x181b, name_value:]
-[offset:0x181d, name_value:Clash启动失败 ]
-[offset:0x1831, name_value: => ]
-[offset:0x1837, name_value:stack]
-[offset:0x183e, name_value:destroy]
-[offset:0x1847, name_value:send]
-[offset:0x184d, name_value:function]
-[offset:0x1857, name_value:paramsGenerator_]
-[offset:0x1869, name_value:ObservedPropertySimplePU]
-[offset:0x1883, name_value:note]
-[offset:0x1889, name_value:__note]
-[offset:0x1891, name_value:finalizeConstruction]
-[offset:0x18a7, name_value:loaded]
-[offset:0x18af, name_value:missing]
-[offset:0x18b8, name_value:SubscriberManager]
-[offset:0x18cb, name_value:Get]
-[offset:0x18d0, name_value:delete]
-[offset:0x18d8, name_value:id__]
-[offset:0x18de, name_value:aboutToBeDeletedInternal]
-[offset:0x18f8, name_value:observeComponentCreation2]
-[offset:0x1913, name_value:Column]
-[offset:0x191b, name_value:Text]
-[offset:0x1921, name_value:pop]
-[offset:0x1926, name_value:get]
-[offset:0x192b, name_value:set]
-[offset:0x1930, name_value:purgeDependencyOnElmtId]
-[offset:0x1949, name_value:updateDirtyElements]
-[offset:0x195e, name_value:ViewPU]
-[offset:0x1966, name_value:Reflect]
-[offset:0x196f, name_value:aboutToAppear]
-[offset:0x197e, name_value:rerender]
-[offset:0x1988, name_value:getEntryName]
-[offset:0x1996, name_value:registerNamedRoute]
+[offset:0x93c, name_value:UIAbility]
+[offset:0x950, name_value:hilog]
+[offset:0x99e, name_value:DOMAIN]
+[offset:0xd03, name_value:address]
+[offset:0xd19, name_value:prefixLength]
+[offset:0xd37, name_value:destination]
+[offset:0xd44, name_value:family]
+[offset:0xd4c, name_value:gateway]
+[offset:0xd7e, name_value:port]
+[offset:0xdae, name_value:dnsAddresses]
+[offset:0xddb, name_value:context]
+[offset:0xe03, name_value:error]
+[offset:0xe37, name_value:message]
+[offset:0xe5b, name_value:Address]
+[offset:0xe64, name_value:AddressWithPrefix]
+[offset:0xe82, name_value:CommonVpnService]
+[offset:0xfce, name_value:vpnExtension]
+[offset:0x1032, name_value:isDefaultRoute]
+[offset:0x1042, name_value:data]
+[offset:0x107b, name_value:protect]
+[offset:0x1484, name_value:CommonVpnServicePage]
+[offset:0x1575, name_value:initialRender]
+[offset:0x15c1, name_value:setInitiallyProvidedValue]
+[offset:0x1610, name_value:aboutToBeDeleted]
+[offset:0x165d, name_value:pages/Index]
+[offset:0x16d5, name_value:info]
+[offset:0x16db, name_value:testTag]
+[offset:0x16e4, name_value:%{public}s]
+[offset:0x16f0, name_value:Ability onBackground]
+[offset:0x1706, name_value:Ability onCreate]
+[offset:0x1718, name_value:Ability onDestroy]
+[offset:0x172b, name_value:Ability onForeground]
+[offset:0x1741, name_value:Ability onWindowStageCreate]
+[offset:0x175e, name_value:loadContent]
+[offset:0x176b, name_value:Ability onWindowStageDestroy]
+[offset:0x1789, name_value:code]
+[offset:0x178f, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x17be, name_value:JSON]
+[offset:0x17c4, name_value:stringify]
+[offset:0x17cf, name_value:Succeeded in loading the content.]
+[offset:0x17f2, name_value:prototype]
+[offset:0x17fd, name_value:split]
+[offset:0x1804, name_value:/]
+[offset:0x1807, name_value:length]
+[offset:0x180f, name_value:trim]
+[offset:0x1815, name_value:parseInt]
+[offset:0x181f, name_value:Number]
+[offset:0x1827, name_value:isNaN]
+[offset:0x182e, name_value:fe80::]
+[offset:0x1836, name_value:172.19.0.1]
+[offset:0x1842, name_value:0.0.0.0/0]
+[offset:0x184d, name_value:::/0]
+[offset:0x1853, name_value:.]
+[offset:0x1856, name_value:indexOf]
+[offset:0x185f, name_value::]
+[offset:0x1879, name_value:isIPv4Accepted]
+[offset:0x1889, name_value:isIPv6Accepted]
+[offset:0x1899, name_value:trustedApplications]
+[offset:0x18ae, name_value:blockedApplications]
+[offset:0x18c3, name_value:addresses]
+[offset:0x18ce, name_value:routes]
+[offset:0x18d6, name_value:mtu]
+[offset:0x18db, name_value:createVpnConnection]
+[offset:0x18f0, name_value:vpnConnection]
+[offset:0x18ff, name_value:create]
+[offset:0x1907, name_value:console]
+[offset:0x1910, name_value:log]
+[offset:0x1915, name_value:ClashVPN]
+[offset:0x191f, name_value:获取tunFd: ]
+[offset:0x192e, name_value:]
+[offset:0x1930, name_value:Clash启动失败 ]
+[offset:0x1944, name_value: => ]
+[offset:0x194a, name_value:stack]
+[offset:0x1951, name_value:destroy]
+[offset:0x195a, name_value:send]
+[offset:0x1960, name_value:function]
+[offset:0x196a, name_value:paramsGenerator_]
+[offset:0x197c, name_value:ObservedPropertySimplePU]
+[offset:0x1996, name_value:note]
+[offset:0x199c, name_value:__note]
+[offset:0x19a4, name_value:finalizeConstruction]
+[offset:0x19ba, name_value:loaded]
+[offset:0x19c2, name_value:missing]
+[offset:0x19cb, name_value:SubscriberManager]
+[offset:0x19de, name_value:Get]
+[offset:0x19e3, name_value:delete]
+[offset:0x19eb, name_value:id__]
+[offset:0x19f1, name_value:aboutToBeDeletedInternal]
+[offset:0x1a0b, name_value:observeComponentCreation2]
+[offset:0x1a26, name_value:Column]
+[offset:0x1a2e, name_value:Text]
+[offset:0x1a34, name_value:pop]
+[offset:0x1a39, name_value:get]
+[offset:0x1a3e, name_value:set]
+[offset:0x1a43, name_value:purgeDependencyOnElmtId]
+[offset:0x1a5c, name_value:updateDirtyElements]
+[offset:0x1a71, name_value:ViewPU]
+[offset:0x1a79, name_value:Reflect]
+[offset:0x1a82, name_value:aboutToAppear]
+[offset:0x1a91, name_value:rerender]
+[offset:0x1a9b, name_value:getEntryName]
+[offset:0x1aa9, name_value:registerNamedRoute]

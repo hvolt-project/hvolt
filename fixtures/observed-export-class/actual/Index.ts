@@ -10,7 +10,7 @@ interface ObservedHost_Params {
  */
 @Observed
 export class ItemCount {
-  total: number = 0
+    total: number = 0
 }
 @Observed class LocalItem {
 	title: string = '';

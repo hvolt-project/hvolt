@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:7:20 'Sendable' refers to a value, but is being used as a type here. Did you mean 'typeof Sendable'?

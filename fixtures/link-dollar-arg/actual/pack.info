@@ -31,7 +31,7 @@
         },
         "apiVersion": {
           "compatible": 17,
-          "releaseType": "Beta1",
+          "releaseType": "Release",
           "target": 20
         }
       }

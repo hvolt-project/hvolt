@@ -3,18 +3,39 @@
 # ====================
 # LITERALS
 
-0 0xf64 { 22 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@0>#initialRender, method_affiliate:0, string:"rerender", method:#~@0>#rerender, method_affiliate:0, string:"getEntryName", method:#~@0<#getEntryName, method_affiliate:0, i32:6, ]}
-1 0x793 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-10 0xc1f { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-2 0xfc8 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-3 0x7ea { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-4 0xc0c { 3 [ i32:1, string:"this", i32:0, ]}
-5 0xf56 { 2 [ string:"title", string:"qualified", ]}
-6 0xf22 { 2 [ string:"NamespaceImportChild", string:"initialRender", ]}
-7 0x1008 { 5 [ i32:2, string:"Names", i32:0, string:"NamespaceImportChild", i32:1, ]}
-8 0xbda { 2 [ string:"Card", string:"initialRender", ]}
-9 0x745 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-11 0x753 { 3 [
+0 0x115e { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:13, string:"col", i32:7, ]}
+1 0x1180 { 2 [ string:"title", string:"qualified", ]}
+11 0x771 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+12 0x9bd 
+13 0x10f1 { 2 [ string:"NamespaceImportChild", string:"initialRender", ]}
+14 0x7bf { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+16 0x118e { 2 [ string:"name", string:"Card", ]}
+17 0x11af { 22 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@0>#initialRender, method_affiliate:0, string:"rerender", method:#~@0>#rerender, method_affiliate:0, string:"getEntryName", method:#~@0<#getEntryName, method_affiliate:0, i32:6, ]}
+18 0x119c { 3 [ i32:1, string:"this", i32:0, ]}
+19 0x1213 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+2 0xd43 { 3 [ i32:1, string:"this", i32:0, ]}
+20 0x1125 { 5 [ i32:2, string:"Names", i32:0, string:"NamespaceImportChild", i32:1, ]}
+3 0xd56 { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+4 0x1150 { 2 [ string:"title", string:"qualified", ]}
+6 0x816 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+8 0xd11 { 2 [ string:"Card", string:"initialRender", ]}
+9 0x1142 { 2 [ string:"title", string:"qualified", ]}
+10 0x9c1 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+15 0x10ff { 1 [
+	MODULE_REQUEST_ARRAY: {
+		0 : @normalized:N&&&entry/src/main/ets/common/Card&,
+	};
+	ModuleTag: NAMESPACE_IMPORT, local_name: Names, module_request: @normalized:N&&&entry/src/main/ets/common/Card&;
+]}
+5 0xd1f { 1 [
+	MODULE_REQUEST_ARRAY: {
+	};
+	ModuleTag: LOCAL_EXPORT, local_name: Card, export_name: Card;
+]}
+7 0x77f { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -23,20 +44,19 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
-12 0xbe8 { 1 [
-	MODULE_REQUEST_ARRAY: {
-	};
-	ModuleTag: LOCAL_EXPORT, local_name: Card, export_name: Card;
-]}
-13 0xf30 { 1 [
-	MODULE_REQUEST_ARRAY: {
-		0 : @normalized:N&&&entry/src/main/ets/common/Card&,
-	};
-	ModuleTag: NAMESPACE_IMPORT, local_name: Names, module_request: @normalized:N&&&entry/src/main/ets/common/Card&;
-]}
 
 # ====================
 # RECORDS
+
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x9bd
+	u32 moduleRecordIdx = 0x9c1
+}
 
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
@@ -44,8 +64,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x745
-	u32 moduleRecordIdx = 0x753
+	u32 scopeNames = 0x771
+	u32 moduleRecordIdx = 0x77f
 }
 
 .language ArkTS
@@ -54,8 +74,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xbda
-	u32 moduleRecordIdx = 0xbe8
+	u32 scopeNames = 0xd11
+	u32 moduleRecordIdx = 0xd1f
 }
 
 .language ArkTS
@@ -64,8 +84,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xf22
-	u32 moduleRecordIdx = 0xf30
+	u32 scopeNames = 0x10f1
+	u32 moduleRecordIdx = 0x10ff
 }
 
 .language ECMAScript
@@ -117,6 +137,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -1032,13 +1063,15 @@ L_ESSlotNumberAnnotation:
 }
 
 L_ESSlotNumberAnnotation:
-	u32 SlotNumber { 0x10 }
+	u32 SlotNumber { 0x11 }
 .language ArkTS
 .function any &entry.src.main.ets.pages.Index&.#~@0>#initialRender(any a0, any a1, any a2) <static> {
+	newlexenvwithname 0x1, { 3 [ i32:1, string:"this", i32:0, ]}
 	mov v0, a0
 	mov v1, a1
-	mov v2, a2
-	lda v2
+	lda a2
+	stlexvar 0x0, 0x0
+	ldlexvar 0x0, 0x0
 	sta v5
 	lda v5
 	ldobjbyname 0x0, "observeComponentCreation2"
@@ -1050,24 +1083,25 @@ L_ESSlotNumberAnnotation:
 	lda v4
 	callthis2withname 0x4, "observeComponentCreation2", v5, v6, v7
 	ldlexvar 0x0, 0x0
-	throw.undefinedifholewithname "Names"
 	sta v5
 	lda v5
-	ldobjbyname 0x6, "Card"
+	ldobjbyname 0x6, "observeComponentCreation2"
 	sta v4
-	createobjectwithbuffer 0x8, { 2 [ string:"title", string:"qualified", ]}
+	definefunc 0x8, &entry.src.main.ets.pages.Index&.#~@0>@1*#^1:(any,any,any,any,any), 0x2
 	sta v6
-	lda v6
-	sta v6
+	createobjectwithbuffer 0x9, { 2 [ string:"name", string:"Card", ]}
+	sta v7
+	lda v7
+	sta v7
 	lda v4
-	callthis1withname 0x9, "Card", v5, v6
-	tryldglobalbyname 0xb, "Column"
+	callthis2withname 0xa, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0xc, "Column"
 	sta v5
 	lda v5
-	ldobjbyname 0xc, "pop"
+	ldobjbyname 0xd, "pop"
 	sta v4
 	lda v4
-	callthis0withname 0xe, "pop", v5
+	callthis0withname 0xf, "pop", v5
 	ldundefined
 	returnundefined
 }
@@ -1147,6 +1181,101 @@ L_ESSlotNumberAnnotation:
 }
 
 L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x15 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>@1*#^1(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	lda v4
+	callruntime.isfalse 0x0
+	jnez jump_label_0
+	ldlexvar 0x1, 0x0
+	throw.undefinedifholewithname "Names"
+	sta v9
+	lda v9
+	ldobjbyname 0x1, "Card"
+	sta v8
+	ldlexvar 0x0, 0x0
+	sta v9
+	createobjectwithbuffer 0x3, { 2 [ string:"title", string:"qualified", ]}
+	sta v11
+	lda v11
+	sta v10
+	ldundefined
+	sta v11
+	lda v3
+	sta v12
+	definefunc 0x4, &entry.src.main.ets.pages.Index&.#~@0>@1*^1*#:(any,any,any), 0x0
+	sta v13
+	createobjectwithbuffer 0x5, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:13, string:"col", i32:7, ]}
+	sta v15
+	lda v15
+	sta v14
+	newobjrange 0x6, 0x7, v8
+	sta v6
+	tryldglobalbyname 0x8, "ViewPU"
+	sta v9
+	lda v9
+	ldobjbyname 0x9, "create"
+	sta v8
+	lda v6
+	sta v10
+	lda v8
+	callthis1withname 0xb, "create", v9, v10
+	definefunc 0xd, &entry.src.main.ets.pages.Index&.#~@0>@1*^1*#paramsLambda:(any,any,any), 0x0
+	sta v7
+	lda v6
+	sta v8
+	lda v7
+	stobjbyname 0xe, "paramsGenerator_", v8
+	jmp jump_label_1
+jump_label_0:
+	ldlexvar 0x0, 0x0
+	sta v7
+	lda v7
+	ldobjbyname 0x10, "updateStateVarsOfChildByElmtId"
+	sta v6
+	lda v3
+	sta v8
+	createobjectwithbuffer 0x12, { 2 [ string:"title", string:"qualified", ]}
+	sta v9
+	lda v9
+	sta v9
+	lda v6
+	callthis2withname 0x13, "updateStateVarsOfChildByElmtId", v7, v8, v9
+jump_label_1:
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>@1*^1*#(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x1 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@0>@1*^1*#paramsLambda(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	createobjectwithbuffer 0x0, { 2 [ string:"title", string:"qualified", ]}
+	sta v4
+	lda v4
+	return
+}
+
+L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x18 }
 .language ArkTS
 .function any &entry.src.main.ets.pages.Index&.func_main_0(any a0, any a1, any a2) <static> {
@@ -1222,56 +1351,57 @@ jump_label_2:
 # ====================
 # STRING
 
-[offset:0x83c, name_value:UIAbility]
-[offset:0x850, name_value:hilog]
-[offset:0x89e, name_value:DOMAIN]
-[offset:0xbd4, name_value:Card]
-[offset:0xc5c, name_value:initialRender]
-[offset:0xc6b, name_value:setInitiallyProvidedValue]
-[offset:0xcba, name_value:aboutToBeDeleted]
-[offset:0xf0c, name_value:NamespaceImportChild]
-[offset:0x1056, name_value:Names]
-[offset:0x105d, name_value:title]
-[offset:0x106f, name_value:rerender]
-[offset:0x10c2, name_value:pages/Index]
-[offset:0x113a, name_value:info]
-[offset:0x1140, name_value:testTag]
-[offset:0x1149, name_value:%{public}s]
-[offset:0x1155, name_value:Ability onBackground]
-[offset:0x116b, name_value:Ability onCreate]
-[offset:0x117d, name_value:Ability onDestroy]
-[offset:0x1190, name_value:Ability onForeground]
-[offset:0x11a6, name_value:Ability onWindowStageCreate]
-[offset:0x11c3, name_value:loadContent]
-[offset:0x11d0, name_value:Ability onWindowStageDestroy]
-[offset:0x11ee, name_value:code]
-[offset:0x11f4, name_value:error]
-[offset:0x11fb, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x122a, name_value:JSON]
-[offset:0x1230, name_value:stringify]
-[offset:0x123b, name_value:Succeeded in loading the content.]
-[offset:0x125e, name_value:prototype]
-[offset:0x1269, name_value:function]
-[offset:0x1273, name_value:paramsGenerator_]
-[offset:0x1285, name_value:SynchedPropertySimpleOneWayPU]
-[offset:0x12a4, name_value:__title]
-[offset:0x12ad, name_value:finalizeConstruction]
-[offset:0x12da, name_value:SubscriberManager]
-[offset:0x12ed, name_value:Get]
-[offset:0x12f2, name_value:delete]
-[offset:0x12fa, name_value:id__]
-[offset:0x1300, name_value:aboutToBeDeletedInternal]
-[offset:0x131a, name_value:observeComponentCreation2]
-[offset:0x1335, name_value:Text]
-[offset:0x133b, name_value:pop]
-[offset:0x1340, name_value:purgeDependencyOnElmtId]
-[offset:0x1359, name_value:updateDirtyElements]
-[offset:0x136e, name_value:set]
-[offset:0x1373, name_value:]
-[offset:0x1375, name_value:get]
-[offset:0x137a, name_value:reset]
-[offset:0x1381, name_value:create]
-[offset:0x1389, name_value:ViewPU]
-[offset:0x1391, name_value:Reflect]
-[offset:0x139a, name_value:Column]
-[offset:0x13a2, name_value:registerNamedRoute]
+[offset:0x868, name_value:UIAbility]
+[offset:0x87c, name_value:hilog]
+[offset:0x8ca, name_value:DOMAIN]
+[offset:0xd0b, name_value:Card]
+[offset:0xd93, name_value:initialRender]
+[offset:0xda2, name_value:setInitiallyProvidedValue]
+[offset:0xdf1, name_value:aboutToBeDeleted]
+[offset:0x10db, name_value:NamespaceImportChild]
+[offset:0x1284, name_value:Names]
+[offset:0x128b, name_value:title]
+[offset:0x12d8, name_value:rerender]
+[offset:0x132b, name_value:pages/Index]
+[offset:0x13a3, name_value:info]
+[offset:0x13a9, name_value:testTag]
+[offset:0x13b2, name_value:%{public}s]
+[offset:0x13be, name_value:Ability onBackground]
+[offset:0x13d4, name_value:Ability onCreate]
+[offset:0x13e6, name_value:Ability onDestroy]
+[offset:0x13f9, name_value:Ability onForeground]
+[offset:0x140f, name_value:Ability onWindowStageCreate]
+[offset:0x142c, name_value:loadContent]
+[offset:0x1439, name_value:Ability onWindowStageDestroy]
+[offset:0x1457, name_value:code]
+[offset:0x145d, name_value:error]
+[offset:0x1464, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x1493, name_value:JSON]
+[offset:0x1499, name_value:stringify]
+[offset:0x14a4, name_value:Succeeded in loading the content.]
+[offset:0x14c7, name_value:prototype]
+[offset:0x14d2, name_value:function]
+[offset:0x14dc, name_value:paramsGenerator_]
+[offset:0x14ee, name_value:SynchedPropertySimpleOneWayPU]
+[offset:0x150d, name_value:__title]
+[offset:0x1516, name_value:finalizeConstruction]
+[offset:0x1543, name_value:SubscriberManager]
+[offset:0x1556, name_value:Get]
+[offset:0x155b, name_value:delete]
+[offset:0x1563, name_value:id__]
+[offset:0x1569, name_value:aboutToBeDeletedInternal]
+[offset:0x1583, name_value:observeComponentCreation2]
+[offset:0x159e, name_value:Text]
+[offset:0x15a4, name_value:pop]
+[offset:0x15a9, name_value:purgeDependencyOnElmtId]
+[offset:0x15c2, name_value:updateDirtyElements]
+[offset:0x15d7, name_value:set]
+[offset:0x15dc, name_value:]
+[offset:0x15de, name_value:get]
+[offset:0x15e3, name_value:reset]
+[offset:0x15ea, name_value:create]
+[offset:0x15f2, name_value:ViewPU]
+[offset:0x15fa, name_value:Reflect]
+[offset:0x1603, name_value:Column]
+[offset:0x160b, name_value:updateStateVarsOfChildByElmtId]
+[offset:0x162b, name_value:registerNamedRoute]

@@ -3,30 +3,31 @@
 # ====================
 # LITERALS
 
-0 0xa0f { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-1 0x1fa2 { 13 [ string:"setInitiallyProvidedValue", method:#~@2>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@2>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@2>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@2>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-10 0x1f90 { 1 [ i32:0, ]}
-11 0x20bb { 13 [ i32:6, string:"SomeClass", i32:0, string:"AppConfig", i32:1, string:"LocalKind", i32:2, string:"PropHost", i32:3, string:"ConsumeHost", i32:4, string:"ObservedPropertyKind", i32:5, ]}
-12 0x2100 { 8 [ string:"propObject", null_value:0, string:"propNumber", i32:1, string:"linkObject", null_value:0, string:"objectLink", null_value:0, ]}
-13 0x201c { 13 [ string:"setInitiallyProvidedValue", method:#~@5>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@5>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@5>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@5>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-14 0x1f10 { 6 [ string:"AppConfig", string:"SomeClass", string:"PropHost", string:"initialRender", string:"ConsumeHost", string:"ObservedPropertyKind", ]}
-15 0x2059 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-16 0x1f5c { 2 [ string:"name", string:"n", ]}
-17 0x1f4e { 2 [ string:"name", string:"x", ]}
-18 0x1f7d { 3 [ i32:1, string:"this", i32:0, ]}
-19 0x2192 { 2 [ string:"name", string:"ConsumeHost", ]}
-2 0x2146 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:97, string:"col", i32:7, ]}
-20 0x21a0 { 3 [ i32:1, string:"this", i32:0, ]}
-21 0x9c1 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-23 0x1fdf { 13 [ string:"setInitiallyProvidedValue", method:#~@4>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@4>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@4>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@4>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-24 0xa66 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-3 0x1f6a { 3 [ i32:1, string:"this", i32:0, ]}
-4 0x1f99 { 1 [ i32:0, ]}
-5 0x2184 { 2 [ string:"name", string:"PropHost", ]}
-6 0x2099 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:98, string:"col", i32:7, ]}
-7 0x2123 { 8 [ string:"propObject", null_value:0, string:"propNumber", i32:1, string:"linkObject", null_value:0, string:"objectLink", null_value:0, ]}
-8 0x2168 { 6 [ string:"propObject", null_value:0, string:"propNumber", i32:1, string:"objectLink", null_value:0, ]}
-22 0x9cf { 3 [
+0 0x2090 { 3 [ i32:1, string:"this", i32:0, ]}
+1 0x20b5 { 13 [ string:"setInitiallyProvidedValue", method:#~@2>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@2>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@2>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@2>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+10 0x2023 { 6 [ string:"AppConfig", string:"SomeClass", string:"PropHost", string:"initialRender", string:"ConsumeHost", string:"ObservedPropertyKind", ]}
+11 0x212f { 13 [ string:"setInitiallyProvidedValue", method:#~@5>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@5>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@5>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@5>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+12 0xc15 
+13 0x22b3 { 3 [ i32:1, string:"this", i32:0, ]}
+15 0x206f { 2 [ string:"name", string:"n", ]}
+16 0x2061 { 2 [ string:"name", string:"x", ]}
+17 0x2213 { 8 [ string:"propObject", null_value:0, string:"propNumber", i32:1, string:"linkObject", null_value:0, string:"objectLink", null_value:0, ]}
+18 0x2297 { 2 [ string:"name", string:"PropHost", ]}
+19 0x2259 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:97, string:"col", i32:7, ]}
+2 0x216c { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+20 0x227b { 6 [ string:"propObject", null_value:0, string:"propNumber", i32:1, string:"objectLink", null_value:0, ]}
+21 0x207d { 3 [ i32:1, string:"this", i32:0, ]}
+23 0x2236 { 8 [ string:"propObject", null_value:0, string:"propNumber", i32:1, string:"linkObject", null_value:0, string:"objectLink", null_value:0, ]}
+24 0x9c9 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+25 0x22a5 { 2 [ string:"name", string:"ConsumeHost", ]}
+26 0x21ac { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:98, string:"col", i32:7, ]}
+3 0x20f2 { 13 [ string:"setInitiallyProvidedValue", method:#~@4>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@4>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@4>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@4>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+4 0x20ac { 1 [ i32:0, ]}
+5 0x20a3 { 1 [ i32:0, ]}
+6 0xa17 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+7 0x21ce { 13 [ i32:6, string:"SomeClass", i32:0, string:"AppConfig", i32:1, string:"LocalKind", i32:2, string:"PropHost", i32:3, string:"ConsumeHost", i32:4, string:"ObservedPropertyKind", i32:5, ]}
+8 0xa6e { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+14 0x9d7 { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -35,7 +36,11 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
-9 0x1f32 { 0 [
+22 0xc19 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+9 0x2045 { 0 [
 	MODULE_REQUEST_ARRAY: {
 	};
 ]}
@@ -43,14 +48,24 @@
 # ====================
 # RECORDS
 
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0xc15
+	u32 moduleRecordIdx = 0xc19
+}
+
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
 	u8 pkgName@entry = 0x0
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x9c1
-	u32 moduleRecordIdx = 0x9cf
+	u32 scopeNames = 0x9c9
+	u32 moduleRecordIdx = 0x9d7
 }
 
 .language ArkTS
@@ -59,8 +74,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x1f10
-	u32 moduleRecordIdx = 0x1f32
+	u32 scopeNames = 0x2023
+	u32 moduleRecordIdx = 0x2045
 }
 
 .language ECMAScript
@@ -112,6 +127,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -5304,129 +5330,129 @@ jump_label_6:
 # ====================
 # STRING
 
-[offset:0xab8, name_value:UIAbility]
-[offset:0xacc, name_value:hilog]
-[offset:0xb1a, name_value:DOMAIN]
-[offset:0x1ecd, name_value:AppConfig]
-[offset:0x1ed8, name_value:SomeClass]
-[offset:0x1ee3, name_value:PropHost]
-[offset:0x1eed, name_value:ConsumeHost]
-[offset:0x1efa, name_value:ObservedPropertyKind]
-[offset:0x21b3, name_value:initialRender]
-[offset:0x21c2, name_value:name]
-[offset:0x21ce, name_value:setInitiallyProvidedValue]
-[offset:0x221d, name_value:aboutToBeDeleted]
-[offset:0x226a, name_value:pages/Index]
-[offset:0x230b, name_value:propObject]
-[offset:0x2317, name_value:propNumber]
-[offset:0x2323, name_value:linkObject]
-[offset:0x232f, name_value:objectLink]
-[offset:0x2347, name_value:info]
-[offset:0x234d, name_value:testTag]
-[offset:0x2356, name_value:%{public}s]
-[offset:0x2362, name_value:Ability onBackground]
-[offset:0x2378, name_value:Ability onCreate]
-[offset:0x238a, name_value:Ability onDestroy]
-[offset:0x239d, name_value:Ability onForeground]
-[offset:0x23b3, name_value:Ability onWindowStageCreate]
-[offset:0x23d0, name_value:loadContent]
-[offset:0x23dd, name_value:Ability onWindowStageDestroy]
-[offset:0x23fb, name_value:code]
-[offset:0x2401, name_value:error]
-[offset:0x2408, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x2437, name_value:JSON]
-[offset:0x243d, name_value:stringify]
-[offset:0x2448, name_value:Succeeded in loading the content.]
-[offset:0x246b, name_value:prototype]
-[offset:0x2476, name_value:A]
-[offset:0x2479, name_value:B]
-[offset:0x247c, name_value:]
-[offset:0x2495, name_value:value]
-[offset:0x249c, name_value:function]
-[offset:0x24a6, name_value:paramsGenerator_]
-[offset:0x24b8, name_value:SynchedPropertyObjectOneWayPU]
-[offset:0x24d7, name_value:__propObject]
-[offset:0x24e5, name_value:SynchedPropertySimpleOneWayPU]
-[offset:0x2504, name_value:__propNumber]
-[offset:0x2512, name_value:SynchedPropertyObjectTwoWayPU]
-[offset:0x2531, name_value:__linkObject]
-[offset:0x253f, name_value:SynchedPropertyNesedObjectPU]
-[offset:0x255d, name_value:__objectLink]
-[offset:0x256b, name_value:finalizeConstruction]
-[offset:0x2581, name_value:SubscriberManager]
-[offset:0x2594, name_value:Get]
-[offset:0x2599, name_value:delete]
-[offset:0x25a1, name_value:id__]
-[offset:0x25a7, name_value:aboutToBeDeletedInternal]
-[offset:0x25c1, name_value:observeComponentCreation2]
-[offset:0x25dc, name_value:Column]
-[offset:0x25e4, name_value:Text]
-[offset:0x25ea, name_value:pop]
-[offset:0x25ef, name_value:get]
-[offset:0x25f4, name_value:set]
-[offset:0x25f9, name_value:purgeDependencyOnElmtId]
-[offset:0x2612, name_value:updateDirtyElements]
-[offset:0x2627, name_value:reset]
-[offset:0x262e, name_value:create]
-[offset:0x2636, name_value:initializeConsume]
-[offset:0x2649, name_value:consumedConfig]
-[offset:0x2659, name_value:__consumedConfig]
-[offset:0x266b, name_value:consumedNumber]
-[offset:0x267b, name_value:__consumedNumber]
-[offset:0x268d, name_value:ObservedPropertyObjectPU]
-[offset:0x26a7, name_value:addProvidedVar]
-[offset:0x26b7, name_value:ObservedPropertySimplePU]
-[offset:0x26d1, name_value:count]
-[offset:0x26d8, name_value:__count]
-[offset:0x26e1, name_value:a]
-[offset:0x26e4, name_value:label]
-[offset:0x26eb, name_value:__label]
-[offset:0x26f4, name_value:flag]
-[offset:0x26fa, name_value:__flag]
-[offset:0x2702, name_value:config]
-[offset:0x270a, name_value:__config]
-[offset:0x2714, name_value:item]
-[offset:0x271a, name_value:__item]
-[offset:0x2722, name_value:list]
-[offset:0x2728, name_value:__list]
-[offset:0x2730, name_value:objs]
-[offset:0x2736, name_value:__objs]
-[offset:0x273e, name_value:Map]
-[offset:0x2743, name_value:m]
-[offset:0x2746, name_value:__m]
-[offset:0x274b, name_value:maybe]
-[offset:0x2752, name_value:__maybe]
-[offset:0x275b, name_value:maybeBool]
-[offset:0x2766, name_value:__maybeBool]
-[offset:0x2773, name_value:opt]
-[offset:0x2778, name_value:__opt]
-[offset:0x277f, name_value:kind]
-[offset:0x2785, name_value:__kind]
-[offset:0x278d, name_value:localAlias]
-[offset:0x2799, name_value:__localAlias]
-[offset:0x27a7, name_value:numberAlias]
-[offset:0x27b4, name_value:__numberAlias]
-[offset:0x27c3, name_value:s]
-[offset:0x27c6, name_value:stringPrimAlias]
-[offset:0x27d7, name_value:__stringPrimAlias]
-[offset:0x27ea, name_value:boolAlias]
-[offset:0x27f5, name_value:__boolAlias]
-[offset:0x2802, name_value:enumAlias]
-[offset:0x280d, name_value:__enumAlias]
-[offset:0x281a, name_value:twoPrimAlias]
-[offset:0x2828, name_value:__twoPrimAlias]
-[offset:0x2838, name_value:inlineLiteralUnion]
-[offset:0x284c, name_value:__inlineLiteralUnion]
-[offset:0x2862, name_value:inlinePrimUnion]
-[offset:0x2873, name_value:__inlinePrimUnion]
-[offset:0x2886, name_value:iface]
-[offset:0x288d, name_value:__iface]
-[offset:0x2896, name_value:angleList]
-[offset:0x28a1, name_value:__angleList]
-[offset:0x28ae, name_value:ViewPU]
-[offset:0x28b6, name_value:updateStateVarsOfChildByElmtId]
-[offset:0x28d6, name_value:Reflect]
-[offset:0x28df, name_value:Observed]
-[offset:0x28e9, name_value:rerender]
-[offset:0x28f3, name_value:getEntryName]
-[offset:0x2901, name_value:registerNamedRoute]
+[offset:0xac0, name_value:UIAbility]
+[offset:0xad4, name_value:hilog]
+[offset:0xb22, name_value:DOMAIN]
+[offset:0x1fe0, name_value:AppConfig]
+[offset:0x1feb, name_value:SomeClass]
+[offset:0x1ff6, name_value:PropHost]
+[offset:0x2000, name_value:ConsumeHost]
+[offset:0x200d, name_value:ObservedPropertyKind]
+[offset:0x22c6, name_value:initialRender]
+[offset:0x22d5, name_value:name]
+[offset:0x22e1, name_value:setInitiallyProvidedValue]
+[offset:0x2330, name_value:aboutToBeDeleted]
+[offset:0x237d, name_value:pages/Index]
+[offset:0x241e, name_value:propObject]
+[offset:0x242a, name_value:propNumber]
+[offset:0x2436, name_value:linkObject]
+[offset:0x2442, name_value:objectLink]
+[offset:0x245a, name_value:info]
+[offset:0x2460, name_value:testTag]
+[offset:0x2469, name_value:%{public}s]
+[offset:0x2475, name_value:Ability onBackground]
+[offset:0x248b, name_value:Ability onCreate]
+[offset:0x249d, name_value:Ability onDestroy]
+[offset:0x24b0, name_value:Ability onForeground]
+[offset:0x24c6, name_value:Ability onWindowStageCreate]
+[offset:0x24e3, name_value:loadContent]
+[offset:0x24f0, name_value:Ability onWindowStageDestroy]
+[offset:0x250e, name_value:code]
+[offset:0x2514, name_value:error]
+[offset:0x251b, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x254a, name_value:JSON]
+[offset:0x2550, name_value:stringify]
+[offset:0x255b, name_value:Succeeded in loading the content.]
+[offset:0x257e, name_value:prototype]
+[offset:0x2589, name_value:A]
+[offset:0x258c, name_value:B]
+[offset:0x258f, name_value:]
+[offset:0x25a8, name_value:value]
+[offset:0x25af, name_value:function]
+[offset:0x25b9, name_value:paramsGenerator_]
+[offset:0x25cb, name_value:SynchedPropertyObjectOneWayPU]
+[offset:0x25ea, name_value:__propObject]
+[offset:0x25f8, name_value:SynchedPropertySimpleOneWayPU]
+[offset:0x2617, name_value:__propNumber]
+[offset:0x2625, name_value:SynchedPropertyObjectTwoWayPU]
+[offset:0x2644, name_value:__linkObject]
+[offset:0x2652, name_value:SynchedPropertyNesedObjectPU]
+[offset:0x2670, name_value:__objectLink]
+[offset:0x267e, name_value:finalizeConstruction]
+[offset:0x2694, name_value:SubscriberManager]
+[offset:0x26a7, name_value:Get]
+[offset:0x26ac, name_value:delete]
+[offset:0x26b4, name_value:id__]
+[offset:0x26ba, name_value:aboutToBeDeletedInternal]
+[offset:0x26d4, name_value:observeComponentCreation2]
+[offset:0x26ef, name_value:Column]
+[offset:0x26f7, name_value:Text]
+[offset:0x26fd, name_value:pop]
+[offset:0x2702, name_value:get]
+[offset:0x2707, name_value:set]
+[offset:0x270c, name_value:purgeDependencyOnElmtId]
+[offset:0x2725, name_value:updateDirtyElements]
+[offset:0x273a, name_value:reset]
+[offset:0x2741, name_value:create]
+[offset:0x2749, name_value:initializeConsume]
+[offset:0x275c, name_value:consumedConfig]
+[offset:0x276c, name_value:__consumedConfig]
+[offset:0x277e, name_value:consumedNumber]
+[offset:0x278e, name_value:__consumedNumber]
+[offset:0x27a0, name_value:ObservedPropertyObjectPU]
+[offset:0x27ba, name_value:addProvidedVar]
+[offset:0x27ca, name_value:ObservedPropertySimplePU]
+[offset:0x27e4, name_value:count]
+[offset:0x27eb, name_value:__count]
+[offset:0x27f4, name_value:a]
+[offset:0x27f7, name_value:label]
+[offset:0x27fe, name_value:__label]
+[offset:0x2807, name_value:flag]
+[offset:0x280d, name_value:__flag]
+[offset:0x2815, name_value:config]
+[offset:0x281d, name_value:__config]
+[offset:0x2827, name_value:item]
+[offset:0x282d, name_value:__item]
+[offset:0x2835, name_value:list]
+[offset:0x283b, name_value:__list]
+[offset:0x2843, name_value:objs]
+[offset:0x2849, name_value:__objs]
+[offset:0x2851, name_value:Map]
+[offset:0x2856, name_value:m]
+[offset:0x2859, name_value:__m]
+[offset:0x285e, name_value:maybe]
+[offset:0x2865, name_value:__maybe]
+[offset:0x286e, name_value:maybeBool]
+[offset:0x2879, name_value:__maybeBool]
+[offset:0x2886, name_value:opt]
+[offset:0x288b, name_value:__opt]
+[offset:0x2892, name_value:kind]
+[offset:0x2898, name_value:__kind]
+[offset:0x28a0, name_value:localAlias]
+[offset:0x28ac, name_value:__localAlias]
+[offset:0x28ba, name_value:numberAlias]
+[offset:0x28c7, name_value:__numberAlias]
+[offset:0x28d6, name_value:s]
+[offset:0x28d9, name_value:stringPrimAlias]
+[offset:0x28ea, name_value:__stringPrimAlias]
+[offset:0x28fd, name_value:boolAlias]
+[offset:0x2908, name_value:__boolAlias]
+[offset:0x2915, name_value:enumAlias]
+[offset:0x2920, name_value:__enumAlias]
+[offset:0x292d, name_value:twoPrimAlias]
+[offset:0x293b, name_value:__twoPrimAlias]
+[offset:0x294b, name_value:inlineLiteralUnion]
+[offset:0x295f, name_value:__inlineLiteralUnion]
+[offset:0x2975, name_value:inlinePrimUnion]
+[offset:0x2986, name_value:__inlinePrimUnion]
+[offset:0x2999, name_value:iface]
+[offset:0x29a0, name_value:__iface]
+[offset:0x29a9, name_value:angleList]
+[offset:0x29b4, name_value:__angleList]
+[offset:0x29c1, name_value:ViewPU]
+[offset:0x29c9, name_value:updateStateVarsOfChildByElmtId]
+[offset:0x29e9, name_value:Reflect]
+[offset:0x29f2, name_value:Observed]
+[offset:0x29fc, name_value:rerender]
+[offset:0x2a06, name_value:getEntryName]
+[offset:0x2a14, name_value:registerNamedRoute]

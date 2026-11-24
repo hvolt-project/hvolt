@@ -1,0 +1,2 @@
+ERROR 10605066 ets/pages/Index.ets:7:19 "in" operator is not supported (arkts-no-in)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

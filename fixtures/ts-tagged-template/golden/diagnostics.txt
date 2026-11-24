@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:7:13 Argument of type 'TemplateStringsArray' is not assignable to parameter of type 'string[]'. Type 'TemplateStringsArray' is missing the following properties from type 'string[]': pop, push, reverse, shift, and 6 more.

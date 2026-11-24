@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:4:2 Unable to resolve signature of class decorator when called as an expression. This expression is not callable. Type 'Number' has no call signatures.

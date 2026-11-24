@@ -1,0 +1,3 @@
+ERROR 10605055 ets/pages/Index.ets:2:18 Unary operators "+", "-" and "~" work only on numbers (arkts-no-polymorphic-unops)
+ERROR 10605055 ets/pages/Index.ets:3:17 Unary operators "+", "-" and "~" work only on numbers (arkts-no-polymorphic-unops)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

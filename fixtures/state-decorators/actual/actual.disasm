@@ -3,23 +3,28 @@
 # ====================
 # LITERALS
 
-0 0x8f6 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-1 0x13d5 { 13 [ string:"setInitiallyProvidedValue", method:#~@1>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@1>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@1>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@1>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-10 0x151a { 2 [ string:"name", string:"StateChild", ]}
-11 0x14c9 { 4 [ string:"shared", null_value:0, string:"task", null_value:0, ]}
-12 0x1528 { 3 [ i32:1, string:"this", i32:0, ]}
-13 0x13a1 { 4 [ string:"Task", string:"StateHost", string:"initialRender", string:"StateChild", ]}
-15 0x14b6 { 3 [ i32:1, string:"this", i32:0, ]}
-17 0x851 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-2 0x14db { 4 [ string:"shared", null_value:0, string:"task", null_value:0, ]}
-3 0x89f { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-4 0x144f { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-5 0x14ed { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:17, string:"col", i32:7, ]}
-6 0x148f { 7 [ i32:3, string:"Task", i32:0, string:"StateChild", i32:1, string:"StateHost", i32:2, ]}
-7 0x153b { 1 [ i32:0, ]}
-8 0x1412 { 13 [ string:"setInitiallyProvidedValue", method:#~@3>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@3>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@3>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@3>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-9 0x150f { 2 [ string:"task", null_value:0, ]}
-14 0x85f { 3 [
+0 0x15a2 { 7 [ i32:3, string:"Task", i32:0, string:"StateChild", i32:1, string:"StateHost", i32:2, ]}
+1 0x163b { 3 [ i32:1, string:"this", i32:0, ]}
+10 0x162d { 2 [ string:"name", string:"StateChild", ]}
+11 0x1562 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+12 0xaa5 
+13 0x14e8 { 13 [ string:"setInitiallyProvidedValue", method:#~@1>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@1>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@1>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@1>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+14 0x164e { 1 [ i32:0, ]}
+15 0x1525 { 13 [ string:"setInitiallyProvidedValue", method:#~@3>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@3>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@3>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@3>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+16 0x1600 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:17, string:"col", i32:7, ]}
+17 0x8fe { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+18 0x15c9 { 3 [ i32:1, string:"this", i32:0, ]}
+19 0x15ee { 4 [ string:"shared", null_value:0, string:"task", null_value:0, ]}
+3 0x15dc { 4 [ string:"shared", null_value:0, string:"task", null_value:0, ]}
+4 0x14b4 { 4 [ string:"Task", string:"StateHost", string:"initialRender", string:"StateChild", ]}
+5 0x1622 { 2 [ string:"task", null_value:0, ]}
+8 0x859 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+9 0x8a7 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+2 0x14cc { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+6 0x867 { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -28,7 +33,7 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
-16 0x13b9 { 0 [
+7 0xaa9 { 0 [
 	MODULE_REQUEST_ARRAY: {
 	};
 ]}
@@ -36,14 +41,24 @@
 # ====================
 # RECORDS
 
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0xaa5
+	u32 moduleRecordIdx = 0xaa9
+}
+
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
 	u8 pkgName@entry = 0x0
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x851
-	u32 moduleRecordIdx = 0x85f
+	u32 scopeNames = 0x859
+	u32 moduleRecordIdx = 0x867
 }
 
 .language ArkTS
@@ -52,8 +67,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x13a1
-	u32 moduleRecordIdx = 0x13b9
+	u32 scopeNames = 0x14b4
+	u32 moduleRecordIdx = 0x14cc
 }
 
 .language ECMAScript
@@ -105,6 +120,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -2520,92 +2546,92 @@ jump_label_4:
 # ====================
 # STRING
 
-[offset:0x948, name_value:UIAbility]
-[offset:0x95c, name_value:hilog]
-[offset:0x9aa, name_value:DOMAIN]
-[offset:0x1384, name_value:Task]
-[offset:0x138a, name_value:StateHost]
-[offset:0x1395, name_value:StateChild]
-[offset:0x1544, name_value:initialRender]
-[offset:0x1553, name_value:setInitiallyProvidedValue]
-[offset:0x15a2, name_value:aboutToBeDeleted]
-[offset:0x15ef, name_value:pages/Index]
-[offset:0x165b, name_value:shared]
-[offset:0x1663, name_value:task]
-[offset:0x16b0, name_value:info]
-[offset:0x16b6, name_value:testTag]
-[offset:0x16bf, name_value:%{public}s]
-[offset:0x16cb, name_value:Ability onBackground]
-[offset:0x16e1, name_value:Ability onCreate]
-[offset:0x16f3, name_value:Ability onDestroy]
-[offset:0x1706, name_value:Ability onForeground]
-[offset:0x171c, name_value:Ability onWindowStageCreate]
-[offset:0x1739, name_value:loadContent]
-[offset:0x1746, name_value:Ability onWindowStageDestroy]
-[offset:0x1764, name_value:code]
-[offset:0x176a, name_value:error]
-[offset:0x1771, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x17a0, name_value:JSON]
-[offset:0x17a6, name_value:stringify]
-[offset:0x17b1, name_value:Succeeded in loading the content.]
-[offset:0x17d4, name_value:prototype]
-[offset:0x17df, name_value:]
-[offset:0x17e1, name_value:title]
-[offset:0x17ff, name_value:function]
-[offset:0x1809, name_value:paramsGenerator_]
-[offset:0x181b, name_value:ObservedPropertySimplePU]
-[offset:0x1835, name_value:count]
-[offset:0x183c, name_value:__count]
-[offset:0x1845, name_value:ObservedPropertyObjectPU]
-[offset:0x185f, name_value:tasks]
-[offset:0x1866, name_value:__tasks]
-[offset:0x186f, name_value:current]
-[offset:0x1878, name_value:__current]
-[offset:0x1883, name_value:light]
-[offset:0x188a, name_value:theme]
-[offset:0x1891, name_value:__theme]
-[offset:0x189a, name_value:addProvidedVar]
-[offset:0x18aa, name_value:p]
-[offset:0x18ad, name_value:plain]
-[offset:0x18b4, name_value:__plain]
-[offset:0x18bd, name_value:finalizeConstruction]
-[offset:0x18d3, name_value:SubscriberManager]
-[offset:0x18e6, name_value:Get]
-[offset:0x18eb, name_value:delete]
-[offset:0x18f3, name_value:id__]
-[offset:0x18f9, name_value:aboutToBeDeletedInternal]
-[offset:0x1913, name_value:get]
-[offset:0x1918, name_value:set]
-[offset:0x191d, name_value:observeComponentCreation2]
-[offset:0x1938, name_value:Column]
-[offset:0x1940, name_value:pop]
-[offset:0x1945, name_value:purgeDependencyOnElmtId]
-[offset:0x195e, name_value:updateDirtyElements]
-[offset:0x1973, name_value:create]
-[offset:0x197b, name_value:ViewPU]
-[offset:0x1983, name_value:updateStateVarsOfChildByElmtId]
-[offset:0x19a3, name_value:createLocalStorageLink]
-[offset:0x19bb, name_value:localKey]
-[offset:0x19c5, name_value:localStorageLinked]
-[offset:0x19d9, name_value:__localStorageLinked]
-[offset:0x19ef, name_value:createLocalStorageProp]
-[offset:0x1a07, name_value:localStoragePropped]
-[offset:0x1a1c, name_value:__localStoragePropped]
-[offset:0x1a33, name_value:SynchedPropertySimpleTwoWayPU]
-[offset:0x1a52, name_value:__shared]
-[offset:0x1a5c, name_value:initializeConsume]
-[offset:0x1a6f, name_value:SynchedPropertyNesedObjectPU]
-[offset:0x1a8d, name_value:__task]
-[offset:0x1a95, name_value:createStorageLink]
-[offset:0x1aa8, name_value:appKey]
-[offset:0x1ab0, name_value:storageLinked]
-[offset:0x1abf, name_value:__storageLinked]
-[offset:0x1ad0, name_value:createStorageProp]
-[offset:0x1ae3, name_value:storagePropped]
-[offset:0x1af3, name_value:__storagePropped]
-[offset:0x1b05, name_value:Text]
-[offset:0x1b0b, name_value:Reflect]
-[offset:0x1b14, name_value:Observed]
-[offset:0x1b1e, name_value:rerender]
-[offset:0x1b28, name_value:getEntryName]
-[offset:0x1b36, name_value:registerNamedRoute]
+[offset:0x950, name_value:UIAbility]
+[offset:0x964, name_value:hilog]
+[offset:0x9b2, name_value:DOMAIN]
+[offset:0x1497, name_value:Task]
+[offset:0x149d, name_value:StateHost]
+[offset:0x14a8, name_value:StateChild]
+[offset:0x1657, name_value:initialRender]
+[offset:0x1666, name_value:setInitiallyProvidedValue]
+[offset:0x16b5, name_value:aboutToBeDeleted]
+[offset:0x1702, name_value:pages/Index]
+[offset:0x176e, name_value:shared]
+[offset:0x1776, name_value:task]
+[offset:0x17c3, name_value:info]
+[offset:0x17c9, name_value:testTag]
+[offset:0x17d2, name_value:%{public}s]
+[offset:0x17de, name_value:Ability onBackground]
+[offset:0x17f4, name_value:Ability onCreate]
+[offset:0x1806, name_value:Ability onDestroy]
+[offset:0x1819, name_value:Ability onForeground]
+[offset:0x182f, name_value:Ability onWindowStageCreate]
+[offset:0x184c, name_value:loadContent]
+[offset:0x1859, name_value:Ability onWindowStageDestroy]
+[offset:0x1877, name_value:code]
+[offset:0x187d, name_value:error]
+[offset:0x1884, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x18b3, name_value:JSON]
+[offset:0x18b9, name_value:stringify]
+[offset:0x18c4, name_value:Succeeded in loading the content.]
+[offset:0x18e7, name_value:prototype]
+[offset:0x18f2, name_value:]
+[offset:0x18f4, name_value:title]
+[offset:0x1912, name_value:function]
+[offset:0x191c, name_value:paramsGenerator_]
+[offset:0x192e, name_value:ObservedPropertySimplePU]
+[offset:0x1948, name_value:count]
+[offset:0x194f, name_value:__count]
+[offset:0x1958, name_value:ObservedPropertyObjectPU]
+[offset:0x1972, name_value:tasks]
+[offset:0x1979, name_value:__tasks]
+[offset:0x1982, name_value:current]
+[offset:0x198b, name_value:__current]
+[offset:0x1996, name_value:light]
+[offset:0x199d, name_value:theme]
+[offset:0x19a4, name_value:__theme]
+[offset:0x19ad, name_value:addProvidedVar]
+[offset:0x19bd, name_value:p]
+[offset:0x19c0, name_value:plain]
+[offset:0x19c7, name_value:__plain]
+[offset:0x19d0, name_value:finalizeConstruction]
+[offset:0x19e6, name_value:SubscriberManager]
+[offset:0x19f9, name_value:Get]
+[offset:0x19fe, name_value:delete]
+[offset:0x1a06, name_value:id__]
+[offset:0x1a0c, name_value:aboutToBeDeletedInternal]
+[offset:0x1a26, name_value:get]
+[offset:0x1a2b, name_value:set]
+[offset:0x1a30, name_value:observeComponentCreation2]
+[offset:0x1a4b, name_value:Column]
+[offset:0x1a53, name_value:pop]
+[offset:0x1a58, name_value:purgeDependencyOnElmtId]
+[offset:0x1a71, name_value:updateDirtyElements]
+[offset:0x1a86, name_value:create]
+[offset:0x1a8e, name_value:ViewPU]
+[offset:0x1a96, name_value:updateStateVarsOfChildByElmtId]
+[offset:0x1ab6, name_value:createLocalStorageLink]
+[offset:0x1ace, name_value:localKey]
+[offset:0x1ad8, name_value:localStorageLinked]
+[offset:0x1aec, name_value:__localStorageLinked]
+[offset:0x1b02, name_value:createLocalStorageProp]
+[offset:0x1b1a, name_value:localStoragePropped]
+[offset:0x1b2f, name_value:__localStoragePropped]
+[offset:0x1b46, name_value:SynchedPropertySimpleTwoWayPU]
+[offset:0x1b65, name_value:__shared]
+[offset:0x1b6f, name_value:initializeConsume]
+[offset:0x1b82, name_value:SynchedPropertyNesedObjectPU]
+[offset:0x1ba0, name_value:__task]
+[offset:0x1ba8, name_value:createStorageLink]
+[offset:0x1bbb, name_value:appKey]
+[offset:0x1bc3, name_value:storageLinked]
+[offset:0x1bd2, name_value:__storageLinked]
+[offset:0x1be3, name_value:createStorageProp]
+[offset:0x1bf6, name_value:storagePropped]
+[offset:0x1c06, name_value:__storagePropped]
+[offset:0x1c18, name_value:Text]
+[offset:0x1c1e, name_value:Reflect]
+[offset:0x1c27, name_value:Observed]
+[offset:0x1c31, name_value:rerender]
+[offset:0x1c3b, name_value:getEntryName]
+[offset:0x1c49, name_value:registerNamedRoute]

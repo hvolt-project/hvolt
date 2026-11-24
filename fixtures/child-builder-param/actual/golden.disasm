@@ -3,21 +3,33 @@
 # ====================
 # LITERALS
 
-0 0xfd1 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-1 0xef5 { 2 [ string:"name", string:"Child", ]}
-10 0x77c { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-12 0x725 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-13 0xf16 { 19 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@0>#initialRender, method_affiliate:0, string:"rerender", method:#~@0>#rerender, method_affiliate:0, i32:6, ]}
-14 0xf03 { 3 [ i32:1, string:"this", i32:0, ]}
-15 0xe67 { 5 [ string:"Child", string:"initialRender", string:"Index", string:"content", string:"paramsLambda", ]}
-16 0x40f 
-3 0xec8 { 2 [ string:"content", null_value:0, ]}
-4 0xf6d { 22 [ string:"setInitiallyProvidedValue", method:#~@2>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@2>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@2>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@2>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@2>#initialRender, method_affiliate:0, string:"rerender", method:#~@2>#rerender, method_affiliate:0, string:"getEntryName", method:#~@2<#getEntryName, method_affiliate:0, i32:6, ]}
-5 0xed3 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:17, string:"col", i32:7, ]}
-6 0x6d7 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-7 0xebd { 2 [ string:"content", null_value:0, ]}
-8 0xea0 { 5 [ i32:2, string:"Child", i32:0, string:"Index", i32:1, ]}
-11 0x6e5 { 3 [
+0 0x1187 { 2 [ string:"name", string:"Child", ]}
+1 0x113e { 3 [ i32:1, string:"item", i32:0, ]}
+10 0x112a { 1 [ string:"inside", ]}
+12 0x75d { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+13 0x115a { 2 [ string:"content", null_value:0, ]}
+14 0x1151 { 1 [ string:"inside", ]}
+15 0xfae { 6 [ string:"Child", string:"initialRender", string:"Index", string:"content", string:"forEachItemGenFunction", string:"paramsLambda", ]}
+16 0x1165 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:17, string:"col", i32:7, ]}
+17 0x1133 { 2 [ string:"content", null_value:0, ]}
+18 0x1117 { 3 [ i32:1, string:"item", i32:0, ]}
+19 0x70f { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+2 0x10fa { 5 [ i32:2, string:"Child", i32:0, string:"Index", i32:1, ]}
+20 0x447 
+3 0x10ba { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+4 0x1056 { 22 [ string:"setInitiallyProvidedValue", method:#~@2>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@2>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@2>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@2>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@2>#initialRender, method_affiliate:0, string:"rerender", method:#~@2>#rerender, method_affiliate:0, string:"getEntryName", method:#~@2<#getEntryName, method_affiliate:0, i32:6, ]}
+5 0xfec { 3 [ i32:1, string:"this", i32:0, ]}
+7 0x7b4 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+8 0xfff { 19 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@0>#initialRender, method_affiliate:0, string:"rerender", method:#~@0>#rerender, method_affiliate:0, i32:6, ]}
+11 0x44b { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+6 0xfd0 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+9 0x71d { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -25,14 +37,6 @@
 	ModuleTag: REGULAR_IMPORT, local_name: UIAbility, import_name: default, module_request: @ohos:app.ability.UIAbility;
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
-]}
-2 0x413 { 0 [
-	MODULE_REQUEST_ARRAY: {
-	};
-]}
-9 0xe84 { 0 [
-	MODULE_REQUEST_ARRAY: {
-	};
 ]}
 
 # ====================
@@ -44,8 +48,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x40f
-	u32 moduleRecordIdx = 0x413
+	u32 scopeNames = 0x447
+	u32 moduleRecordIdx = 0x44b
 }
 
 .language ArkTS
@@ -54,8 +58,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x6d7
-	u32 moduleRecordIdx = 0x6e5
+	u32 scopeNames = 0x70f
+	u32 moduleRecordIdx = 0x71d
 }
 
 .language ArkTS
@@ -64,8 +68,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xe67
-	u32 moduleRecordIdx = 0xe84
+	u32 scopeNames = 0xfae
+	u32 moduleRecordIdx = 0xfd0
 }
 
 .language ECMAScript
@@ -1072,11 +1076,11 @@ L_ESSlotNumberAnnotation:
 	sta v4
 	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@3*#:(any,any,any,any,any), 0x2
 	sta v6
-	tryldglobalbyname 0x3, "Text"
+	tryldglobalbyname 0x3, "ForEach"
 	sta v7
 	lda v4
 	callthis2 0x4, v5, v6, v7
-	tryldglobalbyname 0x6, "Text"
+	tryldglobalbyname 0x6, "ForEach"
 	sta v5
 	lda v5
 	ldobjbyname 0x7, "pop"
@@ -1096,16 +1100,87 @@ L_ESSlotNumberAnnotation:
 	mov v2, a2
 	createobjectwithbuffer 0x0, { 2 [ string:"content", null_value:0, ]}
 	sta v4
-	definefunc 0x1, &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@4*#content:(any,any,any), 0x0
+	definefunc 0x1, &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@5*#content:(any,any,any), 0x0
 	definepropertybyname 0x2, "content", v4
 	lda v4
 	return
 }
 
 L_ESSlotNumberAnnotation:
-	u32 SlotNumber { 0xa }
+	u32 SlotNumber { 0xb }
 .language ArkTS
 .function any &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@3*#(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "ForEach"
+	sta v8
+	lda v8
+	ldobjbyname 0x1, "create"
+	sta v7
+	lda v7
+	callthis0 0x3, v8
+	definefunc 0x5, &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@3**#forEachItemGenFunction:(any,any,any,any), 0x1
+	sta v5
+	ldlexvar 0x0, 0x0
+	sta v8
+	lda v8
+	ldobjbyname 0x6, "forEachUpdateFunction"
+	sta v7
+	lda v3
+	sta v9
+	createarraywithbuffer 0x8, { 1 [ string:"inside", ]}
+	sta v10
+	sta v10
+	lda v5
+	sta v11
+	lda v7
+	callthis3 0x9, v8, v9, v10, v11
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0xb }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@3**#forEachItemGenFunction(any a0, any a1, any a2, any a3) <static> {
+	newlexenvwithname 0x1, { 3 [ i32:1, string:"item", i32:0, ]}
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v3
+	sta v5
+	lda v5
+	stlexvar 0x0, 0x0
+	ldlexvar 0x1, 0x0
+	sta v6
+	lda v6
+	ldobjbyname 0x0, "observeComponentCreation2"
+	sta v5
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@3**@4*#:(any,any,any,any,any), 0x2
+	sta v7
+	tryldglobalbyname 0x3, "Text"
+	sta v8
+	lda v5
+	callthis2 0x4, v6, v7, v8
+	tryldglobalbyname 0x6, "Text"
+	sta v6
+	lda v6
+	ldobjbyname 0x7, "pop"
+	sta v5
+	lda v5
+	callthis0 0x9, v6
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0xa }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@3**@4*#(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1116,7 +1191,8 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	ldobjbyname 0x1, "create"
 	sta v6
-	lda.str "inside"
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "item"
 	sta v8
 	lda v6
 	callthis1 0x3, v7, v8
@@ -1136,7 +1212,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0xb }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@4*#content(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@5*#content(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1145,13 +1221,13 @@ L_ESSlotNumberAnnotation:
 	lda v5
 	ldobjbyname 0x0, "observeComponentCreation2"
 	sta v4
-	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@4*@3*#:(any,any,any,any,any), 0x2
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@5*@3*#:(any,any,any,any,any), 0x2
 	sta v6
-	tryldglobalbyname 0x3, "Text"
+	tryldglobalbyname 0x3, "ForEach"
 	sta v7
 	lda v4
 	callthis2 0x4, v5, v6, v7
-	tryldglobalbyname 0x6, "Text"
+	tryldglobalbyname 0x6, "ForEach"
 	sta v5
 	lda v5
 	ldobjbyname 0x7, "pop"
@@ -1163,9 +1239,80 @@ L_ESSlotNumberAnnotation:
 }
 
 L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0xb }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@5*@3*#(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "ForEach"
+	sta v8
+	lda v8
+	ldobjbyname 0x1, "create"
+	sta v7
+	lda v7
+	callthis0 0x3, v8
+	definefunc 0x5, &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@5*@3**#forEachItemGenFunction:(any,any,any,any), 0x1
+	sta v5
+	ldlexvar 0x0, 0x0
+	sta v8
+	lda v8
+	ldobjbyname 0x6, "forEachUpdateFunction"
+	sta v7
+	lda v3
+	sta v9
+	createarraywithbuffer 0x8, { 1 [ string:"inside", ]}
+	sta v10
+	sta v10
+	lda v5
+	sta v11
+	lda v7
+	callthis3 0x9, v8, v9, v10, v11
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0xb }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@5*@3**#forEachItemGenFunction(any a0, any a1, any a2, any a3) <static> {
+	newlexenvwithname 0x1, { 3 [ i32:1, string:"item", i32:0, ]}
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v3
+	sta v5
+	lda v5
+	stlexvar 0x0, 0x0
+	ldlexvar 0x1, 0x0
+	sta v6
+	lda v6
+	ldobjbyname 0x0, "observeComponentCreation2"
+	sta v5
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@5*@3**@4*#:(any,any,any,any,any), 0x2
+	sta v7
+	tryldglobalbyname 0x3, "Text"
+	sta v8
+	lda v5
+	callthis2 0x4, v6, v7, v8
+	tryldglobalbyname 0x6, "Text"
+	sta v6
+	lda v6
+	ldobjbyname 0x7, "pop"
+	sta v5
+	lda v5
+	callthis0 0x9, v6
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0xa }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@4*@3*#(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@5*@3**@4*#(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1176,7 +1323,8 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	ldobjbyname 0x1, "create"
 	sta v6
-	lda.str "inside"
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "item"
 	sta v8
 	lda v6
 	callthis1 0x3, v7, v8
@@ -1277,52 +1425,54 @@ jump_label_2:
 # ====================
 # STRING
 
-[offset:0x7ce, name_value:UIAbility]
-[offset:0x7e2, name_value:hilog]
-[offset:0x830, name_value:DOMAIN]
-[offset:0xe59, name_value:Child]
-[offset:0xe60, name_value:Index]
-[offset:0x1020, name_value:content]
-[offset:0x1064, name_value:setInitiallyProvidedValue]
-[offset:0x1118, name_value:pages/Index]
-[offset:0x1329, name_value:use strict]
-[offset:0x1341, name_value:info]
-[offset:0x1347, name_value:testTag]
-[offset:0x1350, name_value:%{public}s]
-[offset:0x135c, name_value:Ability onBackground]
-[offset:0x1372, name_value:Ability onCreate]
-[offset:0x1384, name_value:Ability onDestroy]
-[offset:0x1397, name_value:Ability onForeground]
-[offset:0x13ad, name_value:Ability onWindowStageCreate]
-[offset:0x13ca, name_value:loadContent]
-[offset:0x13d7, name_value:Ability onWindowStageDestroy]
-[offset:0x13f5, name_value:code]
-[offset:0x13fb, name_value:error]
-[offset:0x1402, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x1431, name_value:JSON]
-[offset:0x1437, name_value:stringify]
-[offset:0x1442, name_value:Succeeded in loading the content.]
-[offset:0x1465, name_value:prototype]
-[offset:0x1470, name_value:function]
-[offset:0x147a, name_value:paramsGenerator_]
-[offset:0x148c, name_value:finalizeConstruction]
-[offset:0x14a2, name_value:SubscriberManager]
-[offset:0x14b5, name_value:Get]
-[offset:0x14ba, name_value:delete]
-[offset:0x14c2, name_value:id__]
-[offset:0x14c8, name_value:aboutToBeDeletedInternal]
-[offset:0x14e2, name_value:observeComponentCreation2]
-[offset:0x14fd, name_value:Column]
-[offset:0x1505, name_value:bind]
-[offset:0x150b, name_value:pop]
-[offset:0x1510, name_value:updateDirtyElements]
-[offset:0x1525, name_value:create]
-[offset:0x152d, name_value:ViewPU]
-[offset:0x1535, name_value:updateStateVarsOfChildByElmtId]
-[offset:0x1555, name_value:Text]
-[offset:0x155b, name_value:inside]
-[offset:0x1563, name_value:fontSize]
-[offset:0x156d, name_value:Reflect]
-[offset:0x1576, name_value:set]
-[offset:0x157b, name_value:registerNamedRoute]
-[offset:0x158f, name_value:]
+[offset:0x806, name_value:UIAbility]
+[offset:0x81a, name_value:hilog]
+[offset:0x868, name_value:DOMAIN]
+[offset:0xfa0, name_value:Child]
+[offset:0xfa7, name_value:Index]
+[offset:0x11a4, name_value:content]
+[offset:0x11ad, name_value:setInitiallyProvidedValue]
+[offset:0x1261, name_value:pages/Index]
+[offset:0x12cd, name_value:item]
+[offset:0x14bb, name_value:use strict]
+[offset:0x14d3, name_value:info]
+[offset:0x14d9, name_value:testTag]
+[offset:0x14e2, name_value:%{public}s]
+[offset:0x14ee, name_value:Ability onBackground]
+[offset:0x1504, name_value:Ability onCreate]
+[offset:0x1516, name_value:Ability onDestroy]
+[offset:0x1529, name_value:Ability onForeground]
+[offset:0x153f, name_value:Ability onWindowStageCreate]
+[offset:0x155c, name_value:loadContent]
+[offset:0x1569, name_value:Ability onWindowStageDestroy]
+[offset:0x1587, name_value:code]
+[offset:0x158d, name_value:error]
+[offset:0x1594, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x15c3, name_value:JSON]
+[offset:0x15c9, name_value:stringify]
+[offset:0x15d4, name_value:Succeeded in loading the content.]
+[offset:0x15f7, name_value:prototype]
+[offset:0x1602, name_value:function]
+[offset:0x160c, name_value:paramsGenerator_]
+[offset:0x161e, name_value:finalizeConstruction]
+[offset:0x1634, name_value:SubscriberManager]
+[offset:0x1647, name_value:Get]
+[offset:0x164c, name_value:delete]
+[offset:0x1654, name_value:id__]
+[offset:0x165a, name_value:aboutToBeDeletedInternal]
+[offset:0x1674, name_value:observeComponentCreation2]
+[offset:0x168f, name_value:Column]
+[offset:0x1697, name_value:bind]
+[offset:0x169d, name_value:pop]
+[offset:0x16a2, name_value:updateDirtyElements]
+[offset:0x16b7, name_value:create]
+[offset:0x16bf, name_value:ViewPU]
+[offset:0x16c7, name_value:updateStateVarsOfChildByElmtId]
+[offset:0x16e7, name_value:ForEach]
+[offset:0x16f0, name_value:forEachUpdateFunction]
+[offset:0x1707, name_value:Text]
+[offset:0x170d, name_value:fontSize]
+[offset:0x1717, name_value:Reflect]
+[offset:0x1720, name_value:set]
+[offset:0x1725, name_value:registerNamedRoute]
+[offset:0x1739, name_value:]

@@ -9,9 +9,9 @@ import deviceInfo from '@ohos:deviceInfo';
 // rewrite with the type checker: the callee's type must come from `@ohos.deviceInfo.d.ts` and be
 // named `apiAvailable`. This one is not, so the call must stay as written.
 class Probe {
-  apiAvailable(n: number): boolean {
-    return n > 0
-  }
+    apiAvailable(n: number): boolean {
+        return n > 0
+    }
 }
 class ApiAvailableShadow extends ViewPU {
 	constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {

@@ -3,22 +3,17 @@
 # ====================
 # LITERALS
 
-0 0x7a3 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-1 0xdc3 { 7 [ i32:3, string:"ProbeStore", i32:0, string:"connected", i32:1, string:"KitArkuiState", i32:2, ]}
-10 0x755 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-2 0xd3d { 1 [ i32:0, ]}
-3 0xd83 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-4 0xd2a { 3 [ i32:1, string:"this", i32:0, ]}
-6 0xced { 3 [ string:"ProbeStore", string:"KitArkuiState", string:"initialRender", ]}
-7 0xd46 { 13 [ string:"setInitiallyProvidedValue", method:#~@1>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@1>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@1>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@1>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-9 0x7fa { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-5 0xd00 { 1 [
-	MODULE_REQUEST_ARRAY: {
-		0 : @ohos:arkui.StateManagement,
-	};
-	ModuleTag: REGULAR_IMPORT, local_name: AppStorageV2, import_name: AppStorageV2, module_request: @ohos:arkui.StateManagement;
-]}
-8 0x763 { 3 [
+0 0xe59 { 13 [ string:"setInitiallyProvidedValue", method:#~@1>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@1>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@1>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@1>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+1 0xed6 { 7 [ i32:3, string:"ProbeStore", i32:0, string:"connected", i32:1, string:"KitArkuiState", i32:2, ]}
+11 0xe00 { 3 [ string:"ProbeStore", string:"KitArkuiState", string:"initialRender", ]}
+2 0xe3d { 3 [ i32:1, string:"this", i32:0, ]}
+3 0x802 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+4 0xe96 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+5 0xe50 { 1 [ i32:0, ]}
+6 0x7ab { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+7 0x9a9 
+8 0x75d { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+10 0x76b { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -27,9 +22,29 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
+12 0xe13 { 1 [
+	MODULE_REQUEST_ARRAY: {
+		0 : @ohos:arkui.StateManagement,
+	};
+	ModuleTag: REGULAR_IMPORT, local_name: AppStorageV2, import_name: AppStorageV2, module_request: @ohos:arkui.StateManagement;
+]}
+9 0x9ad { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
 
 # ====================
 # RECORDS
+
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x9a9
+	u32 moduleRecordIdx = 0x9ad
+}
 
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
@@ -37,8 +52,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x755
-	u32 moduleRecordIdx = 0x763
+	u32 scopeNames = 0x75d
+	u32 moduleRecordIdx = 0x76b
 }
 
 .language ArkTS
@@ -47,8 +62,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xced
-	u32 moduleRecordIdx = 0xd00
+	u32 scopeNames = 0xe00
+	u32 moduleRecordIdx = 0xe13
 }
 
 .language ECMAScript
@@ -100,6 +115,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -985,62 +1011,62 @@ jump_label_2:
 # ====================
 # STRING
 
-[offset:0x84c, name_value:UIAbility]
-[offset:0x860, name_value:hilog]
-[offset:0x8ae, name_value:DOMAIN]
-[offset:0xcd2, name_value:ProbeStore]
-[offset:0xcde, name_value:KitArkuiState]
-[offset:0xdea, name_value:initialRender]
-[offset:0xe16, name_value:AppStorageV2]
-[offset:0xe24, name_value:setInitiallyProvidedValue]
-[offset:0xe73, name_value:aboutToBeDeleted]
-[offset:0xec0, name_value:pages/Index]
-[offset:0xf2c, name_value:connected]
-[offset:0xf43, name_value:info]
-[offset:0xf49, name_value:testTag]
-[offset:0xf52, name_value:%{public}s]
-[offset:0xf5e, name_value:Ability onBackground]
-[offset:0xf74, name_value:Ability onCreate]
-[offset:0xf86, name_value:Ability onDestroy]
-[offset:0xf99, name_value:Ability onForeground]
-[offset:0xfaf, name_value:Ability onWindowStageCreate]
-[offset:0xfcc, name_value:loadContent]
-[offset:0xfd9, name_value:Ability onWindowStageDestroy]
-[offset:0xff7, name_value:code]
-[offset:0xffd, name_value:error]
-[offset:0x1004, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x1033, name_value:JSON]
-[offset:0x1039, name_value:stringify]
-[offset:0x1044, name_value:Succeeded in loading the content.]
-[offset:0x1067, name_value:prototype]
-[offset:0x1072, name_value:value]
-[offset:0x1090, name_value:function]
-[offset:0x109a, name_value:paramsGenerator_]
-[offset:0x10ac, name_value:ObservedPropertySimplePU]
-[offset:0x10c6, name_value:state]
-[offset:0x10cd, name_value:label]
-[offset:0x10d4, name_value:__label]
-[offset:0x10dd, name_value:finalizeConstruction]
-[offset:0x10f3, name_value:SubscriberManager]
-[offset:0x1106, name_value:Get]
-[offset:0x110b, name_value:delete]
-[offset:0x1113, name_value:id__]
-[offset:0x1119, name_value:aboutToBeDeletedInternal]
-[offset:0x1133, name_value:observeComponentCreation2]
-[offset:0x114e, name_value:Column]
-[offset:0x1156, name_value:Text]
-[offset:0x115c, name_value:pop]
-[offset:0x1161, name_value:get]
-[offset:0x1166, name_value:set]
-[offset:0x116b, name_value:purgeDependencyOnElmtId]
-[offset:0x1184, name_value:updateDirtyElements]
-[offset:0x1199, name_value:create]
-[offset:0x11a1, name_value:String]
-[offset:0x11a9, name_value:ViewPU]
-[offset:0x11b1, name_value:Reflect]
-[offset:0x11ba, name_value:connect]
-[offset:0x11c3, name_value:probe]
-[offset:0x11ca, name_value:rerender]
-[offset:0x11d4, name_value:getEntryName]
-[offset:0x11e2, name_value:registerNamedRoute]
-[offset:0x11f6, name_value:]
+[offset:0x854, name_value:UIAbility]
+[offset:0x868, name_value:hilog]
+[offset:0x8b6, name_value:DOMAIN]
+[offset:0xde5, name_value:ProbeStore]
+[offset:0xdf1, name_value:KitArkuiState]
+[offset:0xefd, name_value:initialRender]
+[offset:0xf29, name_value:AppStorageV2]
+[offset:0xf37, name_value:setInitiallyProvidedValue]
+[offset:0xf86, name_value:aboutToBeDeleted]
+[offset:0xfd3, name_value:pages/Index]
+[offset:0x103f, name_value:connected]
+[offset:0x1056, name_value:info]
+[offset:0x105c, name_value:testTag]
+[offset:0x1065, name_value:%{public}s]
+[offset:0x1071, name_value:Ability onBackground]
+[offset:0x1087, name_value:Ability onCreate]
+[offset:0x1099, name_value:Ability onDestroy]
+[offset:0x10ac, name_value:Ability onForeground]
+[offset:0x10c2, name_value:Ability onWindowStageCreate]
+[offset:0x10df, name_value:loadContent]
+[offset:0x10ec, name_value:Ability onWindowStageDestroy]
+[offset:0x110a, name_value:code]
+[offset:0x1110, name_value:error]
+[offset:0x1117, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x1146, name_value:JSON]
+[offset:0x114c, name_value:stringify]
+[offset:0x1157, name_value:Succeeded in loading the content.]
+[offset:0x117a, name_value:prototype]
+[offset:0x1185, name_value:value]
+[offset:0x11a3, name_value:function]
+[offset:0x11ad, name_value:paramsGenerator_]
+[offset:0x11bf, name_value:ObservedPropertySimplePU]
+[offset:0x11d9, name_value:state]
+[offset:0x11e0, name_value:label]
+[offset:0x11e7, name_value:__label]
+[offset:0x11f0, name_value:finalizeConstruction]
+[offset:0x1206, name_value:SubscriberManager]
+[offset:0x1219, name_value:Get]
+[offset:0x121e, name_value:delete]
+[offset:0x1226, name_value:id__]
+[offset:0x122c, name_value:aboutToBeDeletedInternal]
+[offset:0x1246, name_value:observeComponentCreation2]
+[offset:0x1261, name_value:Column]
+[offset:0x1269, name_value:Text]
+[offset:0x126f, name_value:pop]
+[offset:0x1274, name_value:get]
+[offset:0x1279, name_value:set]
+[offset:0x127e, name_value:purgeDependencyOnElmtId]
+[offset:0x1297, name_value:updateDirtyElements]
+[offset:0x12ac, name_value:create]
+[offset:0x12b4, name_value:String]
+[offset:0x12bc, name_value:ViewPU]
+[offset:0x12c4, name_value:Reflect]
+[offset:0x12cd, name_value:connect]
+[offset:0x12d6, name_value:probe]
+[offset:0x12dd, name_value:rerender]
+[offset:0x12e7, name_value:getEntryName]
+[offset:0x12f5, name_value:registerNamedRoute]
+[offset:0x1309, name_value:]

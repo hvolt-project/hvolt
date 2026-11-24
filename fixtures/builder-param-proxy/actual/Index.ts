@@ -12,10 +12,10 @@ interface BuilderParamProxyProbe_Params {
 // shape sits at a call site whose declared parameter type accepts it.
 
 class Cfg {
-  a: number = 1
-  b: Cfg | null = null
-  run: () => void = () => {
-  }
+    a: number = 1
+    b: Cfg | null = null
+    run: () => void = () => {
+    }
 }
 const SHARED_CFG: Cfg = {
 	a: 1,
@@ -162,8 +162,8 @@ this.memberContent.bind(this)(makeBuilderParameterProxy("memberContent", { a: ()
                 Column.create();
                 // an inline arrow where a CustomBuilder is expected
                 Column.bindSheet({ value: this.shown, changeEvent: newValue => { this.shown = newValue; } }, () => {
-          this.memberSheet()
-        });
+                    this.memberSheet()
+                });
             }, Column);
             // an inline arrow where a CustomBuilder is expected
             Column.pop();

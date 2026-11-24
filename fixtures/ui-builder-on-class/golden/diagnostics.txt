@@ -1,0 +1,1 @@
+ERROR 10905114 ets/pages/Index.ets:3:4 Use the '@Builder' decorator only in the global scope or in a struct.

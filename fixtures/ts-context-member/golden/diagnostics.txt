@@ -1,0 +1,2 @@
+ERROR 10505001 ets/pages/Index.ets:4:14 Property 'missingProp' does not exist on type 'Context'.
+WARN - ets/pages/Index.ets:3:15 'getContext' has been deprecated.

@@ -1,1 +1,1 @@
-ERROR 10905210 ets/pages/Index.ets:8:12 In an '@Entry' decorated component, the 'build' method can have only one root node, which must be a container component.
+ERROR 10905210 ets/pages/Index.ets:5:12 In an '@Entry' decorated component, the 'build' method can have only one root node, which must be a container component.

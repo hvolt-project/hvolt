@@ -1,0 +1,2 @@
+ERROR 10605087 ets/pages/Index.ets:3:3 "throw" statements cannot accept values of arbitrary types (arkts-limited-throw)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

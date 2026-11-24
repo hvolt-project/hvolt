@@ -1,0 +1,3 @@
+ERROR 10605038 ets/pages/Index.ets:7:19 Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)
+ERROR 10605142 ets/pages/Index.ets:7:28 "as const" assertions are not supported (arkts-no-as-const)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

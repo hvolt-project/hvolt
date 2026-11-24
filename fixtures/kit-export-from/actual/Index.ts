@@ -83,6 +83,8 @@ export * from "@ohos:app.agent.AgentExtensionAbility";
 export * from "@ohos:app.agent.AgentUIExtensionAbility";
 export * from "@ohos:app.agent.agentConstant";
 export * from "@ohos:app.ability.hyperSnapManager";
+export * from "@ohos:bundle.pluginBundleManager";
+export * from "@ohos:app.ability.appMemoryOptimizer";
 class Index extends ViewPU {
 	constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
 		super(parent, __localStorage, elmtId, extraInfo);

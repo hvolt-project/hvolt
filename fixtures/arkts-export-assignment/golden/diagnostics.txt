@@ -1,0 +1,3 @@
+ERROR 10505001 ets/pages/Index.ets:7:1 Export assignment cannot be used when targeting ECMAScript modules. Consider using 'export default' or another module format instead.
+ERROR 10605126 ets/pages/Index.ets:7:1 "export = ..." assignment is not supported (arkts-no-export-assignment)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

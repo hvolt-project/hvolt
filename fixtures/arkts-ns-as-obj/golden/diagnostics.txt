@@ -1,0 +1,2 @@
+ERROR 10605114 ets/pages/Index.ets:10:18 Namespaces cannot be used as objects (arkts-no-ns-as-obj)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

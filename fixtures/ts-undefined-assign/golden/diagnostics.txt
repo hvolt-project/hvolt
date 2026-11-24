@@ -1,0 +1,2 @@
+ERROR 10605999 ets/pages/Index.ets:3:9 Type 'undefined' is not assignable to type 'number'.
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

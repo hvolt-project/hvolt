@@ -1,18 +1,19 @@
-function forIn(obj: Record<string, number>) {
-  for (const key in obj) {
-    return key;
-  }
-  return "";
+
+interface Pair {
+  first: number;
 }
 
-function spread(numbers: number[]) {
-  const copy = [...numbers];
-  return copy.length;
+function read(input: Pair): number {
+  let total = 0;
+  for (const key in input) {
+    total += 1;
+  }
+  return total;
 }
 
 @Entry
 @Component
-struct SpreadProbe {
+struct BatchProbe73 {
   build() {
     Column() {
       Text("x")

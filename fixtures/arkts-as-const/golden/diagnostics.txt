@@ -1,2 +1,2 @@
-ERROR 10605142 ets/pages/Index.ets:2:28 "as const" assertions are not supported (arkts-no-as-const)
+ERROR 10605142 ets/pages/Index.ets:3:23 "as const" assertions are not supported (arkts-no-as-const)
 WARN - -:-:- For details about ArkTS syntax errors, see FAQs

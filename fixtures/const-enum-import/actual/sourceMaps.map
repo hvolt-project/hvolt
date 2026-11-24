@@ -10,17 +10,6 @@
     "mappings": ";;;;;;AAMA;CACE;EACE;;CAGF;EACE;;CAGF;EACE;EAEA;GACE;IACE;IACA;;GAEF;;;CAIJ;EACE;;CAGF;EACE;;CAGF;EACE",
     "entry-package-info": "entry|1.0.0"
   },
-  "entry|entry|1.0.0|src/main/ets/common/Shared.ts": {
-    "version": 3,
-    "file": "Shared.ets",
-    "sourceRoot": "",
-    "sources": [
-      "entry/src/main/ets/common/Shared.ets"
-    ],
-    "names": [],
-    "mappings": "AAAA;CACE;CACA",
-    "entry-package-info": "entry|1.0.0"
-  },
   "entry|entry|1.0.0|src/main/ets/pages/Index.ts": {
     "version": 3,
     "file": "Index.ets",

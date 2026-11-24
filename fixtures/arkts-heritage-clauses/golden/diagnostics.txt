@@ -1,0 +1,5 @@
+ERROR 10505001 ets/pages/Index.ets:12:7 Class 'ImplementsClass' incorrectly implements class 'BaseThing'. Did you mean to extend 'BaseThing' and inherit its members as a subclass? Property 'size' is missing in type 'ImplementsClass' but required in type 'BaseThing'.
+ERROR 10505001 ets/pages/Index.ets:16:18 Type annotation cannot appear on a constructor declaration.
+ERROR 10505001 ets/pages/Index.ets:9:29 Cannot extend an interface 'AreaShape'. Did you mean 'implements'?
+ERROR 10605051 ets/pages/Index.ets:12:34 Classes cannot be specified in "implements" clause (arkts-implements-only-iface)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

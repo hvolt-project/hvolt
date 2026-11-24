@@ -12,10 +12,10 @@
   },
   "entry|entry|1.0.0|src/main/ets/common/EventHub.ts": {
     "version": 3,
-    "file": "EventHub.ets",
+    "file": "EventHub.ts",
     "sourceRoot": "",
     "sources": [
-      "entry/src/main/ets/common/EventHub.ets"
+      "entry/src/main/ets/common/EventHub.ts"
     ],
     "names": [],
     "mappings": "AAAA;;;AAIA",
@@ -23,10 +23,10 @@
   },
   "entry|entry|1.0.0|src/main/ets/common/breakpoint/BreakPoint.ts": {
     "version": 3,
-    "file": "BreakPoint.ets",
+    "file": "BreakPoint.ts",
     "sourceRoot": "",
     "sources": [
-      "entry/src/main/ets/common/breakpoint/BreakPoint.ets"
+      "entry/src/main/ets/common/breakpoint/BreakPoint.ts"
     ],
     "names": [],
     "mappings": "AAAA;;;AAIA;;;AAIA;;;AAIA",
@@ -34,10 +34,10 @@
   },
   "entry|entry|1.0.0|src/main/ets/common/utils/Animation.ts": {
     "version": 3,
-    "file": "Animation.ets",
+    "file": "Animation.ts",
     "sourceRoot": "",
     "sources": [
-      "entry/src/main/ets/common/utils/Animation.ets"
+      "entry/src/main/ets/common/utils/Animation.ts"
     ],
     "names": [],
     "mappings": "",
@@ -45,10 +45,10 @@
   },
   "entry|entry|1.0.0|src/main/ets/common/utils/ResourceStringUtil.ts": {
     "version": 3,
-    "file": "ResourceStringUtil.ets",
+    "file": "ResourceStringUtil.ts",
     "sourceRoot": "",
     "sources": [
-      "entry/src/main/ets/common/utils/ResourceStringUtil.ets"
+      "entry/src/main/ets/common/utils/ResourceStringUtil.ts"
     ],
     "names": [],
     "mappings": "AAAA",
@@ -56,10 +56,10 @@
   },
   "entry|entry|1.0.0|src/main/ets/common/utils/Toast.ts": {
     "version": 3,
-    "file": "Toast.ets",
+    "file": "Toast.ts",
     "sourceRoot": "",
     "sources": [
-      "entry/src/main/ets/common/utils/Toast.ets"
+      "entry/src/main/ets/common/utils/Toast.ts"
     ],
     "names": [],
     "mappings": "AAAA",
@@ -67,10 +67,10 @@
   },
   "entry|entry|1.0.0|src/main/ets/common/utils/VibratorUtil.ts": {
     "version": 3,
-    "file": "VibratorUtil.ets",
+    "file": "VibratorUtil.ts",
     "sourceRoot": "",
     "sources": [
-      "entry/src/main/ets/common/utils/VibratorUtil.ets"
+      "entry/src/main/ets/common/utils/VibratorUtil.ts"
     ],
     "names": [],
     "mappings": "",
@@ -89,10 +89,10 @@
   },
   "entry|entry|1.0.0|src/main/ets/entryability/AppState.ts": {
     "version": 3,
-    "file": "AppState.ets",
+    "file": "AppState.ts",
     "sourceRoot": "",
     "sources": [
-      "entry/src/main/ets/entryability/AppState.ets"
+      "entry/src/main/ets/entryability/AppState.ts"
     ],
     "names": [],
     "mappings": "AAAA;;;AAIA;;;AAIA",
@@ -100,10 +100,10 @@
   },
   "entry|entry|1.0.0|src/main/ets/entryability/ClashViewModel.ts": {
     "version": 3,
-    "file": "ClashViewModel.ets",
+    "file": "ClashViewModel.ts",
     "sourceRoot": "",
     "sources": [
-      "entry/src/main/ets/entryability/ClashViewModel.ets"
+      "entry/src/main/ets/entryability/ClashViewModel.ts"
     ],
     "names": [],
     "mappings": "AAAA",
@@ -117,7 +117,7 @@
       "entry/src/main/ets/pages/Index.ets"
     ],
     "names": [],
-    "mappings": ";;;;;;;;;;;;;;;;;;;;;;MAaO;;;;;;aAE4B;;;aAEQ;;;aAED;aACd;aACD;;;aAEE;aAElB;;;;;;;;;aAVwB;aAEQ;aAED;aACd;aACD;aAEE;aAElB;;;;;;;;;;;;;YAVwB;QAAA;;;QAAA;;;;YAEQ;QAAA;;;QAAA;;;;YAED;QAAA;;;QAAA;;;YACd;QAAA;;;QAAA;;;YACD;QAAA;;;QAAA;;;;YAEE;;;QAAA;;;QAAA;;;;YAElB;QAAA;;;QAAA;;;IAET;;YACE;;;;;;;;;;;;;;;;;oBAwDE;;;;;;;;gBArDA;;;4BACE;;;;;;;;;;;;;;4CAEI;;;;;;;;;;cAmBE;gBACE;gBACA;gBACA;;gBAEA;kBACE;;;;;;;cAMJ;gBACE;;;gBAGA;;cAEF;;;;;;gDApCA;;;oDACE;;;;;;;;;oDAMA;;;;oBAII;;;;;;;;;;;;;;;oDA4BN;;;;;;wCAUR;;;;;;;;;;;;;;;gBAAA;;;4BACE;;;;;gCACE;;;;;;gCAIA;;;;;;;;;;;;;;;;;;;MA0BJ;;;;;;;;;;;;;;;MASC;;;;;;;;;;;;;;;;CACL",
+    "mappings": ";;;;;;;;;;;;;;;;;;;;;;MAaO;;;;;;aAE4B;;;aAEQ;;;aAED;aACd;aACD;;;aAEE;aAElB;;;;;;;;;aAVwB;aAEQ;aAED;aACd;aACD;aAEE;aAElB;;;;;;;;;;;;;YAVwB;QAAA;;;QAAA;;;;YAEQ;QAAA;;;QAAA;;;;YAED;QAAA;;;QAAA;;;YACd;QAAA;;;QAAA;;;YACD;QAAA;;;QAAA;;;;YAEE;;;QAAA;;;QAAA;;;;YAElB;QAAA;;;QAAA;;;IAET;;YACE;;;;;;;;;;;;;;;;;oBAwDE;;;;;;;;gBArDA;;;4BACE;;;;;;;;;;;;;;4CAEI;;;;;;;;;;cAmBE;gBACE;gBACA;gBACA;;gBAEA;kBACE;;;;;;;gDAMJ;kDACE;oDACE;;kDAEF;;gDAEF;;;;;;gDApCA;;;oDACE;;;;;;;;;oDAMA;;;;wDAII;;;;;;;;;;;;;;;oDA4BN;;;;;;wCAUR;;;;;;;;;;;;;;;gBAAA;;;4BACE;;;;;gCACE;;;;;;gCAIA;;;;;;;;;;;;;;;;;;;MA0BJ;;;;;;;;;;;;;;;MASC;;;;;;;;;;;;;;;;CACL",
     "entry-package-info": "entry|1.0.0"
   }
 }

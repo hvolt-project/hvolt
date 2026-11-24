@@ -33,7 +33,7 @@ export function Xb_Menu(menuList: MenuItem[], onMenuSelect: (index: number) => v
 			}, MenuItem);
 			MenuItem.pop();
 		};
-		this.forEachUpdateFunction(elmtId, menuList, forEachItemGenFunction, (menuItem: MenuItem) => JSON.stringify(menuItem), true, false);
+		(parent ? parent : this).forEachUpdateFunction(elmtId, menuList, forEachItemGenFunction, (menuItem: MenuItem) => JSON.stringify(menuItem), true, false);
 	}, ForEach);
 	ForEach.pop();
 	Menu.pop();

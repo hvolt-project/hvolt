@@ -199,20 +199,36 @@ class ObservedPropertyKind extends ViewPU {
         }
         this.__consumedConfig = new ObservedPropertyObjectPU(new AppConfig(), this, "consumedConfig");
         this.addProvidedVar("consumedConfig", this.__consumedConfig, false);
-        this.__consumedNumber = new ObservedPropertySimplePU(0, this, "consumedNumber");
+        this.__consumedNumber = new ObservedPropertySimplePU(0
+        // 1. 原始类型
+        , this, "consumedNumber");
         this.addProvidedVar("consumedNumber", this.__consumedNumber, false);
         this.__count = new ObservedPropertySimplePU(0, this, "count");
         this.__label = new ObservedPropertySimplePU('a', this, "label");
-        this.__flag = new ObservedPropertySimplePU(false, this, "flag");
-        this.__config = new ObservedPropertyObjectPU({ name: 'x' }, this, "config");
-        this.__item = new ObservedPropertyObjectPU(new SomeClass(), this, "item");
+        this.__flag = new ObservedPropertySimplePU(false
+        // 2. 对象字面量初值（本地 class）
+        , this, "flag");
+        this.__config = new ObservedPropertyObjectPU({ name: 'x' }
+        // 3. 类实例
+        , this, "config");
+        this.__item = new ObservedPropertyObjectPU(new SomeClass()
+        // 4. 数组
+        , this, "item");
         this.__list = new ObservedPropertyObjectPU([], this, "list");
-        this.__objs = new ObservedPropertyObjectPU([], this, "objs");
-        this.__m = new ObservedPropertyObjectPU(new Map(), this, "m");
+        this.__objs = new ObservedPropertyObjectPU([]
+        // 5. Map
+        , this, "objs");
+        this.__m = new ObservedPropertyObjectPU(new Map()
+        // 6. 联合与可选
+        , this, "m");
         this.__maybe = new ObservedPropertyObjectPU(undefined, this, "maybe");
         this.__maybeBool = new ObservedPropertySimplePU(false, this, "maybeBool");
-        this.__opt = new ObservedPropertySimplePU(undefined, this, "opt");
-        this.__kind = new ObservedPropertySimplePU(LocalKind.A, this, "kind");
+        this.__opt = new ObservedPropertySimplePU(undefined
+        // 8. 枚举
+        , this, "opt");
+        this.__kind = new ObservedPropertySimplePU(LocalKind.A
+        // 10. 本地类型别名
+        , this, "kind");
         this.__localAlias = new ObservedPropertySimplePU('a', this, "localAlias");
         this.__numberAlias = new ObservedPropertyObjectPU(1, this, "numberAlias");
         this.__stringPrimAlias = new ObservedPropertyObjectPU('s', this, "stringPrimAlias");
@@ -220,7 +236,9 @@ class ObservedPropertyKind extends ViewPU {
         this.__enumAlias = new ObservedPropertySimplePU(LocalKind.A, this, "enumAlias");
         this.__twoPrimAlias = new ObservedPropertySimplePU('s', this, "twoPrimAlias");
         this.__inlineLiteralUnion = new ObservedPropertySimplePU('a', this, "inlineLiteralUnion");
-        this.__inlinePrimUnion = new ObservedPropertySimplePU(1, this, "inlinePrimUnion");
+        this.__inlinePrimUnion = new ObservedPropertySimplePU(1
+        // 11. interface / Array 角度括号
+        , this, "inlinePrimUnion");
         this.__iface = new ObservedPropertyObjectPU({ name: 'n' }, this, "iface");
         this.__angleList = new ObservedPropertyObjectPU([], this, "angleList");
         this.setInitiallyProvidedValue(params);

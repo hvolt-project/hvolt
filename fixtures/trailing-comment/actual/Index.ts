@@ -1,6 +1,13 @@
 if (!('finalizeConstruction' in ViewPU.prototype)) {
 	Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {});
 }
+interface McLikeProbe_Params {
+	options?: ProbeOptions;
+	chartOption?: number;
+	callback?: Function;
+	click?: Function;
+	customTooltip?: (info: ProbeInfo) => void;
+}
 interface TrailingIndex_Params {}
 interface PairProbe_Params {
 	slotA?: () => void;
@@ -10,10 +17,9 @@ interface SingleFieldProbe_Params {
 	only?: number;
 }
 interface TrailingProbe_Params {
-    slot?: () => void;
-    count?: number;
-    // TRAILING_PLAIN
-    tail?: () => void;
+	slot?: () => void;
+	count?: number;
+	tail?: () => void;
 }
 function globalBuilder(parent = null) {
 	(parent ? parent : this).observeComponentCreation2((elmtId, isInitialRender) => {
@@ -28,9 +34,7 @@ class TrailingProbe extends ViewPU {
             this.paramsGenerator_ = paramsLambda;
         }
         this.slot = globalBuilder;
-        this.__count = new ObservedPropertySimplePU(0
-        // TRAILING_PLAIN
-        , this, "count");
+        this.__count = new ObservedPropertySimplePU(0, this, "count");
         this.tail = globalBuilder;
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
@@ -56,22 +60,19 @@ class TrailingProbe extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-    private __slot;
-    // TRAILING_FIELD
-    private __count: ObservedPropertySimplePU<number>;
+    private __slot; // TRAILING_FIELD
+    private __count: ObservedPropertySimplePU<number>; // TRAILING_PLAIN
     get count() {
         return this.__count.get();
     }
     set count(newValue: number) {
         this.__count.set(newValue);
     }
-    // TRAILING_PLAIN
-    private __tail;
-// TRAILING_THEN_LEADING
-  // LEADING_AFTER_TRAILING
-  onUpdate(): void {
-    this.count = 1; // TRAILING_STMT
-  }
+    private __tail; // TRAILING_THEN_LEADING
+    // LEADING_AFTER_TRAILING
+    onUpdate(): void {
+        this.count = 1; // TRAILING_STMT
+    }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
@@ -113,14 +114,13 @@ class SingleFieldProbe extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-    private __only: ObservedPropertySimplePU<number>;
+    private __only: ObservedPropertySimplePU<number>; // ONLY_FIELD
     get only() {
         return this.__only.get();
     }
     set only(newValue: number) {
         this.__only.set(newValue);
     }
-    // ONLY_FIELD
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(`${this.only}`);
@@ -158,18 +158,16 @@ class PairProbe extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-    private __slotA;
-// TRAIL_A
-  // LEADING_A
-  onUpdateA(): void {
-    this.slotA()
-  }
-    private __slotB;
-// TRAIL_B
-  // LEADING_B
-  onUpdateB(): void {
-    this.slotB()
-  }
+    private __slotA; // TRAIL_A
+    // LEADING_A
+    onUpdateA(): void {
+        this.slotA()
+    }
+    private __slotB; // TRAIL_B
+    // LEADING_B
+    onUpdateB(): void {
+        this.slotB()
+    }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
@@ -264,6 +262,91 @@ class TrailingIndex extends ViewPU {
 	static getEntryName(): string {
 		return 'TrailingIndex';
 	}
+}
+class ProbeOptions {
+	value: number = 0;
+}
+class ProbeInfo {
+	flag: boolean = true;
+}
+export class McLikeProbe extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.__options = new SynchedPropertyObjectOneWayPU(params.options, this, "options");
+        this.__chartOption = new ObservedPropertySimplePU(0, this, "chartOption");
+        this.callback = () => {};
+        this.click = (event: ProbeInfo) => {};
+        this.customTooltip = globalBuilder;
+        this.setInitiallyProvidedValue(params);
+        this.declareWatch("options", this.onOptionsChanged);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params: McLikeProbe_Params) {
+        if (params.chartOption !== undefined) {
+            this.chartOption = params.chartOption;
+        }
+        if (params.callback !== undefined) {
+            this.callback = params.callback;
+        }
+        if (params.click !== undefined) {
+            this.click = params.click;
+        }
+        if (params.customTooltip !== undefined) {
+            this.customTooltip = params.customTooltip;
+        }
+    }
+    updateStateVars(params: McLikeProbe_Params) {
+        this.__options.reset(params.options);
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__options.purgeDependencyOnElmtId(rmElmtId);
+        this.__chartOption.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.__options.aboutToBeDeleted();
+        this.__chartOption.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    private __options: SynchedPropertySimpleOneWayPU<ProbeOptions>;
+    get options() {
+        return this.__options.get();
+    }
+    set options(newValue: ProbeOptions) {
+        this.__options.set(newValue);
+    }
+    private __chartOption: ObservedPropertySimplePU<number>;
+    get chartOption() {
+        return this.__chartOption.get();
+    }
+    set chartOption(newValue: number) {
+        this.__chartOption.set(newValue);
+    }
+    private callback: Function;
+    private click: Function;
+    private __customTooltip; // PROBE_TRAILING
+    // PROBE_LEADING
+    onOptionsChanged(options: ProbeOptions): void {
+        this.chartOption = options.value
+        this.callback = () => {}
+    }
+    // @Watch 回调 AT_WATCH_IN_COMMENT
+    aboutToAppear() {
+        this.chartOption = 1
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+        }, Column);
+            this.customTooltip.bind(this)(makeBuilderParameterProxy("customTooltip", { flag: () => true }))
+        Column.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
 }
 registerNamedRoute(() => new TrailingIndex(undefined, {}), '', {
 	bundleName: 'com.example.demo',

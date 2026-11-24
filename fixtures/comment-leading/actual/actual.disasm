@@ -3,42 +3,60 @@
 # ====================
 # LITERALS
 
-0 0xabf { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-1 0x249f { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:76, string:"col", i32:14, ]}
-10 0x2730 { 3 [ i32:1, string:"recycleNode", i32:0, ]}
-11 0x26ab { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-12 0x264c { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:210, string:"col", i32:7, ]}
-13 0x2743 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-14 0x2453 { 2 [ string:"title", string:"plain", ]}
-15 0x256d { 13 [ string:"totalCount", method:#~@0>#totalCount, method_affiliate:0, string:"getData", method:#~@0>#getData, method_affiliate:1, string:"registerDataChangeListener", method:#~@0>#registerDataChangeListener, method_affiliate:1, string:"unregisterDataChangeListener", method:#~@0>#unregisterDataChangeListener, method_affiliate:1, i32:4, ]}
-16 0x25aa { 2 [ string:"a", i32:3, ]}
-17 0x2461 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:113, string:"col", i32:14, ]}
-18 0x2547 { 3 [ i32:1, string:"this", i32:0, ]}
-19 0x27aa { 2 [ string:"title", string:"public", ]}
-2 0x26eb { 13 [ i32:6, string:"ProbeDataSource", i32:0, string:"ProbeDialog", i32:1, string:"INIT_OBJ", i32:2, string:"INIT_VALUE", i32:3, string:"AttrChainProbe", i32:4, string:"CommentLeading", i32:5, ]}
-20 0xb16 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-21 0x24ca { 4 [ string:"builder", null_value:0, string:"autoCancel", u1:1, ]}
-22 0x24c1 { 1 [ string:"x", ]}
-23 0x24dc { 2 [ string:"a", i32:1, ]}
-24 0x2507 { 2 [ string:"a", i32:2, ]}
-25 0x2535 { 4 [ string:"builder", null_value:0, string:"autoCancel", u1:1, ]}
-26 0xa71 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-27 0x2483 { 2 [ string:"title", string:"probe", ]}
-28 0x24ea { 5 [ i32:2, string:"itemCreation2", i32:0, string:"item", i32:1, ]}
-29 0x279c { 2 [ string:"title", string:"public", ]}
-3 0x2515 { 2 [ string:"a", i32:1, ]}
-30 0x2776 { 3 [ i32:1, string:"item", i32:0, ]}
-31 0x2445 { 2 [ string:"title", string:"plain", ]}
-32 0x23d1 { 10 [ string:"ProbeDataSource", string:"ProbeDialog", string:"initialRender", string:"AttrChainProbe", string:"CommentLeading", string:"builder", string:"forEachItemGenFunction", string:"__lazyForEachItemGenFunction", string:"itemCreation2", string:"observedDeepRender", ]}
-33 0x2523 { 4 [ string:"builder", null_value:0, string:"autoCancel", u1:1, ]}
-34 0x2491 { 2 [ string:"title", string:"probe", ]}
-4 0x2423 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:119, string:"col", i32:14, ]}
-5 0x2602 { 16 [ string:"setInitiallyProvidedValue", method:#~@3>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@3>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@3>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@3>#aboutToBeDeleted, method_affiliate:0, string:"updateRecycleElmtId", method:#~@3>#updateRecycleElmtId, method_affiliate:2, i32:5, ]}
-6 0x2789 { 3 [ i32:1, string:"this", i32:0, ]}
-7 0x266e { 13 [ string:"setInitiallyProvidedValue", method:#~@4>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@4>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@4>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@4>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-8 0x255a { 3 [ i32:1, string:"this", i32:0, ]}
-9 0x25b8 { 16 [ string:"setInitiallyProvidedValue", method:#~@1>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@1>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@1>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@1>#aboutToBeDeleted, method_affiliate:0, string:"setController", method:#~@1>#setController, method_affiliate:1, i32:5, ]}
-35 0xa7f { 3 [
+0 0x31b9 { 4 [ string:"builder", null_value:0, string:"autoCancel", u1:1, ]}
+1 0x319d { 2 [ string:"a", i32:2, ]}
+10 0x33d8 { 3 [ i32:1, string:"recycleNode", i32:0, ]}
+11 0x342b { 21 [ i32:10, string:"ProbeDataSource", i32:0, string:"ProbeDialog", i32:1, string:"INIT_OBJ", i32:2, string:"INIT_VALUE", i32:3, string:"animWidth", i32:4, string:"__Text__loudExtend", i32:5, string:"AttrChainProbe", i32:6, string:"ConsumeCarryProbe", i32:7, string:"ConsumeFirstProbe", i32:8, string:"CommentLeading", i32:9, ]}
+12 0x31cb { 4 [ string:"builder", null_value:0, string:"autoCancel", u1:1, ]}
+13 0x30db { 2 [ string:"title", string:"plain", ]}
+14 0x2ffa { 13 [ string:"ProbeDataSource", string:"ProbeDialog", string:"initialRender", string:"animWidth", string:"ConsumeCarryProbe", string:"ConsumeFirstProbe", string:"AttrChainProbe", string:"CommentLeading", string:"builder", string:"forEachItemGenFunction", string:"__lazyForEachItemGenFunction", string:"itemCreation2", string:"observedDeepRender", ]}
+15 0x3136 { 2 [ string:"title", string:"probe", ]}
+16 0x309d { 2 [ string:"title", string:"public", ]}
+17 0x3314 { 13 [ string:"setInitiallyProvidedValue", method:#~@5>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@5>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@5>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@5>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+18 0x3225 { 5 [ i32:2, string:"elmtId", i32:0, string:"parent", i32:1, ]}
+19 0x30e9 { 2 [ string:"title", string:"plain", ]}
+2 0x31ff { 3 [ i32:1, string:"this", i32:0, ]}
+20 0x317d { 4 [ string:"builder", null_value:0, string:"autoCancel", u1:1, ]}
+21 0x305b { 3 [ i32:1, string:"item", i32:0, ]}
+22 0x3119 { 5 [ i32:2, string:"itemCreation2", i32:0, string:"item", i32:1, ]}
+23 0xe01 
+24 0x318f { 2 [ string:"a", i32:1, ]}
+25 0x306e { 2 [ string:"name", string:"ConsumeCarryProbe", ]}
+26 0xbb5 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+27 0x3498 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:284, string:"col", i32:7, ]}
+29 0x339b { 13 [ string:"setInitiallyProvidedValue", method:#~@7>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@7>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@7>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@7>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+3 0x308a { 3 [ i32:1, string:"this", i32:0, ]}
+30 0x3511 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+31 0x327f { 2 [ string:"a", i32:3, ]}
+33 0xc03 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+34 0x30b9 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:169, string:"col", i32:14, ]}
+35 0x34ba { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:283, string:"col", i32:7, ]}
+36 0x3242 { 13 [ string:"totalCount", method:#~@0>#totalCount, method_affiliate:0, string:"getData", method:#~@0>#getData, method_affiliate:1, string:"registerDataChangeListener", method:#~@0>#registerDataChangeListener, method_affiliate:1, string:"unregisterDataChangeListener", method:#~@0>#unregisterDataChangeListener, method_affiliate:1, i32:4, ]}
+37 0x30ab { 2 [ string:"title", string:"public", ]}
+38 0x34fe { 3 [ i32:1, string:"recycleNode", i32:0, ]}
+39 0x31ab { 2 [ string:"a", i32:1, ]}
+4 0x34dc { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:282, string:"col", i32:7, ]}
+40 0xc5a { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+42 0x307c { 2 [ string:"name", string:"ConsumeFirstProbe", ]}
+43 0x328d { 16 [ string:"setInitiallyProvidedValue", method:#~@1>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@1>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@1>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@1>#aboutToBeDeleted, method_affiliate:0, string:"setController", method:#~@1>#setController, method_affiliate:1, i32:5, ]}
+44 0x32d7 { 13 [ string:"setInitiallyProvidedValue", method:#~@4>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@4>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@4>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@4>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+45 0x33eb { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+46 0x3144 { 2 [ string:"title", string:"probe", ]}
+47 0x3152 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:126, string:"col", i32:14, ]}
+5 0x3351 { 16 [ string:"setInitiallyProvidedValue", method:#~@6>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@6>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@6>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@6>#aboutToBeDeleted, method_affiliate:0, string:"updateRecycleElmtId", method:#~@6>#updateRecycleElmtId, method_affiliate:2, i32:5, ]}
+6 0x3212 { 3 [ i32:1, string:"this", i32:0, ]}
+7 0x3174 { 1 [ string:"x", ]}
+8 0x30f7 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:163, string:"col", i32:14, ]}
+9 0x31dd { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:288, string:"col", i32:9, ]}
+28 0xe05 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+32 0x303f { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+41 0xbc3 { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -47,13 +65,19 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
-36 0x2407 { 0 [
-	MODULE_REQUEST_ARRAY: {
-	};
-]}
 
 # ====================
 # RECORDS
+
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0xe01
+	u32 moduleRecordIdx = 0xe05
+}
 
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
@@ -61,8 +85,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xa71
-	u32 moduleRecordIdx = 0xa7f
+	u32 scopeNames = 0xbb5
+	u32 moduleRecordIdx = 0xbc3
 }
 
 .language ArkTS
@@ -71,8 +95,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x23d1
-	u32 moduleRecordIdx = 0x2407
+	u32 scopeNames = 0x2ffa
+	u32 moduleRecordIdx = 0x303f
 }
 
 .language ECMAScript
@@ -124,6 +148,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -425,6 +460,40 @@ L_ESSlotNumberAnnotation:
 }
 
 L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x8 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#%#LocalKind(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v3
+	sta v5
+	lda v3
+	sta v7
+	lda.str "A"
+	sta v8
+	ldai 0x0
+	stobjbyvalue 0x0, v7, v8
+	sta v6
+	lda.str "A"
+	stobjbyvalue 0x2, v5, v6
+	lda v3
+	sta v5
+	lda v3
+	sta v7
+	lda.str "B"
+	sta v8
+	ldai 0x1
+	stobjbyvalue 0x4, v7, v8
+	sta v6
+	lda.str "B"
+	stobjbyvalue 0x6, v5, v6
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
 .language ArkTS
 .function any &entry.src.main.ets.pages.Index&.#*#(any a0, any a1, any a2) <static> {
@@ -442,7 +511,7 @@ L_ESSlotNumberAnnotation:
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
-	ldlexvar 0x0, 0x5
+	ldlexvar 0x0, 0x9
 	throw.undefinedifholewithname "CommentLeading"
 	sta v4
 	ldundefined
@@ -451,6 +520,143 @@ L_ESSlotNumberAnnotation:
 	sta v6
 	newobjrange 0x0, 0x3, v4
 	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x8 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#*#__Text__loudExtend(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	tryldglobalbyname 0x0, "Text"
+	sta v5
+	lda v5
+	ldobjbyname 0x1, "fontWeight"
+	sta v4
+	tryldglobalbyname 0x3, "FontWeight"
+	sta v6
+	lda v6
+	ldobjbyname 0x4, "Bold"
+	sta v6
+	lda v4
+	callthis1withname 0x6, "fontWeight", v5, v6
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x11 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#*#animWidth(any a0, any a1, any a2, any a3, any a4, any a5, any a6) <static> {
+	newlexenvwithname 0x2, { 5 [ i32:2, string:"elmtId", i32:0, string:"parent", i32:1, ]}
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda a4
+	stlexvar 0x0, 0x0
+	mov v5, a5
+	lda a6
+	stlexvar 0x0, 0x1
+	lda v5
+	callruntime.isfalse 0x0
+	jnez jump_label_0
+	tryldglobalbyname 0x1, "Text"
+	sta v9
+	lda v9
+	ldobjbyname 0x2, "createAnimatableProperty"
+	sta v8
+	lda.str "animWidth"
+	sta v10
+	lda v3
+	sta v11
+	definefunc 0x4, &entry.src.main.ets.pages.Index&.#*@3*#:(any,any,any,any), 0x1
+	sta v12
+	lda v8
+	callthis3withname 0x5, "createAnimatableProperty", v9, v10, v11, v12
+	tryldglobalbyname 0x7, "Text"
+	sta v9
+	lda v9
+	ldobjbyname 0x8, "width"
+	sta v8
+	lda v3
+	sta v10
+	lda v8
+	callthis1withname 0xa, "width", v9, v10
+	jmp jump_label_1
+jump_label_0:
+	tryldglobalbyname 0xc, "Text"
+	sta v9
+	lda v9
+	ldobjbyname 0xd, "updateAnimatableProperty"
+	sta v8
+	lda.str "animWidth"
+	sta v10
+	lda v3
+	sta v11
+	lda v8
+	callthis2withname 0xf, "updateAnimatableProperty", v9, v10, v11
+jump_label_1:
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x18 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#*@3*#(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	tryldglobalbyname 0x0, "ViewStackProcessor"
+	sta v6
+	lda v6
+	ldobjbyname 0x1, "StartGetAccessRecordingFor"
+	sta v5
+	ldlexvar 0x0, 0x0
+	sta v7
+	lda v5
+	callthis1withname 0x3, "StartGetAccessRecordingFor", v6, v7
+	tryldglobalbyname 0x5, "ViewStackProcessor"
+	sta v6
+	lda v6
+	ldobjbyname 0x6, "GetAndPushFrameNode"
+	sta v5
+	lda.str "Text"
+	sta v7
+	ldlexvar 0x0, 0x0
+	sta v8
+	lda v5
+	callthis2withname 0x8, "GetAndPushFrameNode", v6, v7, v8
+	tryldglobalbyname 0xa, "Text"
+	sta v6
+	lda v6
+	ldobjbyname 0xb, "width"
+	sta v5
+	lda v3
+	sta v7
+	lda v5
+	callthis1withname 0xd, "width", v6, v7
+	tryldglobalbyname 0xf, "ViewStackProcessor"
+	sta v6
+	lda v6
+	ldobjbyname 0x10, "StopGetAccessRecording"
+	sta v5
+	lda v5
+	callthis0withname 0x12, "StopGetAccessRecording", v6
+	ldlexvar 0x0, 0x1
+	sta v6
+	lda v6
+	ldobjbyname 0x14, "finishUpdateFunc"
+	sta v5
+	ldlexvar 0x0, 0x0
+	sta v7
+	lda v5
+	callthis1withname 0x16, "finishUpdateFunc", v6, v7
+	ldundefined
+	returnundefined
 }
 
 L_ESExpectedPropertyCountAnnotation:
@@ -950,11 +1156,910 @@ L_ESSlotNumberAnnotation:
 }
 
 L_ESExpectedPropertyCountAnnotation:
+	u32 ExpectedPropertyCount { 0x4 }
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x29 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@4=#ConsumeCarryProbe(any a0, any a1, any a2, any a3, any a4, any a5, any a6, any a7, any a8) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	mov v5, a5
+	mov v6, a6
+	mov v7, a7
+	mov v8, a8
+	lda v6
+	sta v10
+	ldundefined
+	stricteq 0x0, v10
+	jeqz jump_label_4
+	ldai 0x1
+	sta v10
+	lda v10
+	neg 0x1
+	sta v6
+jump_label_4:
+	lda v7
+	sta v10
+	ldundefined
+	stricteq 0x2, v10
+	jeqz jump_label_5
+	ldundefined
+	sta v7
+jump_label_5:
+	lda v3
+	sta v10
+	lda v5
+	sta v11
+	lda v6
+	sta v12
+	lda v8
+	sta v13
+	supercallthisrange 0x3, 0x4, v10
+	sta v10
+	lda v2
+	throw.ifsupernotcorrectcall 0x1
+	lda v10
+	sta v2
+	lda v7
+	typeof 0x5
+	sta v10
+	lda.str "function"
+	stricteq 0x7, v10
+	jeqz jump_label_6
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v10
+	lda v7
+	stobjbyname 0x8, "paramsGenerator_", v10
+jump_label_6:
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v10
+	tryldglobalbyname 0xa, "ObservedPropertySimplePU"
+	sta v11
+	ldai 0x1
+	sta v12
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v13
+	lda.str "first"
+	sta v14
+	newobjrange 0xb, 0x4, v11
+	stobjbyname 0xd, "__first", v10
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v10
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v12
+	lda v12
+	ldobjbyname 0xf, "initializeConsume"
+	sta v11
+	lda.str "adjacent"
+	sta v13
+	lda.str "adjacent"
+	sta v14
+	lda v11
+	callthis2withname 0x11, "initializeConsume", v12, v13, v14
+	stobjbyname 0x13, "__adjacent", v10
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v10
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v12
+	lda v12
+	ldobjbyname 0x15, "initializeConsume"
+	sta v11
+	lda.str "afterMethod"
+	sta v13
+	lda.str "afterMethod"
+	sta v14
+	lda v11
+	callthis2withname 0x17, "initializeConsume", v12, v13, v14
+	stobjbyname 0x19, "__afterMethod", v10
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v10
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v12
+	lda v12
+	ldobjbyname 0x1b, "initializeConsume"
+	sta v11
+	lda.str "afterBuild"
+	sta v13
+	lda.str "afterBuild"
+	sta v14
+	lda v11
+	callthis2withname 0x1d, "initializeConsume", v12, v13, v14
+	stobjbyname 0x1f, "__afterBuild", v10
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v11
+	lda v11
+	ldobjbyname 0x21, "setInitiallyProvidedValue"
+	sta v10
+	lda v4
+	sta v12
+	lda v10
+	callthis1withname 0x23, "setInitiallyProvidedValue", v11, v12
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v11
+	lda v11
+	ldobjbyname 0x25, "finalizeConstruction"
+	sta v10
+	lda v10
+	callthis0withname 0x27, "finalizeConstruction", v11
+	lda v2
+try_begin_label_0:
+	throw.ifsupernotcorrectcall 0x0
+try_end_label_0:
+	return
+handler_begin_label_0_0:
+	throw
+:
+
+.catchall try_begin_label_0, try_end_label_0, handler_begin_label_0_0, handler_end_label_0_0
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x29 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@4>#aboutToBeDeleted(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda v2
+	sta v6
+	lda v6
+	ldobjbyname 0x0, "__first"
+	sta v5
+	lda v5
+	ldobjbyname 0x2, "aboutToBeDeleted"
+	sta v4
+	lda v4
+	callthis0withname 0x4, "aboutToBeDeleted", v5
+	lda v2
+	sta v6
+	lda v6
+	ldobjbyname 0x6, "__adjacent"
+	sta v5
+	lda v5
+	ldobjbyname 0x8, "aboutToBeDeleted"
+	sta v4
+	lda v4
+	callthis0withname 0xa, "aboutToBeDeleted", v5
+	lda v2
+	sta v6
+	lda v6
+	ldobjbyname 0xc, "__afterMethod"
+	sta v5
+	lda v5
+	ldobjbyname 0xe, "aboutToBeDeleted"
+	sta v4
+	lda v4
+	callthis0withname 0x10, "aboutToBeDeleted", v5
+	lda v2
+	sta v6
+	lda v6
+	ldobjbyname 0x12, "__afterBuild"
+	sta v5
+	lda v5
+	ldobjbyname 0x14, "aboutToBeDeleted"
+	sta v4
+	lda v4
+	callthis0withname 0x16, "aboutToBeDeleted", v5
+	tryldglobalbyname 0x18, "SubscriberManager"
+	sta v7
+	lda v7
+	ldobjbyname 0x19, "Get"
+	sta v6
+	lda v6
+	callthis0withname 0x1b, "Get", v7
+	sta v5
+	lda v5
+	ldobjbyname 0x1d, "delete"
+	sta v4
+	lda v2
+	sta v7
+	lda v7
+	ldobjbyname 0x1f, "id__"
+	sta v6
+	lda v6
+	callthis0withname 0x21, "id__", v7
+	sta v6
+	lda v4
+	callthis1withname 0x23, "delete", v5, v6
+	lda v2
+	sta v5
+	lda v5
+	ldobjbyname 0x25, "aboutToBeDeletedInternal"
+	sta v4
+	lda v4
+	callthis0withname 0x27, "aboutToBeDeletedInternal", v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x6 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@4>#adjacent(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda v2
+	sta v6
+	lda v6
+	ldobjbyname 0x0, "__adjacent"
+	sta v5
+	lda v5
+	ldobjbyname 0x2, "get"
+	sta v4
+	lda v4
+	callthis0withname 0x4, "get", v5
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x6 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@4>#adjacent^1(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v2
+	sta v7
+	lda v7
+	ldobjbyname 0x0, "__adjacent"
+	sta v6
+	lda v6
+	ldobjbyname 0x2, "set"
+	sta v5
+	lda v3
+	sta v7
+	lda v5
+	callthis1withname 0x4, "set", v6, v7
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x6 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@4>#afterBuild(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda v2
+	sta v6
+	lda v6
+	ldobjbyname 0x0, "__afterBuild"
+	sta v5
+	lda v5
+	ldobjbyname 0x2, "get"
+	sta v4
+	lda v4
+	callthis0withname 0x4, "get", v5
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x6 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@4>#afterBuild^1(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v2
+	sta v7
+	lda v7
+	ldobjbyname 0x0, "__afterBuild"
+	sta v6
+	lda v6
+	ldobjbyname 0x2, "set"
+	sta v5
+	lda v3
+	sta v7
+	lda v5
+	callthis1withname 0x4, "set", v6, v7
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x6 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@4>#afterMethod(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda v2
+	sta v6
+	lda v6
+	ldobjbyname 0x0, "__afterMethod"
+	sta v5
+	lda v5
+	ldobjbyname 0x2, "get"
+	sta v4
+	lda v4
+	callthis0withname 0x4, "get", v5
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x6 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@4>#afterMethod^1(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v2
+	sta v7
+	lda v7
+	ldobjbyname 0x0, "__afterMethod"
+	sta v6
+	lda v6
+	ldobjbyname 0x2, "set"
+	sta v5
+	lda v3
+	sta v7
+	lda v5
+	callthis1withname 0x4, "set", v6, v7
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x6 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@4>#first(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda v2
+	sta v6
+	lda v6
+	ldobjbyname 0x0, "__first"
+	sta v5
+	lda v5
+	ldobjbyname 0x2, "get"
+	sta v4
+	lda v4
+	callthis0withname 0x4, "get", v5
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x6 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@4>#first^1(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v2
+	sta v7
+	lda v7
+	ldobjbyname 0x0, "__first"
+	sta v6
+	lda v6
+	ldobjbyname 0x2, "set"
+	sta v5
+	lda v3
+	sta v7
+	lda v5
+	callthis1withname 0x4, "set", v6, v7
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@4>#helperMethod(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldai 0x1
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0xb }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@4>#initialRender(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda v2
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "observeComponentCreation2"
+	sta v4
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@4>@2*#:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0x3, "Column"
+	sta v7
+	lda v4
+	callthis2withname 0x4, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0x6, "Column"
+	sta v5
+	lda v5
+	ldobjbyname 0x7, "pop"
+	sta v4
+	lda v4
+	callthis0withname 0x9, "pop", v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x18 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@4>#purgeVariableDependenciesOnElmtId(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v2
+	sta v7
+	lda v7
+	ldobjbyname 0x0, "__first"
+	sta v6
+	lda v6
+	ldobjbyname 0x2, "purgeDependencyOnElmtId"
+	sta v5
+	lda v3
+	sta v7
+	lda v5
+	callthis1withname 0x4, "purgeDependencyOnElmtId", v6, v7
+	lda v2
+	sta v7
+	lda v7
+	ldobjbyname 0x6, "__adjacent"
+	sta v6
+	lda v6
+	ldobjbyname 0x8, "purgeDependencyOnElmtId"
+	sta v5
+	lda v3
+	sta v7
+	lda v5
+	callthis1withname 0xa, "purgeDependencyOnElmtId", v6, v7
+	lda v2
+	sta v7
+	lda v7
+	ldobjbyname 0xc, "__afterMethod"
+	sta v6
+	lda v6
+	ldobjbyname 0xe, "purgeDependencyOnElmtId"
+	sta v5
+	lda v3
+	sta v7
+	lda v5
+	callthis1withname 0x10, "purgeDependencyOnElmtId", v6, v7
+	lda v2
+	sta v7
+	lda v7
+	ldobjbyname 0x12, "__afterBuild"
+	sta v6
+	lda v6
+	ldobjbyname 0x14, "purgeDependencyOnElmtId"
+	sta v5
+	lda v3
+	sta v7
+	lda v5
+	callthis1withname 0x16, "purgeDependencyOnElmtId", v6, v7
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x4 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@4>#rerender(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda v2
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "updateDirtyElements"
+	sta v4
+	lda v4
+	callthis0withname 0x2, "updateDirtyElements", v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x7 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@4>#setInitiallyProvidedValue(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v3
+	sta v6
+	lda v6
+	ldobjbyname 0x0, "first"
+	sta v5
+	ldundefined
+	strictnoteq 0x2, v5
+	jeqz jump_label_0
+	lda v2
+	sta v5
+	lda v3
+	sta v6
+	lda v6
+	ldobjbyname 0x3, "first"
+	stobjbyname 0x5, "first", v5
+jump_label_0:
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@4>#updateStateVars(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x5 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "Column"
+	sta v7
+	lda v7
+	ldobjbyname 0x1, "create"
+	sta v6
+	lda v6
+	callthis0withname 0x3, "create", v7
+	ldundefined
+	returnundefined
+}
+
+L_ESExpectedPropertyCountAnnotation:
+	u32 ExpectedPropertyCount { 0x1 }
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x18 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@5=#ConsumeFirstProbe(any a0, any a1, any a2, any a3, any a4, any a5, any a6, any a7, any a8) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	mov v5, a5
+	mov v6, a6
+	mov v7, a7
+	mov v8, a8
+	lda v6
+	sta v10
+	ldundefined
+	stricteq 0x0, v10
+	jeqz jump_label_4
+	ldai 0x1
+	sta v10
+	lda v10
+	neg 0x1
+	sta v6
+jump_label_4:
+	lda v7
+	sta v10
+	ldundefined
+	stricteq 0x2, v10
+	jeqz jump_label_5
+	ldundefined
+	sta v7
+jump_label_5:
+	lda v3
+	sta v10
+	lda v5
+	sta v11
+	lda v6
+	sta v12
+	lda v8
+	sta v13
+	supercallthisrange 0x3, 0x4, v10
+	sta v10
+	lda v2
+	throw.ifsupernotcorrectcall 0x1
+	lda v10
+	sta v2
+	lda v7
+	typeof 0x5
+	sta v10
+	lda.str "function"
+	stricteq 0x7, v10
+	jeqz jump_label_6
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v10
+	lda v7
+	stobjbyname 0x8, "paramsGenerator_", v10
+jump_label_6:
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v10
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v12
+	lda v12
+	ldobjbyname 0xa, "initializeConsume"
+	sta v11
+	lda.str "firstField"
+	sta v13
+	lda.str "firstField"
+	sta v14
+	lda v11
+	callthis2withname 0xc, "initializeConsume", v12, v13, v14
+	stobjbyname 0xe, "__firstField", v10
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v11
+	lda v11
+	ldobjbyname 0x10, "setInitiallyProvidedValue"
+	sta v10
+	lda v4
+	sta v12
+	lda v10
+	callthis1withname 0x12, "setInitiallyProvidedValue", v11, v12
+	lda v2
+	throw.ifsupernotcorrectcall 0x0
+	sta v11
+	lda v11
+	ldobjbyname 0x14, "finalizeConstruction"
+	sta v10
+	lda v10
+	callthis0withname 0x16, "finalizeConstruction", v11
+	lda v2
+try_begin_label_0:
+	throw.ifsupernotcorrectcall 0x0
+try_end_label_0:
+	return
+handler_begin_label_0_0:
+	throw
+:
+
+.catchall try_begin_label_0, try_end_label_0, handler_begin_label_0_0, handler_end_label_0_0
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x17 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@5>#aboutToBeDeleted(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda v2
+	sta v6
+	lda v6
+	ldobjbyname 0x0, "__firstField"
+	sta v5
+	lda v5
+	ldobjbyname 0x2, "aboutToBeDeleted"
+	sta v4
+	lda v4
+	callthis0withname 0x4, "aboutToBeDeleted", v5
+	tryldglobalbyname 0x6, "SubscriberManager"
+	sta v7
+	lda v7
+	ldobjbyname 0x7, "Get"
+	sta v6
+	lda v6
+	callthis0withname 0x9, "Get", v7
+	sta v5
+	lda v5
+	ldobjbyname 0xb, "delete"
+	sta v4
+	lda v2
+	sta v7
+	lda v7
+	ldobjbyname 0xd, "id__"
+	sta v6
+	lda v6
+	callthis0withname 0xf, "id__", v7
+	sta v6
+	lda v4
+	callthis1withname 0x11, "delete", v5, v6
+	lda v2
+	sta v5
+	lda v5
+	ldobjbyname 0x13, "aboutToBeDeletedInternal"
+	sta v4
+	lda v4
+	callthis0withname 0x15, "aboutToBeDeletedInternal", v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x6 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@5>#firstField(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda v2
+	sta v6
+	lda v6
+	ldobjbyname 0x0, "__firstField"
+	sta v5
+	lda v5
+	ldobjbyname 0x2, "get"
+	sta v4
+	lda v4
+	callthis0withname 0x4, "get", v5
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x6 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@5>#firstField^1(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v2
+	sta v7
+	lda v7
+	ldobjbyname 0x0, "__firstField"
+	sta v6
+	lda v6
+	ldobjbyname 0x2, "set"
+	sta v5
+	lda v3
+	sta v7
+	lda v5
+	callthis1withname 0x4, "set", v6, v7
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0xb }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@5>#initialRender(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda v2
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "observeComponentCreation2"
+	sta v4
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@5>@2*#:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0x3, "Column"
+	sta v7
+	lda v4
+	callthis2withname 0x4, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0x6, "Column"
+	sta v5
+	lda v5
+	ldobjbyname 0x7, "pop"
+	sta v4
+	lda v4
+	callthis0withname 0x9, "pop", v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x6 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@5>#purgeVariableDependenciesOnElmtId(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v2
+	sta v7
+	lda v7
+	ldobjbyname 0x0, "__firstField"
+	sta v6
+	lda v6
+	ldobjbyname 0x2, "purgeDependencyOnElmtId"
+	sta v5
+	lda v3
+	sta v7
+	lda v5
+	callthis1withname 0x4, "purgeDependencyOnElmtId", v6, v7
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x4 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@5>#rerender(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	lda v2
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "updateDirtyElements"
+	sta v4
+	lda v4
+	callthis0withname 0x2, "updateDirtyElements", v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@5>#setInitiallyProvidedValue(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@5>#updateStateVars(any a0, any a1, any a2, any a3) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x5 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@5>@2*#(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "Column"
+	sta v7
+	lda v7
+	ldobjbyname 0x1, "create"
+	sta v6
+	lda v6
+	callthis0withname 0x3, "create", v7
+	ldundefined
+	returnundefined
+}
+
+L_ESExpectedPropertyCountAnnotation:
 	u32 ExpectedPropertyCount { 0x1 }
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x17 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@3=#AttrChainProbe(any a0, any a1, any a2, any a3, any a4, any a5, any a6, any a7, any a8) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@6=#AttrChainProbe(any a0, any a1, any a2, any a3, any a4, any a5, any a6, any a7, any a8) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1056,7 +2161,7 @@ handler_begin_label_0_0:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x17 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@3>#aboutToBeDeleted(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@6>#aboutToBeDeleted(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1105,7 +2210,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x16 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@3>#initialRender(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@6>#initialRender(any a0, any a1, any a2) <static> {
 	newlexenvwithname 0x1, { 3 [ i32:1, string:"this", i32:0, ]}
 	mov v0, a0
 	mov v1, a1
@@ -1116,7 +2221,7 @@ L_ESSlotNumberAnnotation:
 	lda v5
 	ldobjbyname 0x0, "observeComponentCreation2"
 	sta v4
-	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@3>@2*#:(any,any,any,any,any), 0x2
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@6>@2*#:(any,any,any,any,any), 0x2
 	sta v6
 	tryldglobalbyname 0x3, "Column"
 	sta v7
@@ -1127,7 +2232,7 @@ L_ESSlotNumberAnnotation:
 	lda v5
 	ldobjbyname 0x6, "observeComponentCreation2"
 	sta v4
-	definefunc 0x8, &entry.src.main.ets.pages.Index&.#~@3>@2*#^1:(any,any,any,any,any), 0x2
+	definefunc 0x8, &entry.src.main.ets.pages.Index&.#~@6>@2*#^1:(any,any,any,any,any), 0x2
 	sta v6
 	tryldglobalbyname 0x9, "Text"
 	sta v7
@@ -1154,7 +2259,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@3>#purgeVariableDependenciesOnElmtId(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@6>#purgeVariableDependenciesOnElmtId(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1178,7 +2283,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x4 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@3>#rerender(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@6>#rerender(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1196,7 +2301,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x7 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@3>#setInitiallyProvidedValue(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@6>#setInitiallyProvidedValue(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1224,7 +2329,7 @@ jump_label_0:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@3>#updateRecycleElmtId(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@6>#updateRecycleElmtId(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1251,7 +2356,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@3>#updateStateVars(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@6>#updateStateVars(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1263,7 +2368,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@3>#wide(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@6>#wide(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1283,7 +2388,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@3>#wide^1(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@6>#wide^1(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1307,7 +2412,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@3>@2*#(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@6>@2*#(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1327,7 +2432,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x1b }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@3>@2*#^1(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@6>@2*#^1(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1393,7 +2498,7 @@ jump_label_2:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4<#getEntryName(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7<#getEntryName(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1406,7 +2511,7 @@ L_ESExpectedPropertyCountAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x73 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4=#CommentLeading(any a0, any a1, any a2, any a3, any a4, any a5, any a6, any a7, any a8) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7=#CommentLeading(any a0, any a1, any a2, any a3, any a4, any a5, any a6, any a7, any a8) <static> {
 	newlexenvwithname 0x1, { 3 [ i32:1, string:"this", i32:0, ]}
 	mov v0, a0
 	mov v1, a1
@@ -1523,7 +2628,7 @@ jump_label_6:
 	sta v11
 	createobjectwithbuffer 0x1f, { 4 [ string:"builder", null_value:0, string:"autoCancel", u1:1, ]}
 	sta v13
-	definefunc 0x20, &entry.src.main.ets.pages.Index&.#~@4=@4*#builder:(any,any,any), 0x0
+	definefunc 0x20, &entry.src.main.ets.pages.Index&.#~@7=@7*#builder:(any,any,any), 0x0
 	definepropertybyname 0x21, "builder", v13
 	lda v13
 	sta v12
@@ -1661,7 +2766,7 @@ jump_label_6:
 	sta v11
 	createobjectwithbuffer 0x55, { 4 [ string:"builder", null_value:0, string:"autoCancel", u1:1, ]}
 	sta v13
-	definefunc 0x56, &entry.src.main.ets.pages.Index&.#~@4=@4*#builder^1:(any,any,any), 0x0
+	definefunc 0x56, &entry.src.main.ets.pages.Index&.#~@7=@7*#builder^1:(any,any,any), 0x0
 	definepropertybyname 0x57, "builder", v13
 	lda v13
 	sta v12
@@ -1677,7 +2782,7 @@ jump_label_6:
 	sta v11
 	createobjectwithbuffer 0x5e, { 4 [ string:"builder", null_value:0, string:"autoCancel", u1:1, ]}
 	sta v13
-	definefunc 0x5f, &entry.src.main.ets.pages.Index&.#~@4=@4*#builder^2:(any,any,any), 0x0
+	definefunc 0x5f, &entry.src.main.ets.pages.Index&.#~@7=@7*#builder^2:(any,any,any), 0x0
 	definepropertybyname 0x60, "builder", v13
 	lda v13
 	sta v12
@@ -1733,7 +2838,7 @@ handler_begin_label_0_0:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x14 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4=@4*#builder(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7=@7*#builder(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1754,9 +2859,9 @@ L_ESSlotNumberAnnotation:
 	lda v11
 	neg 0x1
 	sta v10
-	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@4=@4*@5*#:(any,any,any), 0x0
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@7=@7*@8*#:(any,any,any), 0x0
 	sta v11
-	createobjectwithbuffer 0x3, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:76, string:"col", i32:14, ]}
+	createobjectwithbuffer 0x3, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:126, string:"col", i32:14, ]}
 	sta v13
 	lda v13
 	sta v12
@@ -1784,7 +2889,7 @@ L_ESSlotNumberAnnotation:
 	sta v8
 	lda v6
 	callthis1withname 0xf, "create", v7, v8
-	definefunc 0x11, &entry.src.main.ets.pages.Index&.#~@4=@4*@5*#paramsLambda:(any,any,any), 0x0
+	definefunc 0x11, &entry.src.main.ets.pages.Index&.#~@7=@7*@8*#paramsLambda:(any,any,any), 0x0
 	sta v4
 	lda v3
 	sta v6
@@ -1797,7 +2902,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x14 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4=@4*#builder^1(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7=@7*#builder^1(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1818,9 +2923,9 @@ L_ESSlotNumberAnnotation:
 	lda v11
 	neg 0x1
 	sta v10
-	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@4=@4*@5^1*#:(any,any,any), 0x0
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@7=@7*@8^1*#:(any,any,any), 0x0
 	sta v11
-	createobjectwithbuffer 0x3, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:113, string:"col", i32:14, ]}
+	createobjectwithbuffer 0x3, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:163, string:"col", i32:14, ]}
 	sta v13
 	lda v13
 	sta v12
@@ -1848,7 +2953,7 @@ L_ESSlotNumberAnnotation:
 	sta v8
 	lda v6
 	callthis1withname 0xf, "create", v7, v8
-	definefunc 0x11, &entry.src.main.ets.pages.Index&.#~@4=@4*@5^1*#paramsLambda:(any,any,any), 0x0
+	definefunc 0x11, &entry.src.main.ets.pages.Index&.#~@7=@7*@8^1*#paramsLambda:(any,any,any), 0x0
 	sta v4
 	lda v3
 	sta v6
@@ -1861,7 +2966,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x14 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4=@4*#builder^2(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7=@7*#builder^2(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1882,9 +2987,9 @@ L_ESSlotNumberAnnotation:
 	lda v11
 	neg 0x1
 	sta v10
-	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@4=@4*@5^2*#:(any,any,any), 0x0
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@7=@7*@8^2*#:(any,any,any), 0x0
 	sta v11
-	createobjectwithbuffer 0x3, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:119, string:"col", i32:14, ]}
+	createobjectwithbuffer 0x3, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:169, string:"col", i32:14, ]}
 	sta v13
 	lda v13
 	sta v12
@@ -1912,7 +3017,7 @@ L_ESSlotNumberAnnotation:
 	sta v8
 	lda v6
 	callthis1withname 0xf, "create", v7, v8
-	definefunc 0x11, &entry.src.main.ets.pages.Index&.#~@4=@4*@5^2*#paramsLambda:(any,any,any), 0x0
+	definefunc 0x11, &entry.src.main.ets.pages.Index&.#~@7=@7*@8^2*#paramsLambda:(any,any,any), 0x0
 	sta v4
 	lda v3
 	sta v6
@@ -1925,7 +3030,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4=@4*@5*#(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7=@7*@8*#(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1936,7 +3041,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x1 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4=@4*@5*#paramsLambda(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7=@7*@8*#paramsLambda(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1949,7 +3054,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4=@4*@5^1*#(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7=@7*@8^1*#(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1960,7 +3065,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x1 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4=@4*@5^1*#paramsLambda(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7=@7*@8^1*#paramsLambda(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1973,7 +3078,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4=@4*@5^2*#(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7=@7*@8^2*#(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1984,7 +3089,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x1 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4=@4*@5^2*#paramsLambda(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7=@7*@8^2*#paramsLambda(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1997,7 +3102,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x4d }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#aboutToBeDeleted(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#aboutToBeDeleted(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2136,7 +3241,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#cond(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#cond(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2156,7 +3261,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#cond^1(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#cond^1(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2180,7 +3285,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#elseCond(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#elseCond(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2200,7 +3305,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#elseCond^1(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#elseCond^1(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2224,7 +3329,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#gapFirst(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#gapFirst(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2244,7 +3349,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#gapFirst^1(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#gapFirst^1(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2268,7 +3373,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#helperGap(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#helperGap(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2279,7 +3384,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#identFirst(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#identFirst(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2299,7 +3404,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#identFirst^1(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#identFirst^1(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2321,9 +3426,9 @@ L_ESSlotNumberAnnotation:
 }
 
 L_ESSlotNumberAnnotation:
-	u32 SlotNumber { 0xd9 }
+	u32 SlotNumber { 0x112 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#initialRender(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#initialRender(any a0, any a1, any a2) <static> {
 	newlexenvwithname 0x1, { 3 [ i32:1, string:"this", i32:0, ]}
 	mov v0, a0
 	mov v1, a1
@@ -2332,332 +3437,412 @@ L_ESSlotNumberAnnotation:
 	ldlexvar 0x0, 0x0
 	sta v5
 	lda v5
-	ldobjbyname 0x0, "observeComponentCreation2"
+	ldobjbyname 0x62, "observeComponentCreation2"
 	sta v4
-	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@4>@2*#:(any,any,any,any,any), 0x2
+	definefunc 0x64, &entry.src.main.ets.pages.Index&.#~@7>@2*#:(any,any,any,any,any), 0x2
 	sta v6
-	tryldglobalbyname 0x3, "Column"
+	tryldglobalbyname 0x65, "Column"
 	sta v7
 	lda v4
-	callthis2withname 0x4, "observeComponentCreation2", v5, v6, v7
+	callthis2withname 0x0, "observeComponentCreation2", v5, v6, v7
 	ldlexvar 0x0, 0x0
 	sta v5
 	lda v5
-	ldobjbyname 0x6, "observeComponentCreation2"
+	ldobjbyname 0x66, "observeComponentCreation2"
 	sta v4
-	definefunc 0x8, &entry.src.main.ets.pages.Index&.#~@4>@2*#^1:(any,any,any,any,any), 0x2
+	definefunc 0x68, &entry.src.main.ets.pages.Index&.#~@7>@2*#^1:(any,any,any,any,any), 0x2
 	sta v6
-	tryldglobalbyname 0x9, "If"
+	tryldglobalbyname 0x69, "If"
 	sta v7
 	lda v4
-	callthis2withname 0xa, "observeComponentCreation2", v5, v6, v7
-	tryldglobalbyname 0xc, "If"
+	callthis2withname 0x2, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0x6a, "If"
 	sta v5
 	lda v5
-	ldobjbyname 0xd, "pop"
+	ldobjbyname 0x6b, "pop"
 	sta v4
 	lda v4
-	callthis0withname 0xf, "pop", v5
+	callthis0withname 0x4, "pop", v5
 	ldlexvar 0x0, 0x0
 	sta v5
 	lda v5
-	ldobjbyname 0x11, "observeComponentCreation2"
+	ldobjbyname 0x6d, "observeComponentCreation2"
 	sta v4
-	definefunc 0x13, &entry.src.main.ets.pages.Index&.#~@4>@2*#^2:(any,any,any,any,any), 0x2
+	definefunc 0x6f, &entry.src.main.ets.pages.Index&.#~@7>@2*#^2:(any,any,any,any,any), 0x2
 	sta v6
-	tryldglobalbyname 0x14, "If"
+	tryldglobalbyname 0x70, "If"
 	sta v7
 	lda v4
-	callthis2withname 0x15, "observeComponentCreation2", v5, v6, v7
-	tryldglobalbyname 0x17, "If"
+	callthis2withname 0x6, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0x71, "If"
 	sta v5
 	lda v5
-	ldobjbyname 0x18, "pop"
+	ldobjbyname 0x72, "pop"
 	sta v4
 	lda v4
-	callthis0withname 0x1a, "pop", v5
-	ldlexvar 0x0, 0x0
-	sta v5
-	lda v5
-	ldobjbyname 0x1c, "observeComponentCreation2"
-	sta v4
-	definefunc 0x1e, &entry.src.main.ets.pages.Index&.#~@4>@2*#^3:(any,any,any,any,any), 0x2
-	sta v6
-	tryldglobalbyname 0x1f, "ForEach"
-	sta v7
-	lda v4
-	callthis2withname 0x20, "observeComponentCreation2", v5, v6, v7
-	tryldglobalbyname 0x22, "ForEach"
-	sta v5
-	lda v5
-	ldobjbyname 0x23, "pop"
-	sta v4
-	lda v4
-	callthis0withname 0x25, "pop", v5
-	ldlexvar 0x0, 0x0
-	sta v5
-	lda v5
-	ldobjbyname 0x27, "observeComponentCreation2"
-	sta v4
-	definefunc 0x29, &entry.src.main.ets.pages.Index&.#~@4>@2*#^4:(any,any,any,any,any), 0x2
-	sta v6
-	tryldglobalbyname 0x2a, "If"
-	sta v7
-	lda v4
-	callthis2withname 0x2b, "observeComponentCreation2", v5, v6, v7
-	tryldglobalbyname 0x2d, "If"
-	sta v5
-	lda v5
-	ldobjbyname 0x2e, "pop"
-	sta v4
-	lda v4
-	callthis0withname 0x30, "pop", v5
-	ldlexvar 0x0, 0x0
-	sta v5
-	lda v5
-	ldobjbyname 0x32, "observeComponentCreation2"
-	sta v4
-	definefunc 0x34, &entry.src.main.ets.pages.Index&.#~@4>@2*#^5:(any,any,any,any,any), 0x2
-	sta v6
-	tryldglobalbyname 0x35, "Text"
-	sta v7
-	lda v4
-	callthis2withname 0x36, "observeComponentCreation2", v5, v6, v7
-	tryldglobalbyname 0x38, "Text"
-	sta v5
-	lda v5
-	ldobjbyname 0x39, "pop"
-	sta v4
-	lda v4
-	callthis0withname 0x3b, "pop", v5
-	ldlexvar 0x0, 0x0
-	sta v5
-	lda v5
-	ldobjbyname 0x3d, "observeComponentCreation2"
-	sta v4
-	definefunc 0x3f, &entry.src.main.ets.pages.Index&.#~@4>@2*#^6:(any,any,any,any,any), 0x2
-	sta v6
-	tryldglobalbyname 0x40, "Text"
-	sta v7
-	lda v4
-	callthis2withname 0x41, "observeComponentCreation2", v5, v6, v7
-	tryldglobalbyname 0x43, "Text"
-	sta v5
-	lda v5
-	ldobjbyname 0x44, "pop"
-	sta v4
-	lda v4
-	callthis0withname 0x46, "pop", v5
-	ldlexvar 0x0, 0x0
-	sta v5
-	lda v5
-	ldobjbyname 0x48, "observeComponentCreation2"
-	sta v4
-	definefunc 0x4a, &entry.src.main.ets.pages.Index&.#~@4>@2*#^7:(any,any,any,any,any), 0x2
-	sta v6
-	tryldglobalbyname 0x4b, "Text"
-	sta v7
-	lda v4
-	callthis2withname 0x4c, "observeComponentCreation2", v5, v6, v7
-	tryldglobalbyname 0x4e, "Text"
-	sta v5
-	lda v5
-	ldobjbyname 0x4f, "pop"
-	sta v4
-	lda v4
-	callthis0withname 0x51, "pop", v5
-	ldlexvar 0x0, 0x0
-	sta v5
-	lda v5
-	ldobjbyname 0x53, "observeComponentCreation2"
-	sta v4
-	definefunc 0x55, &entry.src.main.ets.pages.Index&.#~@4>@2*#^8:(any,any,any,any,any), 0x2
-	sta v6
-	tryldglobalbyname 0x56, "Text"
-	sta v7
-	lda v4
-	callthis2withname 0x57, "observeComponentCreation2", v5, v6, v7
-	tryldglobalbyname 0x59, "Text"
-	sta v5
-	lda v5
-	ldobjbyname 0x5a, "pop"
-	sta v4
-	lda v4
-	callthis0withname 0x5c, "pop", v5
-	ldlexvar 0x0, 0x0
-	sta v5
-	lda v5
-	ldobjbyname 0x5e, "observeComponentCreation2"
-	sta v4
-	definefunc 0x60, &entry.src.main.ets.pages.Index&.#~@4>@2*#^9:(any,any,any,any,any), 0x2
-	sta v6
-	tryldglobalbyname 0x61, "If"
-	sta v7
-	lda v4
-	callthis2withname 0x62, "observeComponentCreation2", v5, v6, v7
-	tryldglobalbyname 0x64, "If"
-	sta v5
-	lda v5
-	ldobjbyname 0x65, "pop"
-	sta v4
-	lda v4
-	callthis0withname 0x67, "pop", v5
-	ldlexvar 0x0, 0x0
-	sta v5
-	lda v5
-	ldobjbyname 0x69, "observeComponentCreation2"
-	sta v4
-	definefunc 0x6b, &entry.src.main.ets.pages.Index&.#~@4>@2*#^a:(any,any,any,any,any), 0x2
-	sta v6
-	tryldglobalbyname 0x6c, "If"
-	sta v7
-	lda v4
-	callthis2withname 0x6d, "observeComponentCreation2", v5, v6, v7
-	tryldglobalbyname 0x6f, "If"
-	sta v5
-	lda v5
-	ldobjbyname 0x70, "pop"
-	sta v4
-	lda v4
-	callthis0withname 0x72, "pop", v5
+	callthis0withname 0x8, "pop", v5
 	ldlexvar 0x0, 0x0
 	sta v5
 	lda v5
 	ldobjbyname 0x74, "observeComponentCreation2"
 	sta v4
-	definefunc 0x76, &entry.src.main.ets.pages.Index&.#~@4>@2*#^b:(any,any,any,any,any), 0x2
+	definefunc 0x76, &entry.src.main.ets.pages.Index&.#~@7>@2*#^3:(any,any,any,any,any), 0x2
 	sta v6
-	tryldglobalbyname 0x77, "Text"
+	tryldglobalbyname 0x77, "ForEach"
 	sta v7
 	lda v4
-	callthis2withname 0x78, "observeComponentCreation2", v5, v6, v7
-	tryldglobalbyname 0x7a, "Text"
+	callthis2withname 0xa, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0x78, "ForEach"
 	sta v5
 	lda v5
-	ldobjbyname 0x7b, "pop"
+	ldobjbyname 0x79, "pop"
 	sta v4
 	lda v4
-	callthis0withname 0x7d, "pop", v5
+	callthis0withname 0xc, "pop", v5
 	ldlexvar 0x0, 0x0
 	sta v5
 	lda v5
-	ldobjbyname 0x7f, "observeComponentCreation2"
+	ldobjbyname 0x7b, "observeComponentCreation2"
 	sta v4
-	definefunc 0x81, &entry.src.main.ets.pages.Index&.#~@4>@2*#^c:(any,any,any,any,any), 0x2
+	definefunc 0x7d, &entry.src.main.ets.pages.Index&.#~@7>@2*#^4:(any,any,any,any,any), 0x2
 	sta v6
-	tryldglobalbyname 0x82, "Text"
+	tryldglobalbyname 0x7e, "If"
 	sta v7
 	lda v4
-	callthis2withname 0x83, "observeComponentCreation2", v5, v6, v7
+	callthis2withname 0xe, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0x7f, "If"
+	sta v5
+	lda v5
+	ldobjbyname 0x80, "pop"
+	sta v4
+	lda v4
+	callthis0withname 0x10, "pop", v5
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0x82, "observeComponentCreation2"
+	sta v4
+	definefunc 0x84, &entry.src.main.ets.pages.Index&.#~@7>@2*#^5:(any,any,any,any,any), 0x2
+	sta v6
 	tryldglobalbyname 0x85, "Text"
+	sta v7
+	lda v4
+	callthis2withname 0x12, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0x86, "Text"
 	sta v5
 	lda v5
-	ldobjbyname 0x86, "pop"
+	ldobjbyname 0x87, "pop"
 	sta v4
 	lda v4
-	callthis0withname 0x88, "pop", v5
+	callthis0withname 0x14, "pop", v5
 	ldlexvar 0x0, 0x0
 	sta v5
 	lda v5
-	ldobjbyname 0x8a, "observeComponentCreation2"
+	ldobjbyname 0x89, "observeComponentCreation2"
 	sta v4
-	definefunc 0x8c, &entry.src.main.ets.pages.Index&.#~@4>@2*#^d:(any,any,any,any,any), 0x2
+	definefunc 0x8b, &entry.src.main.ets.pages.Index&.#~@7>@2*#^6:(any,any,any,any,any), 0x2
 	sta v6
+	tryldglobalbyname 0x8c, "Text"
+	sta v7
+	lda v4
+	callthis2withname 0x16, "observeComponentCreation2", v5, v6, v7
 	tryldglobalbyname 0x8d, "Text"
-	sta v7
-	lda v4
-	callthis2withname 0x8e, "observeComponentCreation2", v5, v6, v7
-	tryldglobalbyname 0x90, "Text"
 	sta v5
 	lda v5
-	ldobjbyname 0x91, "pop"
+	ldobjbyname 0x8e, "pop"
 	sta v4
 	lda v4
-	callthis0withname 0x93, "pop", v5
+	callthis0withname 0x18, "pop", v5
 	ldlexvar 0x0, 0x0
 	sta v5
 	lda v5
-	ldobjbyname 0x95, "observeComponentCreation2"
+	ldobjbyname 0x90, "observeComponentCreation2"
 	sta v4
-	definefunc 0x97, &entry.src.main.ets.pages.Index&.#~@4>@2*#^e:(any,any,any,any,any), 0x2
+	definefunc 0x92, &entry.src.main.ets.pages.Index&.#~@7>@2*#^7:(any,any,any,any,any), 0x2
 	sta v6
-	tryldglobalbyname 0x98, "Text"
+	tryldglobalbyname 0x93, "Text"
 	sta v7
 	lda v4
-	callthis2withname 0x99, "observeComponentCreation2", v5, v6, v7
+	callthis2withname 0x1a, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0x94, "Text"
+	sta v5
+	lda v5
+	ldobjbyname 0x95, "pop"
+	sta v4
+	lda v4
+	callthis0withname 0x1c, "pop", v5
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0x97, "observeComponentCreation2"
+	sta v4
+	definefunc 0x99, &entry.src.main.ets.pages.Index&.#~@7>@2*#^8:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0x9a, "Text"
+	sta v7
+	lda v4
+	callthis2withname 0x1e, "observeComponentCreation2", v5, v6, v7
 	tryldglobalbyname 0x9b, "Text"
 	sta v5
 	lda v5
 	ldobjbyname 0x9c, "pop"
 	sta v4
 	lda v4
-	callthis0withname 0x9e, "pop", v5
+	callthis0withname 0x20, "pop", v5
 	ldlexvar 0x0, 0x0
 	sta v5
 	lda v5
-	ldobjbyname 0xa0, "observeComponentCreation2"
+	ldobjbyname 0x9e, "observeComponentCreation2"
 	sta v4
-	definefunc 0xa2, &entry.src.main.ets.pages.Index&.#~@4>@2*#^f:(any,any,any,any,any), 0x2
+	definefunc 0xa0, &entry.src.main.ets.pages.Index&.#~@7>@2*#^9:(any,any,any,any,any), 0x2
 	sta v6
-	tryldglobalbyname 0xa3, "Text"
+	tryldglobalbyname 0xa1, "If"
 	sta v7
 	lda v4
-	callthis2withname 0xa4, "observeComponentCreation2", v5, v6, v7
-	tryldglobalbyname 0xa6, "Text"
+	callthis2withname 0x22, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0xa2, "If"
 	sta v5
 	lda v5
-	ldobjbyname 0xa7, "pop"
+	ldobjbyname 0xa3, "pop"
 	sta v4
 	lda v4
-	callthis0withname 0xa9, "pop", v5
+	callthis0withname 0x24, "pop", v5
 	ldlexvar 0x0, 0x0
 	sta v5
 	lda v5
-	ldobjbyname 0xab, "observeComponentCreation2"
+	ldobjbyname 0xa5, "observeComponentCreation2"
 	sta v4
-	definefunc 0xad, &entry.src.main.ets.pages.Index&.#~@4>@2*#^10:(any,any,any,any,any), 0x2
+	definefunc 0xa7, &entry.src.main.ets.pages.Index&.#~@7>@2*#^a:(any,any,any,any,any), 0x2
 	sta v6
-	tryldglobalbyname 0xae, "__Recycle__"
+	tryldglobalbyname 0xa8, "If"
 	sta v7
 	lda v4
-	callthis2withname 0xaf, "observeComponentCreation2", v5, v6, v7
+	callthis2withname 0x26, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0xa9, "If"
+	sta v5
+	lda v5
+	ldobjbyname 0xaa, "pop"
+	sta v4
+	lda v4
+	callthis0withname 0x28, "pop", v5
 	ldlexvar 0x0, 0x0
 	sta v5
 	lda v5
-	ldobjbyname 0xb1, "observeRecycleComponentCreation"
+	ldobjbyname 0xac, "observeComponentCreation2"
+	sta v4
+	definefunc 0xae, &entry.src.main.ets.pages.Index&.#~@7>@2*#^b:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0xaf, "Text"
+	sta v7
+	lda v4
+	callthis2withname 0x2a, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0xb0, "Text"
+	sta v5
+	lda v5
+	ldobjbyname 0xb1, "pop"
+	sta v4
+	lda v4
+	callthis0withname 0x2c, "pop", v5
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0xb3, "observeComponentCreation2"
+	sta v4
+	definefunc 0xb5, &entry.src.main.ets.pages.Index&.#~@7>@2*#^c:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0xb6, "Text"
+	sta v7
+	lda v4
+	callthis2withname 0x2e, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0xb7, "Text"
+	sta v5
+	lda v5
+	ldobjbyname 0xb8, "pop"
+	sta v4
+	lda v4
+	callthis0withname 0x30, "pop", v5
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0xba, "observeComponentCreation2"
+	sta v4
+	definefunc 0xbc, &entry.src.main.ets.pages.Index&.#~@7>@2*#^d:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0xbd, "Text"
+	sta v7
+	lda v4
+	callthis2withname 0x32, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0xbe, "Text"
+	sta v5
+	lda v5
+	ldobjbyname 0xbf, "pop"
+	sta v4
+	lda v4
+	callthis0withname 0x34, "pop", v5
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0xc1, "observeComponentCreation2"
+	sta v4
+	definefunc 0xc3, &entry.src.main.ets.pages.Index&.#~@7>@2*#^e:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0xc4, "Text"
+	sta v7
+	lda v4
+	callthis2withname 0x36, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0xc5, "Text"
+	sta v5
+	lda v5
+	ldobjbyname 0xc6, "pop"
+	sta v4
+	lda v4
+	callthis0withname 0x38, "pop", v5
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0xc8, "observeComponentCreation2"
+	sta v4
+	definefunc 0xca, &entry.src.main.ets.pages.Index&.#~@7>@2*#^f:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0xcb, "Text"
+	sta v7
+	lda v4
+	callthis2withname 0x3a, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0xcc, "Text"
+	sta v5
+	lda v5
+	ldobjbyname 0xcd, "pop"
+	sta v4
+	lda v4
+	callthis0withname 0x3c, "pop", v5
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0xcf, "observeComponentCreation2"
+	sta v4
+	definefunc 0xd1, &entry.src.main.ets.pages.Index&.#~@7>@2*#^10:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0xd2, "Text"
+	sta v7
+	lda v4
+	callthis2withname 0x3e, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0xd3, "Text"
+	sta v5
+	lda v5
+	ldobjbyname 0xd4, "pop"
+	sta v4
+	lda v4
+	callthis0withname 0x40, "pop", v5
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0xd6, "observeComponentCreation2"
+	sta v4
+	definefunc 0xd8, &entry.src.main.ets.pages.Index&.#~@7>@2*#^11:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0xd9, "Text"
+	sta v7
+	lda v4
+	callthis2withname 0x42, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0xda, "Text"
+	sta v5
+	lda v5
+	ldobjbyname 0xdb, "pop"
+	sta v4
+	lda v4
+	callthis0withname 0x44, "pop", v5
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0xdd, "observeComponentCreation2"
+	sta v4
+	definefunc 0xdf, &entry.src.main.ets.pages.Index&.#~@7>@2*#^12:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0xe0, "__Recycle__"
+	sta v7
+	lda v4
+	callthis2withname 0x46, "observeComponentCreation2", v5, v6, v7
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0xe1, "observeRecycleComponentCreation"
 	sta v4
 	lda.str "AttrChainProbe"
 	sta v6
-	definefunc 0xb3, &entry.src.main.ets.pages.Index&.#~@4>@2*#^11:(any,any,any,any,any,any), 0x2
+	definefunc 0xe3, &entry.src.main.ets.pages.Index&.#~@7>@2*#^13:(any,any,any,any,any,any), 0x2
 	sta v7
 	lda v4
-	callthis2withname 0xb4, "observeRecycleComponentCreation", v5, v6, v7
-	tryldglobalbyname 0xb6, "__Recycle__"
+	callthis2withname 0x48, "observeRecycleComponentCreation", v5, v6, v7
+	tryldglobalbyname 0xe4, "__Recycle__"
 	sta v5
 	lda v5
-	ldobjbyname 0xb7, "pop"
+	ldobjbyname 0xe5, "pop"
 	sta v4
 	lda v4
-	callthis0withname 0xb9, "pop", v5
+	callthis0withname 0x4a, "pop", v5
 	ldlexvar 0x0, 0x0
 	sta v5
 	lda v5
-	ldobjbyname 0xbb, "observeComponentCreation2"
+	ldobjbyname 0xe7, "observeComponentCreation2"
 	sta v4
-	definefunc 0xbd, &entry.src.main.ets.pages.Index&.#~@4>@2*#^12:(any,any,any,any,any), 0x2
+	definefunc 0xe9, &entry.src.main.ets.pages.Index&.#~@7>@2*#^14:(any,any,any,any,any), 0x2
 	sta v6
-	tryldglobalbyname 0xbe, "List"
-	sta v7
-	lda v4
-	callthis2withname 0xbf, "observeComponentCreation2", v5, v6, v7
-	definefunc 0xc1, &entry.src.main.ets.pages.Index&.#~@4>@2*#__lazyForEachItemGenFunction:(any,any,any,any), 0x1
-	sta v4
-	definefunc 0xc2, &entry.src.main.ets.pages.Index&.#~@4>@2*#__lazyForEachItemIdFunc:(any,any,any,any), 0x1
-	sta v5
-	tryldglobalbyname 0xc3, "LazyForEach"
+	createobjectwithbuffer 0xea, { 2 [ string:"name", string:"ConsumeCarryProbe", ]}
 	sta v7
 	lda v7
-	ldobjbyname 0xc4, "create"
+	sta v7
+	lda v4
+	callthis2withname 0x4c, "observeComponentCreation2", v5, v6, v7
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0xeb, "observeComponentCreation2"
+	sta v4
+	definefunc 0xed, &entry.src.main.ets.pages.Index&.#~@7>@2*#^15:(any,any,any,any,any), 0x2
+	sta v6
+	createobjectwithbuffer 0xee, { 2 [ string:"name", string:"ConsumeFirstProbe", ]}
+	sta v7
+	lda v7
+	sta v7
+	lda v4
+	callthis2withname 0x4e, "observeComponentCreation2", v5, v6, v7
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0xef, "observeComponentCreation2"
+	sta v4
+	definefunc 0xf1, &entry.src.main.ets.pages.Index&.#~@7>@2*#^16:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0xf2, "If"
+	sta v7
+	lda v4
+	callthis2withname 0x50, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0xf3, "If"
+	sta v5
+	lda v5
+	ldobjbyname 0xf4, "pop"
+	sta v4
+	lda v4
+	callthis0withname 0x52, "pop", v5
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0xf6, "observeComponentCreation2"
+	sta v4
+	definefunc 0xf8, &entry.src.main.ets.pages.Index&.#~@7>@2*#^17:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0xf9, "List"
+	sta v7
+	lda v4
+	callthis2withname 0x54, "observeComponentCreation2", v5, v6, v7
+	definefunc 0xfa, &entry.src.main.ets.pages.Index&.#~@7>@2*#__lazyForEachItemGenFunction:(any,any,any,any), 0x1
+	sta v4
+	definefunc 0xfb, &entry.src.main.ets.pages.Index&.#~@7>@2*#__lazyForEachItemIdFunc:(any,any,any,any), 0x1
+	sta v5
+	tryldglobalbyname 0xfc, "LazyForEach"
+	sta v7
+	lda v7
+	ldobjbyname 0xfd, "create"
 	sta v6
 	lda.str "1"
 	sta v8
@@ -2666,35 +3851,53 @@ L_ESSlotNumberAnnotation:
 	ldlexvar 0x0, 0x0
 	sta v10
 	lda v10
-	ldobjbyname 0xc6, "source"
+	ldobjbyname 0x100, "source"
 	sta v10
 	lda v4
 	sta v11
 	lda v5
 	sta v12
 	lda v6
-	callthisrangewithname 0xc8, 0x5, "create", v7
-	tryldglobalbyname 0xca, "LazyForEach"
+	callthisrangewithname 0x56, 0x5, "create", v7
+	tryldglobalbyname 0x102, "LazyForEach"
 	sta v7
 	lda v7
-	ldobjbyname 0xcb, "pop"
+	ldobjbyname 0x103, "pop"
 	sta v6
 	lda v6
-	callthis0withname 0xcd, "pop", v7
-	tryldglobalbyname 0xcf, "List"
+	callthis0withname 0x58, "pop", v7
+	tryldglobalbyname 0x105, "List"
 	sta v5
 	lda v5
-	ldobjbyname 0xd0, "pop"
+	ldobjbyname 0x106, "pop"
 	sta v4
 	lda v4
-	callthis0withname 0xd2, "pop", v5
-	tryldglobalbyname 0xd4, "Column"
+	callthis0withname 0x5a, "pop", v5
+	ldlexvar 0x0, 0x0
 	sta v5
 	lda v5
-	ldobjbyname 0xd5, "pop"
+	ldobjbyname 0x108, "observeComponentCreation2"
+	sta v4
+	definefunc 0x10a, &entry.src.main.ets.pages.Index&.#~@7>@2*#^18:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0x10b, "If"
+	sta v7
+	lda v4
+	callthis2withname 0x5c, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0x10c, "If"
+	sta v5
+	lda v5
+	ldobjbyname 0x10d, "pop"
 	sta v4
 	lda v4
-	callthis0withname 0xd7, "pop", v5
+	callthis0withname 0x5e, "pop", v5
+	tryldglobalbyname 0x10f, "Column"
+	sta v5
+	lda v5
+	ldobjbyname 0x110, "pop"
+	sta v4
+	lda v4
+	callthis0withname 0x60, "pop", v5
 	ldundefined
 	returnundefined
 }
@@ -2702,7 +3905,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#items(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#items(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2722,7 +3925,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#items^1(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#items^1(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2746,7 +3949,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#multiFirst(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#multiFirst(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2766,7 +3969,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#multiFirst^1(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#multiFirst^1(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2790,7 +3993,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#numFirst(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#numFirst(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2810,7 +4013,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#numFirst^1(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#numFirst^1(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2834,7 +4037,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#objFirst(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#objFirst(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2854,7 +4057,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#objFirst^1(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#objFirst^1(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2878,7 +4081,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#objIdentFirst(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#objIdentFirst(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2898,7 +4101,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#objIdentFirst^1(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#objIdentFirst^1(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -2922,7 +4125,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x3c }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#purgeVariableDependenciesOnElmtId(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#purgeVariableDependenciesOnElmtId(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -3054,7 +4257,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x4 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#rerender(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#rerender(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -3072,7 +4275,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x8c }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#setInitiallyProvidedValue(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#setInitiallyProvidedValue(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -3404,7 +4607,7 @@ jump_label_19:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#tagged(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#tagged(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -3424,7 +4627,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#tagged^1(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#tagged^1(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -3448,7 +4651,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>#updateStateVars(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>#updateStateVars(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -3460,7 +4663,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -3478,9 +4681,104 @@ L_ESSlotNumberAnnotation:
 }
 
 L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x12 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^10(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "Text"
+	sta v7
+	lda v7
+	ldobjbyname 0x1, "create"
+	sta v6
+	lda.str "cond"
+	sta v8
+	lda v6
+	callthis1withname 0x3, "create", v7, v8
+	tryldglobalbyname 0x5, "Text"
+	sta v7
+	lda v7
+	ldobjbyname 0x6, "fontSize"
+	sta v6
+	ldlexvar 0x0, 0x0
+	sta v8
+	lda v8
+	ldobjbyname 0x8, "cond"
+	callruntime.isfalse 0xa
+	jnez jump_label_0
+	ldai 0xc
+	jmp jump_label_1
+jump_label_0:
+	ldai 0xe
+jump_label_1:
+	sta v8
+	lda v6
+	callthis1withname 0xb, "fontSize", v7, v8
+	tryldglobalbyname 0xd, "Text"
+	sta v7
+	lda v7
+	ldobjbyname 0xe, "width"
+	sta v6
+	ldai 0x64
+	sta v8
+	lda v6
+	callthis1withname 0x10, "width", v7, v8
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x13 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^11(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "Text"
+	sta v7
+	lda v7
+	ldobjbyname 0x1, "create"
+	sta v6
+	lda.str "res"
+	sta v8
+	lda v6
+	callthis1withname 0x3, "create", v7, v8
+	tryldglobalbyname 0x5, "Text"
+	sta v7
+	lda v7
+	ldobjbyname 0x6, "fontColor"
+	sta v6
+	createobjectwithbuffer 0x8, { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	sta v8
+	createemptyarray 0x9
+	sta v9
+	definepropertybyname 0xa, "params", v8
+	lda v8
+	sta v8
+	lda v6
+	callthis1withname 0xc, "fontColor", v7, v8
+	tryldglobalbyname 0xe, "Text"
+	sta v7
+	lda v7
+	ldobjbyname 0xf, "fontSize"
+	sta v6
+	ldai 0xc
+	sta v8
+	lda v6
+	callthis1withname 0x11, "fontSize", v7, v8
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#^10(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^12(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -3500,7 +4798,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x1f }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#^11(any a0, any a1, any a2, any a3, any a4, any a5) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^13(any a0, any a1, any a2, any a3, any a4, any a5) <static> {
 	newlexenvwithname 0x1, { 3 [ i32:1, string:"recycleNode", i32:0, ]}
 	mov v0, a0
 	mov v1, a1
@@ -3537,7 +4835,7 @@ jump_label_0:
 	ldlexvar 0x0, 0x0
 	jmp jump_label_3
 jump_label_2:
-	ldlexvar 0x2, 0x4
+	ldlexvar 0x2, 0x6
 	throw.undefinedifholewithname "AttrChainProbe"
 	sta v9
 	ldlexvar 0x1, 0x0
@@ -3548,9 +4846,9 @@ jump_label_2:
 	sta v12
 	lda v3
 	sta v13
-	definefunc 0x8, &entry.src.main.ets.pages.Index&.#~@4>@2*^11*#:(any,any,any), 0x0
+	definefunc 0x8, &entry.src.main.ets.pages.Index&.#~@7>@2*^13*#:(any,any,any), 0x0
 	sta v14
-	createobjectwithbuffer 0x9, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:210, string:"col", i32:7, ]}
+	createobjectwithbuffer 0x9, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:282, string:"col", i32:7, ]}
 	sta v16
 	lda v16
 	sta v15
@@ -3571,11 +4869,11 @@ jump_label_3:
 	sta v12
 	lda.str "AttrChainProbe"
 	sta v13
-	definefunc 0x10, &entry.src.main.ets.pages.Index&.#~@4>@2*^11*#^1:(any,any,any), 0x0
+	definefunc 0x10, &entry.src.main.ets.pages.Index&.#~@7>@2*^13*#^1:(any,any,any), 0x0
 	sta v14
 	lda v9
 	callthisrangewithname 0x11, 0x4, "createRecycle", v10
-	definefunc 0x13, &entry.src.main.ets.pages.Index&.#~@4>@2*^11*#paramsLambda:(any,any,any), 0x0
+	definefunc 0x13, &entry.src.main.ets.pages.Index&.#~@7>@2*^13*#paramsLambda:(any,any,any), 0x0
 	sta v8
 	lda v7
 	sta v9
@@ -3607,21 +4905,129 @@ jump_label_4:
 }
 
 L_ESSlotNumberAnnotation:
-	u32 SlotNumber { 0x5 }
+	u32 SlotNumber { 0x11 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#^12(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^14(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
 	mov v3, a3
 	mov v4, a4
-	tryldglobalbyname 0x0, "List"
+	lda v4
+	callruntime.isfalse 0x0
+	jnez jump_label_0
+	ldlexvar 0x1, 0x7
+	throw.undefinedifholewithname "ConsumeCarryProbe"
+	sta v8
+	ldlexvar 0x0, 0x0
+	sta v9
+	createemptyobject
+	sta v10
+	ldundefined
+	sta v11
+	lda v3
+	sta v12
+	definefunc 0x1, &entry.src.main.ets.pages.Index&.#~@7>@2*^14*#:(any,any,any), 0x0
+	sta v13
+	createobjectwithbuffer 0x2, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:283, string:"col", i32:7, ]}
+	sta v15
+	lda v15
+	sta v14
+	newobjrange 0x3, 0x7, v8
+	sta v6
+	tryldglobalbyname 0x5, "ViewPU"
+	sta v9
+	lda v9
+	ldobjbyname 0x6, "create"
+	sta v8
+	lda v6
+	sta v10
+	lda v8
+	callthis1withname 0x8, "create", v9, v10
+	definefunc 0xa, &entry.src.main.ets.pages.Index&.#~@7>@2*^14*#paramsLambda:(any,any,any), 0x0
+	sta v7
+	lda v6
+	sta v8
+	lda v7
+	stobjbyname 0xb, "paramsGenerator_", v8
+	jmp jump_label_1
+jump_label_0:
+	ldlexvar 0x0, 0x0
 	sta v7
 	lda v7
-	ldobjbyname 0x1, "create"
+	ldobjbyname 0xd, "updateStateVarsOfChildByElmtId"
 	sta v6
+	lda v3
+	sta v8
+	createemptyobject
+	sta v9
 	lda v6
-	callthis0withname 0x3, "create", v7
+	callthis2withname 0xf, "updateStateVarsOfChildByElmtId", v7, v8, v9
+jump_label_1:
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x11 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^15(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	lda v4
+	callruntime.isfalse 0x0
+	jnez jump_label_0
+	ldlexvar 0x1, 0x8
+	throw.undefinedifholewithname "ConsumeFirstProbe"
+	sta v8
+	ldlexvar 0x0, 0x0
+	sta v9
+	createemptyobject
+	sta v10
+	ldundefined
+	sta v11
+	lda v3
+	sta v12
+	definefunc 0x1, &entry.src.main.ets.pages.Index&.#~@7>@2*^15*#:(any,any,any), 0x0
+	sta v13
+	createobjectwithbuffer 0x2, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:284, string:"col", i32:7, ]}
+	sta v15
+	lda v15
+	sta v14
+	newobjrange 0x3, 0x7, v8
+	sta v6
+	tryldglobalbyname 0x5, "ViewPU"
+	sta v9
+	lda v9
+	ldobjbyname 0x6, "create"
+	sta v8
+	lda v6
+	sta v10
+	lda v8
+	callthis1withname 0x8, "create", v9, v10
+	definefunc 0xa, &entry.src.main.ets.pages.Index&.#~@7>@2*^15*#paramsLambda:(any,any,any), 0x0
+	sta v7
+	lda v6
+	sta v8
+	lda v7
+	stobjbyname 0xb, "paramsGenerator_", v8
+	jmp jump_label_1
+jump_label_0:
+	ldlexvar 0x0, 0x0
+	sta v7
+	lda v7
+	ldobjbyname 0xd, "updateStateVarsOfChildByElmtId"
+	sta v6
+	lda v3
+	sta v8
+	createemptyobject
+	sta v9
+	lda v6
+	callthis2withname 0xf, "updateStateVarsOfChildByElmtId", v7, v8, v9
+jump_label_1:
 	ldundefined
 	returnundefined
 }
@@ -3629,7 +5035,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x12 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#^1(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^16(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -3655,7 +5061,7 @@ L_ESSlotNumberAnnotation:
 	sta v6
 	ldai 0x0
 	sta v8
-	definefunc 0xa, &entry.src.main.ets.pages.Index&.#~@4>@2*^1*#:(any,any,any), 0x0
+	definefunc 0xa, &entry.src.main.ets.pages.Index&.#~@7>@2*^16*#:(any,any,any), 0x0
 	sta v9
 	lda v6
 	callthis2withname 0xb, "ifElseBranchUpdateFunction", v7, v8, v9
@@ -3668,7 +5074,7 @@ jump_label_0:
 	sta v6
 	ldai 0x1
 	sta v8
-	definefunc 0xf, &entry.src.main.ets.pages.Index&.#~@4>@2*^1*#^1:(any,any,any), 0x0
+	definefunc 0xf, &entry.src.main.ets.pages.Index&.#~@7>@2*^16*#^1:(any,any,any), 0x0
 	sta v9
 	lda v6
 	callthis2withname 0x10, "ifElseBranchUpdateFunction", v7, v8, v9
@@ -3678,9 +5084,29 @@ jump_label_1:
 }
 
 L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x5 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^17(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "List"
+	sta v7
+	lda v7
+	ldobjbyname 0x1, "create"
+	sta v6
+	lda v6
+	callthis0withname 0x3, "create", v7
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x12 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#^2(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^18(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -3706,7 +5132,7 @@ L_ESSlotNumberAnnotation:
 	sta v6
 	ldai 0x0
 	sta v8
-	definefunc 0xa, &entry.src.main.ets.pages.Index&.#~@4>@2*^2*#:(any,any,any), 0x0
+	definefunc 0xa, &entry.src.main.ets.pages.Index&.#~@7>@2*^18*#:(any,any,any), 0x0
 	sta v9
 	lda v6
 	callthis2withname 0xb, "ifElseBranchUpdateFunction", v7, v8, v9
@@ -3719,7 +5145,7 @@ jump_label_0:
 	sta v6
 	ldai 0x1
 	sta v8
-	definefunc 0xf, &entry.src.main.ets.pages.Index&.#~@4>@2*^2*#^1:(any,any,any), 0x0
+	definefunc 0xf, &entry.src.main.ets.pages.Index&.#~@7>@2*^18*#^1:(any,any,any), 0x0
 	sta v9
 	lda v6
 	callthis2withname 0x10, "ifElseBranchUpdateFunction", v7, v8, v9
@@ -3729,53 +5155,9 @@ jump_label_1:
 }
 
 L_ESSlotNumberAnnotation:
-	u32 SlotNumber { 0xd }
-.language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#^3(any a0, any a1, any a2, any a3, any a4) <static> {
-	mov v0, a0
-	mov v1, a1
-	mov v2, a2
-	mov v3, a3
-	mov v4, a4
-	tryldglobalbyname 0x0, "ForEach"
-	sta v8
-	lda v8
-	ldobjbyname 0x1, "create"
-	sta v7
-	lda v7
-	callthis0withname 0x3, "create", v8
-	definefunc 0x5, &entry.src.main.ets.pages.Index&.#~@4>@2*^3*#forEachItemGenFunction:(any,any,any,any), 0x1
-	sta v5
-	ldlexvar 0x0, 0x0
-	sta v8
-	lda v8
-	ldobjbyname 0x6, "forEachUpdateFunction"
-	sta v7
-	lda v3
-	sta v9
-	ldlexvar 0x0, 0x0
-	sta v10
-	lda v10
-	ldobjbyname 0x8, "items"
-	sta v10
-	lda v5
-	sta v11
-	definefunc 0xa, &entry.src.main.ets.pages.Index&.#~@4>@2*^3*#:(any,any,any,any), 0x1
-	sta v12
-	ldfalse
-	sta v13
-	ldfalse
-	sta v14
-	lda v7
-	callthisrangewithname 0xb, 0x6, "forEachUpdateFunction", v8
-	ldundefined
-	returnundefined
-}
-
-L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x12 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#^4(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^1(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -3801,7 +5183,7 @@ L_ESSlotNumberAnnotation:
 	sta v6
 	ldai 0x0
 	sta v8
-	definefunc 0xa, &entry.src.main.ets.pages.Index&.#~@4>@2*^4*#:(any,any,any), 0x0
+	definefunc 0xa, &entry.src.main.ets.pages.Index&.#~@7>@2*^1*#:(any,any,any), 0x0
 	sta v9
 	lda v6
 	callthis2withname 0xb, "ifElseBranchUpdateFunction", v7, v8, v9
@@ -3814,7 +5196,153 @@ jump_label_0:
 	sta v6
 	ldai 0x1
 	sta v8
-	definefunc 0xf, &entry.src.main.ets.pages.Index&.#~@4>@2*^4*#^1:(any,any,any), 0x0
+	definefunc 0xf, &entry.src.main.ets.pages.Index&.#~@7>@2*^1*#^1:(any,any,any), 0x0
+	sta v9
+	lda v6
+	callthis2withname 0x10, "ifElseBranchUpdateFunction", v7, v8, v9
+jump_label_1:
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x12 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^2(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "If"
+	sta v7
+	lda v7
+	ldobjbyname 0x1, "create"
+	sta v6
+	lda v6
+	callthis0withname 0x3, "create", v7
+	ldlexvar 0x0, 0x0
+	sta v6
+	lda v6
+	ldobjbyname 0x5, "elseCond"
+	callruntime.isfalse 0x7
+	jnez jump_label_0
+	ldlexvar 0x0, 0x0
+	sta v7
+	lda v7
+	ldobjbyname 0x8, "ifElseBranchUpdateFunction"
+	sta v6
+	ldai 0x0
+	sta v8
+	definefunc 0xa, &entry.src.main.ets.pages.Index&.#~@7>@2*^2*#:(any,any,any), 0x0
+	sta v9
+	lda v6
+	callthis2withname 0xb, "ifElseBranchUpdateFunction", v7, v8, v9
+	jmp jump_label_1
+jump_label_0:
+	ldlexvar 0x0, 0x0
+	sta v7
+	lda v7
+	ldobjbyname 0xd, "ifElseBranchUpdateFunction"
+	sta v6
+	ldai 0x1
+	sta v8
+	definefunc 0xf, &entry.src.main.ets.pages.Index&.#~@7>@2*^2*#^1:(any,any,any), 0x0
+	sta v9
+	lda v6
+	callthis2withname 0x10, "ifElseBranchUpdateFunction", v7, v8, v9
+jump_label_1:
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0xd }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^3(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "ForEach"
+	sta v8
+	lda v8
+	ldobjbyname 0x1, "create"
+	sta v7
+	lda v7
+	callthis0withname 0x3, "create", v8
+	definefunc 0x5, &entry.src.main.ets.pages.Index&.#~@7>@2*^3*#forEachItemGenFunction:(any,any,any,any), 0x1
+	sta v5
+	ldlexvar 0x0, 0x0
+	sta v8
+	lda v8
+	ldobjbyname 0x6, "forEachUpdateFunction"
+	sta v7
+	lda v3
+	sta v9
+	ldlexvar 0x0, 0x0
+	sta v10
+	lda v10
+	ldobjbyname 0x8, "items"
+	sta v10
+	lda v5
+	sta v11
+	definefunc 0xa, &entry.src.main.ets.pages.Index&.#~@7>@2*^3*#:(any,any,any,any), 0x1
+	sta v12
+	ldfalse
+	sta v13
+	ldfalse
+	sta v14
+	lda v7
+	callthisrangewithname 0xb, 0x6, "forEachUpdateFunction", v8
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x12 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^4(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "If"
+	sta v7
+	lda v7
+	ldobjbyname 0x1, "create"
+	sta v6
+	lda v6
+	callthis0withname 0x3, "create", v7
+	ldlexvar 0x0, 0x0
+	sta v6
+	lda v6
+	ldobjbyname 0x5, "cond"
+	callruntime.isfalse 0x7
+	jnez jump_label_0
+	ldlexvar 0x0, 0x0
+	sta v7
+	lda v7
+	ldobjbyname 0x8, "ifElseBranchUpdateFunction"
+	sta v6
+	ldai 0x0
+	sta v8
+	definefunc 0xa, &entry.src.main.ets.pages.Index&.#~@7>@2*^4*#:(any,any,any), 0x0
+	sta v9
+	lda v6
+	callthis2withname 0xb, "ifElseBranchUpdateFunction", v7, v8, v9
+	jmp jump_label_1
+jump_label_0:
+	ldlexvar 0x0, 0x0
+	sta v7
+	lda v7
+	ldobjbyname 0xd, "ifElseBranchUpdateFunction"
+	sta v6
+	ldai 0x1
+	sta v8
+	definefunc 0xf, &entry.src.main.ets.pages.Index&.#~@7>@2*^4*#^1:(any,any,any), 0x0
 	sta v9
 	lda v6
 	callthis2withname 0x10, "ifElseBranchUpdateFunction", v7, v8, v9
@@ -3826,7 +5354,7 @@ jump_label_1:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#^5(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^5(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -3848,7 +5376,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#^6(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^6(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -3870,7 +5398,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#^7(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^7(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -3892,7 +5420,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#^8(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^8(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -3914,7 +5442,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x1a }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#^9(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^9(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -3940,7 +5468,7 @@ L_ESSlotNumberAnnotation:
 	sta v6
 	ldai 0x0
 	sta v8
-	definefunc 0xa, &entry.src.main.ets.pages.Index&.#~@4>@2*^9*#:(any,any,any), 0x0
+	definefunc 0xa, &entry.src.main.ets.pages.Index&.#~@7>@2*^9*#:(any,any,any), 0x0
 	sta v9
 	lda v6
 	callthis2withname 0xb, "ifElseBranchUpdateFunction", v7, v8, v9
@@ -3959,7 +5487,7 @@ jump_label_0:
 	sta v6
 	ldai 0x1
 	sta v8
-	definefunc 0x12, &entry.src.main.ets.pages.Index&.#~@4>@2*^9*#^1:(any,any,any), 0x0
+	definefunc 0x12, &entry.src.main.ets.pages.Index&.#~@7>@2*^9*#^1:(any,any,any), 0x0
 	sta v9
 	lda v6
 	callthis2withname 0x13, "ifElseBranchUpdateFunction", v7, v8, v9
@@ -3972,7 +5500,7 @@ jump_label_2:
 	sta v6
 	ldai 0x2
 	sta v8
-	definefunc 0x17, &entry.src.main.ets.pages.Index&.#~@4>@2*^9*#^2:(any,any,any), 0x0
+	definefunc 0x17, &entry.src.main.ets.pages.Index&.#~@7>@2*^9*#^2:(any,any,any), 0x0
 	sta v9
 	lda v6
 	callthis2withname 0x18, "ifElseBranchUpdateFunction", v7, v8, v9
@@ -3984,7 +5512,7 @@ jump_label_1:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x12 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#^a(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^a(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4010,7 +5538,7 @@ L_ESSlotNumberAnnotation:
 	sta v6
 	ldai 0x0
 	sta v8
-	definefunc 0xa, &entry.src.main.ets.pages.Index&.#~@4>@2*^a*#:(any,any,any), 0x0
+	definefunc 0xa, &entry.src.main.ets.pages.Index&.#~@7>@2*^a*#:(any,any,any), 0x0
 	sta v9
 	lda v6
 	callthis2withname 0xb, "ifElseBranchUpdateFunction", v7, v8, v9
@@ -4023,7 +5551,7 @@ jump_label_0:
 	sta v6
 	ldai 0x1
 	sta v8
-	definefunc 0xf, &entry.src.main.ets.pages.Index&.#~@4>@2*^a*#^1:(any,any,any), 0x0
+	definefunc 0xf, &entry.src.main.ets.pages.Index&.#~@7>@2*^a*#^1:(any,any,any), 0x0
 	sta v9
 	lda v6
 	callthis2withname 0x10, "ifElseBranchUpdateFunction", v7, v8, v9
@@ -4033,9 +5561,87 @@ jump_label_1:
 }
 
 L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0xc }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^b(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "Text"
+	sta v7
+	lda v7
+	ldobjbyname 0x1, "create"
+	sta v6
+	lda.str "an1"
+	sta v8
+	lda v6
+	callthis1withname 0x3, "create", v7, v8
+	tryldglobalbyname 0x5, "Text"
+	sta v7
+	lda v7
+	ldobjbyname 0x6, "fontSize"
+	sta v6
+	ldai 0x8
+	sta v8
+	lda v6
+	callthis1withname 0x8, "fontSize", v7, v8
+	ldlexvar 0x1, 0x4
+	sta v6
+	ldai 0x14
+	sta v7
+	lda v3
+	sta v8
+	lda v4
+	sta v9
+	ldlexvar 0x0, 0x0
+	sta v10
+	lda v6
+	callrange 0xa, 0x4, v7
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0xc }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^c(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "Text"
+	sta v7
+	lda v7
+	ldobjbyname 0x1, "create"
+	sta v6
+	lda.str "e1"
+	sta v8
+	lda v6
+	callthis1withname 0x3, "create", v7, v8
+	tryldglobalbyname 0x5, "Text"
+	sta v7
+	lda v7
+	ldobjbyname 0x6, "fontSize"
+	sta v6
+	ldai 0x9
+	sta v8
+	lda v6
+	callthis1withname 0x8, "fontSize", v7, v8
+	ldlexvar 0x1, 0x5
+	sta v6
+	lda v6
+	callarg0 0xa
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0xa }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#^b(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^d(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4066,7 +5672,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x12 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#^c(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^e(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4109,7 +5715,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x1c }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#^d(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#^f(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4168,104 +5774,9 @@ L_ESSlotNumberAnnotation:
 }
 
 L_ESSlotNumberAnnotation:
-	u32 SlotNumber { 0x12 }
-.language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#^e(any a0, any a1, any a2, any a3, any a4) <static> {
-	mov v0, a0
-	mov v1, a1
-	mov v2, a2
-	mov v3, a3
-	mov v4, a4
-	tryldglobalbyname 0x0, "Text"
-	sta v7
-	lda v7
-	ldobjbyname 0x1, "create"
-	sta v6
-	lda.str "cond"
-	sta v8
-	lda v6
-	callthis1withname 0x3, "create", v7, v8
-	tryldglobalbyname 0x5, "Text"
-	sta v7
-	lda v7
-	ldobjbyname 0x6, "fontSize"
-	sta v6
-	ldlexvar 0x0, 0x0
-	sta v8
-	lda v8
-	ldobjbyname 0x8, "cond"
-	callruntime.isfalse 0xa
-	jnez jump_label_0
-	ldai 0xc
-	jmp jump_label_1
-jump_label_0:
-	ldai 0xe
-jump_label_1:
-	sta v8
-	lda v6
-	callthis1withname 0xb, "fontSize", v7, v8
-	tryldglobalbyname 0xd, "Text"
-	sta v7
-	lda v7
-	ldobjbyname 0xe, "width"
-	sta v6
-	ldai 0x64
-	sta v8
-	lda v6
-	callthis1withname 0x10, "width", v7, v8
-	ldundefined
-	returnundefined
-}
-
-L_ESSlotNumberAnnotation:
-	u32 SlotNumber { 0x13 }
-.language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#^f(any a0, any a1, any a2, any a3, any a4) <static> {
-	mov v0, a0
-	mov v1, a1
-	mov v2, a2
-	mov v3, a3
-	mov v4, a4
-	tryldglobalbyname 0x0, "Text"
-	sta v7
-	lda v7
-	ldobjbyname 0x1, "create"
-	sta v6
-	lda.str "res"
-	sta v8
-	lda v6
-	callthis1withname 0x3, "create", v7, v8
-	tryldglobalbyname 0x5, "Text"
-	sta v7
-	lda v7
-	ldobjbyname 0x6, "fontColor"
-	sta v6
-	createobjectwithbuffer 0x8, { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-	sta v8
-	createemptyarray 0x9
-	sta v9
-	definepropertybyname 0xa, "params", v8
-	lda v8
-	sta v8
-	lda v6
-	callthis1withname 0xc, "fontColor", v7, v8
-	tryldglobalbyname 0xe, "Text"
-	sta v7
-	lda v7
-	ldobjbyname 0xf, "fontSize"
-	sta v6
-	ldai 0xc
-	sta v8
-	lda v6
-	callthis1withname 0x11, "fontSize", v7, v8
-	ldundefined
-	returnundefined
-}
-
-L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x4 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#__lazyForEachItemGenFunction(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#__lazyForEachItemGenFunction(any a0, any a1, any a2, any a3) <static> {
 	newlexenvwithname 0x2, { 5 [ i32:2, string:"itemCreation2", i32:0, string:"item", i32:1, ]}
 	mov v0, a0
 	mov v1, a1
@@ -4275,11 +5786,11 @@ L_ESSlotNumberAnnotation:
 	sta v5
 	lda v5
 	stlexvar 0x0, 0x1
-	definefunc 0x0, &entry.src.main.ets.pages.Index&.#~@4>@2*@7*#itemCreation2:(any,any,any,any,any), 0x2
+	definefunc 0x0, &entry.src.main.ets.pages.Index&.#~@7>@2*@a*#itemCreation2:(any,any,any,any,any), 0x2
 	sta v6
 	lda v6
 	stlexvar 0x0, 0x0
-	definefunc 0x1, &entry.src.main.ets.pages.Index&.#~@4>@2*@7*#observedDeepRender:(any,any,any), 0x0
+	definefunc 0x1, &entry.src.main.ets.pages.Index&.#~@7>@2*@a*#observedDeepRender:(any,any,any), 0x0
 	sta v5
 	lda v5
 	sta v6
@@ -4292,7 +5803,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*#__lazyForEachItemIdFunc(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*#__lazyForEachItemIdFunc(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4304,7 +5815,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x6 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*@7*#itemCreation2(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*@a*#itemCreation2(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4315,7 +5826,7 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	ldobjbyname 0x1, "create"
 	sta v6
-	definefunc 0x3, &entry.src.main.ets.pages.Index&.#~@4>@2*@7*@8*#:(any,any,any), 0x0
+	definefunc 0x3, &entry.src.main.ets.pages.Index&.#~@7>@2*@a*@b*#:(any,any,any), 0x0
 	sta v8
 	ldfalse
 	sta v9
@@ -4328,7 +5839,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x15 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*@7*#observedDeepRender(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*@a*#observedDeepRender(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4349,7 +5860,7 @@ L_ESSlotNumberAnnotation:
 	lda v5
 	ldobjbyname 0x5, "observeComponentCreation2"
 	sta v4
-	definefunc 0x7, &entry.src.main.ets.pages.Index&.#~@4>@2*@7*@9*#:(any,any,any,any,any), 0x2
+	definefunc 0x7, &entry.src.main.ets.pages.Index&.#~@7>@2*@a*@c*#:(any,any,any,any,any), 0x2
 	sta v6
 	tryldglobalbyname 0x8, "Text"
 	sta v7
@@ -4376,7 +5887,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*@7*@8*#(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*@a*@b*#(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4387,7 +5898,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*@7*@9*#(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*@a*@c*#(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4410,7 +5921,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0xb }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^1*#(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^1*#(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4419,7 +5930,7 @@ L_ESSlotNumberAnnotation:
 	lda v5
 	ldobjbyname 0x0, "observeComponentCreation2"
 	sta v4
-	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@4>@2*^1**#:(any,any,any,any,any), 0x2
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@7>@2*^1**#:(any,any,any,any,any), 0x2
 	sta v6
 	tryldglobalbyname 0x3, "Text"
 	sta v7
@@ -4439,7 +5950,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^1*#^1(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^1*#^1(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4450,7 +5961,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^1**#(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^1**#(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4472,7 +5983,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^11*#(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^13*#(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4483,7 +5994,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x1c }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^11*#^1(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^13*#^1(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4550,7 +6061,320 @@ jump_label_1:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^11*#paramsLambda(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^13*#paramsLambda(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	createemptyobject
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^14*#(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^14*#paramsLambda(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	createemptyobject
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^15*#(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^15*#paramsLambda(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	createemptyobject
+	return
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x10 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^16*#(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "observeComponentCreation2"
+	sta v4
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@7>@2*^16**#:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0x3, "__Recycle__"
+	sta v7
+	lda v4
+	callthis2withname 0x4, "observeComponentCreation2", v5, v6, v7
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0x6, "observeRecycleComponentCreation"
+	sta v4
+	lda.str "AttrChainProbe"
+	sta v6
+	definefunc 0x8, &entry.src.main.ets.pages.Index&.#~@7>@2*^16**#^1:(any,any,any,any,any,any), 0x2
+	sta v7
+	lda v4
+	callthis2withname 0x9, "observeRecycleComponentCreation", v5, v6, v7
+	tryldglobalbyname 0xb, "__Recycle__"
+	sta v5
+	lda v5
+	ldobjbyname 0xc, "pop"
+	sta v4
+	lda v4
+	callthis0withname 0xe, "pop", v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^16*#^1(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x5 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^16**#(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "__Recycle__"
+	sta v7
+	lda v7
+	ldobjbyname 0x1, "create"
+	sta v6
+	lda v6
+	callthis0withname 0x3, "create", v7
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x1f }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^16**#^1(any a0, any a1, any a2, any a3, any a4, any a5) <static> {
+	newlexenvwithname 0x1, { 3 [ i32:1, string:"recycleNode", i32:0, ]}
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	lda a5
+	stlexvar 0x0, 0x0
+	ldlexvar 0x0, 0x0
+	sta v7
+	ldundefined
+	stricteq 0x0, v7
+	jeqz jump_label_0
+	ldnull
+	sta v7
+	lda v7
+	stlexvar 0x0, 0x0
+jump_label_0:
+	tryldglobalbyname 0x1, "ViewStackProcessor"
+	sta v8
+	lda v8
+	ldobjbyname 0x2, "StartGetAccessRecordingFor"
+	sta v7
+	lda v3
+	sta v9
+	lda v7
+	callthis1withname 0x4, "StartGetAccessRecordingFor", v8, v9
+	lda v4
+	callruntime.isfalse 0x6
+	jnez jump_label_1
+	ldlexvar 0x0, 0x0
+	callruntime.isfalse 0x7
+	jnez jump_label_2
+	ldlexvar 0x0, 0x0
+	jmp jump_label_3
+jump_label_2:
+	ldlexvar 0x2, 0x6
+	throw.undefinedifholewithname "AttrChainProbe"
+	sta v9
+	ldlexvar 0x1, 0x0
+	sta v10
+	createemptyobject
+	sta v11
+	ldundefined
+	sta v12
+	lda v3
+	sta v13
+	definefunc 0x8, &entry.src.main.ets.pages.Index&.#~@7>@2*^16**^1*#:(any,any,any), 0x0
+	sta v14
+	createobjectwithbuffer 0x9, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:288, string:"col", i32:9, ]}
+	sta v16
+	lda v16
+	sta v15
+	newobjrange 0xa, 0x7, v9
+jump_label_3:
+	sta v7
+	tryldglobalbyname 0xc, "ViewPU"
+	sta v10
+	lda v10
+	ldobjbyname 0xd, "createRecycle"
+	sta v9
+	lda v7
+	sta v11
+	ldlexvar 0x0, 0x0
+	sta v12
+	ldnull
+	strictnoteq 0xf, v12
+	sta v12
+	lda.str "AttrChainProbe"
+	sta v13
+	definefunc 0x10, &entry.src.main.ets.pages.Index&.#~@7>@2*^16**^1*#^1:(any,any,any), 0x0
+	sta v14
+	lda v9
+	callthisrangewithname 0x11, 0x4, "createRecycle", v10
+	definefunc 0x13, &entry.src.main.ets.pages.Index&.#~@7>@2*^16**^1*#paramsLambda:(any,any,any), 0x0
+	sta v8
+	lda v7
+	sta v9
+	lda v8
+	stobjbyname 0x14, "paramsGenerator_", v9
+	jmp jump_label_4
+jump_label_1:
+	ldlexvar 0x1, 0x0
+	sta v8
+	lda v8
+	ldobjbyname 0x16, "updateStateVarsOfChildByElmtId"
+	sta v7
+	lda v3
+	sta v9
+	createemptyobject
+	sta v10
+	lda v7
+	callthis2withname 0x18, "updateStateVarsOfChildByElmtId", v8, v9, v10
+jump_label_4:
+	tryldglobalbyname 0x1a, "ViewStackProcessor"
+	sta v8
+	lda v8
+	ldobjbyname 0x1b, "StopGetAccessRecording"
+	sta v7
+	lda v7
+	callthis0withname 0x1d, "StopGetAccessRecording", v8
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^16**^1*#(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x1c }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^16**^1*#^1(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldlexvar 0x0, 0x0
+	callruntime.isfalse 0x0
+	jnez jump_label_0
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0x1, "aboutToReuseInternal"
+	typeof 0x3
+	sta v4
+	lda.str "function"
+	stricteq 0x5, v4
+	callruntime.isfalse 0x6
+	jnez jump_label_0
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0x7, "aboutToReuseInternal"
+	sta v4
+	lda v4
+	callthis0withname 0x9, "aboutToReuseInternal", v5
+	jmp jump_label_1
+jump_label_0:
+	ldlexvar 0x0, 0x0
+	sta v4
+	lda v4
+	ldobjbyname 0xb, "aboutToReuse"
+	callruntime.isfalse 0xd
+	jnez jump_label_2
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0xe, "aboutToReuse"
+	typeof 0x10
+	sta v4
+	lda.str "function"
+	stricteq 0x12, v4
+	callruntime.isfalse 0x13
+	jnez jump_label_2
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0x14, "aboutToReuse"
+	sta v4
+	createemptyobject
+	sta v6
+	lda v4
+	callthis1withname 0x16, "aboutToReuse", v5, v6
+jump_label_2:
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0x18, "rerender"
+	sta v4
+	lda v4
+	callthis0withname 0x1a, "rerender", v5
+jump_label_1:
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^16**^1*#paramsLambda(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4561,7 +6385,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0xb }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^2*#(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^18*#(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4570,7 +6394,69 @@ L_ESSlotNumberAnnotation:
 	lda v5
 	ldobjbyname 0x0, "observeComponentCreation2"
 	sta v4
-	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@4>@2*^2**#:(any,any,any,any,any), 0x2
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@7>@2*^18**#:(any,any,any,any,any), 0x2
+	sta v6
+	tryldglobalbyname 0x3, "Text"
+	sta v7
+	lda v4
+	callthis2withname 0x4, "observeComponentCreation2", v5, v6, v7
+	tryldglobalbyname 0x6, "Text"
+	sta v5
+	lda v5
+	ldobjbyname 0x7, "pop"
+	sta v4
+	lda v4
+	callthis0withname 0x9, "pop", v5
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^18*#^1(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x5 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^18**#(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "Text"
+	sta v7
+	lda v7
+	ldobjbyname 0x1, "create"
+	sta v6
+	lda.str "tail"
+	sta v8
+	lda v6
+	callthis1withname 0x3, "create", v7, v8
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0xb }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^2*#(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldlexvar 0x0, 0x0
+	sta v5
+	lda v5
+	ldobjbyname 0x0, "observeComponentCreation2"
+	sta v4
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@7>@2*^2**#:(any,any,any,any,any), 0x2
 	sta v6
 	tryldglobalbyname 0x3, "Text"
 	sta v7
@@ -4590,7 +6476,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0xb }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^2*#^1(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^2*#^1(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4599,7 +6485,7 @@ L_ESSlotNumberAnnotation:
 	lda v5
 	ldobjbyname 0x0, "observeComponentCreation2"
 	sta v4
-	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@4>@2*^2*^1*#:(any,any,any,any,any), 0x2
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@7>@2*^2*^1*#:(any,any,any,any,any), 0x2
 	sta v6
 	tryldglobalbyname 0x3, "Text"
 	sta v7
@@ -4619,7 +6505,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^2**#(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^2**#(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4641,7 +6527,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^2*^1*#(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^2*^1*#(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4663,7 +6549,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^3*#(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^3*#(any a0, any a1, any a2, any a3) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4675,7 +6561,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0xb }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^3*#forEachItemGenFunction(any a0, any a1, any a2, any a3) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^3*#forEachItemGenFunction(any a0, any a1, any a2, any a3) <static> {
 	newlexenvwithname 0x1, { 3 [ i32:1, string:"item", i32:0, ]}
 	mov v0, a0
 	mov v1, a1
@@ -4690,7 +6576,7 @@ L_ESSlotNumberAnnotation:
 	lda v6
 	ldobjbyname 0x0, "observeComponentCreation2"
 	sta v5
-	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@4>@2*^3*@6*#:(any,any,any,any,any), 0x2
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@7>@2*^3*@9*#:(any,any,any,any,any), 0x2
 	sta v7
 	tryldglobalbyname 0x3, "Text"
 	sta v8
@@ -4710,7 +6596,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^3*@6*#(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^3*@9*#(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4733,7 +6619,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0xb }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^4*#(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^4*#(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4742,7 +6628,7 @@ L_ESSlotNumberAnnotation:
 	lda v5
 	ldobjbyname 0x0, "observeComponentCreation2"
 	sta v4
-	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@4>@2*^4**#:(any,any,any,any,any), 0x2
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@7>@2*^4**#:(any,any,any,any,any), 0x2
 	sta v6
 	tryldglobalbyname 0x3, "Text"
 	sta v7
@@ -4762,7 +6648,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^4*#^1(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^4*#^1(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4773,7 +6659,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^4**#(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^4**#(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4795,7 +6681,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0xb }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^9*#(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^9*#(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4804,7 +6690,7 @@ L_ESSlotNumberAnnotation:
 	lda v5
 	ldobjbyname 0x0, "observeComponentCreation2"
 	sta v4
-	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@4>@2*^9**#:(any,any,any,any,any), 0x2
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@7>@2*^9**#:(any,any,any,any,any), 0x2
 	sta v6
 	tryldglobalbyname 0x3, "Text"
 	sta v7
@@ -4824,7 +6710,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0xb }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^9*#^1(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^9*#^1(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4833,7 +6719,7 @@ L_ESSlotNumberAnnotation:
 	lda v5
 	ldobjbyname 0x0, "observeComponentCreation2"
 	sta v4
-	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@4>@2*^9*^1*#:(any,any,any,any,any), 0x2
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@7>@2*^9*^1*#:(any,any,any,any,any), 0x2
 	sta v6
 	tryldglobalbyname 0x3, "Text"
 	sta v7
@@ -4853,7 +6739,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0xb }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^9*#^2(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^9*#^2(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4862,7 +6748,7 @@ L_ESSlotNumberAnnotation:
 	lda v5
 	ldobjbyname 0x0, "observeComponentCreation2"
 	sta v4
-	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@4>@2*^9*^2*#:(any,any,any,any,any), 0x2
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@7>@2*^9*^2*#:(any,any,any,any,any), 0x2
 	sta v6
 	tryldglobalbyname 0x3, "Text"
 	sta v7
@@ -4882,7 +6768,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^9**#(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^9**#(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4904,7 +6790,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^9*^1*#(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^9*^1*#(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4926,7 +6812,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^9*^2*#(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^9*^2*#(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4948,7 +6834,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0xb }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^a*#(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^a*#(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4957,7 +6843,7 @@ L_ESSlotNumberAnnotation:
 	lda v5
 	ldobjbyname 0x0, "observeComponentCreation2"
 	sta v4
-	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@4>@2*^a**#:(any,any,any,any,any), 0x2
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@7>@2*^a**#:(any,any,any,any,any), 0x2
 	sta v6
 	tryldglobalbyname 0x3, "Text"
 	sta v7
@@ -4977,7 +6863,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0xb }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^a*#^1(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^a*#^1(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -4986,7 +6872,7 @@ L_ESSlotNumberAnnotation:
 	lda v5
 	ldobjbyname 0x0, "observeComponentCreation2"
 	sta v4
-	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@4>@2*^a*^1*#:(any,any,any,any,any), 0x2
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@7>@2*^a*^1*#:(any,any,any,any,any), 0x2
 	sta v6
 	tryldglobalbyname 0x3, "Text"
 	sta v7
@@ -5006,7 +6892,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^a**#(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^a**#(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -5028,7 +6914,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@4>@2*^a*^1*#(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@7>@2*^a*^1*#(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -5048,356 +6934,510 @@ L_ESSlotNumberAnnotation:
 }
 
 L_ESSlotNumberAnnotation:
-	u32 SlotNumber { 0x54 }
+	u32 SlotNumber { 0x7b }
 .language ArkTS
 .function any &entry.src.main.ets.pages.Index&.func_main_0(any a0, any a1, any a2) <static> {
-	newlexenvwithname 0x6, { 13 [ i32:6, string:"ProbeDataSource", i32:0, string:"ProbeDialog", i32:1, string:"INIT_OBJ", i32:2, string:"INIT_VALUE", i32:3, string:"AttrChainProbe", i32:4, string:"CommentLeading", i32:5, ]}
+	newlexenvwithname 0xa, { 21 [ i32:10, string:"ProbeDataSource", i32:0, string:"ProbeDialog", i32:1, string:"INIT_OBJ", i32:2, string:"INIT_VALUE", i32:3, string:"animWidth", i32:4, string:"__Text__loudExtend", i32:5, string:"AttrChainProbe", i32:6, string:"ConsumeCarryProbe", i32:7, string:"ConsumeFirstProbe", i32:8, string:"CommentLeading", i32:9, ]}
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
-	lda.str "finalizeConstruction"
-	sta v8
-	tryldglobalbyname 0x0, "ViewPU"
+	ldundefined
 	sta v9
-	lda v9
-	ldobjbyname 0x1, "prototype"
-	isin 0x3, v8
-	callruntime.istrue 0x4
+	definefunc 0x0, &entry.src.main.ets.pages.Index&.#*#__Text__loudExtend:(any,any,any), 0x0
+	sta v10
+	lda v10
+	stlexvar 0x0, 0x5
+	definefunc 0x1, &entry.src.main.ets.pages.Index&.#*#animWidth:(any,any,any,any,any,any,any), 0x4
+	sta v10
+	lda v10
+	stlexvar 0x0, 0x4
+	lda.str "finalizeConstruction"
+	sta v11
+	tryldglobalbyname 0x2, "ViewPU"
+	sta v12
+	lda v12
+	ldobjbyname 0x3, "prototype"
+	isin 0x5, v11
+	callruntime.istrue 0x6
 	jnez jump_label_0
 	ldtrue
 	jmp jump_label_1
 jump_label_0:
 	ldfalse
 jump_label_1:
-	callruntime.isfalse 0x5
+	callruntime.isfalse 0x7
 	jnez jump_label_2
-	tryldglobalbyname 0x6, "Reflect"
-	sta v9
-	lda v9
-	ldobjbyname 0x7, "set"
-	sta v8
-	tryldglobalbyname 0x9, "ViewPU"
-	sta v10
-	lda v10
-	ldobjbyname 0xa, "prototype"
-	sta v10
-	lda.str "finalizeConstruction"
-	sta v11
-	definefunc 0xc, &entry.src.main.ets.pages.Index&.#*#:(any,any,any), 0x0
+	tryldglobalbyname 0x8, "Reflect"
 	sta v12
-	lda v8
-	callthis3withname 0xd, "set", v9, v10, v11, v12
+	lda v12
+	ldobjbyname 0x9, "set"
+	sta v11
+	tryldglobalbyname 0xb, "ViewPU"
+	sta v13
+	lda v13
+	ldobjbyname 0xc, "prototype"
+	sta v13
+	lda.str "finalizeConstruction"
+	sta v14
+	definefunc 0xe, &entry.src.main.ets.pages.Index&.#*#:(any,any,any), 0x0
+	sta v15
+	lda v11
+	callthis3withname 0xf, "set", v12, v13, v14, v15
 jump_label_2:
 	ldhole
-	sta v10
-	defineclasswithbuffer 0xf, &entry.src.main.ets.pages.Index&.#~@0=#ProbeDataSource:(any,any,any), { 13 [ string:"totalCount", method:#~@0>#totalCount, method_affiliate:0, string:"getData", method:#~@0>#getData, method_affiliate:1, string:"registerDataChangeListener", method:#~@0>#registerDataChangeListener, method_affiliate:1, string:"unregisterDataChangeListener", method:#~@0>#unregisterDataChangeListener, method_affiliate:1, i32:4, ]}, 0x0, v10
-	sta v8
-	sta v9
-	lda v8
-	ldobjbyname 0x10, "prototype"
+	sta v13
+	defineclasswithbuffer 0x11, &entry.src.main.ets.pages.Index&.#~@0=#ProbeDataSource:(any,any,any), { 13 [ string:"totalCount", method:#~@0>#totalCount, method_affiliate:0, string:"getData", method:#~@0>#getData, method_affiliate:1, string:"registerDataChangeListener", method:#~@0>#registerDataChangeListener, method_affiliate:1, string:"unregisterDataChangeListener", method:#~@0>#unregisterDataChangeListener, method_affiliate:1, i32:4, ]}, 0x0, v13
 	sta v11
-	lda v8
-	sta v8
-	lda v8
+	sta v12
+	lda v11
+	ldobjbyname 0x12, "prototype"
+	sta v14
+	lda v11
+	sta v11
+	lda v11
 	stlexvar 0x0, 0x0
 	ldai 0x9
-	sta v8
-	lda v8
+	sta v11
+	lda v11
 	stlexvar 0x0, 0x3
-	createobjectwithbuffer 0x12, { 2 [ string:"a", i32:3, ]}
-	sta v8
-	lda v8
-	sta v8
-	lda v8
+	createobjectwithbuffer 0x14, { 2 [ string:"a", i32:3, ]}
+	sta v11
+	lda v11
+	sta v11
+	lda v11
 	stlexvar 0x0, 0x2
-	tryldglobalbyname 0x13, "ViewPU"
-	sta v10
-	defineclasswithbuffer 0x14, &entry.src.main.ets.pages.Index&.#~@1=#ProbeDialog:(any,any,any,any,any,any,any,any,any), { 16 [ string:"setInitiallyProvidedValue", method:#~@1>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@1>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@1>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@1>#aboutToBeDeleted, method_affiliate:0, string:"setController", method:#~@1>#setController, method_affiliate:1, i32:5, ]}, 0x3, v10
-	sta v8
-	sta v9
-	lda v8
-	ldobjbyname 0x15, "prototype"
+	definefunc 0x15, &entry.src.main.ets.pages.Index&.#%#LocalKind:(any,any,any,any), 0x1
 	sta v11
-	lda.str "title"
+	lda v9
 	sta v12
-	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x17, &entry.src.main.ets.pages.Index&.#~@1>#title:(any,any,any), 0x0
-	sta v14
-	ldfalse
-	definegettersetterbyvalue v11, v12, v14, v13
-	lda.str "title"
+	callruntime.istrue 0x16
+	jnez jump_label_3
+	createemptyobject
+	sta v9
+	jmp jump_label_4
+jump_label_3:
+	lda v12
+jump_label_4:
 	sta v12
-	ldundefined
+	lda v11
+	callarg1 0x17, v12
+	tryldglobalbyname 0x19, "ViewPU"
 	sta v13
+	defineclasswithbuffer 0x1a, &entry.src.main.ets.pages.Index&.#~@1=#ProbeDialog:(any,any,any,any,any,any,any,any,any), { 16 [ string:"setInitiallyProvidedValue", method:#~@1>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@1>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@1>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@1>#aboutToBeDeleted, method_affiliate:0, string:"setController", method:#~@1>#setController, method_affiliate:1, i32:5, ]}, 0x3, v13
+	sta v11
+	sta v12
 	lda v11
-	definemethod 0x18, &entry.src.main.ets.pages.Index&.#~@1>#title^1:(any,any,any,any), 0x1
+	ldobjbyname 0x1b, "prototype"
 	sta v14
+	lda.str "title"
+	sta v15
+	ldundefined
+	sta v16
+	lda v14
+	definemethod 0x1d, &entry.src.main.ets.pages.Index&.#~@1>#title:(any,any,any), 0x0
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v13, v14
+	definegettersetterbyvalue v14, v15, v17, v16
+	lda.str "title"
+	sta v15
+	ldundefined
+	sta v16
+	lda v14
+	definemethod 0x1e, &entry.src.main.ets.pages.Index&.#~@1>#title^1:(any,any,any,any), 0x1
+	sta v17
+	ldfalse
+	definegettersetterbyvalue v14, v15, v16, v17
+	lda v14
+	definemethod 0x1f, &entry.src.main.ets.pages.Index&.#~@1>#initialRender:(any,any,any), 0x0
+	stownbyname 0x20, "initialRender", v14
+	lda v14
+	definemethod 0x22, &entry.src.main.ets.pages.Index&.#~@1>#rerender:(any,any,any), 0x0
+	stownbyname 0x23, "rerender", v14
 	lda v11
-	definemethod 0x19, &entry.src.main.ets.pages.Index&.#~@1>#initialRender:(any,any,any), 0x0
-	stownbyname 0x1a, "initialRender", v11
+	sta v11
 	lda v11
-	definemethod 0x1c, &entry.src.main.ets.pages.Index&.#~@1>#rerender:(any,any,any), 0x0
-	stownbyname 0x1d, "rerender", v11
-	lda v8
-	sta v8
-	lda v8
 	stlexvar 0x0, 0x1
-	tryldglobalbyname 0x1f, "ViewPU"
-	sta v10
-	defineclasswithbuffer 0x20, &entry.src.main.ets.pages.Index&.#~@3=#AttrChainProbe:(any,any,any,any,any,any,any,any,any), { 16 [ string:"setInitiallyProvidedValue", method:#~@3>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@3>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@3>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@3>#aboutToBeDeleted, method_affiliate:0, string:"updateRecycleElmtId", method:#~@3>#updateRecycleElmtId, method_affiliate:2, i32:5, ]}, 0x3, v10
-	sta v8
-	sta v9
-	lda v8
-	ldobjbyname 0x21, "prototype"
+	tryldglobalbyname 0x25, "ViewPU"
+	sta v13
+	defineclasswithbuffer 0x26, &entry.src.main.ets.pages.Index&.#~@4=#ConsumeCarryProbe:(any,any,any,any,any,any,any,any,any), { 13 [ string:"setInitiallyProvidedValue", method:#~@4>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@4>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@4>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@4>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}, 0x3, v13
 	sta v11
-	lda.str "wide"
 	sta v12
-	ldundefined
-	sta v13
 	lda v11
-	definemethod 0x23, &entry.src.main.ets.pages.Index&.#~@3>#wide:(any,any,any), 0x0
+	ldobjbyname 0x27, "prototype"
 	sta v14
-	ldfalse
-	definegettersetterbyvalue v11, v12, v14, v13
-	lda.str "wide"
-	sta v12
+	lda.str "first"
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x24, &entry.src.main.ets.pages.Index&.#~@3>#wide^1:(any,any,any,any), 0x1
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x29, &entry.src.main.ets.pages.Index&.#~@4>#first:(any,any,any), 0x0
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v13, v14
+	definegettersetterbyvalue v14, v15, v17, v16
+	lda.str "first"
+	sta v15
+	ldundefined
+	sta v16
+	lda v14
+	definemethod 0x2a, &entry.src.main.ets.pages.Index&.#~@4>#first^1:(any,any,any,any), 0x1
+	sta v17
+	ldfalse
+	definegettersetterbyvalue v14, v15, v16, v17
+	lda.str "adjacent"
+	sta v15
+	ldundefined
+	sta v16
+	lda v14
+	definemethod 0x2b, &entry.src.main.ets.pages.Index&.#~@4>#adjacent:(any,any,any), 0x0
+	sta v17
+	ldfalse
+	definegettersetterbyvalue v14, v15, v17, v16
+	lda.str "adjacent"
+	sta v15
+	ldundefined
+	sta v16
+	lda v14
+	definemethod 0x2c, &entry.src.main.ets.pages.Index&.#~@4>#adjacent^1:(any,any,any,any), 0x1
+	sta v17
+	ldfalse
+	definegettersetterbyvalue v14, v15, v16, v17
+	lda v14
+	definemethod 0x2d, &entry.src.main.ets.pages.Index&.#~@4>#helperMethod:(any,any,any), 0x0
+	stownbyname 0x2e, "helperMethod", v14
+	lda.str "afterMethod"
+	sta v15
+	ldundefined
+	sta v16
+	lda v14
+	definemethod 0x30, &entry.src.main.ets.pages.Index&.#~@4>#afterMethod:(any,any,any), 0x0
+	sta v17
+	ldfalse
+	definegettersetterbyvalue v14, v15, v17, v16
+	lda.str "afterMethod"
+	sta v15
+	ldundefined
+	sta v16
+	lda v14
+	definemethod 0x31, &entry.src.main.ets.pages.Index&.#~@4>#afterMethod^1:(any,any,any,any), 0x1
+	sta v17
+	ldfalse
+	definegettersetterbyvalue v14, v15, v16, v17
+	lda v14
+	definemethod 0x32, &entry.src.main.ets.pages.Index&.#~@4>#initialRender:(any,any,any), 0x0
+	stownbyname 0x33, "initialRender", v14
+	lda.str "afterBuild"
+	sta v15
+	ldundefined
+	sta v16
+	lda v14
+	definemethod 0x35, &entry.src.main.ets.pages.Index&.#~@4>#afterBuild:(any,any,any), 0x0
+	sta v17
+	ldfalse
+	definegettersetterbyvalue v14, v15, v17, v16
+	lda.str "afterBuild"
+	sta v15
+	ldundefined
+	sta v16
+	lda v14
+	definemethod 0x36, &entry.src.main.ets.pages.Index&.#~@4>#afterBuild^1:(any,any,any,any), 0x1
+	sta v17
+	ldfalse
+	definegettersetterbyvalue v14, v15, v16, v17
+	lda v14
+	definemethod 0x37, &entry.src.main.ets.pages.Index&.#~@4>#rerender:(any,any,any), 0x0
+	stownbyname 0x38, "rerender", v14
 	lda v11
-	definemethod 0x25, &entry.src.main.ets.pages.Index&.#~@3>#initialRender:(any,any,any), 0x0
-	stownbyname 0x26, "initialRender", v11
-	lda v11
-	definemethod 0x28, &entry.src.main.ets.pages.Index&.#~@3>#rerender:(any,any,any), 0x0
-	stownbyname 0x29, "rerender", v11
-	lda v8
-	sta v8
-	lda v8
-	stlexvar 0x0, 0x4
-	tryldglobalbyname 0x2b, "ViewPU"
-	sta v10
-	defineclasswithbuffer 0x2c, &entry.src.main.ets.pages.Index&.#~@4=#CommentLeading:(any,any,any,any,any,any,any,any,any), { 13 [ string:"setInitiallyProvidedValue", method:#~@4>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@4>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@4>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@4>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}, 0x3, v10
-	sta v8
-	sta v9
-	lda v8
-	ldobjbyname 0x2d, "prototype"
 	sta v11
+	lda v11
+	stlexvar 0x0, 0x7
+	tryldglobalbyname 0x3a, "ViewPU"
+	sta v13
+	defineclasswithbuffer 0x3b, &entry.src.main.ets.pages.Index&.#~@5=#ConsumeFirstProbe:(any,any,any,any,any,any,any,any,any), { 13 [ string:"setInitiallyProvidedValue", method:#~@5>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@5>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@5>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@5>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}, 0x3, v13
+	sta v11
+	sta v12
+	lda v11
+	ldobjbyname 0x3c, "prototype"
+	sta v14
+	lda.str "firstField"
+	sta v15
+	ldundefined
+	sta v16
+	lda v14
+	definemethod 0x3e, &entry.src.main.ets.pages.Index&.#~@5>#firstField:(any,any,any), 0x0
+	sta v17
+	ldfalse
+	definegettersetterbyvalue v14, v15, v17, v16
+	lda.str "firstField"
+	sta v15
+	ldundefined
+	sta v16
+	lda v14
+	definemethod 0x3f, &entry.src.main.ets.pages.Index&.#~@5>#firstField^1:(any,any,any,any), 0x1
+	sta v17
+	ldfalse
+	definegettersetterbyvalue v14, v15, v16, v17
+	lda v14
+	definemethod 0x40, &entry.src.main.ets.pages.Index&.#~@5>#initialRender:(any,any,any), 0x0
+	stownbyname 0x41, "initialRender", v14
+	lda v14
+	definemethod 0x43, &entry.src.main.ets.pages.Index&.#~@5>#rerender:(any,any,any), 0x0
+	stownbyname 0x44, "rerender", v14
+	lda v11
+	sta v11
+	lda v11
+	stlexvar 0x0, 0x8
+	tryldglobalbyname 0x46, "ViewPU"
+	sta v13
+	defineclasswithbuffer 0x47, &entry.src.main.ets.pages.Index&.#~@6=#AttrChainProbe:(any,any,any,any,any,any,any,any,any), { 16 [ string:"setInitiallyProvidedValue", method:#~@6>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@6>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@6>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@6>#aboutToBeDeleted, method_affiliate:0, string:"updateRecycleElmtId", method:#~@6>#updateRecycleElmtId, method_affiliate:2, i32:5, ]}, 0x3, v13
+	sta v11
+	sta v12
+	lda v11
+	ldobjbyname 0x48, "prototype"
+	sta v14
+	lda.str "wide"
+	sta v15
+	ldundefined
+	sta v16
+	lda v14
+	definemethod 0x4a, &entry.src.main.ets.pages.Index&.#~@6>#wide:(any,any,any), 0x0
+	sta v17
+	ldfalse
+	definegettersetterbyvalue v14, v15, v17, v16
+	lda.str "wide"
+	sta v15
+	ldundefined
+	sta v16
+	lda v14
+	definemethod 0x4b, &entry.src.main.ets.pages.Index&.#~@6>#wide^1:(any,any,any,any), 0x1
+	sta v17
+	ldfalse
+	definegettersetterbyvalue v14, v15, v16, v17
+	lda v14
+	definemethod 0x4c, &entry.src.main.ets.pages.Index&.#~@6>#initialRender:(any,any,any), 0x0
+	stownbyname 0x4d, "initialRender", v14
+	lda v14
+	definemethod 0x4f, &entry.src.main.ets.pages.Index&.#~@6>#rerender:(any,any,any), 0x0
+	stownbyname 0x50, "rerender", v14
+	lda v11
+	sta v11
+	lda v11
+	stlexvar 0x0, 0x6
+	tryldglobalbyname 0x52, "ViewPU"
+	sta v13
+	defineclasswithbuffer 0x53, &entry.src.main.ets.pages.Index&.#~@7=#CommentLeading:(any,any,any,any,any,any,any,any,any), { 13 [ string:"setInitiallyProvidedValue", method:#~@7>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@7>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@7>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@7>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}, 0x3, v13
+	sta v11
+	sta v12
+	lda v11
+	ldobjbyname 0x54, "prototype"
+	sta v14
 	lda.str "cond"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x2f, &entry.src.main.ets.pages.Index&.#~@4>#cond:(any,any,any), 0x0
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x56, &entry.src.main.ets.pages.Index&.#~@7>#cond:(any,any,any), 0x0
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v14, v13
+	definegettersetterbyvalue v14, v15, v17, v16
 	lda.str "cond"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x30, &entry.src.main.ets.pages.Index&.#~@4>#cond^1:(any,any,any,any), 0x1
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x57, &entry.src.main.ets.pages.Index&.#~@7>#cond^1:(any,any,any,any), 0x1
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v13, v14
+	definegettersetterbyvalue v14, v15, v16, v17
 	lda.str "elseCond"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x31, &entry.src.main.ets.pages.Index&.#~@4>#elseCond:(any,any,any), 0x0
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x58, &entry.src.main.ets.pages.Index&.#~@7>#elseCond:(any,any,any), 0x0
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v14, v13
+	definegettersetterbyvalue v14, v15, v17, v16
 	lda.str "elseCond"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x32, &entry.src.main.ets.pages.Index&.#~@4>#elseCond^1:(any,any,any,any), 0x1
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x59, &entry.src.main.ets.pages.Index&.#~@7>#elseCond^1:(any,any,any,any), 0x1
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v13, v14
+	definegettersetterbyvalue v14, v15, v16, v17
 	lda.str "items"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x33, &entry.src.main.ets.pages.Index&.#~@4>#items:(any,any,any), 0x0
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x5a, &entry.src.main.ets.pages.Index&.#~@7>#items:(any,any,any), 0x0
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v14, v13
+	definegettersetterbyvalue v14, v15, v17, v16
 	lda.str "items"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x34, &entry.src.main.ets.pages.Index&.#~@4>#items^1:(any,any,any,any), 0x1
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x5b, &entry.src.main.ets.pages.Index&.#~@7>#items^1:(any,any,any,any), 0x1
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v13, v14
+	definegettersetterbyvalue v14, v15, v16, v17
 	lda.str "gapFirst"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x35, &entry.src.main.ets.pages.Index&.#~@4>#gapFirst:(any,any,any), 0x0
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x5c, &entry.src.main.ets.pages.Index&.#~@7>#gapFirst:(any,any,any), 0x0
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v14, v13
+	definegettersetterbyvalue v14, v15, v17, v16
 	lda.str "gapFirst"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x36, &entry.src.main.ets.pages.Index&.#~@4>#gapFirst^1:(any,any,any,any), 0x1
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x5d, &entry.src.main.ets.pages.Index&.#~@7>#gapFirst^1:(any,any,any,any), 0x1
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v13, v14
-	lda v11
-	definemethod 0x37, &entry.src.main.ets.pages.Index&.#~@4>#helperGap:(any,any,any), 0x0
-	stownbyname 0x38, "helperGap", v11
+	definegettersetterbyvalue v14, v15, v16, v17
+	lda v14
+	definemethod 0x5e, &entry.src.main.ets.pages.Index&.#~@7>#helperGap:(any,any,any), 0x0
+	stownbyname 0x5f, "helperGap", v14
 	lda.str "objFirst"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x3a, &entry.src.main.ets.pages.Index&.#~@4>#objFirst:(any,any,any), 0x0
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x61, &entry.src.main.ets.pages.Index&.#~@7>#objFirst:(any,any,any), 0x0
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v14, v13
+	definegettersetterbyvalue v14, v15, v17, v16
 	lda.str "objFirst"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x3b, &entry.src.main.ets.pages.Index&.#~@4>#objFirst^1:(any,any,any,any), 0x1
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x62, &entry.src.main.ets.pages.Index&.#~@7>#objFirst^1:(any,any,any,any), 0x1
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v13, v14
+	definegettersetterbyvalue v14, v15, v16, v17
 	lda.str "objIdentFirst"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x3c, &entry.src.main.ets.pages.Index&.#~@4>#objIdentFirst:(any,any,any), 0x0
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x63, &entry.src.main.ets.pages.Index&.#~@7>#objIdentFirst:(any,any,any), 0x0
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v14, v13
+	definegettersetterbyvalue v14, v15, v17, v16
 	lda.str "objIdentFirst"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x3d, &entry.src.main.ets.pages.Index&.#~@4>#objIdentFirst^1:(any,any,any,any), 0x1
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x64, &entry.src.main.ets.pages.Index&.#~@7>#objIdentFirst^1:(any,any,any,any), 0x1
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v13, v14
+	definegettersetterbyvalue v14, v15, v16, v17
 	lda.str "identFirst"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x3e, &entry.src.main.ets.pages.Index&.#~@4>#identFirst:(any,any,any), 0x0
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x65, &entry.src.main.ets.pages.Index&.#~@7>#identFirst:(any,any,any), 0x0
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v14, v13
+	definegettersetterbyvalue v14, v15, v17, v16
 	lda.str "identFirst"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x3f, &entry.src.main.ets.pages.Index&.#~@4>#identFirst^1:(any,any,any,any), 0x1
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x66, &entry.src.main.ets.pages.Index&.#~@7>#identFirst^1:(any,any,any,any), 0x1
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v13, v14
+	definegettersetterbyvalue v14, v15, v16, v17
 	lda.str "multiFirst"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x40, &entry.src.main.ets.pages.Index&.#~@4>#multiFirst:(any,any,any), 0x0
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x67, &entry.src.main.ets.pages.Index&.#~@7>#multiFirst:(any,any,any), 0x0
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v14, v13
+	definegettersetterbyvalue v14, v15, v17, v16
 	lda.str "multiFirst"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x41, &entry.src.main.ets.pages.Index&.#~@4>#multiFirst^1:(any,any,any,any), 0x1
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x68, &entry.src.main.ets.pages.Index&.#~@7>#multiFirst^1:(any,any,any,any), 0x1
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v13, v14
+	definegettersetterbyvalue v14, v15, v16, v17
 	lda.str "numFirst"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x42, &entry.src.main.ets.pages.Index&.#~@4>#numFirst:(any,any,any), 0x0
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x69, &entry.src.main.ets.pages.Index&.#~@7>#numFirst:(any,any,any), 0x0
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v14, v13
+	definegettersetterbyvalue v14, v15, v17, v16
 	lda.str "numFirst"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x43, &entry.src.main.ets.pages.Index&.#~@4>#numFirst^1:(any,any,any,any), 0x1
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x6a, &entry.src.main.ets.pages.Index&.#~@7>#numFirst^1:(any,any,any,any), 0x1
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v13, v14
+	definegettersetterbyvalue v14, v15, v16, v17
 	lda.str "tagged"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x44, &entry.src.main.ets.pages.Index&.#~@4>#tagged:(any,any,any), 0x0
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x6b, &entry.src.main.ets.pages.Index&.#~@7>#tagged:(any,any,any), 0x0
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v14, v13
+	definegettersetterbyvalue v14, v15, v17, v16
 	lda.str "tagged"
-	sta v12
+	sta v15
 	ldundefined
-	sta v13
-	lda v11
-	definemethod 0x45, &entry.src.main.ets.pages.Index&.#~@4>#tagged^1:(any,any,any,any), 0x1
-	sta v14
+	sta v16
+	lda v14
+	definemethod 0x6c, &entry.src.main.ets.pages.Index&.#~@7>#tagged^1:(any,any,any,any), 0x1
+	sta v17
 	ldfalse
-	definegettersetterbyvalue v11, v12, v13, v14
+	definegettersetterbyvalue v14, v15, v16, v17
+	lda v14
+	definemethod 0x6d, &entry.src.main.ets.pages.Index&.#~@7>#initialRender:(any,any,any), 0x0
+	stownbyname 0x6e, "initialRender", v14
+	lda v14
+	definemethod 0x70, &entry.src.main.ets.pages.Index&.#~@7>#rerender:(any,any,any), 0x0
+	stownbyname 0x71, "rerender", v14
 	lda v11
-	definemethod 0x46, &entry.src.main.ets.pages.Index&.#~@4>#initialRender:(any,any,any), 0x0
-	stownbyname 0x47, "initialRender", v11
+	definemethod 0x73, &entry.src.main.ets.pages.Index&.#~@7<#getEntryName:(any,any,any), 0x0
+	stownbyname 0x74, "getEntryName", v11
 	lda v11
-	definemethod 0x49, &entry.src.main.ets.pages.Index&.#~@4>#rerender:(any,any,any), 0x0
-	stownbyname 0x4a, "rerender", v11
-	lda v8
-	definemethod 0x4c, &entry.src.main.ets.pages.Index&.#~@4<#getEntryName:(any,any,any), 0x0
-	stownbyname 0x4d, "getEntryName", v8
-	lda v8
-	sta v8
-	lda v8
-	stlexvar 0x0, 0x5
-	tryldglobalbyname 0x4f, "registerNamedRoute"
-	sta v8
-	definefunc 0x50, &entry.src.main.ets.pages.Index&.#*#^1:(any,any,any), 0x0
-	sta v9
+	sta v11
+	lda v11
+	stlexvar 0x0, 0x9
+	tryldglobalbyname 0x76, "registerNamedRoute"
+	sta v11
+	definefunc 0x77, &entry.src.main.ets.pages.Index&.#*#^1:(any,any,any), 0x0
+	sta v12
 	lda.str ""
-	sta v10
-	createobjectwithbuffer 0x51, { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-	sta v11
+	sta v13
+	createobjectwithbuffer 0x78, { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+	sta v14
+	lda v14
+	sta v14
 	lda v11
-	sta v11
-	lda v8
-	callargs3 0x52, v9, v10, v11
+	callargs3 0x79, v12, v13, v14
 	ldundefined
 	returnundefined
 }
@@ -5405,146 +7445,173 @@ jump_label_2:
 # ====================
 # STRING
 
-[offset:0xb68, name_value:UIAbility]
-[offset:0xb7c, name_value:hilog]
-[offset:0xbca, name_value:DOMAIN]
-[offset:0x1a4a, name_value:params]
-[offset:0x212e, name_value:item]
-[offset:0x2393, name_value:ProbeDataSource]
-[offset:0x23a4, name_value:ProbeDialog]
-[offset:0x23b1, name_value:AttrChainProbe]
-[offset:0x23c1, name_value:CommentLeading]
-[offset:0x27b8, name_value:initialRender]
-[offset:0x27c7, name_value:builder]
-[offset:0x27d0, name_value:itemCreation2]
-[offset:0x2814, name_value:title]
-[offset:0x2829, name_value:x]
-[offset:0x2838, name_value:a]
-[offset:0x288a, name_value:setInitiallyProvidedValue]
-[offset:0x28d9, name_value:aboutToBeDeleted]
-[offset:0x28eb, name_value:setController]
-[offset:0x294a, name_value:pages/Index]
-[offset:0x29b6, name_value:INIT_OBJ]
-[offset:0x29c0, name_value:INIT_VALUE]
-[offset:0x29f7, name_value:info]
-[offset:0x29fd, name_value:testTag]
-[offset:0x2a06, name_value:%{public}s]
-[offset:0x2a12, name_value:Ability onBackground]
-[offset:0x2a28, name_value:Ability onCreate]
-[offset:0x2a3a, name_value:Ability onDestroy]
-[offset:0x2a4d, name_value:Ability onForeground]
-[offset:0x2a63, name_value:Ability onWindowStageCreate]
-[offset:0x2a80, name_value:loadContent]
-[offset:0x2a8d, name_value:Ability onWindowStageDestroy]
-[offset:0x2aab, name_value:code]
-[offset:0x2ab1, name_value:error]
-[offset:0x2ab8, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x2ae7, name_value:JSON]
-[offset:0x2aed, name_value:stringify]
-[offset:0x2af8, name_value:Succeeded in loading the content.]
-[offset:0x2b1b, name_value:prototype]
-[offset:0x2b26, name_value:listeners]
-[offset:0x2b31, name_value:data]
-[offset:0x2b4e, name_value:push]
-[offset:0x2b54, name_value:length]
-[offset:0x2b5c, name_value:indexOf]
-[offset:0x2b65, name_value:splice]
-[offset:0x2b6d, name_value:function]
-[offset:0x2b77, name_value:paramsGenerator_]
-[offset:0x2b89, name_value:controller]
-[offset:0x2b95, name_value:SynchedPropertyObjectOneWayPU]
-[offset:0x2bb4, name_value:__title]
-[offset:0x2bbd, name_value:finalizeConstruction]
-[offset:0x2bd3, name_value:SubscriberManager]
-[offset:0x2be6, name_value:Get]
-[offset:0x2beb, name_value:delete]
-[offset:0x2bf3, name_value:id__]
-[offset:0x2bf9, name_value:aboutToBeDeletedInternal]
-[offset:0x2c13, name_value:observeComponentCreation2]
-[offset:0x2c2e, name_value:Column]
-[offset:0x2c36, name_value:pop]
-[offset:0x2c3b, name_value:purgeDependencyOnElmtId]
-[offset:0x2c54, name_value:updateDirtyElements]
-[offset:0x2c69, name_value:get]
-[offset:0x2c6e, name_value:set]
-[offset:0x2c73, name_value:reset]
-[offset:0x2c7a, name_value:create]
-[offset:0x2c82, name_value:ObservedPropertySimplePU]
-[offset:0x2c9c, name_value:wide]
-[offset:0x2ca2, name_value:__wide]
-[offset:0x2caa, name_value:Text]
-[offset:0x2cb0, name_value:updateElmtId]
-[offset:0x2cbe, name_value:r]
-[offset:0x2cc1, name_value:width]
-[offset:0x2cc8, name_value:fontSize]
-[offset:0x2cd2, name_value:fontColor]
-[offset:0x2cdd, name_value:Color]
-[offset:0x2ce4, name_value:Red]
-[offset:0x2ce9, name_value:cond]
-[offset:0x2cef, name_value:__cond]
-[offset:0x2cf7, name_value:elseCond]
-[offset:0x2d01, name_value:__elseCond]
-[offset:0x2d0d, name_value:ObservedPropertyObjectPU]
-[offset:0x2d27, name_value:items]
-[offset:0x2d2e, name_value:__items]
-[offset:0x2d37, name_value:source]
-[offset:0x2d3f, name_value:CustomDialogController]
-[offset:0x2d57, name_value:dlg]
-[offset:0x2d5c, name_value:gapFirst]
-[offset:0x2d66, name_value:__gapFirst]
-[offset:0x2d72, name_value:plainAfterGap]
-[offset:0x2d81, name_value:objFirst]
-[offset:0x2d8b, name_value:__objFirst]
-[offset:0x2d97, name_value:plainAfterObj]
-[offset:0x2da6, name_value:objIdentFirst]
-[offset:0x2db5, name_value:__objIdentFirst]
-[offset:0x2dc6, name_value:plainAfterObjIdent]
-[offset:0x2dda, name_value:identFirst]
-[offset:0x2de6, name_value:__identFirst]
-[offset:0x2df4, name_value:plainAfterIdent]
-[offset:0x2e05, name_value:multiFirst]
-[offset:0x2e11, name_value:__multiFirst]
-[offset:0x2e1f, name_value:objMulti]
-[offset:0x2e29, name_value:numFirst]
-[offset:0x2e33, name_value:__numFirst]
-[offset:0x2e3f, name_value:objAfter]
-[offset:0x2e49, name_value:dlg2]
-[offset:0x2e4f, name_value:dlg3]
-[offset:0x2e55, name_value:tagged]
-[offset:0x2e5d, name_value:__tagged]
-[offset:0x2e67, name_value:ViewPU]
-[offset:0x2e6f, name_value:If]
-[offset:0x2e73, name_value:ForEach]
-[offset:0x2e7c, name_value:__Recycle__]
-[offset:0x2e89, name_value:observeRecycleComponentCreation]
-[offset:0x2eaa, name_value:List]
-[offset:0x2eb0, name_value:LazyForEach]
-[offset:0x2ebd, name_value:1]
-[offset:0x2ec0, name_value:ifElseBranchUpdateFunction]
-[offset:0x2edc, name_value:ViewStackProcessor]
-[offset:0x2ef0, name_value:StartGetAccessRecordingFor]
-[offset:0x2f0c, name_value:createRecycle]
-[offset:0x2f1b, name_value:updateStateVarsOfChildByElmtId]
-[offset:0x2f3b, name_value:StopGetAccessRecording]
-[offset:0x2f53, name_value:forEachUpdateFunction]
-[offset:0x2f6a, name_value:d]
-[offset:0x2f6d, name_value:y]
-[offset:0x2f70, name_value:z]
-[offset:0x2f73, name_value:a1]
-[offset:0x2f77, name_value:a2]
-[offset:0x2f7b, name_value:a4]
-[offset:0x2f7f, name_value:height]
-[offset:0x2f87, name_value:res]
-[offset:0x2f8c, name_value:ListItem]
-[offset:0x2f96, name_value:aboutToReuseInternal]
-[offset:0x2fac, name_value:aboutToReuse]
-[offset:0x2fba, name_value:rerender]
-[offset:0x2fc4, name_value:no]
-[offset:0x2fc8, name_value:b]
-[offset:0x2fcb, name_value:c]
-[offset:0x2fce, name_value:e]
-[offset:0x2fd1, name_value:Reflect]
-[offset:0x2fda, name_value:helperGap]
-[offset:0x2fe5, name_value:getEntryName]
-[offset:0x2ff3, name_value:registerNamedRoute]
-[offset:0x3007, name_value:]
+[offset:0xcac, name_value:UIAbility]
+[offset:0xcc0, name_value:hilog]
+[offset:0xd0e, name_value:DOMAIN]
+[offset:0x21a4, name_value:width]
+[offset:0x227d, name_value:params]
+[offset:0x2bee, name_value:item]
+[offset:0x2f96, name_value:ProbeDataSource]
+[offset:0x2fa7, name_value:ProbeDialog]
+[offset:0x2fb4, name_value:ConsumeCarryProbe]
+[offset:0x2fc7, name_value:ConsumeFirstProbe]
+[offset:0x2fda, name_value:AttrChainProbe]
+[offset:0x2fea, name_value:CommentLeading]
+[offset:0x3544, name_value:initialRender]
+[offset:0x3553, name_value:animWidth]
+[offset:0x355e, name_value:builder]
+[offset:0x3567, name_value:itemCreation2]
+[offset:0x357c, name_value:title]
+[offset:0x35ce, name_value:x]
+[offset:0x35dd, name_value:a]
+[offset:0x362f, name_value:setInitiallyProvidedValue]
+[offset:0x367e, name_value:aboutToBeDeleted]
+[offset:0x3690, name_value:setController]
+[offset:0x36fc, name_value:pages/Index]
+[offset:0x3768, name_value:INIT_OBJ]
+[offset:0x3772, name_value:INIT_VALUE]
+[offset:0x37a8, name_value:info]
+[offset:0x37ae, name_value:testTag]
+[offset:0x37b7, name_value:%{public}s]
+[offset:0x37c3, name_value:Ability onBackground]
+[offset:0x37d9, name_value:Ability onCreate]
+[offset:0x37eb, name_value:Ability onDestroy]
+[offset:0x37fe, name_value:Ability onForeground]
+[offset:0x3814, name_value:Ability onWindowStageCreate]
+[offset:0x3831, name_value:loadContent]
+[offset:0x383e, name_value:Ability onWindowStageDestroy]
+[offset:0x385c, name_value:code]
+[offset:0x3862, name_value:error]
+[offset:0x3869, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x3898, name_value:JSON]
+[offset:0x389e, name_value:stringify]
+[offset:0x38a9, name_value:Succeeded in loading the content.]
+[offset:0x38cc, name_value:prototype]
+[offset:0x38d7, name_value:A]
+[offset:0x38da, name_value:B]
+[offset:0x38dd, name_value:Text]
+[offset:0x38e3, name_value:fontWeight]
+[offset:0x38ef, name_value:FontWeight]
+[offset:0x38fb, name_value:Bold]
+[offset:0x3901, name_value:createAnimatableProperty]
+[offset:0x391b, name_value:updateAnimatableProperty]
+[offset:0x3935, name_value:ViewStackProcessor]
+[offset:0x3949, name_value:StartGetAccessRecordingFor]
+[offset:0x3965, name_value:GetAndPushFrameNode]
+[offset:0x397a, name_value:StopGetAccessRecording]
+[offset:0x3992, name_value:finishUpdateFunc]
+[offset:0x39a4, name_value:listeners]
+[offset:0x39af, name_value:data]
+[offset:0x39cc, name_value:push]
+[offset:0x39d2, name_value:length]
+[offset:0x39da, name_value:indexOf]
+[offset:0x39e3, name_value:splice]
+[offset:0x39eb, name_value:function]
+[offset:0x39f5, name_value:paramsGenerator_]
+[offset:0x3a07, name_value:controller]
+[offset:0x3a13, name_value:SynchedPropertyObjectOneWayPU]
+[offset:0x3a32, name_value:__title]
+[offset:0x3a3b, name_value:finalizeConstruction]
+[offset:0x3a51, name_value:SubscriberManager]
+[offset:0x3a64, name_value:Get]
+[offset:0x3a69, name_value:delete]
+[offset:0x3a71, name_value:id__]
+[offset:0x3a77, name_value:aboutToBeDeletedInternal]
+[offset:0x3a91, name_value:observeComponentCreation2]
+[offset:0x3aac, name_value:Column]
+[offset:0x3ab4, name_value:pop]
+[offset:0x3ab9, name_value:purgeDependencyOnElmtId]
+[offset:0x3ad2, name_value:updateDirtyElements]
+[offset:0x3ae7, name_value:get]
+[offset:0x3aec, name_value:set]
+[offset:0x3af1, name_value:reset]
+[offset:0x3af8, name_value:create]
+[offset:0x3b00, name_value:ObservedPropertySimplePU]
+[offset:0x3b1a, name_value:first]
+[offset:0x3b21, name_value:__first]
+[offset:0x3b2a, name_value:initializeConsume]
+[offset:0x3b3d, name_value:adjacent]
+[offset:0x3b47, name_value:__adjacent]
+[offset:0x3b53, name_value:afterMethod]
+[offset:0x3b60, name_value:__afterMethod]
+[offset:0x3b6f, name_value:afterBuild]
+[offset:0x3b7b, name_value:__afterBuild]
+[offset:0x3b89, name_value:firstField]
+[offset:0x3b95, name_value:__firstField]
+[offset:0x3ba3, name_value:wide]
+[offset:0x3ba9, name_value:__wide]
+[offset:0x3bb1, name_value:updateElmtId]
+[offset:0x3bbf, name_value:r]
+[offset:0x3bc2, name_value:fontSize]
+[offset:0x3bcc, name_value:fontColor]
+[offset:0x3bd7, name_value:Color]
+[offset:0x3bde, name_value:Red]
+[offset:0x3be3, name_value:cond]
+[offset:0x3be9, name_value:__cond]
+[offset:0x3bf1, name_value:elseCond]
+[offset:0x3bfb, name_value:__elseCond]
+[offset:0x3c07, name_value:ObservedPropertyObjectPU]
+[offset:0x3c21, name_value:items]
+[offset:0x3c28, name_value:__items]
+[offset:0x3c31, name_value:source]
+[offset:0x3c39, name_value:CustomDialogController]
+[offset:0x3c51, name_value:dlg]
+[offset:0x3c56, name_value:gapFirst]
+[offset:0x3c60, name_value:__gapFirst]
+[offset:0x3c6c, name_value:plainAfterGap]
+[offset:0x3c7b, name_value:objFirst]
+[offset:0x3c85, name_value:__objFirst]
+[offset:0x3c91, name_value:plainAfterObj]
+[offset:0x3ca0, name_value:objIdentFirst]
+[offset:0x3caf, name_value:__objIdentFirst]
+[offset:0x3cc0, name_value:plainAfterObjIdent]
+[offset:0x3cd4, name_value:identFirst]
+[offset:0x3ce0, name_value:__identFirst]
+[offset:0x3cee, name_value:plainAfterIdent]
+[offset:0x3cff, name_value:multiFirst]
+[offset:0x3d0b, name_value:__multiFirst]
+[offset:0x3d19, name_value:objMulti]
+[offset:0x3d23, name_value:numFirst]
+[offset:0x3d2d, name_value:__numFirst]
+[offset:0x3d39, name_value:objAfter]
+[offset:0x3d43, name_value:dlg2]
+[offset:0x3d49, name_value:dlg3]
+[offset:0x3d4f, name_value:tagged]
+[offset:0x3d57, name_value:__tagged]
+[offset:0x3d61, name_value:ViewPU]
+[offset:0x3d69, name_value:If]
+[offset:0x3d6d, name_value:ForEach]
+[offset:0x3d76, name_value:__Recycle__]
+[offset:0x3d83, name_value:observeRecycleComponentCreation]
+[offset:0x3da4, name_value:List]
+[offset:0x3daa, name_value:LazyForEach]
+[offset:0x3db7, name_value:1]
+[offset:0x3dba, name_value:ifElseBranchUpdateFunction]
+[offset:0x3dd6, name_value:res]
+[offset:0x3ddb, name_value:createRecycle]
+[offset:0x3dea, name_value:updateStateVarsOfChildByElmtId]
+[offset:0x3e0a, name_value:forEachUpdateFunction]
+[offset:0x3e21, name_value:d]
+[offset:0x3e24, name_value:y]
+[offset:0x3e27, name_value:z]
+[offset:0x3e2a, name_value:an1]
+[offset:0x3e2f, name_value:e1]
+[offset:0x3e33, name_value:a1]
+[offset:0x3e37, name_value:a2]
+[offset:0x3e3b, name_value:a4]
+[offset:0x3e3f, name_value:height]
+[offset:0x3e47, name_value:ListItem]
+[offset:0x3e51, name_value:aboutToReuseInternal]
+[offset:0x3e67, name_value:aboutToReuse]
+[offset:0x3e75, name_value:rerender]
+[offset:0x3e7f, name_value:tail]
+[offset:0x3e85, name_value:no]
+[offset:0x3e89, name_value:b]
+[offset:0x3e8c, name_value:c]
+[offset:0x3e8f, name_value:e]
+[offset:0x3e92, name_value:Reflect]
+[offset:0x3e9b, name_value:helperMethod]
+[offset:0x3ea9, name_value:helperGap]
+[offset:0x3eb4, name_value:getEntryName]
+[offset:0x3ec2, name_value:registerNamedRoute]
+[offset:0x3ed6, name_value:]

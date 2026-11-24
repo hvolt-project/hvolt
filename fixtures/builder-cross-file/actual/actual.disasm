@@ -3,30 +3,31 @@
 # ====================
 # LITERALS
 
-0 0xc9d { 3 [ i32:1, string:"ImportHost", i32:0, ]}
-1 0x1141 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Shared", string:"pageFullPath", string:"entry/src/main/ets/pages/Shared", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-10 0x777 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-11 0x7ce { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-12 0x10ca { 3 [ i32:1, string:"__text__", i32:0, ]}
-13 0x1093 { 3 [ string:"SharedPage", string:"initialRender", string:"pageBuilder", ]}
-2 0xbf9 { 22 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@0>#initialRender, method_affiliate:0, string:"rerender", method:#~@0>#rerender, method_affiliate:0, string:"getEntryName", method:#~@0<#getEntryName, method_affiliate:0, i32:6, ]}
-3 0xbc1 { 2 [ string:"ImportHost", string:"initialRender", ]}
-4 0x1181 { 3 [ i32:1, string:"SharedPage", i32:0, ]}
-5 0x729 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-6 0x10dd { 22 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@0>#initialRender, method_affiliate:0, string:"rerender", method:#~@0>#rerender, method_affiliate:0, string:"getEntryName", method:#~@0<#getEntryName, method_affiliate:0, i32:6, ]}
-9 0xc5d { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-14 0xbcf { 1 [
+0 0x1294 { 3 [ i32:1, string:"SharedPage", i32:0, ]}
+1 0x11dd { 3 [ i32:1, string:"__text__", i32:0, ]}
+10 0x97d 
+12 0x77f { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+13 0x11f0 { 22 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@0>#initialRender, method_affiliate:0, string:"rerender", method:#~@0>#rerender, method_affiliate:0, string:"getEntryName", method:#~@0<#getEntryName, method_affiliate:0, i32:6, ]}
+14 0x11a6 { 3 [ string:"SharedPage", string:"initialRender", string:"pageBuilder", ]}
+15 0xd0c { 22 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@0>#initialRender, method_affiliate:0, string:"rerender", method:#~@0>#rerender, method_affiliate:0, string:"getEntryName", method:#~@0<#getEntryName, method_affiliate:0, i32:6, ]}
+16 0xd70 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+2 0x1254 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Shared", string:"pageFullPath", string:"entry/src/main/ets/pages/Shared", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+3 0x7d6 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+6 0xdb0 { 3 [ i32:1, string:"ImportHost", i32:0, ]}
+7 0xcd4 { 2 [ string:"ImportHost", string:"initialRender", ]}
+9 0x731 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+11 0x11b9 { 1 [
+	MODULE_REQUEST_ARRAY: {
+	};
+	ModuleTag: LOCAL_EXPORT, local_name: pageBuilder, export_name: pageBuilder;
+]}
+4 0xce2 { 1 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @normalized:N&&&entry/src/main/ets/pages/Shared&,
 	};
 	ModuleTag: REGULAR_IMPORT, local_name: pageBuilder, import_name: pageBuilder, module_request: @normalized:N&&&entry/src/main/ets/pages/Shared&;
 ]}
-7 0x10a6 { 1 [
-	MODULE_REQUEST_ARRAY: {
-	};
-	ModuleTag: LOCAL_EXPORT, local_name: pageBuilder, export_name: pageBuilder;
-]}
-8 0x737 { 3 [
+5 0x73f { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -35,9 +36,23 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
+8 0x981 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
 
 # ====================
 # RECORDS
+
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x97d
+	u32 moduleRecordIdx = 0x981
+}
 
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
@@ -45,8 +60,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x729
-	u32 moduleRecordIdx = 0x737
+	u32 scopeNames = 0x731
+	u32 moduleRecordIdx = 0x73f
 }
 
 .language ArkTS
@@ -55,8 +70,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xbc1
-	u32 moduleRecordIdx = 0xbcf
+	u32 scopeNames = 0xcd4
+	u32 moduleRecordIdx = 0xce2
 }
 
 .language ArkTS
@@ -65,8 +80,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x1093
-	u32 moduleRecordIdx = 0x10a6
+	u32 scopeNames = 0x11a6
+	u32 moduleRecordIdx = 0x11b9
 }
 
 .language ECMAScript
@@ -118,6 +133,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -1201,50 +1227,50 @@ jump_label_2:
 # ====================
 # STRING
 
-[offset:0x820, name_value:UIAbility]
-[offset:0x834, name_value:hilog]
-[offset:0x882, name_value:DOMAIN]
-[offset:0xbb5, name_value:ImportHost]
-[offset:0xcf1, name_value:pageBuilder]
-[offset:0xcfe, name_value:setInitiallyProvidedValue]
-[offset:0xdb2, name_value:pages/Index]
-[offset:0x1087, name_value:SharedPage]
-[offset:0x1194, name_value:__text__]
-[offset:0x11d9, name_value:info]
-[offset:0x11df, name_value:testTag]
-[offset:0x11e8, name_value:%{public}s]
-[offset:0x11f4, name_value:Ability onBackground]
-[offset:0x120a, name_value:Ability onCreate]
-[offset:0x121c, name_value:Ability onDestroy]
-[offset:0x122f, name_value:Ability onForeground]
-[offset:0x1245, name_value:Ability onWindowStageCreate]
-[offset:0x1262, name_value:loadContent]
-[offset:0x126f, name_value:Ability onWindowStageDestroy]
-[offset:0x128d, name_value:code]
-[offset:0x1293, name_value:error]
-[offset:0x129a, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x12c9, name_value:JSON]
-[offset:0x12cf, name_value:stringify]
-[offset:0x12da, name_value:Succeeded in loading the content.]
-[offset:0x12fd, name_value:prototype]
-[offset:0x1308, name_value:function]
-[offset:0x1312, name_value:paramsGenerator_]
-[offset:0x1324, name_value:finalizeConstruction]
-[offset:0x133a, name_value:SubscriberManager]
-[offset:0x134d, name_value:Get]
-[offset:0x1352, name_value:delete]
-[offset:0x135a, name_value:id__]
-[offset:0x1360, name_value:aboutToBeDeletedInternal]
-[offset:0x137a, name_value:observeComponentCreation2]
-[offset:0x1395, name_value:Column]
-[offset:0x139d, name_value:bind]
-[offset:0x13a3, name_value:shared]
-[offset:0x13ab, name_value:pop]
-[offset:0x13b0, name_value:updateDirtyElements]
-[offset:0x13c5, name_value:create]
-[offset:0x13cd, name_value:ViewPU]
-[offset:0x13d5, name_value:Reflect]
-[offset:0x13de, name_value:set]
-[offset:0x13e3, name_value:registerNamedRoute]
-[offset:0x13f7, name_value:]
-[offset:0x13f9, name_value:Text]
+[offset:0x828, name_value:UIAbility]
+[offset:0x83c, name_value:hilog]
+[offset:0x88a, name_value:DOMAIN]
+[offset:0xcc8, name_value:ImportHost]
+[offset:0xe04, name_value:pageBuilder]
+[offset:0xe11, name_value:setInitiallyProvidedValue]
+[offset:0xec5, name_value:pages/Index]
+[offset:0x119a, name_value:SharedPage]
+[offset:0x12a7, name_value:__text__]
+[offset:0x12ec, name_value:info]
+[offset:0x12f2, name_value:testTag]
+[offset:0x12fb, name_value:%{public}s]
+[offset:0x1307, name_value:Ability onBackground]
+[offset:0x131d, name_value:Ability onCreate]
+[offset:0x132f, name_value:Ability onDestroy]
+[offset:0x1342, name_value:Ability onForeground]
+[offset:0x1358, name_value:Ability onWindowStageCreate]
+[offset:0x1375, name_value:loadContent]
+[offset:0x1382, name_value:Ability onWindowStageDestroy]
+[offset:0x13a0, name_value:code]
+[offset:0x13a6, name_value:error]
+[offset:0x13ad, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x13dc, name_value:JSON]
+[offset:0x13e2, name_value:stringify]
+[offset:0x13ed, name_value:Succeeded in loading the content.]
+[offset:0x1410, name_value:prototype]
+[offset:0x141b, name_value:function]
+[offset:0x1425, name_value:paramsGenerator_]
+[offset:0x1437, name_value:finalizeConstruction]
+[offset:0x144d, name_value:SubscriberManager]
+[offset:0x1460, name_value:Get]
+[offset:0x1465, name_value:delete]
+[offset:0x146d, name_value:id__]
+[offset:0x1473, name_value:aboutToBeDeletedInternal]
+[offset:0x148d, name_value:observeComponentCreation2]
+[offset:0x14a8, name_value:Column]
+[offset:0x14b0, name_value:bind]
+[offset:0x14b6, name_value:shared]
+[offset:0x14be, name_value:pop]
+[offset:0x14c3, name_value:updateDirtyElements]
+[offset:0x14d8, name_value:create]
+[offset:0x14e0, name_value:ViewPU]
+[offset:0x14e8, name_value:Reflect]
+[offset:0x14f1, name_value:set]
+[offset:0x14f6, name_value:registerNamedRoute]
+[offset:0x150a, name_value:]
+[offset:0x150c, name_value:Text]

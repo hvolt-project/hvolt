@@ -3,9 +3,9 @@
  */
 @Observed
 export class MapHolder {
-  private cache: Map<string, number> = new Map<string, number>([['seed', 1]])
+    private cache: Map<string, number> = new Map<string, number>([['seed', 1]])
 
-  total(): number {
-    return this.cache.size
-  }
+    total(): number {
+        return this.cache.size
+    }
 }

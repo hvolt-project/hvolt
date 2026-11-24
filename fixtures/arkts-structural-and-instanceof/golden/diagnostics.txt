@@ -1,0 +1,4 @@
+ERROR 10505001 ets/pages/Index.ets:17:20 The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+ERROR 10605030 ets/pages/Index.ets:14:28 Structural typing is not supported (arkts-no-structural-typing)
+ERROR 10605065 ets/pages/Index.ets:17:30 "instanceof" operator is partially supported (arkts-instanceof-ref-types)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

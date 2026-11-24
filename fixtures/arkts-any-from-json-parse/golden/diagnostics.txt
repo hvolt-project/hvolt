@@ -1,0 +1,2 @@
+ERROR 10605008 ets/pages/Index.ets:1:7 Use explicit types instead of "any", "unknown" (arkts-no-any-unknown)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

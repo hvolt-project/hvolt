@@ -63,10 +63,18 @@ class Index extends ViewPU {
 				if (isInitialRender) {
 					let componentCall = new Child(this, { content: () => {
 						this.observeComponentCreation2((elmtId, isInitialRender) => {
-							Text.create('inside');
-							Text.fontSize(16);
-						}, Text);
-						Text.pop();
+							ForEach.create();
+							const forEachItemGenFunction = (_item) => {
+								const item = _item;
+								this.observeComponentCreation2((elmtId, isInitialRender) => {
+									Text.create(item);
+									Text.fontSize(16);
+								}, Text);
+								Text.pop();
+							};
+							this.forEachUpdateFunction(elmtId, ['inside'], forEachItemGenFunction);
+						}, ForEach);
+						ForEach.pop();
 					} }, undefined, elmtId, () => {}, {
 						page: 'entry/src/main/ets/pages/Index.ets',
 						line: 17,
@@ -76,10 +84,18 @@ class Index extends ViewPU {
 					let paramsLambda = () => {
 						return { content: () => {
 							this.observeComponentCreation2((elmtId, isInitialRender) => {
-								Text.create('inside');
-								Text.fontSize(16);
-							}, Text);
-							Text.pop();
+								ForEach.create();
+								const forEachItemGenFunction = (_item) => {
+									const item = _item;
+									this.observeComponentCreation2((elmtId, isInitialRender) => {
+										Text.create(item);
+										Text.fontSize(16);
+									}, Text);
+									Text.pop();
+								};
+								this.forEachUpdateFunction(elmtId, ['inside'], forEachItemGenFunction);
+							}, ForEach);
+							ForEach.pop();
 						} };
 					};
 					componentCall.paramsGenerator_ = paramsLambda;

@@ -3,59 +3,64 @@
 # ====================
 # LITERALS
 
-0 0x20ef { 2 [ string:"builder", null_value:0, ]}
-1 0x2242 { 13 [ string:"setInitiallyProvidedValue", method:#~@7>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@7>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@7>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@7>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-10 0x20b0 { 4 [ string:"linked", null_value:0, string:"copied", null_value:0, ]}
-11 0x23d9 { 2 [ string:"value", string:"p", ]}
-12 0x200f { 4 [ string:"linked", null_value:0, string:"copied", null_value:0, ]}
-13 0x1fd7 { 3 [ i32:1, string:"this", i32:0, ]}
-14 0x20fa { 2 [ string:"linked", null_value:0, ]}
-15 0xa06 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-16 0x20c2 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:14, string:"col", i32:14, ]}
-17 0x1f9f { 2 [ string:"linked", null_value:0, ]}
-18 0x21e5 { 3 [ i32:1, string:"this", i32:0, ]}
-19 0x2021 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:22, string:"col", i32:7, ]}
-2 0x2339 { 17 [ i32:8, string:"Model", i32:0, string:"LinkDialog", i32:1, string:"PlainChild", i32:2, string:"LinkChild", i32:3, string:"ReusableChild", i32:4, string:"ObjChild", i32:5, string:"ParamChild", i32:6, string:"Index", i32:7, ]}
-20 0x2118 { 1 [ i32:0, ]}
-21 0x1f94 { 2 [ string:"linked", null_value:0, ]}
-22 0x1f89 { 2 [ string:"item", null_value:0, ]}
-23 0x1fea { 3 [ i32:1, string:"recycleNode", i32:0, ]}
-24 0x20e4 { 2 [ string:"builder", null_value:0, ]}
-25 0x209d { 3 [ i32:1, string:"this", i32:0, ]}
-26 0x23a5 { 3 [ i32:1, string:"this", i32:0, ]}
-27 0x1faa { 2 [ string:"linked", null_value:0, ]}
-28 0x1fb5 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:23, string:"col", i32:7, ]}
-29 0x1f21 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:25, string:"col", i32:7, ]}
-3 0x2043 { 2 [ string:"copied", null_value:0, ]}
-30 0x206a { 2 [ string:"name", string:"ParamChild", ]}
-31 0x1f43 { 2 [ string:"value", string:"p", ]}
-32 0x205c { 2 [ string:"name", string:"ObjChild", ]}
-33 0x208b { 4 [ string:"linked", null_value:0, string:"copied", null_value:0, ]}
-34 0x2121 { 13 [ string:"setInitiallyProvidedValue", method:#~@1>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@1>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@1>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@1>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-35 0x215e { 13 [ string:"setInitiallyProvidedValue", method:#~@4>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@4>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@4>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@4>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-36 0x9af { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-37 0x1f51 { 2 [ string:"item", null_value:0, ]}
-38 0x21f8 { 16 [ string:"setInitiallyProvidedValue", method:#~@6>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@6>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@6>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@6>#aboutToBeDeleted, method_affiliate:0, string:"setController", method:#~@6>#setController, method_affiliate:1, i32:5, ]}
-39 0x227f { 13 [ string:"setInitiallyProvidedValue", method:#~@8>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@8>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@8>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@8>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-4 0x2105 { 3 [ i32:1, string:"this", i32:0, ]}
-40 0x1ffd { 4 [ string:"linked", null_value:0, string:"copied", null_value:0, ]}
-41 0x22bc { 13 [ string:"resetStateVarsOnReuse", method:#~@9>#resetStateVarsOnReuse, method_affiliate:1, string:"initialRender", method:#~@9>#initialRender, method_affiliate:0, string:"updateStateVars", method:#~@9>#updateStateVars, method_affiliate:1, string:"rerender", method:#~@9>#rerender, method_affiliate:0, i32:4, ]}
-43 0x23cb { 2 [ string:"value", string:"p", ]}
-44 0x204e { 2 [ string:"name", string:"LinkChild", ]}
-45 0x961 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-47 0x1f5c { 2 [ string:"item", null_value:0, ]}
-48 0x1ecf { 10 [ string:"Model", string:"Index", string:"builder", string:"initialRender", string:"LinkChild", string:"ReusableChild", string:"LinkDialog", string:"PlainChild", string:"ObjChild", string:"ParamChild", ]}
-49 0x22f9 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-5 0x2078 { 3 [ i32:1, string:"this", i32:0, ]}
-6 0x219b { 16 [ string:"setInitiallyProvidedValue", method:#~@5>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@5>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@5>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@5>#aboutToBeDeleted, method_affiliate:0, string:"updateRecycleElmtId", method:#~@5>#updateRecycleElmtId, method_affiliate:2, i32:5, ]}
-7 0x2392 { 3 [ i32:1, string:"this", i32:0, ]}
-8 0x1f67 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:24, string:"col", i32:7, ]}
-9 0x23b8 { 3 [ i32:1, string:"this", i32:0, ]}
-42 0x1f05 { 0 [
+0 0x216f { 2 [ string:"name", string:"ObjChild", ]}
+1 0x220d { 2 [ string:"linked", null_value:0, ]}
+10 0x21f7 { 2 [ string:"builder", null_value:0, ]}
+11 0x2218 { 3 [ i32:1, string:"this", i32:0, ]}
+12 0x9b7 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+13 0x24cb { 3 [ i32:1, string:"this", i32:0, ]}
+14 0x20c8 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:23, string:"col", i32:7, ]}
+15 0xa0e { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+16 0x207a { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:24, string:"col", i32:7, ]}
+17 0x217d { 2 [ string:"name", string:"ParamChild", ]}
+19 0x24a5 { 3 [ i32:1, string:"this", i32:0, ]}
+2 0x218b { 3 [ i32:1, string:"this", i32:0, ]}
+20 0x20ea { 3 [ i32:1, string:"this", i32:0, ]}
+21 0x2134 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:22, string:"col", i32:7, ]}
+22 0x2056 { 2 [ string:"value", string:"p", ]}
+23 0x22f8 { 3 [ i32:1, string:"this", i32:0, ]}
+24 0x1fe2 { 10 [ string:"Model", string:"Index", string:"builder", string:"initialRender", string:"LinkChild", string:"ReusableChild", string:"LinkDialog", string:"PlainChild", string:"ObjChild", string:"ParamChild", ]}
+25 0x21c3 { 4 [ string:"linked", null_value:0, string:"copied", null_value:0, ]}
+26 0x2110 { 4 [ string:"linked", null_value:0, string:"copied", null_value:0, ]}
+27 0x2064 { 2 [ string:"item", null_value:0, ]}
+28 0x24b8 { 3 [ i32:1, string:"this", i32:0, ]}
+3 0x21d5 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:14, string:"col", i32:14, ]}
+30 0x24de { 2 [ string:"value", string:"p", ]}
+31 0x219e { 4 [ string:"linked", null_value:0, string:"copied", null_value:0, ]}
+32 0xbb5 
+33 0x209c { 2 [ string:"item", null_value:0, ]}
+35 0x2034 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:25, string:"col", i32:7, ]}
+36 0x24ec { 2 [ string:"value", string:"p", ]}
+37 0x230b { 16 [ string:"setInitiallyProvidedValue", method:#~@6>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@6>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@6>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@6>#aboutToBeDeleted, method_affiliate:0, string:"setController", method:#~@6>#setController, method_affiliate:1, i32:5, ]}
+38 0x969 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+39 0x2355 { 13 [ string:"setInitiallyProvidedValue", method:#~@7>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@7>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@7>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@7>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+4 0x23cf { 13 [ string:"resetStateVarsOnReuse", method:#~@9>#resetStateVarsOnReuse, method_affiliate:1, string:"initialRender", method:#~@9>#initialRender, method_affiliate:0, string:"updateStateVars", method:#~@9>#updateStateVars, method_affiliate:1, string:"rerender", method:#~@9>#rerender, method_affiliate:0, i32:4, ]}
+40 0x20bd { 2 [ string:"linked", null_value:0, ]}
+41 0x2156 { 2 [ string:"copied", null_value:0, ]}
+42 0x2234 { 13 [ string:"setInitiallyProvidedValue", method:#~@1>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@1>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@1>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@1>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+43 0x2122 { 4 [ string:"linked", null_value:0, string:"copied", null_value:0, ]}
+44 0x20fd { 3 [ i32:1, string:"recycleNode", i32:0, ]}
+45 0x20b2 { 2 [ string:"linked", null_value:0, ]}
+46 0x2202 { 2 [ string:"builder", null_value:0, ]}
+47 0x2271 { 13 [ string:"setInitiallyProvidedValue", method:#~@4>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@4>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@4>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@4>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+48 0x206f { 2 [ string:"item", null_value:0, ]}
+49 0x222b { 1 [ i32:0, ]}
+5 0x2392 { 13 [ string:"setInitiallyProvidedValue", method:#~@8>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@8>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@8>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@8>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+50 0x240c { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+51 0x20a7 { 2 [ string:"linked", null_value:0, ]}
+6 0x2161 { 2 [ string:"name", string:"LinkChild", ]}
+7 0x21b0 { 3 [ i32:1, string:"this", i32:0, ]}
+8 0x22ae { 16 [ string:"setInitiallyProvidedValue", method:#~@5>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@5>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@5>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@5>#aboutToBeDeleted, method_affiliate:0, string:"updateRecycleElmtId", method:#~@5>#updateRecycleElmtId, method_affiliate:2, i32:5, ]}
+9 0x244c { 17 [ i32:8, string:"Model", i32:0, string:"LinkDialog", i32:1, string:"PlainChild", i32:2, string:"LinkChild", i32:3, string:"ReusableChild", i32:4, string:"ObjChild", i32:5, string:"ParamChild", i32:6, string:"Index", i32:7, ]}
+18 0x2018 { 0 [
 	MODULE_REQUEST_ARRAY: {
 	};
 ]}
-46 0x96f { 3 [
+29 0xbb9 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+34 0x977 { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -69,13 +74,23 @@
 # RECORDS
 
 .language ArkTS
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0xbb5
+	u32 moduleRecordIdx = 0xbb9
+}
+
+.language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
 	u8 pkgName@entry = 0x0
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x961
-	u32 moduleRecordIdx = 0x96f
+	u32 scopeNames = 0x969
+	u32 moduleRecordIdx = 0x977
 }
 
 .language ArkTS
@@ -84,8 +99,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x1ecf
-	u32 moduleRecordIdx = 0x1f05
+	u32 scopeNames = 0x1fe2
+	u32 moduleRecordIdx = 0x2018
 }
 
 .language ECMAScript
@@ -137,6 +152,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -4455,100 +4481,100 @@ jump_label_4:
 # ====================
 # STRING
 
-[offset:0xa58, name_value:UIAbility]
-[offset:0xa6c, name_value:hilog]
-[offset:0xaba, name_value:DOMAIN]
-[offset:0x1e79, name_value:Model]
-[offset:0x1e80, name_value:Index]
-[offset:0x1e87, name_value:LinkChild]
-[offset:0x1e92, name_value:ReusableChild]
-[offset:0x1ea1, name_value:LinkDialog]
-[offset:0x1ead, name_value:PlainChild]
-[offset:0x1eb9, name_value:ObjChild]
-[offset:0x1ec3, name_value:ParamChild]
-[offset:0x23e7, name_value:builder]
-[offset:0x23f0, name_value:initialRender]
-[offset:0x2434, name_value:value]
-[offset:0x243e, name_value:item]
-[offset:0x2444, name_value:linked]
-[offset:0x2459, name_value:copied]
-[offset:0x2467, name_value:setInitiallyProvidedValue]
-[offset:0x24b6, name_value:aboutToBeDeleted]
-[offset:0x24dd, name_value:setController]
-[offset:0x2503, name_value:rerender]
-[offset:0x2548, name_value:pages/Index]
-[offset:0x25c0, name_value:info]
-[offset:0x25c6, name_value:testTag]
-[offset:0x25cf, name_value:%{public}s]
-[offset:0x25db, name_value:Ability onBackground]
-[offset:0x25f1, name_value:Ability onCreate]
-[offset:0x2603, name_value:Ability onDestroy]
-[offset:0x2616, name_value:Ability onForeground]
-[offset:0x262c, name_value:Ability onWindowStageCreate]
-[offset:0x2649, name_value:loadContent]
-[offset:0x2656, name_value:Ability onWindowStageDestroy]
-[offset:0x2674, name_value:code]
-[offset:0x267a, name_value:error]
-[offset:0x2681, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x26b0, name_value:JSON]
-[offset:0x26b6, name_value:stringify]
-[offset:0x26c1, name_value:Succeeded in loading the content.]
-[offset:0x26e4, name_value:prototype]
-[offset:0x2706, name_value:function]
-[offset:0x2710, name_value:paramsGenerator_]
-[offset:0x2722, name_value:ObservedPropertySimplePU]
-[offset:0x273c, name_value:count]
-[offset:0x2743, name_value:__count]
-[offset:0x274c, name_value:flag]
-[offset:0x2752, name_value:__flag]
-[offset:0x275a, name_value:ObservedPropertyObjectPU]
-[offset:0x2774, name_value:model]
-[offset:0x277b, name_value:__model]
-[offset:0x2784, name_value:CustomDialogController]
-[offset:0x279c, name_value:dialog]
-[offset:0x27a4, name_value:plainDialog]
-[offset:0x27b1, name_value:finalizeConstruction]
-[offset:0x27c7, name_value:ViewPU]
-[offset:0x27cf, name_value:create]
-[offset:0x27d7, name_value:SubscriberManager]
-[offset:0x27ea, name_value:Get]
-[offset:0x27ef, name_value:delete]
-[offset:0x27f7, name_value:id__]
-[offset:0x27fd, name_value:aboutToBeDeletedInternal]
-[offset:0x2817, name_value:get]
-[offset:0x281c, name_value:set]
-[offset:0x2821, name_value:observeComponentCreation2]
-[offset:0x283c, name_value:Column]
-[offset:0x2844, name_value:__Recycle__]
-[offset:0x2851, name_value:observeRecycleComponentCreation]
-[offset:0x2872, name_value:pop]
-[offset:0x2877, name_value:purgeDependencyOnElmtId]
-[offset:0x2890, name_value:updateDirtyElements]
-[offset:0x28a5, name_value:updateStateVarsOfChildByElmtId]
-[offset:0x28c5, name_value:ViewStackProcessor]
-[offset:0x28d9, name_value:StartGetAccessRecordingFor]
-[offset:0x28f5, name_value:createRecycle]
-[offset:0x2904, name_value:StopGetAccessRecording]
-[offset:0x291c, name_value:ViewV2]
-[offset:0x2924, name_value:aboutToReuseInternal]
-[offset:0x293a, name_value:aboutToReuse]
-[offset:0x2948, name_value:SynchedPropertySimpleTwoWayPU]
-[offset:0x2967, name_value:__linked]
-[offset:0x2971, name_value:SynchedPropertySimpleOneWayPU]
-[offset:0x2990, name_value:__copied]
-[offset:0x299a, name_value:Text]
-[offset:0x29a0, name_value:reset]
-[offset:0x29a7, name_value:]
-[offset:0x29a9, name_value: ]
-[offset:0x29ac, name_value:updateElmtId]
-[offset:0x29ba, name_value:controller]
-[offset:0x29c6, name_value:SynchedPropertyNesedObjectPU]
-[offset:0x29e4, name_value:__item]
-[offset:0x29ec, name_value:initParam]
-[offset:0x29f7, name_value:resetParam]
-[offset:0x2a03, name_value:updateParam]
-[offset:0x2a10, name_value:Reflect]
-[offset:0x2a19, name_value:Observed]
-[offset:0x2a23, name_value:getEntryName]
-[offset:0x2a31, name_value:Param]
-[offset:0x2a38, name_value:registerNamedRoute]
+[offset:0xa60, name_value:UIAbility]
+[offset:0xa74, name_value:hilog]
+[offset:0xac2, name_value:DOMAIN]
+[offset:0x1f8c, name_value:Model]
+[offset:0x1f93, name_value:Index]
+[offset:0x1f9a, name_value:LinkChild]
+[offset:0x1fa5, name_value:ReusableChild]
+[offset:0x1fb4, name_value:LinkDialog]
+[offset:0x1fc0, name_value:PlainChild]
+[offset:0x1fcc, name_value:ObjChild]
+[offset:0x1fd6, name_value:ParamChild]
+[offset:0x24fa, name_value:builder]
+[offset:0x2503, name_value:initialRender]
+[offset:0x2547, name_value:value]
+[offset:0x2551, name_value:item]
+[offset:0x2557, name_value:linked]
+[offset:0x256c, name_value:copied]
+[offset:0x257a, name_value:setInitiallyProvidedValue]
+[offset:0x25c9, name_value:aboutToBeDeleted]
+[offset:0x25f0, name_value:setController]
+[offset:0x2616, name_value:rerender]
+[offset:0x265b, name_value:pages/Index]
+[offset:0x26d3, name_value:info]
+[offset:0x26d9, name_value:testTag]
+[offset:0x26e2, name_value:%{public}s]
+[offset:0x26ee, name_value:Ability onBackground]
+[offset:0x2704, name_value:Ability onCreate]
+[offset:0x2716, name_value:Ability onDestroy]
+[offset:0x2729, name_value:Ability onForeground]
+[offset:0x273f, name_value:Ability onWindowStageCreate]
+[offset:0x275c, name_value:loadContent]
+[offset:0x2769, name_value:Ability onWindowStageDestroy]
+[offset:0x2787, name_value:code]
+[offset:0x278d, name_value:error]
+[offset:0x2794, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x27c3, name_value:JSON]
+[offset:0x27c9, name_value:stringify]
+[offset:0x27d4, name_value:Succeeded in loading the content.]
+[offset:0x27f7, name_value:prototype]
+[offset:0x2819, name_value:function]
+[offset:0x2823, name_value:paramsGenerator_]
+[offset:0x2835, name_value:ObservedPropertySimplePU]
+[offset:0x284f, name_value:count]
+[offset:0x2856, name_value:__count]
+[offset:0x285f, name_value:flag]
+[offset:0x2865, name_value:__flag]
+[offset:0x286d, name_value:ObservedPropertyObjectPU]
+[offset:0x2887, name_value:model]
+[offset:0x288e, name_value:__model]
+[offset:0x2897, name_value:CustomDialogController]
+[offset:0x28af, name_value:dialog]
+[offset:0x28b7, name_value:plainDialog]
+[offset:0x28c4, name_value:finalizeConstruction]
+[offset:0x28da, name_value:ViewPU]
+[offset:0x28e2, name_value:create]
+[offset:0x28ea, name_value:SubscriberManager]
+[offset:0x28fd, name_value:Get]
+[offset:0x2902, name_value:delete]
+[offset:0x290a, name_value:id__]
+[offset:0x2910, name_value:aboutToBeDeletedInternal]
+[offset:0x292a, name_value:get]
+[offset:0x292f, name_value:set]
+[offset:0x2934, name_value:observeComponentCreation2]
+[offset:0x294f, name_value:Column]
+[offset:0x2957, name_value:__Recycle__]
+[offset:0x2964, name_value:observeRecycleComponentCreation]
+[offset:0x2985, name_value:pop]
+[offset:0x298a, name_value:purgeDependencyOnElmtId]
+[offset:0x29a3, name_value:updateDirtyElements]
+[offset:0x29b8, name_value:updateStateVarsOfChildByElmtId]
+[offset:0x29d8, name_value:ViewStackProcessor]
+[offset:0x29ec, name_value:StartGetAccessRecordingFor]
+[offset:0x2a08, name_value:createRecycle]
+[offset:0x2a17, name_value:StopGetAccessRecording]
+[offset:0x2a2f, name_value:ViewV2]
+[offset:0x2a37, name_value:aboutToReuseInternal]
+[offset:0x2a4d, name_value:aboutToReuse]
+[offset:0x2a5b, name_value:SynchedPropertySimpleTwoWayPU]
+[offset:0x2a7a, name_value:__linked]
+[offset:0x2a84, name_value:SynchedPropertySimpleOneWayPU]
+[offset:0x2aa3, name_value:__copied]
+[offset:0x2aad, name_value:Text]
+[offset:0x2ab3, name_value:reset]
+[offset:0x2aba, name_value:]
+[offset:0x2abc, name_value: ]
+[offset:0x2abf, name_value:updateElmtId]
+[offset:0x2acd, name_value:controller]
+[offset:0x2ad9, name_value:SynchedPropertyNesedObjectPU]
+[offset:0x2af7, name_value:__item]
+[offset:0x2aff, name_value:initParam]
+[offset:0x2b0a, name_value:resetParam]
+[offset:0x2b16, name_value:updateParam]
+[offset:0x2b23, name_value:Reflect]
+[offset:0x2b2c, name_value:Observed]
+[offset:0x2b36, name_value:getEntryName]
+[offset:0x2b44, name_value:Param]
+[offset:0x2b4b, name_value:registerNamedRoute]

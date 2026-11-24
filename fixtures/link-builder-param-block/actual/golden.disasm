@@ -3,27 +3,27 @@
 # ====================
 # LITERALS
 
-0 0x11e3 { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-1 0x11a4 { 2 [ string:"copied", null_value:0, ]}
-10 0x7b5 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-11 0x11bd { 3 [ i32:1, string:"this", i32:0, ]}
-12 0x11af { 2 [ string:"name", string:"LinkItem", ]}
-13 0x107d { 5 [ string:"LinkItem", string:"initialRender", string:"Index", string:"content", string:"paramsLambda", ]}
-14 0x11d0 { 3 [ i32:1, string:"this", i32:0, ]}
-15 0x1182 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:26, string:"col", i32:7, ]}
-16 0x1150 { 6 [ string:"linked", null_value:0, string:"copied", null_value:0, string:"content", null_value:0, ]}
-17 0x767 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-18 0x49f 
-2 0x1133 { 5 [ i32:2, string:"LinkItem", i32:0, string:"Index", i32:1, ]}
-3 0x10b6 { 13 [ string:"setInitiallyProvidedValue", method:#~@2>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@2>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@2>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@2>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-5 0x80c { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-6 0x10f3 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-8 0x1169 { 6 [ string:"linked", null_value:0, string:"copied", null_value:0, string:"content", null_value:0, ]}
-4 0x109a { 0 [
-	MODULE_REQUEST_ARRAY: {
-	};
-]}
-7 0x775 { 3 [
+0 0x1399 { 2 [ string:"copied", null_value:0, ]}
+1 0x1342 { 3 [ i32:1, string:"item", i32:0, ]}
+10 0x1210 { 3 [ i32:1, string:"this", i32:0, ]}
+12 0x1320 { 1 [ string:"body", ]}
+14 0x7ed { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+15 0x135e { 6 [ string:"linked", null_value:0, string:"copied", null_value:0, string:"content", null_value:0, ]}
+16 0x1355 { 1 [ string:"body", ]}
+17 0x11c4 { 6 [ string:"LinkItem", string:"initialRender", string:"Index", string:"content", string:"forEachItemGenFunction", string:"paramsLambda", ]}
+18 0x1377 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:26, string:"col", i32:7, ]}
+19 0x1329 { 6 [ string:"linked", null_value:0, string:"copied", null_value:0, string:"content", null_value:0, ]}
+2 0x12f0 { 5 [ i32:2, string:"LinkItem", i32:0, string:"Index", i32:1, ]}
+20 0x130d { 3 [ i32:1, string:"item", i32:0, ]}
+21 0x79f { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+22 0x4d7 
+3 0x12b0 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+4 0x1273 { 13 [ string:"setInitiallyProvidedValue", method:#~@2>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@2>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@2>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@2>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+5 0x1236 { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+6 0x1223 { 3 [ i32:1, string:"this", i32:0, ]}
+7 0x1202 { 2 [ string:"name", string:"LinkItem", ]}
+9 0x844 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+11 0x7ad { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -32,7 +32,11 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
-9 0x4a3 { 0 [
+13 0x4db { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+8 0x11e6 { 0 [
 	MODULE_REQUEST_ARRAY: {
 	};
 ]}
@@ -46,8 +50,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x49f
-	u32 moduleRecordIdx = 0x4a3
+	u32 scopeNames = 0x4d7
+	u32 moduleRecordIdx = 0x4db
 }
 
 .language ArkTS
@@ -56,8 +60,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x767
-	u32 moduleRecordIdx = 0x775
+	u32 scopeNames = 0x79f
+	u32 moduleRecordIdx = 0x7ad
 }
 
 .language ArkTS
@@ -66,8 +70,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x107d
-	u32 moduleRecordIdx = 0x109a
+	u32 scopeNames = 0x11c4
+	u32 moduleRecordIdx = 0x11e6
 }
 
 .language ECMAScript
@@ -1545,11 +1549,11 @@ L_ESSlotNumberAnnotation:
 	sta v4
 	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@3*#:(any,any,any,any,any), 0x2
 	sta v6
-	tryldglobalbyname 0x3, "Text"
+	tryldglobalbyname 0x3, "ForEach"
 	sta v7
 	lda v4
 	callthis2 0x4, v5, v6, v7
-	tryldglobalbyname 0x6, "Text"
+	tryldglobalbyname 0x6, "ForEach"
 	sta v5
 	lda v5
 	ldobjbyname 0x7, "pop"
@@ -1579,16 +1583,87 @@ L_ESSlotNumberAnnotation:
 	lda v5
 	ldobjbyname 0x5, "flag"
 	definepropertybyname 0x7, "copied", v4
-	definefunc 0x9, &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@4*#content:(any,any,any), 0x0
+	definefunc 0x9, &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@5*#content:(any,any,any), 0x0
 	definepropertybyname 0xa, "content", v4
 	lda v4
 	return
 }
 
 L_ESSlotNumberAnnotation:
-	u32 SlotNumber { 0x5 }
+	u32 SlotNumber { 0xb }
 .language ArkTS
 .function any &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@3*#(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "ForEach"
+	sta v8
+	lda v8
+	ldobjbyname 0x1, "create"
+	sta v7
+	lda v7
+	callthis0 0x3, v8
+	definefunc 0x5, &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@3**#forEachItemGenFunction:(any,any,any,any), 0x1
+	sta v5
+	ldlexvar 0x0, 0x0
+	sta v8
+	lda v8
+	ldobjbyname 0x6, "forEachUpdateFunction"
+	sta v7
+	lda v3
+	sta v9
+	createarraywithbuffer 0x8, { 1 [ string:"body", ]}
+	sta v10
+	sta v10
+	lda v5
+	sta v11
+	lda v7
+	callthis3 0x9, v8, v9, v10, v11
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0xb }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@3**#forEachItemGenFunction(any a0, any a1, any a2, any a3) <static> {
+	newlexenvwithname 0x1, { 3 [ i32:1, string:"item", i32:0, ]}
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v3
+	sta v5
+	lda v5
+	stlexvar 0x0, 0x0
+	ldlexvar 0x1, 0x0
+	sta v6
+	lda v6
+	ldobjbyname 0x0, "observeComponentCreation2"
+	sta v5
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@3**@4*#:(any,any,any,any,any), 0x2
+	sta v7
+	tryldglobalbyname 0x3, "Text"
+	sta v8
+	lda v5
+	callthis2 0x4, v6, v7, v8
+	tryldglobalbyname 0x6, "Text"
+	sta v6
+	lda v6
+	ldobjbyname 0x7, "pop"
+	sta v5
+	lda v5
+	callthis0 0x9, v6
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x5 }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@3**@4*#(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1599,7 +1674,8 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	ldobjbyname 0x1, "create"
 	sta v6
-	lda.str "body"
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "item"
 	sta v8
 	lda v6
 	callthis1 0x3, v7, v8
@@ -1610,7 +1686,7 @@ L_ESSlotNumberAnnotation:
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0xb }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@4*#content(any a0, any a1, any a2) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@5*#content(any a0, any a1, any a2) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1619,13 +1695,13 @@ L_ESSlotNumberAnnotation:
 	lda v5
 	ldobjbyname 0x0, "observeComponentCreation2"
 	sta v4
-	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@4*@3*#:(any,any,any,any,any), 0x2
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@5*@3*#:(any,any,any,any,any), 0x2
 	sta v6
-	tryldglobalbyname 0x3, "Text"
+	tryldglobalbyname 0x3, "ForEach"
 	sta v7
 	lda v4
 	callthis2 0x4, v5, v6, v7
-	tryldglobalbyname 0x6, "Text"
+	tryldglobalbyname 0x6, "ForEach"
 	sta v5
 	lda v5
 	ldobjbyname 0x7, "pop"
@@ -1637,9 +1713,80 @@ L_ESSlotNumberAnnotation:
 }
 
 L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0xb }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@5*@3*#(any a0, any a1, any a2, any a3, any a4) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	mov v4, a4
+	tryldglobalbyname 0x0, "ForEach"
+	sta v8
+	lda v8
+	ldobjbyname 0x1, "create"
+	sta v7
+	lda v7
+	callthis0 0x3, v8
+	definefunc 0x5, &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@5*@3**#forEachItemGenFunction:(any,any,any,any), 0x1
+	sta v5
+	ldlexvar 0x0, 0x0
+	sta v8
+	lda v8
+	ldobjbyname 0x6, "forEachUpdateFunction"
+	sta v7
+	lda v3
+	sta v9
+	createarraywithbuffer 0x8, { 1 [ string:"body", ]}
+	sta v10
+	sta v10
+	lda v5
+	sta v11
+	lda v7
+	callthis3 0x9, v8, v9, v10, v11
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0xb }
+.language ArkTS
+.function any &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@5*@3**#forEachItemGenFunction(any a0, any a1, any a2, any a3) <static> {
+	newlexenvwithname 0x1, { 3 [ i32:1, string:"item", i32:0, ]}
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	mov v3, a3
+	lda v3
+	sta v5
+	lda v5
+	stlexvar 0x0, 0x0
+	ldlexvar 0x1, 0x0
+	sta v6
+	lda v6
+	ldobjbyname 0x0, "observeComponentCreation2"
+	sta v5
+	definefunc 0x2, &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@5*@3**@4*#:(any,any,any,any,any), 0x2
+	sta v7
+	tryldglobalbyname 0x3, "Text"
+	sta v8
+	lda v5
+	callthis2 0x4, v6, v7, v8
+	tryldglobalbyname 0x6, "Text"
+	sta v6
+	lda v6
+	ldobjbyname 0x7, "pop"
+	sta v5
+	lda v5
+	callthis0 0x9, v6
+	ldundefined
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x5 }
 .language ArkTS
-.function any &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@4*@3*#(any a0, any a1, any a2, any a3, any a4) <static> {
+.function any &entry.src.main.ets.pages.Index&.#~@2>@1*^1*@5*@3**@4*#(any a0, any a1, any a2, any a3, any a4) <static> {
 	mov v0, a0
 	mov v1, a1
 	mov v2, a2
@@ -1650,7 +1797,8 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	ldobjbyname 0x1, "create"
 	sta v6
-	lda.str "body"
+	ldlexvar 0x0, 0x0
+	throw.undefinedifholewithname "item"
 	sta v8
 	lda v6
 	callthis1 0x3, v7, v8
@@ -1829,70 +1977,72 @@ jump_label_2:
 # ====================
 # STRING
 
-[offset:0x85e, name_value:UIAbility]
-[offset:0x872, name_value:hilog]
-[offset:0x8c0, name_value:DOMAIN]
-[offset:0x106c, name_value:LinkItem]
-[offset:0x1076, name_value:Index]
-[offset:0x1220, name_value:initialRender]
-[offset:0x122f, name_value:content]
-[offset:0x1238, name_value:setInitiallyProvidedValue]
-[offset:0x1287, name_value:aboutToBeDeleted]
-[offset:0x12d4, name_value:pages/Index]
-[offset:0x1340, name_value:linked]
-[offset:0x1348, name_value:copied]
-[offset:0x1530, name_value:use strict]
-[offset:0x1548, name_value:info]
-[offset:0x154e, name_value:testTag]
-[offset:0x1557, name_value:%{public}s]
-[offset:0x1563, name_value:Ability onBackground]
-[offset:0x1579, name_value:Ability onCreate]
-[offset:0x158b, name_value:Ability onDestroy]
-[offset:0x159e, name_value:Ability onForeground]
-[offset:0x15b4, name_value:Ability onWindowStageCreate]
-[offset:0x15d1, name_value:loadContent]
-[offset:0x15de, name_value:Ability onWindowStageDestroy]
-[offset:0x15fc, name_value:code]
-[offset:0x1602, name_value:error]
-[offset:0x1609, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x1638, name_value:JSON]
-[offset:0x163e, name_value:stringify]
-[offset:0x1649, name_value:Succeeded in loading the content.]
-[offset:0x166c, name_value:prototype]
-[offset:0x1677, name_value:function]
-[offset:0x1681, name_value:paramsGenerator_]
-[offset:0x1693, name_value:SynchedPropertySimpleTwoWayPU]
-[offset:0x16b2, name_value:__linked]
-[offset:0x16bc, name_value:SynchedPropertySimpleOneWayPU]
-[offset:0x16db, name_value:__copied]
-[offset:0x16e5, name_value:finalizeConstruction]
-[offset:0x16fb, name_value:SubscriberManager]
-[offset:0x170e, name_value:Get]
-[offset:0x1713, name_value:delete]
-[offset:0x171b, name_value:id__]
-[offset:0x1721, name_value:aboutToBeDeletedInternal]
-[offset:0x173b, name_value:get]
-[offset:0x1740, name_value:set]
-[offset:0x1745, name_value:observeComponentCreation2]
-[offset:0x1760, name_value:Column]
-[offset:0x1768, name_value:bind]
-[offset:0x176e, name_value:Text]
-[offset:0x1774, name_value:pop]
-[offset:0x1779, name_value:purgeDependencyOnElmtId]
-[offset:0x1792, name_value:updateDirtyElements]
-[offset:0x17a7, name_value:reset]
-[offset:0x17ae, name_value:create]
-[offset:0x17b6, name_value:]
-[offset:0x17b8, name_value: ]
-[offset:0x17bb, name_value:ObservedPropertySimplePU]
-[offset:0x17d5, name_value:count]
-[offset:0x17dc, name_value:__count]
-[offset:0x17e5, name_value:flag]
-[offset:0x17eb, name_value:__flag]
-[offset:0x17f3, name_value:ViewPU]
-[offset:0x17fb, name_value:updateStateVarsOfChildByElmtId]
-[offset:0x181b, name_value:body]
-[offset:0x1821, name_value:Reflect]
-[offset:0x182a, name_value:rerender]
-[offset:0x1834, name_value:getEntryName]
-[offset:0x1842, name_value:registerNamedRoute]
+[offset:0x896, name_value:UIAbility]
+[offset:0x8aa, name_value:hilog]
+[offset:0x8f8, name_value:DOMAIN]
+[offset:0x11b3, name_value:LinkItem]
+[offset:0x11bd, name_value:Index]
+[offset:0x13a4, name_value:initialRender]
+[offset:0x13b3, name_value:content]
+[offset:0x13c2, name_value:setInitiallyProvidedValue]
+[offset:0x1411, name_value:aboutToBeDeleted]
+[offset:0x145e, name_value:pages/Index]
+[offset:0x14ca, name_value:item]
+[offset:0x14d6, name_value:linked]
+[offset:0x14de, name_value:copied]
+[offset:0x16c0, name_value:use strict]
+[offset:0x16d8, name_value:info]
+[offset:0x16de, name_value:testTag]
+[offset:0x16e7, name_value:%{public}s]
+[offset:0x16f3, name_value:Ability onBackground]
+[offset:0x1709, name_value:Ability onCreate]
+[offset:0x171b, name_value:Ability onDestroy]
+[offset:0x172e, name_value:Ability onForeground]
+[offset:0x1744, name_value:Ability onWindowStageCreate]
+[offset:0x1761, name_value:loadContent]
+[offset:0x176e, name_value:Ability onWindowStageDestroy]
+[offset:0x178c, name_value:code]
+[offset:0x1792, name_value:error]
+[offset:0x1799, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x17c8, name_value:JSON]
+[offset:0x17ce, name_value:stringify]
+[offset:0x17d9, name_value:Succeeded in loading the content.]
+[offset:0x17fc, name_value:prototype]
+[offset:0x1807, name_value:function]
+[offset:0x1811, name_value:paramsGenerator_]
+[offset:0x1823, name_value:SynchedPropertySimpleTwoWayPU]
+[offset:0x1842, name_value:__linked]
+[offset:0x184c, name_value:SynchedPropertySimpleOneWayPU]
+[offset:0x186b, name_value:__copied]
+[offset:0x1875, name_value:finalizeConstruction]
+[offset:0x188b, name_value:SubscriberManager]
+[offset:0x189e, name_value:Get]
+[offset:0x18a3, name_value:delete]
+[offset:0x18ab, name_value:id__]
+[offset:0x18b1, name_value:aboutToBeDeletedInternal]
+[offset:0x18cb, name_value:get]
+[offset:0x18d0, name_value:set]
+[offset:0x18d5, name_value:observeComponentCreation2]
+[offset:0x18f0, name_value:Column]
+[offset:0x18f8, name_value:bind]
+[offset:0x18fe, name_value:Text]
+[offset:0x1904, name_value:pop]
+[offset:0x1909, name_value:purgeDependencyOnElmtId]
+[offset:0x1922, name_value:updateDirtyElements]
+[offset:0x1937, name_value:reset]
+[offset:0x193e, name_value:create]
+[offset:0x1946, name_value:]
+[offset:0x1948, name_value: ]
+[offset:0x194b, name_value:ObservedPropertySimplePU]
+[offset:0x1965, name_value:count]
+[offset:0x196c, name_value:__count]
+[offset:0x1975, name_value:flag]
+[offset:0x197b, name_value:__flag]
+[offset:0x1983, name_value:ViewPU]
+[offset:0x198b, name_value:updateStateVarsOfChildByElmtId]
+[offset:0x19ab, name_value:ForEach]
+[offset:0x19b4, name_value:forEachUpdateFunction]
+[offset:0x19cb, name_value:Reflect]
+[offset:0x19d4, name_value:rerender]
+[offset:0x19de, name_value:getEntryName]
+[offset:0x19ec, name_value:registerNamedRoute]

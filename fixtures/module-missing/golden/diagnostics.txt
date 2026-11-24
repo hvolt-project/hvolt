@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:2:26 Cannot find module '@ohos.nonexistentmodule' or its corresponding type declarations.

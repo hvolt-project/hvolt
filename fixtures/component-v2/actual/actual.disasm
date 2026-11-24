@@ -3,34 +3,31 @@
 # ====================
 # LITERALS
 
-0 0x8d2 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-1 0x87b { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-10 0x13e9 { 4 [ string:"title", string:"x", string:"once", i32:1, ]}
-11 0x1271 { 4 [ string:"resetStateVarsOnReuse", method:#~@1>#resetStateVarsOnReuse, method_affiliate:1, i32:1, ]}
-12 0x1287 { 13 [ string:"resetStateVarsOnReuse", method:#~@3>#resetStateVarsOnReuse, method_affiliate:1, string:"initialRender", method:#~@3>#initialRender, method_affiliate:0, string:"updateStateVars", method:#~@3>#updateStateVars, method_affiliate:1, string:"rerender", method:#~@3>#rerender, method_affiliate:0, i32:4, ]}
-13 0x1255 { 3 [ i32:1, string:"this", i32:0, ]}
-14 0x137b { 3 [ i32:1, string:"this", i32:0, ]}
-15 0x1247 { 2 [ string:"name", string:"V1Badge", ]}
-16 0x138e { 2 [ string:"label", null_value:0, ]}
-17 0x1301 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-18 0x82d { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-19 0x11c1 { 6 [ string:"Model", string:"V2View", string:"initialRender", string:"V2Card", string:"resetStateVarsOnReuse", string:"V1Badge", ]}
-2 0x1239 { 2 [ string:"name", string:"V2Card", ]}
-20 0x13c6 { 2 [ string:"label", null_value:0, ]}
-22 0x13d1 { 4 [ string:"title", string:"x", string:"once", i32:1, ]}
-23 0x13a4 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:21, string:"col", i32:7, ]}
-3 0x1268 { 1 [ i32:0, ]}
-4 0x12c4 { 13 [ string:"setInitiallyProvidedValue", method:#~@5>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@5>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@5>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@5>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-5 0x11ff { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:20, string:"col", i32:7, ]}
-6 0x1341 { 3 [ i32:1, string:"this", i32:0, ]}
-7 0x1354 { 7 [ i32:3, string:"V2Card", i32:0, string:"V1Badge", i32:1, string:"V2View", i32:2, ]}
-8 0x1221 { 4 [ string:"title", string:"x", string:"once", i32:1, ]}
-9 0x1399 { 2 [ string:"label", null_value:0, ]}
-21 0x11e3 { 0 [
-	MODULE_REQUEST_ARRAY: {
-	};
-]}
-24 0x83b { 3 [
+0 0x134c { 2 [ string:"name", string:"V2Card", ]}
+1 0x1384 { 4 [ string:"resetStateVarsOnReuse", method:#~@1>#resetStateVarsOnReuse, method_affiliate:1, i32:1, ]}
+10 0x148e { 3 [ i32:1, string:"this", i32:0, ]}
+11 0x1467 { 7 [ i32:3, string:"V2Card", i32:0, string:"V1Badge", i32:1, string:"V2View", i32:2, ]}
+13 0x137b { 1 [ i32:0, ]}
+15 0x835 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+16 0x14e4 { 4 [ string:"title", string:"x", string:"once", i32:1, ]}
+17 0xa81 
+18 0x1312 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:20, string:"col", i32:7, ]}
+19 0x1334 { 4 [ string:"title", string:"x", string:"once", i32:1, ]}
+2 0x14ac { 2 [ string:"label", null_value:0, ]}
+20 0x135a { 2 [ string:"name", string:"V1Badge", ]}
+21 0x883 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+22 0x139a { 13 [ string:"resetStateVarsOnReuse", method:#~@3>#resetStateVarsOnReuse, method_affiliate:1, string:"initialRender", method:#~@3>#initialRender, method_affiliate:0, string:"updateStateVars", method:#~@3>#updateStateVars, method_affiliate:1, string:"rerender", method:#~@3>#rerender, method_affiliate:0, i32:4, ]}
+23 0x14a1 { 2 [ string:"label", null_value:0, ]}
+24 0x1454 { 3 [ i32:1, string:"this", i32:0, ]}
+26 0x14fc { 4 [ string:"title", string:"x", string:"once", i32:1, ]}
+3 0x1414 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+4 0x14d9 { 2 [ string:"label", null_value:0, ]}
+5 0x8da { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+6 0x14b7 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:21, string:"col", i32:7, ]}
+7 0x13d7 { 13 [ string:"setInitiallyProvidedValue", method:#~@5>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@5>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@5>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@5>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+8 0x1368 { 3 [ i32:1, string:"this", i32:0, ]}
+9 0x12d4 { 6 [ string:"Model", string:"V2View", string:"initialRender", string:"V2Card", string:"resetStateVarsOnReuse", string:"V1Badge", ]}
+12 0x843 { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -39,9 +36,27 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
+14 0xa85 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+25 0x12f6 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
 
 # ====================
 # RECORDS
+
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0xa81
+	u32 moduleRecordIdx = 0xa85
+}
 
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
@@ -49,8 +64,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x82d
-	u32 moduleRecordIdx = 0x83b
+	u32 scopeNames = 0x835
+	u32 moduleRecordIdx = 0x843
 }
 
 .language ArkTS
@@ -59,8 +74,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x11c1
-	u32 moduleRecordIdx = 0x11e3
+	u32 scopeNames = 0x12d4
+	u32 moduleRecordIdx = 0x12f6
 }
 
 .language ECMAScript
@@ -112,6 +127,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -2054,88 +2080,88 @@ jump_label_8:
 # ====================
 # STRING
 
-[offset:0x924, name_value:UIAbility]
-[offset:0x938, name_value:hilog]
-[offset:0x986, name_value:DOMAIN]
-[offset:0x11a8, name_value:V2View]
-[offset:0x11b0, name_value:V2Card]
-[offset:0x11b8, name_value:V1Badge]
-[offset:0x1401, name_value:initialRender]
-[offset:0x145c, name_value:title]
-[offset:0x1466, name_value:once]
-[offset:0x146c, name_value:name]
-[offset:0x1483, name_value:rerender]
-[offset:0x148d, name_value:setInitiallyProvidedValue]
-[offset:0x14cb, name_value:aboutToBeDeleted]
-[offset:0x1518, name_value:pages/Index]
-[offset:0x1584, name_value:label]
-[offset:0x1597, name_value:info]
-[offset:0x159d, name_value:testTag]
-[offset:0x15a6, name_value:%{public}s]
-[offset:0x15b2, name_value:Ability onBackground]
-[offset:0x15c8, name_value:Ability onCreate]
-[offset:0x15da, name_value:Ability onDestroy]
-[offset:0x15ed, name_value:Ability onForeground]
-[offset:0x1603, name_value:Ability onWindowStageCreate]
-[offset:0x1620, name_value:loadContent]
-[offset:0x162d, name_value:Ability onWindowStageDestroy]
-[offset:0x164b, name_value:code]
-[offset:0x1651, name_value:error]
-[offset:0x1658, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x1687, name_value:JSON]
-[offset:0x168d, name_value:stringify]
-[offset:0x1698, name_value:Succeeded in loading the content.]
-[offset:0x16bb, name_value:prototype]
-[offset:0x16c6, name_value:]
-[offset:0x16df, name_value:count]
-[offset:0x16e6, name_value:light]
-[offset:0x16ed, name_value:theme]
-[offset:0x16f4, name_value:finalizeConstruction]
-[offset:0x170a, name_value:observeComponentCreation2]
-[offset:0x1725, name_value:Column]
-[offset:0x172d, name_value:pop]
-[offset:0x1732, name_value:updateDirtyElements]
-[offset:0x1747, name_value:resetComputed]
-[offset:0x1756, name_value:doubled]
-[offset:0x175f, name_value:resetMonitorsOnReuse]
-[offset:0x1775, name_value:create]
-[offset:0x177d, name_value:ViewV2]
-[offset:0x1785, name_value:paramsGenerator_]
-[offset:0x1797, name_value:updateStateVarsOfChildByElmtId]
-[offset:0x17b7, name_value:ViewPU]
-[offset:0x17bf, name_value:initParam]
-[offset:0x17ca, name_value:onTap]
-[offset:0x17d1, name_value:consumedTheme]
-[offset:0x17e0, name_value:Text]
-[offset:0x17e6, name_value:resetParam]
-[offset:0x17f2, name_value:resetConsumer]
-[offset:0x1801, name_value:updateParam]
-[offset:0x180e, name_value:function]
-[offset:0x1818, name_value:SynchedPropertySimpleOneWayPU]
-[offset:0x1837, name_value:__label]
-[offset:0x1840, name_value:SubscriberManager]
-[offset:0x1853, name_value:Get]
-[offset:0x1858, name_value:delete]
-[offset:0x1860, name_value:id__]
-[offset:0x1866, name_value:aboutToBeDeletedInternal]
-[offset:0x1880, name_value:get]
-[offset:0x1885, name_value:set]
-[offset:0x188a, name_value:purgeDependencyOnElmtId]
-[offset:0x18a3, name_value:reset]
-[offset:0x18aa, name_value:Reflect]
-[offset:0x18b3, name_value:Trace]
-[offset:0x18ba, name_value:ObservedV2]
-[offset:0x18c6, name_value:onCountChanged]
-[offset:0x18d6, name_value:getEntryName]
-[offset:0x18e4, name_value:Local]
-[offset:0x18eb, name_value:Provider]
-[offset:0x18f5, name_value:Computed]
-[offset:0x18ff, name_value:Object]
-[offset:0x1907, name_value:getOwnPropertyDescriptor]
-[offset:0x1921, name_value:defineProperty]
-[offset:0x1931, name_value:Monitor]
-[offset:0x193a, name_value:Param]
-[offset:0x1941, name_value:Once]
-[offset:0x1947, name_value:Event]
-[offset:0x194e, name_value:Consumer]
-[offset:0x1958, name_value:registerNamedRoute]
+[offset:0x92c, name_value:UIAbility]
+[offset:0x940, name_value:hilog]
+[offset:0x98e, name_value:DOMAIN]
+[offset:0x12bb, name_value:V2View]
+[offset:0x12c3, name_value:V2Card]
+[offset:0x12cb, name_value:V1Badge]
+[offset:0x1514, name_value:initialRender]
+[offset:0x156f, name_value:title]
+[offset:0x1579, name_value:once]
+[offset:0x157f, name_value:name]
+[offset:0x1596, name_value:rerender]
+[offset:0x15a0, name_value:setInitiallyProvidedValue]
+[offset:0x15de, name_value:aboutToBeDeleted]
+[offset:0x162b, name_value:pages/Index]
+[offset:0x1697, name_value:label]
+[offset:0x16aa, name_value:info]
+[offset:0x16b0, name_value:testTag]
+[offset:0x16b9, name_value:%{public}s]
+[offset:0x16c5, name_value:Ability onBackground]
+[offset:0x16db, name_value:Ability onCreate]
+[offset:0x16ed, name_value:Ability onDestroy]
+[offset:0x1700, name_value:Ability onForeground]
+[offset:0x1716, name_value:Ability onWindowStageCreate]
+[offset:0x1733, name_value:loadContent]
+[offset:0x1740, name_value:Ability onWindowStageDestroy]
+[offset:0x175e, name_value:code]
+[offset:0x1764, name_value:error]
+[offset:0x176b, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x179a, name_value:JSON]
+[offset:0x17a0, name_value:stringify]
+[offset:0x17ab, name_value:Succeeded in loading the content.]
+[offset:0x17ce, name_value:prototype]
+[offset:0x17d9, name_value:]
+[offset:0x17f2, name_value:count]
+[offset:0x17f9, name_value:light]
+[offset:0x1800, name_value:theme]
+[offset:0x1807, name_value:finalizeConstruction]
+[offset:0x181d, name_value:observeComponentCreation2]
+[offset:0x1838, name_value:Column]
+[offset:0x1840, name_value:pop]
+[offset:0x1845, name_value:updateDirtyElements]
+[offset:0x185a, name_value:resetComputed]
+[offset:0x1869, name_value:doubled]
+[offset:0x1872, name_value:resetMonitorsOnReuse]
+[offset:0x1888, name_value:create]
+[offset:0x1890, name_value:ViewV2]
+[offset:0x1898, name_value:paramsGenerator_]
+[offset:0x18aa, name_value:updateStateVarsOfChildByElmtId]
+[offset:0x18ca, name_value:ViewPU]
+[offset:0x18d2, name_value:initParam]
+[offset:0x18dd, name_value:onTap]
+[offset:0x18e4, name_value:consumedTheme]
+[offset:0x18f3, name_value:Text]
+[offset:0x18f9, name_value:resetParam]
+[offset:0x1905, name_value:resetConsumer]
+[offset:0x1914, name_value:updateParam]
+[offset:0x1921, name_value:function]
+[offset:0x192b, name_value:SynchedPropertySimpleOneWayPU]
+[offset:0x194a, name_value:__label]
+[offset:0x1953, name_value:SubscriberManager]
+[offset:0x1966, name_value:Get]
+[offset:0x196b, name_value:delete]
+[offset:0x1973, name_value:id__]
+[offset:0x1979, name_value:aboutToBeDeletedInternal]
+[offset:0x1993, name_value:get]
+[offset:0x1998, name_value:set]
+[offset:0x199d, name_value:purgeDependencyOnElmtId]
+[offset:0x19b6, name_value:reset]
+[offset:0x19bd, name_value:Reflect]
+[offset:0x19c6, name_value:Trace]
+[offset:0x19cd, name_value:ObservedV2]
+[offset:0x19d9, name_value:onCountChanged]
+[offset:0x19e9, name_value:getEntryName]
+[offset:0x19f7, name_value:Local]
+[offset:0x19fe, name_value:Provider]
+[offset:0x1a08, name_value:Computed]
+[offset:0x1a12, name_value:Object]
+[offset:0x1a1a, name_value:getOwnPropertyDescriptor]
+[offset:0x1a34, name_value:defineProperty]
+[offset:0x1a44, name_value:Monitor]
+[offset:0x1a4d, name_value:Param]
+[offset:0x1a54, name_value:Once]
+[offset:0x1a5a, name_value:Event]
+[offset:0x1a61, name_value:Consumer]
+[offset:0x1a6b, name_value:registerNamedRoute]

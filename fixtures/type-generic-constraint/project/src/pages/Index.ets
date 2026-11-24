@@ -1,21 +1,13 @@
-function constrained<T extends number>(value: T): T {
+function identity<T extends number>(value: T): T {
   return value;
-}
-
-function callConstrained() {
-  return constrained("s");
-}
-
-function callConstrainedOk() {
-  return constrained(1);
 }
 
 @Entry
 @Component
-struct TypeGenericConstraint {
+struct GenericProbe {
   build() {
     Column() {
-      Text("x")
+      Text(`${identity('text')}`)
     }
   }
 }

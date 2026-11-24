@@ -133,10 +133,10 @@ class FavoriteConfiguration extends ViewPU {
             {
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                     if (isInitialRender) {
-                        let componentCall = new CardTitle(this, { title: { "id": 16777222, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 30, col: 7 });
+                        let componentCall = new CardTitle(this, { title: { "id": 16777218, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 30, col: 7 });
                         ViewPU.create(componentCall);
                         let paramsLambda = () => {
-                            return { title: { "id": 16777222, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } };
+                            return { title: { "id": 16777218, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' } };
                         };
                         componentCall.paramsGenerator_ = paramsLambda;
                     }
@@ -154,7 +154,7 @@ class FavoriteConfiguration extends ViewPU {
                             List.create();
                             List.width('100%');
                             List.height('82%');
-                            List.backgroundColor({ "id": 16777227, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+                            List.backgroundColor({ "id": 16777224, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
                             List.borderRadius(10);
                             List.padding({ left: 8, right: 5 });
                         }, List);
@@ -179,7 +179,7 @@ class FavoriteConfiguration extends ViewPU {
                 this.appConfig.currentProfileId = f[0]
                 EventHub.sendEvent(EventKey.LoadClashConfig)
                 await ClashViewModel.loadConfig(false, 'FavoriteConfiguration-点击收藏行');
-                Xb_ToastUtil.showToast({message: getResourceString({ "id": 16777224, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, this)})
+                Xb_ToastUtil.showToast({message: getResourceString({ "id": 16777221, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, this)})
                 if (this.uiConfig.isVibrate) {
                   customVibrator.vibratorTriggerOfHapticClockTimer()
                 }
@@ -188,14 +188,14 @@ class FavoriteConfiguration extends ViewPU {
                                             ListItem.clickEffect(customAnimationUtil.isClickEffect(ObservedObject.GetRawObject(this.uiConfig)));
                                             ListItem.transition({ type: TransitionType.Delete, opacity: 0 });
                                             ListItem.swipeAction({
-              end: {
-                builder: () => {
-                  this.itemEnd.bind(this)(f[0]);
-                },
-                actionAreaDistance: 56,
-              },
-              edgeEffect: SwipeEdgeEffect.Spring
-            });
+                                                end: {
+                                                  builder: () => {
+                                                    this.itemEnd(f[0]);
+                                                  },
+                                                  actionAreaDistance: 56,
+                                                },
+                                                edgeEffect: SwipeEdgeEffect.Spring
+                                            });
                                         };
                                         const deepRenderFunction = (elmtId, isInitialRender) => {
                                             itemCreation(elmtId, isInitialRender);
@@ -216,8 +216,8 @@ class FavoriteConfiguration extends ViewPU {
                                                     Radio.width(HomeCardFontSize(this.widthBp, this.heightBp));
                                                     Radio.checked(f[0] === this.appConfig.currentProfileId);
                                                     Radio.radioStyle({
-                    checkedBackgroundColor: this.icon_emphasize,
-                  });
+                                                        checkedBackgroundColor: this.icon_emphasize,
+                                                    });
                                                     Radio.hitTestBehavior(HitTestMode.None);
                                                 }, Radio);
                                             Flex.pop();
@@ -233,7 +233,7 @@ class FavoriteConfiguration extends ViewPU {
                                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                     Divider.create();
                                                     Divider.strokeWidth(1);
-                                                    Divider.color({ "id": 16777226, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+                                                    Divider.color({ "id": 16777223, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
                                                 }, Divider);
                                             });
                                         }
@@ -266,7 +266,7 @@ class FavoriteConfiguration extends ViewPU {
                                 SymbolGlyph.padding({bottom:5});
                             }, SymbolGlyph);
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                Text.create({ "id": 16777223, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+                                Text.create({ "id": 16777220, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
                                 Text.fontSize(HomeCardPartSmallFontSize(this.widthBp, this.heightBp));
                                 Text.fontColor({ "id": 125830983, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
                                 Text.textAlign(TextAlign.Center);

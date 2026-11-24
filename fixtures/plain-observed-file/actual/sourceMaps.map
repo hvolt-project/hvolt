@@ -18,7 +18,7 @@
       "entry/src/main/ets/common/ObservedModel.ets"
     ],
     "names": [],
-    "mappings": ";;;AAGA;AACA;EACE;EACA",
+    "mappings": ";;;AAGA;AACA;IACE;IACA",
     "entry-package-info": "entry|1.0.0"
   },
   "entry|entry|1.0.0|src/main/ets/pages/Index.ts": {

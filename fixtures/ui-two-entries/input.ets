@@ -1,9 +1,10 @@
+
 @Entry
 @Component
 struct First {
   build() {
     Column() {
-      Text("a")
+      Text("x")
     }
   }
 }
@@ -13,7 +14,7 @@ struct First {
 struct Second {
   build() {
     Column() {
-      Text("b")
+      Text("y")
     }
   }
 }

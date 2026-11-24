@@ -269,6 +269,20 @@ class BuilderProbe extends ViewPU {
 	}
 	updateRecycleElmtId(oldElmtId, newElmtId) {}
 	private __footer;
+	guarded(parent = null) {
+		this.observeComponentCreation2((elmtId, isInitialRender) => {
+			ForEach.create();
+			const forEachItemGenFunction = (_item) => {
+				const item = _item;
+				this.observeComponentCreation2((elmtId, isInitialRender) => {
+					Text.create(item);
+				}, Text);
+				Text.pop();
+			};
+			this.forEachUpdateFunction(elmtId, ['g'], forEachItemGenFunction);
+		}, ForEach);
+		ForEach.pop();
+	}
 	initialRender() {
 		this.observeComponentCreation2((elmtId, isInitialRender) => {
 			Column.create();
@@ -281,6 +295,7 @@ class BuilderProbe extends ViewPU {
 		}, Text);
 		Text.pop();
 		this.footer.bind(this)();
+		this.guarded.bind(this)();
 		Column.pop();
 	}
 	rerender() {
@@ -460,8 +475,8 @@ class EnumProbe extends ViewPU {
 }
 // ===== A：枚举成员 / 类静态成员的机制 =====
 const enum ConstKind {
-  A = 1,
-  B = 2
+    A = 1,
+    B = 2
 }
 namespace NsHost {
 	export const X: number = 1;
@@ -764,7 +779,7 @@ class Index extends ViewPU {
 				if (isInitialRender) {
 					let componentCall = recycleNode ? recycleNode : new PlainMemberProbe(this, {}, undefined, elmtId, () => {}, {
 						page: 'entry/src/main/ets/pages/Index.ets',
-						line: 281,
+						line: 314,
 						col: 7
 					});
 					ViewPU.createRecycle(componentCall, recycleNode !== null, 'PlainMemberProbe', () => {
@@ -797,7 +812,7 @@ class Index extends ViewPU {
 				if (isInitialRender) {
 					let componentCall = recycleNode ? recycleNode : new CallAndTernaryProbe(this, {}, undefined, elmtId, () => {}, {
 						page: 'entry/src/main/ets/pages/Index.ets',
-						line: 282,
+						line: 315,
 						col: 7
 					});
 					ViewPU.createRecycle(componentCall, recycleNode !== null, 'CallAndTernaryProbe', () => {
@@ -830,7 +845,7 @@ class Index extends ViewPU {
 				if (isInitialRender) {
 					let componentCall = recycleNode ? recycleNode : new StyleProbe(this, {}, undefined, elmtId, () => {}, {
 						page: 'entry/src/main/ets/pages/Index.ets',
-						line: 283,
+						line: 316,
 						col: 7
 					});
 					ViewPU.createRecycle(componentCall, recycleNode !== null, 'StyleProbe', () => {
@@ -863,7 +878,7 @@ class Index extends ViewPU {
 				if (isInitialRender) {
 					let componentCall = recycleNode ? recycleNode : new ModuleVarProbe(this, {}, undefined, elmtId, () => {}, {
 						page: 'entry/src/main/ets/pages/Index.ets',
-						line: 284,
+						line: 317,
 						col: 7
 					});
 					ViewPU.createRecycle(componentCall, recycleNode !== null, 'ModuleVarProbe', () => {
@@ -896,7 +911,7 @@ class Index extends ViewPU {
 				if (isInitialRender) {
 					let componentCall = recycleNode ? recycleNode : new FormProbe(this, {}, undefined, elmtId, () => {}, {
 						page: 'entry/src/main/ets/pages/Index.ets',
-						line: 285,
+						line: 318,
 						col: 7
 					});
 					ViewPU.createRecycle(componentCall, recycleNode !== null, 'FormProbe', () => {
@@ -929,7 +944,7 @@ class Index extends ViewPU {
 				if (isInitialRender) {
 					let componentCall = recycleNode ? recycleNode : new EnumMechanismProbe(this, {}, undefined, elmtId, () => {}, {
 						page: 'entry/src/main/ets/pages/Index.ets',
-						line: 286,
+						line: 319,
 						col: 7
 					});
 					ViewPU.createRecycle(componentCall, recycleNode !== null, 'EnumMechanismProbe', () => {
@@ -962,7 +977,7 @@ class Index extends ViewPU {
 				if (isInitialRender) {
 					let componentCall = recycleNode ? recycleNode : new MixOrderProbe(this, {}, undefined, elmtId, () => {}, {
 						page: 'entry/src/main/ets/pages/Index.ets',
-						line: 287,
+						line: 320,
 						col: 7
 					});
 					ViewPU.createRecycle(componentCall, recycleNode !== null, 'MixOrderProbe', () => {
@@ -995,7 +1010,7 @@ class Index extends ViewPU {
 				if (isInitialRender) {
 					let componentCall = recycleNode ? recycleNode : new StylesScopeProbe(this, {}, undefined, elmtId, () => {}, {
 						page: 'entry/src/main/ets/pages/Index.ets',
-						line: 288,
+						line: 321,
 						col: 7
 					});
 					ViewPU.createRecycle(componentCall, recycleNode !== null, 'StylesScopeProbe', () => {
@@ -1028,7 +1043,7 @@ class Index extends ViewPU {
 				if (isInitialRender) {
 					let componentCall = recycleNode ? recycleNode : new GlobalStyleShadowProbe(this, {}, undefined, elmtId, () => {}, {
 						page: 'entry/src/main/ets/pages/Index.ets',
-						line: 289,
+						line: 322,
 						col: 7
 					});
 					ViewPU.createRecycle(componentCall, recycleNode !== null, 'GlobalStyleShadowProbe', () => {
@@ -1061,7 +1076,7 @@ class Index extends ViewPU {
 				if (isInitialRender) {
 					let componentCall = recycleNode ? recycleNode : new GlobalOnlyProbe(this, {}, undefined, elmtId, () => {}, {
 						page: 'entry/src/main/ets/pages/Index.ets',
-						line: 290,
+						line: 323,
 						col: 7
 					});
 					ViewPU.createRecycle(componentCall, recycleNode !== null, 'GlobalOnlyProbe', () => {
@@ -1094,7 +1109,7 @@ class Index extends ViewPU {
 				if (isInitialRender) {
 					let componentCall = recycleNode ? recycleNode : new EnumProbe(this, {}, undefined, elmtId, () => {}, {
 						page: 'entry/src/main/ets/pages/Index.ets',
-						line: 291,
+						line: 324,
 						col: 7
 					});
 					ViewPU.createRecycle(componentCall, recycleNode !== null, 'EnumProbe', () => {
@@ -1133,7 +1148,7 @@ class Index extends ViewPU {
 						Text.pop();
 					} }, undefined, elmtId, () => {}, {
 						page: 'entry/src/main/ets/pages/Index.ets',
-						line: 292,
+						line: 325,
 						col: 7
 					});
 					ViewPU.createRecycle(componentCall, recycleNode !== null, 'BuilderProbe', () => {

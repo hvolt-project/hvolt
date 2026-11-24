@@ -7,28 +7,29 @@ interface DeclHolder_Params {
 	title?: string;
 	label?: string;
 }
+// BUILDER_DECL_COMMENT
 export function declBuilder(label: string, parent = null) {
-	const __label__ = label;
-	(parent ? parent : this).observeComponentCreation2((elmtId, isInitialRender, label = __label__) => {
-		Text.create(label);
-	}, Text);
-	Text.pop();
+    const __label__ = label;
+    (parent ? parent : this).observeComponentCreation2((elmtId, isInitialRender, label = __label__) => {
+        Text.create(label);
+    }, Text);
+    Text.pop();
 }
 // FUNCTION_DECL_COMMENT
 function plainHelper(value: number): number {
-  return value + 1;
+    return value + 1;
 }
 // INTERFACE_FIELD_COMMENT
 interface DeclShape {
-  // INTERFACE_MEMBER_COMMENT
-  name: string
-  size: number
+    // INTERFACE_MEMBER_COMMENT
+    name: string
+    size: number
 }
 // ENUM_MEMBER_COMMENT
 enum DeclKind {
-  // ENUM_FIRST
-  First = 0,
-  Second = 1
+    // ENUM_FIRST
+    First = 0,
+    Second = 1
 }
 export class DeclHolder extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {

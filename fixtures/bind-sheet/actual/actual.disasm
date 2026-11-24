@@ -3,23 +3,24 @@
 # ====================
 # LITERALS
 
-0 0x7c7 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-1 0xda2 { 4 [ string:"value", null_value:0, string:"changeEvent", null_value:0, ]}
-10 0xe23 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-11 0x81e { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-12 0xdca { 1 [ i32:100, ]}
-13 0x779 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-2 0xe63 { 3 [ i32:1, string:"SheetView", i32:0, ]}
-3 0xd73 { 3 [ string:"SheetView", string:"panel", string:"initialRender", ]}
-4 0xde6 { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-5 0xdd3 { 3 [ i32:1, string:"this", i32:0, ]}
-6 0xdb4 { 2 [ string:"builder", null_value:0, ]}
-9 0xdbf { 2 [ string:"detents", null_value:0, ]}
-7 0xd86 { 0 [
+0 0xec7 { 2 [ string:"builder", null_value:0, ]}
+1 0xeb5 { 4 [ string:"value", null_value:0, string:"changeEvent", null_value:0, ]}
+10 0xe86 { 3 [ string:"SheetView", string:"panel", string:"initialRender", ]}
+11 0xedd { 1 [ i32:100, ]}
+12 0xf76 { 3 [ i32:1, string:"SheetView", i32:0, ]}
+2 0xef9 { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+3 0xed2 { 2 [ string:"detents", null_value:0, ]}
+4 0xf36 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+5 0xee6 { 3 [ i32:1, string:"this", i32:0, ]}
+6 0x7cf { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+7 0x9cd 
+8 0x781 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+9 0x826 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+13 0x9d1 { 0 [
 	MODULE_REQUEST_ARRAY: {
 	};
 ]}
-8 0x787 { 3 [
+14 0x78f { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -28,9 +29,23 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
+15 0xe99 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
 
 # ====================
 # RECORDS
+
+.language ArkTS
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x9cd
+	u32 moduleRecordIdx = 0x9d1
+}
 
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
@@ -38,8 +53,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x779
-	u32 moduleRecordIdx = 0x787
+	u32 scopeNames = 0x781
+	u32 moduleRecordIdx = 0x78f
 }
 
 .language ArkTS
@@ -48,8 +63,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xd73
-	u32 moduleRecordIdx = 0xd86
+	u32 scopeNames = 0xe86
+	u32 moduleRecordIdx = 0xe99
 }
 
 .language ECMAScript
@@ -101,6 +116,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -1067,65 +1093,65 @@ jump_label_2:
 # ====================
 # STRING
 
-[offset:0x870, name_value:UIAbility]
-[offset:0x884, name_value:hilog]
-[offset:0x8d2, name_value:DOMAIN]
-[offset:0xd68, name_value:SheetView]
-[offset:0xe76, name_value:panel]
-[offset:0xe7d, name_value:initialRender]
-[offset:0xe8c, name_value:value]
-[offset:0xe93, name_value:changeEvent]
-[offset:0xea0, name_value:builder]
-[offset:0xea9, name_value:detents]
-[offset:0xeb2, name_value:setInitiallyProvidedValue]
-[offset:0xf01, name_value:aboutToBeDeleted]
-[offset:0xf4e, name_value:pages/Index]
-[offset:0xfc6, name_value:info]
-[offset:0xfcc, name_value:testTag]
-[offset:0xfd5, name_value:%{public}s]
-[offset:0xfe1, name_value:Ability onBackground]
-[offset:0xff7, name_value:Ability onCreate]
-[offset:0x1009, name_value:Ability onDestroy]
-[offset:0x101c, name_value:Ability onForeground]
-[offset:0x1032, name_value:Ability onWindowStageCreate]
-[offset:0x104f, name_value:loadContent]
-[offset:0x105c, name_value:Ability onWindowStageDestroy]
-[offset:0x107a, name_value:code]
-[offset:0x1080, name_value:error]
-[offset:0x1087, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x10b6, name_value:JSON]
-[offset:0x10bc, name_value:stringify]
-[offset:0x10c7, name_value:Succeeded in loading the content.]
-[offset:0x10ea, name_value:prototype]
-[offset:0x10f5, name_value:function]
-[offset:0x10ff, name_value:paramsGenerator_]
-[offset:0x1111, name_value:ObservedPropertySimplePU]
-[offset:0x112b, name_value:shown]
-[offset:0x1132, name_value:__shown]
-[offset:0x113b, name_value:finalizeConstruction]
-[offset:0x1168, name_value:SubscriberManager]
-[offset:0x117b, name_value:Get]
-[offset:0x1180, name_value:delete]
-[offset:0x1188, name_value:id__]
-[offset:0x118e, name_value:aboutToBeDeletedInternal]
-[offset:0x11a8, name_value:observeComponentCreation2]
-[offset:0x11c3, name_value:Column]
-[offset:0x11cb, name_value:Button]
-[offset:0x11d3, name_value:pop]
-[offset:0x11d8, name_value:Text]
-[offset:0x11de, name_value:purgeDependencyOnElmtId]
-[offset:0x11f7, name_value:updateDirtyElements]
-[offset:0x120c, name_value:get]
-[offset:0x1211, name_value:set]
-[offset:0x1216, name_value:create]
-[offset:0x121e, name_value:bindSheet]
-[offset:0x1229, name_value:createWithLabel]
-[offset:0x123a, name_value:open]
-[offset:0x1240, name_value:onClick]
-[offset:0x1249, name_value:call]
-[offset:0x124f, name_value:ViewPU]
-[offset:0x1257, name_value:Reflect]
-[offset:0x1260, name_value:rerender]
-[offset:0x126a, name_value:getEntryName]
-[offset:0x1278, name_value:registerNamedRoute]
-[offset:0x128c, name_value:]
+[offset:0x878, name_value:UIAbility]
+[offset:0x88c, name_value:hilog]
+[offset:0x8da, name_value:DOMAIN]
+[offset:0xe7b, name_value:SheetView]
+[offset:0xf89, name_value:panel]
+[offset:0xf90, name_value:initialRender]
+[offset:0xf9f, name_value:value]
+[offset:0xfa6, name_value:changeEvent]
+[offset:0xfb3, name_value:builder]
+[offset:0xfbc, name_value:detents]
+[offset:0xfc5, name_value:setInitiallyProvidedValue]
+[offset:0x1014, name_value:aboutToBeDeleted]
+[offset:0x1061, name_value:pages/Index]
+[offset:0x10d9, name_value:info]
+[offset:0x10df, name_value:testTag]
+[offset:0x10e8, name_value:%{public}s]
+[offset:0x10f4, name_value:Ability onBackground]
+[offset:0x110a, name_value:Ability onCreate]
+[offset:0x111c, name_value:Ability onDestroy]
+[offset:0x112f, name_value:Ability onForeground]
+[offset:0x1145, name_value:Ability onWindowStageCreate]
+[offset:0x1162, name_value:loadContent]
+[offset:0x116f, name_value:Ability onWindowStageDestroy]
+[offset:0x118d, name_value:code]
+[offset:0x1193, name_value:error]
+[offset:0x119a, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x11c9, name_value:JSON]
+[offset:0x11cf, name_value:stringify]
+[offset:0x11da, name_value:Succeeded in loading the content.]
+[offset:0x11fd, name_value:prototype]
+[offset:0x1208, name_value:function]
+[offset:0x1212, name_value:paramsGenerator_]
+[offset:0x1224, name_value:ObservedPropertySimplePU]
+[offset:0x123e, name_value:shown]
+[offset:0x1245, name_value:__shown]
+[offset:0x124e, name_value:finalizeConstruction]
+[offset:0x127b, name_value:SubscriberManager]
+[offset:0x128e, name_value:Get]
+[offset:0x1293, name_value:delete]
+[offset:0x129b, name_value:id__]
+[offset:0x12a1, name_value:aboutToBeDeletedInternal]
+[offset:0x12bb, name_value:observeComponentCreation2]
+[offset:0x12d6, name_value:Column]
+[offset:0x12de, name_value:Button]
+[offset:0x12e6, name_value:pop]
+[offset:0x12eb, name_value:Text]
+[offset:0x12f1, name_value:purgeDependencyOnElmtId]
+[offset:0x130a, name_value:updateDirtyElements]
+[offset:0x131f, name_value:get]
+[offset:0x1324, name_value:set]
+[offset:0x1329, name_value:create]
+[offset:0x1331, name_value:bindSheet]
+[offset:0x133c, name_value:createWithLabel]
+[offset:0x134d, name_value:open]
+[offset:0x1353, name_value:onClick]
+[offset:0x135c, name_value:call]
+[offset:0x1362, name_value:ViewPU]
+[offset:0x136a, name_value:Reflect]
+[offset:0x1373, name_value:rerender]
+[offset:0x137d, name_value:getEntryName]
+[offset:0x138b, name_value:registerNamedRoute]
+[offset:0x139f, name_value:]

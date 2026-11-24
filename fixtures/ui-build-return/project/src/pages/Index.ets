@@ -1,14 +1,11 @@
+
 @Entry
 @Component
-struct BuildReturnProbe {
-  constructor() {
-    super();
-  }
-
+struct BatchProbe75b {
   build() {
     Column() {
       Text("x")
     }
-    return 1;
+    return;
   }
 }

@@ -3,18 +3,23 @@
 # ====================
 # LITERALS
 
-0 0xd4d { 3 [ i32:1, string:"this", i32:0, ]}
-1 0xe25 { 3 [ i32:1, string:"ReusePage", i32:0, ]}
-10 0xda8 { 13 [ string:"resetStateVarsOnReuse", method:#~@3>#resetStateVarsOnReuse, method_affiliate:1, string:"initialRender", method:#~@3>#initialRender, method_affiliate:0, string:"updateStateVars", method:#~@3>#updateStateVars, method_affiliate:1, string:"rerender", method:#~@3>#rerender, method_affiliate:0, i32:4, ]}
-11 0xd3a { 3 [ i32:1, string:"this", i32:0, ]}
-2 0x76b { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-3 0x7c2 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-4 0xd6b { 13 [ string:"resetStateVarsOnReuse", method:#~@1>#resetStateVarsOnReuse, method_affiliate:1, string:"initialRender", method:#~@1>#initialRender, method_affiliate:0, string:"rerender", method:#~@1>#rerender, method_affiliate:0, string:"getEntryName", method:#~@1<#getEntryName, method_affiliate:0, i32:3, ]}
-5 0xd60 { 2 [ string:"get", null_value:0, ]}
-6 0xcfe { 4 [ string:"__ReusableV2_Inner_Decorator__", string:"ReusePage", string:"initialRender", string:"ReuseCard", ]}
-8 0xde5 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-9 0x71d { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-12 0x72b { 3 [
+0 0x7ca { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+1 0xe60 { 3 [ i32:1, string:"this", i32:0, ]}
+10 0xef8 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+13 0xebb { 13 [ string:"resetStateVarsOnReuse", method:#~@3>#resetStateVarsOnReuse, method_affiliate:1, string:"initialRender", method:#~@3>#initialRender, method_affiliate:0, string:"updateStateVars", method:#~@3>#updateStateVars, method_affiliate:1, string:"rerender", method:#~@3>#rerender, method_affiliate:0, i32:4, ]}
+14 0xe11 { 4 [ string:"__ReusableV2_Inner_Decorator__", string:"ReusePage", string:"initialRender", string:"ReuseCard", ]}
+2 0xe4d { 3 [ i32:1, string:"this", i32:0, ]}
+3 0xe7e { 13 [ string:"resetStateVarsOnReuse", method:#~@1>#resetStateVarsOnReuse, method_affiliate:1, string:"initialRender", method:#~@1>#initialRender, method_affiliate:0, string:"rerender", method:#~@1>#rerender, method_affiliate:0, string:"getEntryName", method:#~@1<#getEntryName, method_affiliate:0, i32:3, ]}
+5 0xf38 { 3 [ i32:1, string:"ReusePage", i32:0, ]}
+6 0x773 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+7 0x971 
+8 0xe73 { 2 [ string:"get", null_value:0, ]}
+9 0x725 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+11 0x975 { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+12 0x733 { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -23,7 +28,7 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
-7 0xd16 { 1 [
+4 0xe29 { 1 [
 	MODULE_REQUEST_ARRAY: {
 	};
 	ModuleTag: LOCAL_EXPORT, local_name: ReuseCard, export_name: ReuseCard;
@@ -32,14 +37,24 @@
 # ====================
 # RECORDS
 
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x971
+	u32 moduleRecordIdx = 0x975
+}
+
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
 	u8 pkgName@entry = 0x0
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x71d
-	u32 moduleRecordIdx = 0x72b
+	u32 scopeNames = 0x725
+	u32 moduleRecordIdx = 0x733
 }
 
 .language ArkTS
@@ -48,8 +63,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xcfe
-	u32 moduleRecordIdx = 0xd16
+	u32 scopeNames = 0xe11
+	u32 moduleRecordIdx = 0xe29
 }
 
 .language ECMAScript
@@ -101,6 +116,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -1061,49 +1087,49 @@ jump_label_4:
 # ====================
 # STRING
 
-[offset:0x814, name_value:UIAbility]
-[offset:0x828, name_value:hilog]
-[offset:0x876, name_value:DOMAIN]
-[offset:0xce8, name_value:ReusePage]
-[offset:0xcf3, name_value:ReuseCard]
-[offset:0xe47, name_value:get]
-[offset:0xec7, name_value:pages/Index]
-[offset:0xf3f, name_value:info]
-[offset:0xf45, name_value:testTag]
-[offset:0xf4e, name_value:%{public}s]
-[offset:0xf5a, name_value:Ability onBackground]
-[offset:0xf70, name_value:Ability onCreate]
-[offset:0xf82, name_value:Ability onDestroy]
-[offset:0xf95, name_value:Ability onForeground]
-[offset:0xfab, name_value:Ability onWindowStageCreate]
-[offset:0xfc8, name_value:loadContent]
-[offset:0xfd5, name_value:Ability onWindowStageDestroy]
-[offset:0xff3, name_value:code]
-[offset:0xff9, name_value:error]
-[offset:0x1000, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x102f, name_value:JSON]
-[offset:0x1035, name_value:stringify]
-[offset:0x1040, name_value:Succeeded in loading the content.]
-[offset:0x1063, name_value:prototype]
-[offset:0x106e, name_value:Reflect]
-[offset:0x1077, name_value:defineProperty]
-[offset:0x1087, name_value:isReusable_]
-[offset:0x1094, name_value:count]
-[offset:0x109b, name_value:finalizeConstruction]
-[offset:0x10c8, name_value:observeComponentCreation2]
-[offset:0x10e3, name_value:Column]
-[offset:0x10eb, name_value:Text]
-[offset:0x10f1, name_value:pop]
-[offset:0x10f6, name_value:updateDirtyElements]
-[offset:0x110b, name_value:create]
-[offset:0x1113, name_value:]
-[offset:0x1115, name_value:initParam]
-[offset:0x1120, name_value:title]
-[offset:0x1127, name_value:resetParam]
-[offset:0x1133, name_value:updateParam]
-[offset:0x1140, name_value:ViewPU]
-[offset:0x1148, name_value:set]
-[offset:0x114d, name_value:ViewV2]
-[offset:0x1155, name_value:Local]
-[offset:0x115c, name_value:Param]
-[offset:0x1163, name_value:registerNamedRoute]
+[offset:0x81c, name_value:UIAbility]
+[offset:0x830, name_value:hilog]
+[offset:0x87e, name_value:DOMAIN]
+[offset:0xdfb, name_value:ReusePage]
+[offset:0xe06, name_value:ReuseCard]
+[offset:0xf5a, name_value:get]
+[offset:0xfda, name_value:pages/Index]
+[offset:0x1052, name_value:info]
+[offset:0x1058, name_value:testTag]
+[offset:0x1061, name_value:%{public}s]
+[offset:0x106d, name_value:Ability onBackground]
+[offset:0x1083, name_value:Ability onCreate]
+[offset:0x1095, name_value:Ability onDestroy]
+[offset:0x10a8, name_value:Ability onForeground]
+[offset:0x10be, name_value:Ability onWindowStageCreate]
+[offset:0x10db, name_value:loadContent]
+[offset:0x10e8, name_value:Ability onWindowStageDestroy]
+[offset:0x1106, name_value:code]
+[offset:0x110c, name_value:error]
+[offset:0x1113, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x1142, name_value:JSON]
+[offset:0x1148, name_value:stringify]
+[offset:0x1153, name_value:Succeeded in loading the content.]
+[offset:0x1176, name_value:prototype]
+[offset:0x1181, name_value:Reflect]
+[offset:0x118a, name_value:defineProperty]
+[offset:0x119a, name_value:isReusable_]
+[offset:0x11a7, name_value:count]
+[offset:0x11ae, name_value:finalizeConstruction]
+[offset:0x11db, name_value:observeComponentCreation2]
+[offset:0x11f6, name_value:Column]
+[offset:0x11fe, name_value:Text]
+[offset:0x1204, name_value:pop]
+[offset:0x1209, name_value:updateDirtyElements]
+[offset:0x121e, name_value:create]
+[offset:0x1226, name_value:]
+[offset:0x1228, name_value:initParam]
+[offset:0x1233, name_value:title]
+[offset:0x123a, name_value:resetParam]
+[offset:0x1246, name_value:updateParam]
+[offset:0x1253, name_value:ViewPU]
+[offset:0x125b, name_value:set]
+[offset:0x1260, name_value:ViewV2]
+[offset:0x1268, name_value:Local]
+[offset:0x126f, name_value:Param]
+[offset:0x1276, name_value:registerNamedRoute]

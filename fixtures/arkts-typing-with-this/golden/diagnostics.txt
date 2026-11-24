@@ -1,0 +1,5 @@
+ERROR 10505001 ets/pages/Index.ets:11:17 A 'this' type is available only in a non-static member of a class or interface.
+ERROR 10605021 ets/pages/Index.ets:11:17 Type notation using "this" is not supported (arkts-no-typing-with-this)
+ERROR 10605021 ets/pages/Index.ets:2:8 Type notation using "this" is not supported (arkts-no-typing-with-this)
+ERROR 10605021 ets/pages/Index.ets:4:12 Type notation using "this" is not supported (arkts-no-typing-with-this)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

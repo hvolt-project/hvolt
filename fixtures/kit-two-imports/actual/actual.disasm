@@ -3,26 +3,22 @@
 # ====================
 # LITERALS
 
-0 0xe2f { 5 [ i32:2, string:"ProbeStore", i32:0, string:"KitTwoImports", i32:1, ]}
-11 0x812 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-2 0xdb2 { 13 [ string:"setInitiallyProvidedValue", method:#~@1>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@1>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@1>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@1>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-3 0x7bb { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-4 0xda9 { 1 [ i32:0, ]}
-5 0xdef { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-6 0xd96 { 3 [ i32:1, string:"this", i32:0, ]}
-7 0x76d { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-8 0x10f3 
-9 0xd43 { 3 [ string:"ProbeStore", string:"KitTwoImports", string:"initialRender", ]}
-1 0xd56 { 3 [
+0 0xf42 { 5 [ i32:2, string:"ProbeStore", i32:0, string:"KitTwoImports", i32:1, ]}
+1 0xea9 { 3 [ i32:1, string:"this", i32:0, ]}
+12 0x81a { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+13 0xf02 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+3 0xec5 { 13 [ string:"setInitiallyProvidedValue", method:#~@1>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@1>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@1>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@1>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+4 0x1206 
+5 0xebc { 1 [ i32:0, ]}
+6 0x7c3 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+7 0xe56 { 3 [ string:"ProbeStore", string:"KitTwoImports", string:"initialRender", ]}
+8 0x9c1 
+9 0x775 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+10 0x9c5 { 0 [
 	MODULE_REQUEST_ARRAY: {
-		0 : @ohos:arkui.StateManagement,
-		1 : @normalized:N&&&entry/src/main/ets/pages/Plain&,
 	};
-	ModuleTag: REGULAR_IMPORT, local_name: PersistenceV2, import_name: PersistenceV2, module_request: @ohos:arkui.StateManagement;
-	ModuleTag: REGULAR_IMPORT, local_name: getPersistence, import_name: getPersistence, module_request: @normalized:N&&&entry/src/main/ets/pages/Plain&;
-	ModuleTag: LOCAL_EXPORT, local_name: restore, export_name: restore;
 ]}
-10 0x77b { 3 [
+11 0x783 { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -31,7 +27,16 @@
 	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
 	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
 ]}
-12 0x10f7 { 4 [
+14 0xe69 { 3 [
+	MODULE_REQUEST_ARRAY: {
+		0 : @ohos:arkui.StateManagement,
+		1 : @normalized:N&&&entry/src/main/ets/pages/Plain&,
+	};
+	ModuleTag: REGULAR_IMPORT, local_name: PersistenceV2, import_name: PersistenceV2, module_request: @ohos:arkui.StateManagement;
+	ModuleTag: REGULAR_IMPORT, local_name: getPersistence, import_name: getPersistence, module_request: @normalized:N&&&entry/src/main/ets/pages/Plain&;
+	ModuleTag: LOCAL_EXPORT, local_name: restore, export_name: restore;
+]}
+2 0x120a { 4 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:arkui.StateManagement,
 	};
@@ -44,14 +49,24 @@
 # ====================
 # RECORDS
 
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x9c1
+	u32 moduleRecordIdx = 0x9c5
+}
+
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
 	u8 pkgName@entry = 0x0
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x76d
-	u32 moduleRecordIdx = 0x77b
+	u32 scopeNames = 0x775
+	u32 moduleRecordIdx = 0x783
 }
 
 .language ArkTS
@@ -60,8 +75,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xd43
-	u32 moduleRecordIdx = 0xd56
+	u32 scopeNames = 0xe56
+	u32 moduleRecordIdx = 0xe69
 }
 
 .language ArkTS
@@ -70,8 +85,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x10f3
-	u32 moduleRecordIdx = 0x10f7
+	u32 scopeNames = 0x1206
+	u32 moduleRecordIdx = 0x120a
 }
 
 .language ECMAScript
@@ -123,6 +138,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -1102,63 +1128,63 @@ L_ESSlotNumberAnnotation:
 # ====================
 # STRING
 
-[offset:0x864, name_value:UIAbility]
-[offset:0x878, name_value:hilog]
-[offset:0x8c6, name_value:DOMAIN]
-[offset:0xd28, name_value:ProbeStore]
-[offset:0xd34, name_value:KitTwoImports]
-[offset:0xe4c, name_value:initialRender]
-[offset:0xea9, name_value:PersistenceV2]
-[offset:0xeb8, name_value:getPersistence]
-[offset:0xed1, name_value:setInitiallyProvidedValue]
-[offset:0xf20, name_value:aboutToBeDeleted]
-[offset:0xf6d, name_value:pages/Index]
-[offset:0x113b, name_value:AppStorageV2]
-[offset:0x1162, name_value:info]
-[offset:0x1168, name_value:testTag]
-[offset:0x1171, name_value:%{public}s]
-[offset:0x117d, name_value:Ability onBackground]
-[offset:0x1193, name_value:Ability onCreate]
-[offset:0x11a5, name_value:Ability onDestroy]
-[offset:0x11b8, name_value:Ability onForeground]
-[offset:0x11ce, name_value:Ability onWindowStageCreate]
-[offset:0x11eb, name_value:loadContent]
-[offset:0x11f8, name_value:Ability onWindowStageDestroy]
-[offset:0x1216, name_value:code]
-[offset:0x121c, name_value:error]
-[offset:0x1223, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x1252, name_value:JSON]
-[offset:0x1258, name_value:stringify]
-[offset:0x1263, name_value:Succeeded in loading the content.]
-[offset:0x1286, name_value:prototype]
-[offset:0x1291, name_value:connect]
-[offset:0x129a, name_value:name]
-[offset:0x12a0, name_value:value]
-[offset:0x12be, name_value:function]
-[offset:0x12c8, name_value:paramsGenerator_]
-[offset:0x12da, name_value:ObservedPropertySimplePU]
-[offset:0x12f4, name_value:two]
-[offset:0x12f9, name_value:label]
-[offset:0x1300, name_value:__label]
-[offset:0x1309, name_value:finalizeConstruction]
-[offset:0x131f, name_value:SubscriberManager]
-[offset:0x1332, name_value:Get]
-[offset:0x1337, name_value:delete]
-[offset:0x133f, name_value:id__]
-[offset:0x1345, name_value:aboutToBeDeletedInternal]
-[offset:0x135f, name_value:observeComponentCreation2]
-[offset:0x137a, name_value:Column]
-[offset:0x1382, name_value:Text]
-[offset:0x1388, name_value:pop]
-[offset:0x138d, name_value:get]
-[offset:0x1392, name_value:set]
-[offset:0x1397, name_value:purgeDependencyOnElmtId]
-[offset:0x13b0, name_value:updateDirtyElements]
-[offset:0x13c5, name_value:create]
-[offset:0x13cd, name_value:String]
-[offset:0x13d5, name_value:ViewPU]
-[offset:0x13dd, name_value:Reflect]
-[offset:0x13e6, name_value:rerender]
-[offset:0x13f0, name_value:getEntryName]
-[offset:0x13fe, name_value:registerNamedRoute]
-[offset:0x1412, name_value:]
+[offset:0x86c, name_value:UIAbility]
+[offset:0x880, name_value:hilog]
+[offset:0x8ce, name_value:DOMAIN]
+[offset:0xe3b, name_value:ProbeStore]
+[offset:0xe47, name_value:KitTwoImports]
+[offset:0xf5f, name_value:initialRender]
+[offset:0xfbc, name_value:PersistenceV2]
+[offset:0xfcb, name_value:getPersistence]
+[offset:0xfe4, name_value:setInitiallyProvidedValue]
+[offset:0x1033, name_value:aboutToBeDeleted]
+[offset:0x1080, name_value:pages/Index]
+[offset:0x124e, name_value:AppStorageV2]
+[offset:0x1275, name_value:info]
+[offset:0x127b, name_value:testTag]
+[offset:0x1284, name_value:%{public}s]
+[offset:0x1290, name_value:Ability onBackground]
+[offset:0x12a6, name_value:Ability onCreate]
+[offset:0x12b8, name_value:Ability onDestroy]
+[offset:0x12cb, name_value:Ability onForeground]
+[offset:0x12e1, name_value:Ability onWindowStageCreate]
+[offset:0x12fe, name_value:loadContent]
+[offset:0x130b, name_value:Ability onWindowStageDestroy]
+[offset:0x1329, name_value:code]
+[offset:0x132f, name_value:error]
+[offset:0x1336, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x1365, name_value:JSON]
+[offset:0x136b, name_value:stringify]
+[offset:0x1376, name_value:Succeeded in loading the content.]
+[offset:0x1399, name_value:prototype]
+[offset:0x13a4, name_value:connect]
+[offset:0x13ad, name_value:name]
+[offset:0x13b3, name_value:value]
+[offset:0x13d1, name_value:function]
+[offset:0x13db, name_value:paramsGenerator_]
+[offset:0x13ed, name_value:ObservedPropertySimplePU]
+[offset:0x1407, name_value:two]
+[offset:0x140c, name_value:label]
+[offset:0x1413, name_value:__label]
+[offset:0x141c, name_value:finalizeConstruction]
+[offset:0x1432, name_value:SubscriberManager]
+[offset:0x1445, name_value:Get]
+[offset:0x144a, name_value:delete]
+[offset:0x1452, name_value:id__]
+[offset:0x1458, name_value:aboutToBeDeletedInternal]
+[offset:0x1472, name_value:observeComponentCreation2]
+[offset:0x148d, name_value:Column]
+[offset:0x1495, name_value:Text]
+[offset:0x149b, name_value:pop]
+[offset:0x14a0, name_value:get]
+[offset:0x14a5, name_value:set]
+[offset:0x14aa, name_value:purgeDependencyOnElmtId]
+[offset:0x14c3, name_value:updateDirtyElements]
+[offset:0x14d8, name_value:create]
+[offset:0x14e0, name_value:String]
+[offset:0x14e8, name_value:ViewPU]
+[offset:0x14f0, name_value:Reflect]
+[offset:0x14f9, name_value:rerender]
+[offset:0x1503, name_value:getEntryName]
+[offset:0x1511, name_value:registerNamedRoute]
+[offset:0x1525, name_value:]

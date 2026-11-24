@@ -13,7 +13,7 @@ export function ListBuilder(items: string[], parent = null) {
 			}, Text);
 			Text.pop();
 		};
-		this.forEachUpdateFunction(elmtId, items, forEachItemGenFunction);
+		(parent ? parent : this).forEachUpdateFunction(elmtId, items, forEachItemGenFunction);
 	}, ForEach);
 	ForEach.pop();
 }

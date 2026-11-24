@@ -1,0 +1,4 @@
+ERROR 10505001 ets/pages/Index.ets:2:3 'with' statements are not allowed in strict mode.
+ERROR 10505001 ets/pages/Index.ets:2:3 The 'with' statement is not supported. All symbols in a 'with' block will have type 'any'.
+ERROR 10605084 ets/pages/Index.ets:2:3 "with" statement is not supported (arkts-no-with)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

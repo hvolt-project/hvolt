@@ -39,20 +39,20 @@ class Index extends ViewPU {
 		this.__flag = new ObservedPropertySimplePU(false, this, 'flag');
 		this.__model = new ObservedPropertyObjectPU(new Model(), this, 'model');
 		this.dialog = new CustomDialogController({ builder: () => {
-		    let jsDialog = new LinkDialog(this, {
+                let jsDialog = new LinkDialog(this, {
 			linked: this.__count,
 			copied: this.flag
 		}, undefined, -1, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 14, col: 14 });
-		    jsDialog.setController(this.dialog);
-		    ViewPU.create(jsDialog);
-		    let paramsLambda = () => {
-		        return {
+                jsDialog.setController(this.dialog);
+                ViewPU.create(jsDialog);
+                let paramsLambda = () => {
+                    return {
 			linked: this.__count,
 			copied: this.flag
 		};
-		    };
-		    jsDialog.paramsGenerator_ = paramsLambda;
-		} }, this);
+                };
+                jsDialog.paramsGenerator_ = paramsLambda;
+            } }, this);
 		this.plainDialog = new CustomDialogController({ builder: PlainChild({ linked: this.__count }) }, this);
 		this.setInitiallyProvidedValue(params);
 		this.finalizeConstruction();

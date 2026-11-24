@@ -1,11 +1,12 @@
-function constAssertion() {
-  const kinds = ["a", "b"] as const;
-  return kinds.length;
+
+function read(): number {
+  const list = [1, 2] as const;
+  return list.length;
 }
 
 @Entry
 @Component
-struct ArktsAsConst {
+struct BatchProbe90 {
   build() {
     Column() {
       Text("x")

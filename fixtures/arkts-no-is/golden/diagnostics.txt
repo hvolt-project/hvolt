@@ -1,0 +1,2 @@
+ERROR 10605096 ets/pages/Index.ets:1:44 Type guarding is supported with "instanceof" and "as" (arkts-no-is)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

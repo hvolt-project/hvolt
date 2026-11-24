@@ -13,7 +13,9 @@ class UnicodeComments extends ViewPU {
         if (typeof paramsLambda === "function") {
             this.paramsGenerator_ = paramsLambda;
         }
-        this.__计数 = new ObservedPropertySimplePU(0, this, "计数");
+        this.__计数 = new ObservedPropertySimplePU(0
+        // 方法前的注释：用于验证注释不会被改写
+        , this, "计数");
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }

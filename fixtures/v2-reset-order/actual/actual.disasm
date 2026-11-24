@@ -3,19 +3,24 @@
 # ====================
 # LITERALS
 
-0 0xbf1 { 4 [ string:"resetStateVarsOnReuse", method:#~@0>#resetStateVarsOnReuse, method_affiliate:1, i32:1, ]}
-1 0xc07 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-2 0xc47 { 3 [ i32:1, string:"V2ResetOrder", i32:0, ]}
-4 0x773 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-5 0xbb4 { 2 [ string:"V2ResetOrder", string:"initialRender", ]}
-6 0xbde { 3 [ i32:1, string:"this", i32:0, ]}
-8 0x7ca { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-9 0x725 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-3 0xbc2 { 0 [
+0 0x7d2 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+1 0xd04 { 4 [ string:"resetStateVarsOnReuse", method:#~@0>#resetStateVarsOnReuse, method_affiliate:1, i32:1, ]}
+10 0xcc7 { 2 [ string:"V2ResetOrder", string:"initialRender", ]}
+2 0xd1a { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+3 0x77b { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+4 0x979 
+5 0xd5a { 3 [ i32:1, string:"V2ResetOrder", i32:0, ]}
+6 0x72d { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+7 0xcf1 { 3 [ i32:1, string:"this", i32:0, ]}
+11 0xcd5 { 0 [
 	MODULE_REQUEST_ARRAY: {
 	};
 ]}
-7 0x733 { 3 [
+8 0x97d { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+9 0x73b { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -28,14 +33,24 @@
 # ====================
 # RECORDS
 
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x979
+	u32 moduleRecordIdx = 0x97d
+}
+
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
 	u8 pkgName@entry = 0x0
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x725
-	u32 moduleRecordIdx = 0x733
+	u32 scopeNames = 0x72d
+	u32 moduleRecordIdx = 0x73b
 }
 
 .language ArkTS
@@ -44,8 +59,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xbb4
-	u32 moduleRecordIdx = 0xbc2
+	u32 scopeNames = 0xcc7
+	u32 moduleRecordIdx = 0xcd5
 }
 
 .language ECMAScript
@@ -97,6 +112,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -935,53 +961,53 @@ jump_label_6:
 # ====================
 # STRING
 
-[offset:0x81c, name_value:UIAbility]
-[offset:0x830, name_value:hilog]
-[offset:0x87e, name_value:DOMAIN]
-[offset:0xba6, name_value:V2ResetOrder]
-[offset:0xc5a, name_value:initialRender]
-[offset:0xcbb, name_value:pages/Index]
-[offset:0xd33, name_value:info]
-[offset:0xd39, name_value:testTag]
-[offset:0xd42, name_value:%{public}s]
-[offset:0xd4e, name_value:Ability onBackground]
-[offset:0xd64, name_value:Ability onCreate]
-[offset:0xd76, name_value:Ability onDestroy]
-[offset:0xd89, name_value:Ability onForeground]
-[offset:0xd9f, name_value:Ability onWindowStageCreate]
-[offset:0xdbc, name_value:loadContent]
-[offset:0xdc9, name_value:Ability onWindowStageDestroy]
-[offset:0xde7, name_value:code]
-[offset:0xded, name_value:error]
-[offset:0xdf4, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0xe23, name_value:JSON]
-[offset:0xe29, name_value:stringify]
-[offset:0xe34, name_value:Succeeded in loading the content.]
-[offset:0xe57, name_value:prototype]
-[offset:0xe62, name_value:before]
-[offset:0xe6a, name_value:after]
-[offset:0xe71, name_value:finalizeConstruction]
-[offset:0xe9e, name_value:observeComponentCreation2]
-[offset:0xeb9, name_value:Column]
-[offset:0xec1, name_value:Text]
-[offset:0xec7, name_value:pop]
-[offset:0xecc, name_value:updateDirtyElements]
-[offset:0xee1, name_value:resetComputed]
-[offset:0xef0, name_value:doubled]
-[offset:0xef9, name_value:resetMonitorsOnReuse]
-[offset:0xf0f, name_value:create]
-[offset:0xf17, name_value:]
-[offset:0xf19, name_value:ViewPU]
-[offset:0xf21, name_value:Reflect]
-[offset:0xf2a, name_value:set]
-[offset:0xf2f, name_value:ViewV2]
-[offset:0xf37, name_value:onBefore]
-[offset:0xf41, name_value:rerender]
-[offset:0xf4b, name_value:getEntryName]
-[offset:0xf59, name_value:Local]
-[offset:0xf60, name_value:Computed]
-[offset:0xf6a, name_value:Object]
-[offset:0xf72, name_value:getOwnPropertyDescriptor]
-[offset:0xf8c, name_value:defineProperty]
-[offset:0xf9c, name_value:Monitor]
-[offset:0xfa5, name_value:registerNamedRoute]
+[offset:0x824, name_value:UIAbility]
+[offset:0x838, name_value:hilog]
+[offset:0x886, name_value:DOMAIN]
+[offset:0xcb9, name_value:V2ResetOrder]
+[offset:0xd6d, name_value:initialRender]
+[offset:0xdce, name_value:pages/Index]
+[offset:0xe46, name_value:info]
+[offset:0xe4c, name_value:testTag]
+[offset:0xe55, name_value:%{public}s]
+[offset:0xe61, name_value:Ability onBackground]
+[offset:0xe77, name_value:Ability onCreate]
+[offset:0xe89, name_value:Ability onDestroy]
+[offset:0xe9c, name_value:Ability onForeground]
+[offset:0xeb2, name_value:Ability onWindowStageCreate]
+[offset:0xecf, name_value:loadContent]
+[offset:0xedc, name_value:Ability onWindowStageDestroy]
+[offset:0xefa, name_value:code]
+[offset:0xf00, name_value:error]
+[offset:0xf07, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0xf36, name_value:JSON]
+[offset:0xf3c, name_value:stringify]
+[offset:0xf47, name_value:Succeeded in loading the content.]
+[offset:0xf6a, name_value:prototype]
+[offset:0xf75, name_value:before]
+[offset:0xf7d, name_value:after]
+[offset:0xf84, name_value:finalizeConstruction]
+[offset:0xfb1, name_value:observeComponentCreation2]
+[offset:0xfcc, name_value:Column]
+[offset:0xfd4, name_value:Text]
+[offset:0xfda, name_value:pop]
+[offset:0xfdf, name_value:updateDirtyElements]
+[offset:0xff4, name_value:resetComputed]
+[offset:0x1003, name_value:doubled]
+[offset:0x100c, name_value:resetMonitorsOnReuse]
+[offset:0x1022, name_value:create]
+[offset:0x102a, name_value:]
+[offset:0x102c, name_value:ViewPU]
+[offset:0x1034, name_value:Reflect]
+[offset:0x103d, name_value:set]
+[offset:0x1042, name_value:ViewV2]
+[offset:0x104a, name_value:onBefore]
+[offset:0x1054, name_value:rerender]
+[offset:0x105e, name_value:getEntryName]
+[offset:0x106c, name_value:Local]
+[offset:0x1073, name_value:Computed]
+[offset:0x107d, name_value:Object]
+[offset:0x1085, name_value:getOwnPropertyDescriptor]
+[offset:0x109f, name_value:defineProperty]
+[offset:0x10af, name_value:Monitor]
+[offset:0x10b8, name_value:registerNamedRoute]

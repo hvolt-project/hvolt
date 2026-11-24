@@ -15,25 +15,23 @@ import { BindSheetTitleCustomBuilder } from '@normalized:N&&&entry/src/main/ets/
 import hilog from '@ohos:hilog';
 import { getResourceString } from '@normalized:N&&&entry/src/main/ets/common/utils/ResourceStringUtil&';
 import { NavigationListPadding } from '@normalized:N&&&entry/src/main/ets/common/breakpoint/BreakPoint&';
+// 关联：route_map.json
 export function CreateNewConfigBuilder(name: string, param: Object, parent = null) {
-	{
-		(parent ? parent : this).observeComponentCreation2((elmtId, isInitialRender) => {
-			if (isInitialRender) {
-				let componentCall = new CreateNewConfig(parent ? parent : this, {}, undefined, elmtId, () => {}, {
-					page: 'entry/src/main/ets/pages/Index.ets',
-					line: 19,
-					col: 3
-				});
-				ViewPU.create(componentCall);
-				let paramsLambda = () => {
-					return {};
-				};
-				componentCall.paramsGenerator_ = paramsLambda;
-			} else {
-				(parent ? parent : this).updateStateVarsOfChildByElmtId(elmtId, {});
-			}
-		}, { name: 'CreateNewConfig' });
-	}
+    {
+        (parent ? parent : this).observeComponentCreation2((elmtId, isInitialRender) => {
+            if (isInitialRender) {
+                let componentCall = new CreateNewConfig(parent ? parent : this, {}, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 19, col: 3 });
+                ViewPU.create(componentCall);
+                let paramsLambda = () => {
+                    return {};
+                };
+                componentCall.paramsGenerator_ = paramsLambda;
+            }
+            else {
+                (parent ? parent : this).updateStateVarsOfChildByElmtId(elmtId, {});
+            }
+        }, { name: "CreateNewConfig" });
+    }
 }
 export class CreateNewConfig extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
@@ -49,8 +47,8 @@ export class CreateNewConfig extends ViewPU {
         this.__widthBp = this.createStorageLink("currentWidthBreakpoint", 1
         // NV title Builder
         , "widthBp");
-        this.__mainTitle = new ObservedPropertySimplePU(getResourceString({ "id": 16777222, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, this), this, "mainTitle");
-        this.__subTitle = new ObservedPropertySimplePU(getResourceString({ "id": 16777224, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, this), this, "subTitle");
+        this.__mainTitle = new ObservedPropertySimplePU(getResourceString({ "id": 16777218, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, this), this, "mainTitle");
+        this.__subTitle = new ObservedPropertySimplePU(getResourceString({ "id": 16777221, "type": 10003, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }, this), this, "subTitle");
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
@@ -130,11 +128,24 @@ export class CreateNewConfig extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             NavDestination.create(() => {
                     // 替代`NavDestination`的标题栏 START
-                    BindSheetTitleCustomBuilder.bind(this)(makeBuilderParameterProxy("BindSheetTitleCustomBuilder", { pageInfos: () => (this["__configAddPageInfos"] ? this["__configAddPageInfos"] : this["configAddPageInfos"]), isSubPage: () => true, needSetHeight: () => true, titlePaddingLeft: () => BIND_SHEET_DRAG_BAR_HEIGHT / 2, mainTitle: () => (this["__mainTitle"] ? this["__mainTitle"] : this["mainTitle"]), subTitle: () => (this["__subTitle"] ? this["__subTitle"] : this["subTitle"]), mainTitleFontWeight: () => BIND_SHEET_MAIN_FONT_WEIGHT, mainTitleFontSize: () => BIND_SHEET_MAIN_FONTSIZE, subTitleFontSize: () => BIND_SHEET_SUB_FONTSIZE, titleBackgroundColor: () => ({ "id": 16777225, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }), padding: () => ({
+                    BindSheetTitleCustomBuilder.bind(this)(makeBuilderParameterProxy("BindSheetTitleCustomBuilder", {
+        pageInfos: () => (this["__configAddPageInfos"] ? this["__configAddPageInfos"] : this["configAddPageInfos"]),
+        isSubPage: () => true,
+        needSetHeight: () => true,
+        titlePaddingLeft: () => BIND_SHEET_DRAG_BAR_HEIGHT / 2,
+        mainTitle: () => (this["__mainTitle"] ? this["__mainTitle"] : this["mainTitle"]),
+        subTitle: () => (this["__subTitle"] ? this["__subTitle"] : this["subTitle"]),
+        mainTitleFontWeight: () => BIND_SHEET_MAIN_FONT_WEIGHT,
+        mainTitleFontSize: () => BIND_SHEET_MAIN_FONTSIZE,
+        subTitleFontSize: () => BIND_SHEET_SUB_FONTSIZE,
+        titleBackgroundColor: () => ({ "id": 16777222, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' }),
+        padding: () => ({
           // 为什么设置`15`，看Builder的参数中`padding`的介绍：ConfigAddBindSheetTitleBuilderParam
           left: 15,
           right: BIND_SHEET_TITLE_LEFT_SYMBOL_WEIGHT + 15 * 2
-        }), menus: () => [] }));
+        }),
+        menus: () => []
+      }));
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         // 替代`NavDestination`的标题栏 END
                         // START
@@ -167,16 +178,16 @@ export class CreateNewConfig extends ViewPU {
             }, { moduleName: "entry", pagePath: "entry/src/main/ets/pages/Index" });
             NavDestination.height('100%');
             NavDestination.hideTitleBar(true);
-            NavDestination.backgroundColor({ "id": 16777226, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
+            NavDestination.backgroundColor({ "id": 16777223, "type": 10001, params: [], "bundleName": 'com.example.demo', "moduleName": 'entry' });
         }, NavDestination);
         NavDestination.pop();
     }
-aboutToAppear(): void {
-    hilog.info(0xCD10, this.componentName, `#aboutToAppear executed`)
-  }
-aboutToDisappear(): void {
-    hilog.info(0xCD10, this.componentName, `#aboutToDisappear executed`)
-  }
+    aboutToAppear(): void {
+        hilog.info(0xCD10, this.componentName, `#aboutToAppear executed`)
+    }
+    aboutToDisappear(): void {
+        hilog.info(0xCD10, this.componentName, `#aboutToDisappear executed`)
+    }
     rerender() {
         this.updateDirtyElements();
     }

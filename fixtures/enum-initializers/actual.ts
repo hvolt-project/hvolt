@@ -8,8 +8,8 @@ interface EnumInitializers_Params {
 // Enum members without an initializer take one from the previous member: the first is 0, and
 // a member after an explicit one is that value + 1. A string member is never filled.
 enum Mode {
-  Off = 0,
-  On = 1
+    Off = 0,
+    On = 1
 }
 enum Level {
 	Low = 3,

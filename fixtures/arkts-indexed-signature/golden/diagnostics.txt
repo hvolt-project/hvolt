@@ -1,0 +1,2 @@
+ERROR 10605017 ets/pages/Index.ets:4:3 Indexed signatures are not supported (arkts-no-indexed-signatures)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

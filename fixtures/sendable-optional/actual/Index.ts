@@ -8,13 +8,13 @@ interface SendableOptional_Params {}
 // property without the question token is untouched.
          
 class Box { constructor() { "use sendable"; }
-  value: number | undefined = undefined;
-  init: string | undefined = 'i';
-  plain: boolean = false;
+    value: number | undefined = undefined;
+    init: string | undefined = 'i';
+    plain: boolean = false;
 
-  read(): number {
-    return this.plain ? 1 : 0;
-  }
+    read(): number {
+        return this.plain ? 1 : 0;
+    }
 }
 function make(n: number): number { "use sendable";
 	return n;

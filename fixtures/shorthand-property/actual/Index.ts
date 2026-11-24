@@ -253,27 +253,27 @@ class ShorthandProperty extends ViewPU {
             __Recycle__.pop();
         Column.pop();
     }
-describe(): string {
-    const name = this.name
-    const key = 'k'
-    const value = 1
-    // 1. 键与值同名
-    const same: Pair = { name: name, key: key, value: value }
-    // 2. 键与值不同名
-    const other: Pair = { name: key, key: name, value: value }
-    // 3. 值是成员访问
-    const member: Pair = { name: this.name, key: this.ident, value: value }
-    // 4. 值是调用
-    const called: Pair = { name: getFn(), key: getFn(), value: value }
-    // 5. 嵌套对象字面量里的简写
-    const nested: Nested = { inner: { name: name, key: key, value: value } }
-    // 6. 箭头函数返回对象里的简写
-    const make = (): Pair => ({ name: name, key: key, value: value })
-    // 7. 数组元素是对象字面量时的简写
-    const list: Pair[] = [{ name: name, key: key, value: value }]
-    this.items = list
-    return `${same.name}${other.name}${member.name}${called.name}${nested.inner.name}${make().name}`
-  }
+    describe(): string {
+        const name = this.name
+        const key = 'k'
+        const value = 1
+        // 1. 键与值同名
+        const same: Pair = { name: name, key: key, value: value }
+        // 2. 键与值不同名
+        const other: Pair = { name: key, key: name, value: value }
+        // 3. 值是成员访问
+        const member: Pair = { name: this.name, key: this.ident, value: value }
+        // 4. 值是调用
+        const called: Pair = { name: getFn(), key: getFn(), value: value }
+        // 5. 嵌套对象字面量里的简写
+        const nested: Nested = { inner: { name: name, key: key, value: value } }
+        // 6. 箭头函数返回对象里的简写
+        const make = (): Pair => ({ name: name, key: key, value: value })
+        // 7. 数组元素是对象字面量时的简写
+        const list: Pair[] = [{ name: name, key: key, value: value }]
+        this.items = list
+        return `${same.name}${other.name}${member.name}${called.name}${nested.inner.name}${make().name}`
+    }
     rerender() {
         this.updateDirtyElements();
     }

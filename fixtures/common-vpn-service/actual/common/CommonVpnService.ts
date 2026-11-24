@@ -109,17 +109,17 @@ export function cidrToAddressWithPrefix(cidr: string): AddressWithPrefix | null 
 	return null;
 }
 export function cidrToRoute(cidr: string): RouteInfo | null {
-  let destination = cidrToAddressWithPrefix(cidr)
-  if (destination == null) {
-    return null
-  }
-  let family = destination.address.family
-  let gateway = family == 2 ? "fe80::" : "172.19.0.1"
-  return {
-    "interface": "vpn-tun",
-    destination: destination,
-    gateway: new Address(gateway, family),
-    hasGateway: false,
-    isDefaultRoute: cidr == "0.0.0.0/0" || cidr == "::/0",
-  }
+    let destination = cidrToAddressWithPrefix(cidr)
+    if (destination == null) {
+        return null
+    }
+    let family = destination.address.family
+    let gateway = family == 2 ? "fe80::" : "172.19.0.1"
+    return {
+        "interface": "vpn-tun",
+        destination: destination,
+        gateway: new Address(gateway, family),
+        hasGateway: false,
+        isDefaultRoute: cidr == "0.0.0.0/0" || cidr == "::/0",
+    }
 }

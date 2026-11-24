@@ -3,254 +3,268 @@
 # ====================
 # LITERALS
 
-0 0x87f5 { 1 [ i32:0, ]}
-1 0x90ac { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-10 0x8401 { 2 [ string:"message", null_value:0, ]}
-100 0x7eda { 2 [ string:"alignContent", null_value:0, ]}
-101 0x8040 { 10 [ string:"id", i32:16777223, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-102 0x8126 { 10 [ string:"id", i32:16777223, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-103 0x818c { 10 [ string:"id", i32:125831551, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-104 0x8aa7 { 13 [ string:"setInitiallyProvidedValue", method:#~@15>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@15>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@15>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@15>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-105 0x8159 { 10 [ string:"id", i32:125831440, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-106 0x7b25 { 2 [ string:"info", null_value:0, ]}
-107 0x7e39 { 10 [ string:"id", i32:16777223, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-108 0x846d { 2 [ string:"message", null_value:0, ]}
-109 0x7e6c { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:472, string:"col", i32:11, ]}
-11 0x9409 { 10 [ string:"id", i32:16777231, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-110 0x87a8 { 2 [ string:"message", null_value:0, ]}
-111 0x9283 { 8 [ string:"theDialogTitle", null_value:0, string:"QRCodeParam", null_value:0, string:"confirm", null_value:0, string:"cancel", null_value:0, ]}
-113 0x7e99 { 10 [ string:"id", i32:16777223, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-114 0x89d6 { 13 [ string:"setInitiallyProvidedValue", method:#~@12>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@12>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@12>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@12>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-115 0x8215 { 4 [ string:"value", null_value:0, string:"changeEvent", null_value:0, ]}
-116 0x94b1 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-117 0x91a5 { 2 [ string:"configData", null_value:0, ]}
-118 0x91d2 { 2 [ string:"configData", null_value:0, ]}
-119 0x84e9 { 10 [ string:"id", i32:16777220, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-12 0x903f { 2 [ string:"space", null_value:0, ]}
-120 0x8949 { 3 [ string:"", string:"", string:"", ]}
-121 0x87bc { 1 [ i32:0, ]}
-122 0x910a { 3 [ i32:1, string:"this", i32:0, ]}
-123 0x90f8 { 4 [ string:"left", null_value:0, string:"right", null_value:0, ]}
-124 0x943c { 4 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, ]}
-125 0x7cf9 { 2 [ i32:1, f64:1.1, ]}
-126 0x7b68 { 2 [ string:"name", string:"CellularData", ]}
-127 0x84b6 { 10 [ string:"id", i32:16777231, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-128 0x95c5 { 7 [ i32:3, string:"result", i32:0, string:"fileName", i32:1, string:"this", i32:2, ]}
-129 0x8f9d { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-13 0x82e9 { 3 [ i32:1, string:"this", i32:0, ]}
-130 0x7e8e { 2 [ string:"name", null_value:0, ]}
-131 0x9481 { 2 [ string:"message", null_value:0, ]}
-132 0x8bf0 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-133 0x7dfb { 10 [ string:"id", i32:16777223, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-134 0x811b { 2 [ string:"message", null_value:0, ]}
-135 0x7ae7 { 10 [ string:"id", i32:16777229, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-136 0x909a { 4 [ string:"duration", null_value:0, string:"curve", null_value:0, ]}
-137 0x874c { 3 [ i32:1, string:"tip", i32:0, ]}
-138 0x7c71 { 4 [ string:"top", i32:10, string:"bottom", i32:10, ]}
-139 0x7f18 { 10 [ string:"id", i32:16777247, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-14 0x966f { 10 [ string:"id", i32:16777248, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-140 0x8232 { 22 [ string:"detents", null_value:0, string:"backgroundColor", null_value:0, string:"showClose", null_value:0, string:"dragBar", u1:0, string:"preferType", null_value:0, string:"scrollSizeMode", null_value:0, string:"onWillAppear", null_value:0, string:"onWillDismiss", null_value:0, string:"onWillDisappear", null_value:0, string:"onDisappear", null_value:0, string:"onWillSpringBackWhenDismiss", null_value:0, ]}
-141 0x96b0 { 4 [ string:"width", i32:50, string:"height", i32:50, ]}
-142 0x7a31 { 10 [ string:"id", i32:125831481, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-143 0x81f2 { 4 [ string:"x", i32:0, string:"y", null_value:0, ]}
-144 0x7d4b { 2 [ string:"builder", null_value:0, ]}
-145 0x7dd3 { 4 [ string:"value", null_value:0, string:"changeEvent", null_value:0, ]}
-146 0x912b { 3 [ i32:1, string:"this", i32:0, ]}
-147 0x79e8 { 2 [ string:"Icon2", null_value:0, ]}
-148 0x8ed0 { 10 [ string:"id", i32:16777228, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-149 0x7dc1 { 4 [ string:"refreshing", null_value:0, string:"builder", null_value:0, ]}
-15 0x8ae4 { 13 [ string:"setInitiallyProvidedValue", method:#~@16>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@16>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@16>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@16>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-150 0x8bb3 { 13 [ string:"setInitiallyProvidedValue", method:#~@19>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@19>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@19>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@19>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-151 0x7f4b { 12 [ string:"title", null_value:0, string:"titleFontSize", null_value:0, string:"icons", null_value:0, string:"iconSize", null_value:0, string:"onFClick", null_value:0, string:"onSClick", null_value:0, ]}
-152 0x8e42 { 8 [ string:"duration", null_value:0, string:"iterations", i32:1, string:"playMode", null_value:0, string:"curve", null_value:0, ]}
-153 0x7a86 { 2 [ string:"Icon2", null_value:0, ]}
-154 0x75df { 2 [ string:"message", string:"当前设备暂不支持系统分享功能！", ]}
-155 0x7de5 { 2 [ string:"message", null_value:0, ]}
-156 0x7c58 { 2 [ string:"overflow", null_value:0, ]}
-157 0x76b8 { 10 [ string:"id", i32:125831551, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-158 0x8a13 { 13 [ string:"setInitiallyProvidedValue", method:#~@13>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@13>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@13>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@13>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-159 0x9361 { 1 [ string:"'文档|.yaml'", ]}
-16 0x79d5 { 3 [ i32:1, string:"this", i32:0, ]}
-160 0x7a91 { 10 [ string:"id", i32:125831481, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-161 0x8557 { 10 [ string:"id", i32:125831521, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-162 0x923e { 10 [ string:"id", i32:16777239, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-163 0x8f24 { 3 [ i32:1, string:"this", i32:0, ]}
-164 0x7be7 { 10 [ string:"id", i32:125830983, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-165 0x8b69 { 16 [ string:"setInitiallyProvidedValue", method:#~@18>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@18>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@18>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@18>#aboutToBeDeleted, method_affiliate:0, string:"setController", method:#~@18>#setController, method_affiliate:1, i32:5, ]}
-166 0x769f { 6 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, string:"callback", null_value:0, ]}
-167 0x8307 { 10 [ string:"id", i32:16777227, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-168 0x7c1a { 2 [ string:"windowId", null_value:0, ]}
-169 0x771e { 10 [ string:"id", i32:16777244, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-17 0x8e7a { 10 [ string:"id", i32:16777235, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-170 0x85bd { 10 [ string:"id", i32:16777242, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-171 0x915f { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:471, string:"col", i32:9, ]}
-172 0x7ba9 { 2 [ string:"overflow", null_value:0, ]}
-173 0x77d0 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-174 0x866f { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-175 0x7cc7 { 10 [ string:"preview", null_value:0, string:"previewAnimationOptions", null_value:0, string:"placement", null_value:0, string:"aboutToAppear", null_value:0, string:"aboutToDisappear", null_value:0, ]}
-176 0x86a2 { 10 [ string:"id", i32:16777221, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-177 0x930a { 4 [ string:"theDialogTitle", null_value:0, string:"QRCodeParam", null_value:0, ]}
-178 0x91b0 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:468, string:"col", i32:9, ]}
-179 0x86d5 { 12 [ string:"builder", null_value:0, string:"cancel", null_value:0, string:"autoCancel", u1:1, string:"alignment", null_value:0, string:"width", i32:328, string:"backgroundColor", null_value:0, ]}
-18 0x853e { 6 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, string:"callback", null_value:0, ]}
-180 0x7d87 { 2 [ string:"offsetRemain", null_value:0, ]}
-181 0x918c { 2 [ string:"name", string:"ImportConfigFromURL", ]}
-182 0x82fc { 2 [ string:"message", null_value:0, ]}
-183 0x7b3b { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:500, string:"col", i32:27, ]}
-184 0x921e { 8 [ string:"theDialogTitle", null_value:0, string:"QRCodeParam", null_value:0, string:"confirm", null_value:0, string:"cancel", null_value:0, ]}
-185 0x93a8 { 3 [ i32:1, string:"this", i32:0, ]}
-186 0x7836 { 6 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, string:"callback", null_value:0, ]}
-187 0x904a { 2 [ string:"message", null_value:0, ]}
-188 0x75ed { 6 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, string:"callback", null_value:0, ]}
-189 0x7901 { 10 [ string:"id", i32:125831910, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-19 0x96c8 { 8 [ string:"radius", i32:15, string:"offsetY", i32:4, string:"color", null_value:0, string:"type", null_value:0, ]}
-190 0x8706 { 10 [ string:"id", i32:16777251, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-191 0x840c { 10 [ string:"id", i32:16777227, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-192 0x8f6a { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-193 0x7967 { 10 [ string:"id", i32:16777233, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-194 0x8fd0 { 2 [ string:"overflow", null_value:0, ]}
-195 0x8368 { 10 [ string:"id", i32:16777232, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-196 0x83ce { 10 [ string:"id", i32:16777220, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-197 0x7a26 { 2 [ string:"Icon2", null_value:0, ]}
-198 0x7c63 { 2 [ string:"space", i32:2, ]}
-199 0x7df0 { 2 [ string:"name", null_value:0, ]}
-2 0x8933 { 4 [ string:"showToast", method:#~@d<#showToast, method_affiliate:1, i32:0, ]}
-20 0x8f16 { 2 [ string:"message", string:"更新所有配置成功", ]}
-200 0x7bb4 { 10 [ string:"id", i32:16777245, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-201 0x9271 { 4 [ string:"url", null_value:0, string:"name", null_value:0, ]}
-202 0x8609 { 10 [ string:"id", i32:125831520, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-203 0x8796 { 1 [ i32:0, ]}
-204 0x9609 { 10 [ string:"id", i32:125831481, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-205 0x876a { 8 [ string:"left", i32:14, string:"right", i32:14, string:"top", i32:5, string:"bottom", i32:5, ]}
-206 0x7e2e { 2 [ string:"name", null_value:0, ]}
-207 0x7b1a { 2 [ string:"checkedBackgroundColor", null_value:0, ]}
-208 0x82b6 { 10 [ string:"id", i32:16777246, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-209 0x8f37 { 10 [ string:"id", i32:125831440, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-21 0x96ee { 10 [ string:"id", i32:16777252, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-210 0x7d92 { 2 [ string:"space", null_value:0, ]}
-211 0x875f { 2 [ string:"level", null_value:0, ]}
-212 0x7d24 { 2 [ string:"count", i32:1, ]}
-213 0x919a { 2 [ string:"configData", null_value:0, ]}
-215 0x7ac4 { 2 [ string:"name", string:"RoundButton", ]}
-216 0x858a { 10 [ string:"id", i32:125831041, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-217 0x76eb { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-218 0x79f3 { 10 [ string:"id", i32:125831481, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-219 0x7751 { 6 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, string:"callback", null_value:0, ]}
-22 0x8227 { 2 [ string:"builder", null_value:0, ]}
-220 0x85f0 { 6 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, string:"callback", null_value:0, ]}
-221 0x7606 { 10 [ string:"id", i32:125831624, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-222 0x7a64 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:634, string:"col", i32:13, ]}
-223 0x7ee5 { 10 [ string:"id", i32:16777248, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-224 0x9181 { 2 [ string:"configData", null_value:0, ]}
-225 0x7639 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-226 0x766c { 10 [ string:"id", i32:16777224, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-227 0x9529 { 10 [ string:"id", i32:16777249, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-228 0x7c89 { 10 [ string:"id", i32:16777249, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-229 0x95ec { 5 [ i32:2, string:"data", i32:0, string:"this", i32:1, ]}
-23 0x949f { 4 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, ]}
-230 0x7803 { 10 [ string:"id", i32:16777240, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-231 0x799a { 14 [ string:"utd", null_value:0, string:"content", null_value:0, string:"thumbnailUri", null_value:0, string:"title", null_value:0, string:"description", null_value:0, string:"label", string:"", string:"uri", string:"", ]}
-232 0x839b { 10 [ string:"id", i32:16777231, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-233 0x833a { 12 [ string:"title", null_value:0, string:"cancelText", null_value:0, string:"confirmText", null_value:0, string:"cancelButtonBackgroundColor", null_value:0, string:"cancel", null_value:0, string:"confirm", null_value:0, ]}
-234 0x948c { 3 [ i32:1, string:"item", i32:0, ]}
-235 0x7882 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-236 0x78e8 { 6 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, string:"callback", null_value:0, ]}
-237 0x7934 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-238 0x8012 { 12 [ string:"title", null_value:0, string:"titleFontSize", null_value:0, string:"icons", null_value:0, string:"iconSize", null_value:0, string:"onFClick", null_value:0, string:"onSClick", null_value:0, ]}
-239 0x934f { 4 [ string:"url", null_value:0, string:"name", null_value:0, ]}
-24 0x78b5 { 10 [ string:"id", i32:16777237, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-240 0x747a { 41 [ string:"SubscriptionInfo", string:"ConfigData", string:"AppConfig", string:"UIConfig", string:"EventHub", string:"isON", string:"customAnimationUtil", string:"customVibrator", string:"SocketProxy", string:"ClashViewModel", string:"Xb_GetResourceStringHolder", string:"Xb_Share", string:"Xb_PreferenceUtil", string:"Xb_ToastUtil", string:"PopupBuilder", string:"CellularData", string:"initialRender", string:"Nothing", string:"TopBar", string:"RoundButton", string:"ConfigAdd", string:"ImportConfigFromURL", string:"ImportConfigFromFile", string:"QRCodeDialog", string:"CustomConfirmDialog", string:"ConfigurationPage", string:"builder", string:"paramsLambda", string:"onDisappear", string:"forEachItemGenFunction", string:"itemCreation2", string:"deepRenderFunction", string:"configListLongPressCtxMenus", string:"FloatAddButton", string:"configListLongPressCtxMenuBuilder", string:"ConfigAddBindSheetBuilder", string:"LoadingBuilder", string:"SortBuilder", string:"aboutToAppear", string:"loadConfig", string:"exportConfig", ]}
-241 0x8b21 { 2 [ string:"message", null_value:0, ]}
-242 0x8483 { 10 [ string:"id", i32:16777232, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-243 0x900e { 9 [ i32:4, string:"deepRenderFunction", i32:0, string:"index", i32:1, string:"itemCreation", i32:2, string:"item", i32:3, ]}
-244 0x955c { 4 [ string:"strokeWidth", null_value:0, string:"color", null_value:0, ]}
-245 0x7cbc { 2 [ string:"builder", null_value:0, ]}
-246 0x7fac { 10 [ string:"id", i32:125831440, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-247 0x7d9d { 4 [ string:"left", null_value:0, string:"right", null_value:0, ]}
-248 0x784f { 10 [ string:"id", i32:125831600, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-25 0x8c30 { 95 [ i32:47, string:"ProfileType", i32:0, string:"SocketProxy", i32:1, string:"AppConfig", i32:2, string:"UIConfig", i32:3, string:"isON", i32:4, string:"NewConfigData", i32:5, string:"TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE", i32:6, string:"CustomConfirmDialog", i32:7, string:"Xb_ToastUtil", i32:8, string:"BIND_SHEET_CONTAINER_HEIGHT", i32:9, string:"componentName", i32:10, string:"Xb_PreferenceUtil", i32:11, string:"TAB_CONTENT_TITLE_HEIGHT", i32:12, string:"TopBar", i32:13, string:"getResourceString", i32:14, string:"TAB_CONTENT_TITLE_FONT_SIZE", i32:15, string:"Nothing", i32:16, string:"LIST_SPACE", i32:17, string:"TabContentTitleMargin", i32:18, string:"CONTENT_END_OFFSET_150", i32:19, string:"ListLanes", i32:20, string:"ListGutter", i32:21, string:"customAnimationUtil", i32:22, string:"BORDER_RADIUS_20", i32:23, string:"customVibrator", i32:24, string:"PopupBuilder", i32:25, string:"PopTips", i32:26, string:"LIST_ITEM_PADDING", i32:27, string:"convertTime", i32:28, string:"CellularData", i32:29, string:"EventHub", i32:30, string:"EventKey", i32:31, string:"RoundButton", i32:32, string:"Xb_TabBarVertical", i32:33, string:"icon_tertiary", i32:34, string:"ConfigAdd", i32:35, string:"QRCodeDialog", i32:36, string:"ImportConfigFromFile", i32:37, string:"ImportConfigFromURL", i32:38, string:"BIND_SHEET_TITLE_CONTAINER_HEIGHT", i32:39, string:"BIND_SHEET_DRAG_BAR_HEIGHT", i32:40, string:"NavigationListPadding", i32:41, string:"Xb_Share", i32:42, string:"ClashViewModel", i32:43, string:"APP_LINKING", i32:44, string:"Xb_GetResourceString", i32:45, string:"ConfigurationPage", i32:46, ]}
-26 0x94f6 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-27 0x87fe { 13 [ string:"isOpacity", method:#~@6<#isOpacity, method_affiliate:1, string:"isClickEffect", method:#~@6<#isClickEffect, method_affiliate:1, string:"isScaleTran", method:#~@6<#isScaleTran, method_affiliate:2, string:"getFloatButtonTransition", method:#~@6<#getFloatButtonTransition, method_affiliate:2, i32:0, ]}
-28 0x944e { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-29 0x7d0b { 2 [ string:"count", i32:2, ]}
-3 0x963c { 10 [ string:"id", i32:16777250, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-30 0x8739 { 3 [ i32:1, string:"this", i32:0, ]}
-31 0x8851 { 4 [ string:"reset", method:#~@8>#reset, method_affiliate:0, i32:1, ]}
-32 0x8478 { 2 [ string:"message", null_value:0, ]}
-33 0x939a { 2 [ string:"name", string:"ConfigAdd", ]}
-34 0x8999 { 13 [ string:"setInitiallyProvidedValue", method:#~@11>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@11>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@11>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@11>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-35 0x96a2 { 2 [ string:"bottom", i32:20, ]}
-36 0x1933 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-37 0x8ead { 8 [ string:"duration", null_value:0, string:"iterations", i32:1, string:"playMode", null_value:0, string:"curve", null_value:0, ]}
-38 0x776a { 10 [ string:"id", i32:125831499, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-39 0x8897 { 1 [ i32:0, ]}
-4 0x8283 { 10 [ string:"id", i32:16777248, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-40 0x895c { 13 [ string:"setInitiallyProvidedValue", method:#~@f>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@f>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@f>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@f>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-41 0x911d { 2 [ string:"bottom", i32:15, ]}
-42 0x8910 { 7 [ string:"putSync", method:#~@c<#putSync, method_affiliate:2, string:"save", method:#~@c<#save, method_affiliate:0, i32:0, ]}
-43 0x198a { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-44 0x80fb { 8 [ string:"title", null_value:0, string:"titleFontSize", null_value:0, string:"icons", null_value:0, string:"iconSize", null_value:0, ]}
-45 0x8a50 { 19 [ string:"setInitiallyProvidedValue", method:#~@14>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@14>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@14>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@14>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@14>#initialRender, method_affiliate:0, string:"rerender", method:#~@14>#rerender, method_affiliate:0, i32:6, ]}
-46 0x913e { 2 [ string:"message", null_value:0, ]}
-47 0x87c5 { 10 [ string:"on", method:#~@4<#on, method_affiliate:2, string:"off", method:#~@4<#off, method_affiliate:1, string:"sendEvent", method:#~@4<#sendEvent, method_affiliate:1, i32:0, ]}
-48 0x7b5d { 2 [ string:"info", null_value:0, ]}
-49 0x8b2c { 13 [ string:"setInitiallyProvidedValue", method:#~@17>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@17>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@17>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@17>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-5 0x88a0 { 13 [ string:"inputInfo", method:#~@b<#inputInfo, method_affiliate:1, string:"sharePlant", method:#~@b<#sharePlant, method_affiliate:1, string:"immersiveListening", method:#~@b<#immersiveListening, method_affiliate:1, string:"immersiveDisablingListening", method:#~@b<#immersiveDisablingListening, method_affiliate:1, i32:0, ]}
-50 0x843f { 12 [ string:"title", null_value:0, string:"cancelText", null_value:0, string:"confirmText", null_value:0, string:"cancelButtonBackgroundColor", null_value:0, string:"cancel", null_value:0, string:"confirm", null_value:0, ]}
-51 0x9154 { 2 [ string:"configData", null_value:0, ]}
-52 0x88dd { 10 [ string:"id", i32:16777222, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-53 0x95a1 { 4 [ string:"duration", null_value:0, string:"curve", null_value:0, ]}
-54 0x956e { 10 [ string:"id", i32:125831013, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-55 0x93bb { 4 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, ]}
-56 0x851c { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:727, string:"col", i32:14, ]}
-57 0x93cd { 10 [ string:"id", i32:125831543, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-58 0x7b30 { 2 [ string:"info", null_value:0, ]}
-59 0x9400 { 1 [ string:"#E6E54E36", ]}
-6 0x9067 { 10 [ string:"id", i32:16777241, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-60 0x7daf { 4 [ string:"scrollForward", null_value:0, string:"scrollBackward", null_value:0, ]}
-61 0x18e5 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-62 0x7c25 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-63 0x91eb { 10 [ string:"id", i32:16777234, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-64 0x9378 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:439, string:"col", i32:7, ]}
-65 0x90ea { 2 [ string:"left", i32:5, ]}
-66 0x90df { 2 [ string:"overflow", null_value:0, ]}
-67 0x9055 { 4 [ string:"left", null_value:0, string:"right", null_value:0, ]}
-68 0x8e65 { 4 [ string:"message", null_value:0, string:"duration", i32:3000, ]}
-69 0x7d56 { 9 [ i32:4, string:"deepRenderFunction", i32:0, string:"index", i32:1, string:"item", i32:2, string:"itemCreation", i32:3, ]}
-7 0x7f79 { 10 [ string:"id", i32:16777223, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-70 0x8207 { 2 [ string:"name", string:"TopBar", ]}
-71 0x883b { 4 [ string:"vibratorTriggerOfHapticClockTimer", method:#~@7<#vibratorTriggerOfHapticClockTimer, method_affiliate:0, i32:0, ]}
-72 0x7ecc { 2 [ string:"name", string:"Nothing", ]}
-73 0x8fdb { 10 [ string:"id", i32:16777249, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-74 0x80d9 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:442, string:"col", i32:11, ]}
-75 0x779d { 10 [ string:"id", i32:16777255, string:"type", i32:20000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-76 0x7cee { 2 [ string:"scale", null_value:0, ]}
-77 0x863c { 10 [ string:"id", i32:16777243, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-78 0x7b76 { 10 [ string:"id", i32:125830983, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-79 0x81bf { 10 [ string:"id", i32:16777248, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-8 0x7ad2 { 4 [ string:"value", null_value:0, string:"group", string:"configGroup", ]}
-80 0x8e0f { 10 [ string:"id", i32:16777236, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-81 0x94e4 { 4 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, ]}
-82 0x9721 { 6 [ string:"bottom", null_value:0, string:"right", i32:15, string:"left", i32:15, ]}
-83 0x879f { 1 [ i32:0, ]}
-84 0x92a3 { 10 [ string:"id", i32:16777239, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-85 0x8073 { 10 [ string:"id", i32:125831440, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-86 0x9149 { 2 [ string:"configData", null_value:0, ]}
-87 0x92d6 { 4 [ string:"url", null_value:0, string:"name", null_value:0, ]}
-88 0x80a6 { 10 [ string:"id", i32:125831551, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-89 0x8867 { 10 [ string:"updateProfileConfig", method:#~@9<#updateProfileConfig, method_affiliate:1, string:"loadConfig", method:#~@9<#loadConfig, method_affiliate:2, string:"deleteProfile", method:#~@9<#deleteProfile, method_affiliate:1, i32:0, ]}
-9 0x87b3 { 1 [ i32:0, ]}
-90 0x92e8 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:443, string:"col", i32:7, ]}
-91 0x7d32 { 6 [ string:"builder", null_value:0, string:"onWillDismiss", u1:0, string:"autoCancel", u1:0, ]}
-92 0x931c { 10 [ string:"id", i32:16777239, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-93 0x7fdf { 10 [ string:"id", i32:125831551, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
-94 0x7d19 { 2 [ string:"windowId", null_value:0, ]}
-95 0x936a { 2 [ string:"name", string:"QRCodeDialog", ]}
-96 0x91dd { 2 [ string:"name", string:"ImportConfigFromFile", ]}
-97 0x95b3 { 4 [ string:"scrollForward", null_value:0, string:"scrollBackward", null_value:0, ]}
-98 0x9740 { 3 [ i32:1, string:"this", i32:0, ]}
-99 0x8f03 { 3 [ i32:1, string:"this", i32:0, ]}
-112 0x754b { 9 [
+0 0x86d0 { 10 [ string:"id", i32:16777239, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+1 0x884c { 3 [ i32:1, string:"this", i32:0, ]}
+10 0x8f22 { 10 [ string:"id", i32:16777233, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+100 0x7ec2 { 4 [ string:"scrollForward", null_value:0, string:"scrollBackward", null_value:0, ]}
+101 0x78e3 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+102 0x93e9 { 4 [ string:"url", null_value:0, string:"name", null_value:0, ]}
+103 0x7995 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+104 0x90b0 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+105 0x90e3 { 2 [ string:"overflow", null_value:0, ]}
+106 0x841a { 10 [ string:"id", i32:16777224, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+107 0x7ed4 { 4 [ string:"refreshing", null_value:0, string:"builder", null_value:0, ]}
+108 0x93b6 { 10 [ string:"id", i32:16777236, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+109 0x7962 { 10 [ string:"id", i32:125831600, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+11 0x8c34 { 2 [ string:"message", null_value:0, ]}
+110 0x874f { 10 [ string:"id", i32:16777240, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+111 0x7cc7 { 10 [ string:"id", i32:16777242, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+112 0x7d9c { 10 [ string:"id", i32:16777246, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+113 0x7c4e { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:500, string:"col", i32:27, ]}
+114 0x844d { 12 [ string:"title", null_value:0, string:"cancelText", null_value:0, string:"confirmText", null_value:0, string:"cancelButtonBackgroundColor", null_value:0, string:"cancel", null_value:0, string:"confirm", null_value:0, ]}
+115 0x7f0e { 10 [ string:"id", i32:16777219, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+116 0x7cbc { 2 [ string:"overflow", null_value:0, ]}
+117 0x8a6f { 13 [ string:"setInitiallyProvidedValue", method:#~@f>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@f>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@f>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@f>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+119 0x18ed { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+12 0x89f0 { 10 [ string:"id", i32:16777218, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+120 0x8a23 { 7 [ string:"putSync", method:#~@c<#putSync, method_affiliate:2, string:"save", method:#~@c<#save, method_affiliate:0, i32:0, ]}
+121 0x959f { 3 [ i32:1, string:"item", i32:0, ]}
+122 0x80bf { 10 [ string:"id", i32:125831440, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+123 0x925c { 2 [ string:"configData", null_value:0, ]}
+124 0x831a { 2 [ string:"name", string:"TopBar", ]}
+125 0x77fe { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+126 0x8ae9 { 13 [ string:"setInitiallyProvidedValue", method:#~@12>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@12>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@12>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@12>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+127 0x7be5 { 4 [ string:"value", null_value:0, string:"group", string:"configGroup", ]}
+128 0x7949 { 6 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, string:"callback", null_value:0, ]}
+129 0x7e0c { 2 [ i32:1, f64:1.1, ]}
+13 0x88bb { 2 [ string:"message", null_value:0, ]}
+130 0x7e37 { 2 [ string:"count", i32:1, ]}
+131 0x9029 { 2 [ string:"message", string:"更新所有配置成功", ]}
+132 0x917a { 10 [ string:"id", i32:16777238, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+133 0x79c8 { 10 [ string:"id", i32:16777234, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+134 0x7e69 { 9 [ i32:4, string:"deepRenderFunction", i32:0, string:"index", i32:1, string:"item", i32:2, string:"itemCreation", i32:3, ]}
+135 0x907d { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+136 0x78b0 { 10 [ string:"id", i32:16777255, string:"type", i32:20000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+137 0x1b39 
+138 0x7a14 { 10 [ string:"id", i32:125831910, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+139 0x8819 { 10 [ string:"id", i32:16777248, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+14 0x91f2 { 2 [ string:"overflow", null_value:0, ]}
+140 0x9384 { 4 [ string:"url", null_value:0, string:"name", null_value:0, ]}
+141 0x7a47 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+142 0x840f { 2 [ string:"message", null_value:0, ]}
+143 0x7719 { 10 [ string:"id", i32:125831624, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+144 0x7ff8 { 10 [ string:"id", i32:16777245, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+145 0x7dcf { 2 [ string:"builder", null_value:0, ]}
+146 0x7e1e { 2 [ string:"count", i32:2, ]}
+147 0x79fb { 6 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, string:"callback", null_value:0, ]}
+148 0x91ad { 4 [ string:"duration", null_value:0, string:"curve", null_value:0, ]}
+149 0x92fe { 10 [ string:"id", i32:16777231, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+15 0x9853 { 3 [ i32:1, string:"this", i32:0, ]}
+151 0x9251 { 2 [ string:"message", null_value:0, ]}
+152 0x9594 { 2 [ string:"message", null_value:0, ]}
+153 0x9609 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+154 0x77cb { 10 [ string:"id", i32:125831551, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+155 0x88a9 { 1 [ i32:0, ]}
+156 0x9331 { 8 [ string:"theDialogTitle", null_value:0, string:"QRCodeParam", null_value:0, string:"confirm", null_value:0, string:"cancel", null_value:0, ]}
+157 0x82d2 { 10 [ string:"id", i32:16777245, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+158 0x758d { 41 [ string:"SubscriptionInfo", string:"ConfigData", string:"AppConfig", string:"UIConfig", string:"EventHub", string:"isON", string:"customAnimationUtil", string:"customVibrator", string:"SocketProxy", string:"ClashViewModel", string:"Xb_GetResourceStringHolder", string:"Xb_Share", string:"Xb_PreferenceUtil", string:"Xb_ToastUtil", string:"PopupBuilder", string:"CellularData", string:"initialRender", string:"Nothing", string:"TopBar", string:"RoundButton", string:"ConfigAdd", string:"ImportConfigFromURL", string:"ImportConfigFromFile", string:"QRCodeDialog", string:"CustomConfirmDialog", string:"ConfigurationPage", string:"builder", string:"paramsLambda", string:"onDisappear", string:"forEachItemGenFunction", string:"itemCreation2", string:"deepRenderFunction", string:"configListLongPressCtxMenus", string:"FloatAddButton", string:"configListLongPressCtxMenuBuilder", string:"ConfigAddBindSheetBuilder", string:"LoadingBuilder", string:"SortBuilder", string:"aboutToAppear", string:"loadConfig", string:"exportConfig", ]}
+159 0x904a { 10 [ string:"id", i32:125831440, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+16 0x83fc { 3 [ i32:1, string:"this", i32:0, ]}
+161 0x777f { 10 [ string:"id", i32:16777220, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+162 0x9351 { 10 [ string:"id", i32:16777236, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+163 0x94bb { 3 [ i32:1, string:"this", i32:0, ]}
+164 0x7916 { 10 [ string:"id", i32:16777237, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+165 0x774c { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+166 0x7f03 { 2 [ string:"name", null_value:0, ]}
+167 0x7ae8 { 3 [ i32:1, string:"this", i32:0, ]}
+168 0x8bf7 { 13 [ string:"setInitiallyProvidedValue", method:#~@16>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@16>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@16>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@16>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+169 0x8872 { 2 [ string:"level", null_value:0, ]}
+17 0x9267 { 2 [ string:"configData", null_value:0, ]}
+170 0x808c { 10 [ string:"id", i32:16777219, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+171 0x8328 { 4 [ string:"value", null_value:0, string:"changeEvent", null_value:0, ]}
+172 0x8f8d { 10 [ string:"id", i32:16777232, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+173 0x7aad { 14 [ string:"utd", null_value:0, string:"content", null_value:0, string:"thumbnailUri", null_value:0, string:"title", null_value:0, string:"description", null_value:0, string:"label", string:"", string:"uri", string:"", ]}
+174 0x7d76 { 2 [ string:"space", i32:2, ]}
+175 0x7c43 { 2 [ string:"info", null_value:0, ]}
+176 0x7d6b { 2 [ string:"overflow", null_value:0, ]}
+177 0x8b63 { 19 [ string:"setInitiallyProvidedValue", method:#~@14>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@14>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@14>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@14>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@14>#initialRender, method_affiliate:0, string:"rerender", method:#~@14>#rerender, method_affiliate:0, i32:6, ]}
+178 0x885f { 3 [ i32:1, string:"tip", i32:0, ]}
+179 0x805e { 12 [ string:"title", null_value:0, string:"titleFontSize", null_value:0, string:"icons", null_value:0, string:"iconSize", null_value:0, string:"onFClick", null_value:0, string:"onSClick", null_value:0, ]}
+18 0x7ba4 { 10 [ string:"id", i32:125831481, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+180 0x941d { 4 [ string:"theDialogTitle", null_value:0, string:"QRCodeParam", null_value:0, ]}
+181 0x7fed { 2 [ string:"alignContent", null_value:0, ]}
+182 0x7bfa { 10 [ string:"id", i32:16777226, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+183 0x866a { 10 [ string:"id", i32:125831521, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+184 0x96ff { 5 [ i32:2, string:"data", i32:0, string:"this", i32:1, ]}
+185 0x8b26 { 13 [ string:"setInitiallyProvidedValue", method:#~@13>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@13>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@13>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@13>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+186 0x9230 { 2 [ string:"bottom", i32:15, ]}
+187 0x8125 { 12 [ string:"title", null_value:0, string:"titleFontSize", null_value:0, string:"icons", null_value:0, string:"iconSize", null_value:0, string:"onFClick", null_value:0, string:"onSClick", null_value:0, ]}
+188 0x8a5c { 3 [ string:"", string:"", string:"", ]}
+189 0x7fdf { 2 [ string:"name", string:"Nothing", ]}
+19 0x8239 { 10 [ string:"id", i32:16777219, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+190 0x96b4 { 4 [ string:"duration", null_value:0, string:"curve", null_value:0, ]}
+191 0x83c9 { 10 [ string:"id", i32:16777243, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+192 0x96c6 { 4 [ string:"scrollForward", null_value:0, string:"scrollBackward", null_value:0, ]}
+193 0x897a { 10 [ string:"updateProfileConfig", method:#~@9<#updateProfileConfig, method_affiliate:1, string:"loadConfig", method:#~@9<#loadConfig, method_affiliate:2, string:"deleteProfile", method:#~@9<#deleteProfile, method_affiliate:1, i32:0, ]}
+194 0x7c70 { 2 [ string:"info", null_value:0, ]}
+195 0x787d { 10 [ string:"id", i32:125831499, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+196 0x8305 { 4 [ string:"x", i32:0, string:"y", null_value:0, ]}
+197 0x9801 { 10 [ string:"id", i32:16777249, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+198 0x97b5 { 2 [ string:"bottom", i32:20, ]}
+199 0x9513 { 1 [ string:"#E6E54E36", ]}
+2 0x8c3f { 13 [ string:"setInitiallyProvidedValue", method:#~@17>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@17>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@17>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@17>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+20 0x7b99 { 2 [ string:"Icon2", null_value:0, ]}
+200 0x7a7a { 10 [ string:"id", i32:16777230, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+201 0x94ce { 4 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, ]}
+202 0x8a46 { 4 [ string:"showToast", method:#~@d<#showToast, method_affiliate:1, i32:0, ]}
+203 0x8703 { 6 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, string:"callback", null_value:0, ]}
+204 0x7c7b { 2 [ string:"name", string:"CellularData", ]}
+205 0x887d { 8 [ string:"left", i32:14, string:"right", i32:14, string:"top", i32:5, string:"bottom", i32:5, ]}
+206 0x7d38 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+207 0x8911 { 13 [ string:"isOpacity", method:#~@6<#isOpacity, method_affiliate:1, string:"isClickEffect", method:#~@6<#isClickEffect, method_affiliate:1, string:"isScaleTran", method:#~@6<#isScaleTran, method_affiliate:2, string:"getFloatButtonTransition", method:#~@6<#getFloatButtonTransition, method_affiliate:2, i32:0, ]}
+208 0x871c { 10 [ string:"id", i32:125831520, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+209 0x7864 { 6 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, string:"callback", null_value:0, ]}
+21 0x822e { 2 [ string:"message", null_value:0, ]}
+210 0x9016 { 3 [ i32:1, string:"this", i32:0, ]}
+211 0x7b06 { 10 [ string:"id", i32:125831481, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+212 0x92b8 { 2 [ string:"configData", null_value:0, ]}
+213 0x8bba { 13 [ string:"setInitiallyProvidedValue", method:#~@15>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@15>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@15>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@15>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+214 0x77b2 { 6 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, string:"callback", null_value:0, ]}
+215 0x88cf { 1 [ i32:0, ]}
+216 0x8f55 { 8 [ string:"duration", null_value:0, string:"iterations", i32:1, string:"playMode", null_value:0, string:"curve", null_value:0, ]}
+217 0x920b { 4 [ string:"left", null_value:0, string:"right", null_value:0, ]}
+218 0x94ad { 2 [ string:"name", string:"ConfigAdd", ]}
+219 0x84e1 { 10 [ string:"id", i32:16777216, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+22 0x7b77 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:634, string:"col", i32:13, ]}
+220 0x974f { 10 [ string:"id", i32:16777247, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+221 0x193b { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+222 0x8d43 { 95 [ i32:47, string:"ProfileType", i32:0, string:"SocketProxy", i32:1, string:"AppConfig", i32:2, string:"UIConfig", i32:3, string:"isON", i32:4, string:"NewConfigData", i32:5, string:"TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE", i32:6, string:"CustomConfirmDialog", i32:7, string:"Xb_ToastUtil", i32:8, string:"BIND_SHEET_CONTAINER_HEIGHT", i32:9, string:"componentName", i32:10, string:"Xb_PreferenceUtil", i32:11, string:"TAB_CONTENT_TITLE_HEIGHT", i32:12, string:"TopBar", i32:13, string:"getResourceString", i32:14, string:"TAB_CONTENT_TITLE_FONT_SIZE", i32:15, string:"Nothing", i32:16, string:"LIST_SPACE", i32:17, string:"TabContentTitleMargin", i32:18, string:"CONTENT_END_OFFSET_150", i32:19, string:"ListLanes", i32:20, string:"ListGutter", i32:21, string:"customAnimationUtil", i32:22, string:"BORDER_RADIUS_20", i32:23, string:"customVibrator", i32:24, string:"PopupBuilder", i32:25, string:"PopTips", i32:26, string:"LIST_ITEM_PADDING", i32:27, string:"convertTime", i32:28, string:"CellularData", i32:29, string:"EventHub", i32:30, string:"EventKey", i32:31, string:"RoundButton", i32:32, string:"Xb_TabBarVertical", i32:33, string:"icon_tertiary", i32:34, string:"ConfigAdd", i32:35, string:"QRCodeDialog", i32:36, string:"ImportConfigFromFile", i32:37, string:"ImportConfigFromURL", i32:38, string:"BIND_SHEET_TITLE_CONTAINER_HEIGHT", i32:39, string:"BIND_SHEET_DRAG_BAR_HEIGHT", i32:40, string:"NavigationListPadding", i32:41, string:"Xb_Share", i32:42, string:"ClashViewModel", i32:43, string:"APP_LINKING", i32:44, string:"Xb_GetResourceString", i32:45, string:"ConfigurationPage", i32:46, ]}
+223 0x9272 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:934, string:"col", i32:9, ]}
+224 0x9121 { 9 [ i32:4, string:"deepRenderFunction", i32:0, string:"index", i32:1, string:"itemCreation", i32:2, string:"item", i32:3, ]}
+225 0x7e45 { 6 [ string:"builder", null_value:0, string:"onWillDismiss", u1:0, string:"autoCancel", u1:0, ]}
+226 0x95f7 { 4 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, ]}
+227 0x7d2d { 2 [ string:"windowId", null_value:0, ]}
+228 0x87b5 { 10 [ string:"id", i32:16777217, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+229 0x89aa { 1 [ i32:0, ]}
+23 0x971c { 10 [ string:"id", i32:125831481, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+230 0x1992 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+231 0x915d { 2 [ string:"message", null_value:0, ]}
+232 0x90ee { 10 [ string:"id", i32:16777246, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+233 0x8908 { 1 [ i32:0, ]}
+234 0x8cc6 { 13 [ string:"setInitiallyProvidedValue", method:#~@19>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@19>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@19>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@19>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+235 0x7cfa { 10 [ string:"id", i32:125830983, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+236 0x8782 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+237 0x91fd { 2 [ string:"left", i32:5, ]}
+238 0x88c6 { 1 [ i32:0, ]}
+239 0x8964 { 4 [ string:"reset", method:#~@8>#reset, method_affiliate:0, i32:1, ]}
+24 0x84ae { 10 [ string:"id", i32:16777228, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+240 0x7dda { 10 [ string:"preview", null_value:0, string:"previewAnimationOptions", null_value:0, string:"placement", null_value:0, string:"aboutToAppear", null_value:0, string:"aboutToDisappear", null_value:0, ]}
+241 0x7c89 { 10 [ string:"id", i32:125830983, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+242 0x89b3 { 13 [ string:"inputInfo", method:#~@b<#inputInfo, method_affiliate:1, string:"sharePlant", method:#~@b<#sharePlant, method_affiliate:1, string:"immersiveListening", method:#~@b<#immersiveListening, method_affiliate:1, string:"immersiveDisablingListening", method:#~@b<#immersiveDisablingListening, method_affiliate:1, i32:0, ]}
+243 0x85c9 { 10 [ string:"id", i32:16777228, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+244 0x88b2 { 1 [ i32:0, ]}
+245 0x948b { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:902, string:"col", i32:7, ]}
+246 0x942f { 10 [ string:"id", i32:16777236, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+247 0x9462 { 4 [ string:"url", null_value:0, string:"name", null_value:0, ]}
+248 0x8c7c { 16 [ string:"setInitiallyProvidedValue", method:#~@18>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@18>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@18>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@18>#aboutToBeDeleted, method_affiliate:0, string:"setController", method:#~@18>#setController, method_affiliate:1, i32:5, ]}
+249 0x8345 { 22 [ string:"detents", null_value:0, string:"backgroundColor", null_value:0, string:"showClose", null_value:0, string:"dragBar", u1:0, string:"preferType", null_value:0, string:"scrollSizeMode", null_value:0, string:"onWillAppear", null_value:0, string:"onWillDismiss", null_value:0, string:"onWillDisappear", null_value:0, string:"onDisappear", null_value:0, string:"onWillSpringBackWhenDismiss", null_value:0, ]}
+25 0x7b44 { 10 [ string:"id", i32:125831481, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+250 0x7e01 { 2 [ string:"scale", null_value:0, ]}
+26 0x847b { 10 [ string:"id", i32:16777229, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+27 0x7b39 { 2 [ string:"Icon2", null_value:0, ]}
+28 0x7eb0 { 4 [ string:"left", null_value:0, string:"right", null_value:0, ]}
+29 0x7ee6 { 4 [ string:"value", null_value:0, string:"changeEvent", null_value:0, ]}
+3 0x851f { 10 [ string:"id", i32:16777224, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+30 0x7700 { 6 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, string:"callback", null_value:0, ]}
+31 0x7ef8 { 2 [ string:"message", null_value:0, ]}
+32 0x9474 { 1 [ string:"'文档|.yaml'", ]}
+33 0x8fe3 { 10 [ string:"id", i32:16777225, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+34 0x894e { 4 [ string:"vibratorTriggerOfHapticClockTimer", method:#~@7<#vibratorTriggerOfHapticClockTimer, method_affiliate:0, i32:0, ]}
+35 0x7831 { 10 [ string:"id", i32:16777241, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+36 0x929f { 2 [ string:"name", string:"ImportConfigFromURL", ]}
+37 0x954f { 4 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, ]}
+38 0x92ad { 2 [ string:"configData", null_value:0, ]}
+39 0x7afb { 2 [ string:"Icon2", null_value:0, ]}
+4 0x963c { 10 [ string:"id", i32:16777246, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+40 0x921d { 3 [ i32:1, string:"this", i32:0, ]}
+41 0x7e5e { 2 [ string:"builder", null_value:0, ]}
+42 0x9294 { 2 [ string:"configData", null_value:0, ]}
+43 0x7d84 { 4 [ string:"top", i32:10, string:"bottom", i32:10, ]}
+44 0x862f { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:727, string:"col", i32:14, ]}
+45 0x85fc { 10 [ string:"id", i32:16777216, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+46 0x8596 { 10 [ string:"id", i32:16777229, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+47 0x8552 { 12 [ string:"title", null_value:0, string:"cancelText", null_value:0, string:"confirmText", null_value:0, string:"cancelButtonBackgroundColor", null_value:0, string:"cancel", null_value:0, string:"confirm", null_value:0, ]}
+48 0x966f { 4 [ string:"strokeWidth", null_value:0, string:"color", null_value:0, ]}
+49 0x92e5 { 2 [ string:"configData", null_value:0, ]}
+5 0x8514 { 2 [ string:"message", null_value:0, ]}
+50 0x96d8 { 7 [ i32:3, string:"result", i32:0, string:"fileName", i32:1, string:"this", i32:2, ]}
+51 0x92c3 { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:931, string:"col", i32:9, ]}
+52 0x95c4 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+53 0x802b { 10 [ string:"id", i32:16777244, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+54 0x7c38 { 2 [ string:"info", null_value:0, ]}
+55 0x95b2 { 4 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, ]}
+56 0x91bf { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+57 0x8580 { 2 [ string:"message", null_value:0, ]}
+58 0x93fb { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:906, string:"col", i32:7, ]}
+59 0x7fa1 { 2 [ string:"name", null_value:0, ]}
+6 0x923e { 3 [ i32:1, string:"this", i32:0, ]}
+60 0x88d8 { 10 [ string:"on", method:#~@4<#on, method_affiliate:2, string:"off", method:#~@4<#off, method_affiliate:1, string:"sendEvent", method:#~@4<#sendEvent, method_affiliate:1, i32:0, ]}
+61 0x80f2 { 10 [ string:"id", i32:125831551, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+62 0x7f7f { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:472, string:"col", i32:11, ]}
+63 0x7ea5 { 2 [ string:"space", null_value:0, ]}
+64 0x7f4c { 10 [ string:"id", i32:16777219, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+65 0x7e9a { 2 [ string:"offsetRemain", null_value:0, ]}
+66 0x9037 { 3 [ i32:1, string:"this", i32:0, ]}
+67 0x7f41 { 2 [ string:"name", null_value:0, ]}
+68 0x829f { 10 [ string:"id", i32:125831551, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+69 0x820e { 8 [ string:"title", null_value:0, string:"titleFontSize", null_value:0, string:"icons", null_value:0, string:"iconSize", null_value:0, ]}
+7 0x9782 { 10 [ string:"id", i32:16777245, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+70 0x81b9 { 10 [ string:"id", i32:125831551, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+71 0x8186 { 10 [ string:"id", i32:125831440, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+72 0x9152 { 2 [ string:"space", null_value:0, ]}
+73 0x8fc0 { 8 [ string:"duration", null_value:0, string:"iterations", i32:1, string:"playMode", null_value:0, string:"curve", null_value:0, ]}
+74 0x826c { 10 [ string:"id", i32:125831440, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+75 0x7bd7 { 2 [ string:"name", string:"RoundButton", ]}
+76 0x8f78 { 4 [ string:"message", null_value:0, string:"duration", i32:3000, ]}
+77 0x7fac { 10 [ string:"id", i32:16777219, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+78 0x8153 { 10 [ string:"id", i32:16777219, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+79 0x87e8 { 12 [ string:"builder", null_value:0, string:"cancel", null_value:0, string:"autoCancel", u1:1, string:"alignment", null_value:0, string:"width", i32:328, string:"backgroundColor", null_value:0, ]}
+8 0x94e0 { 10 [ string:"id", i32:125831543, string:"type", i32:40000, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+80 0x92f0 { 2 [ string:"name", string:"ImportConfigFromFile", ]}
+81 0x9834 { 6 [ string:"bottom", null_value:0, string:"right", i32:15, string:"left", i32:15, ]}
+82 0x76f2 { 2 [ string:"message", string:"当前设备暂不支持系统分享功能！", ]}
+83 0x97db { 8 [ string:"radius", i32:15, string:"offsetY", i32:4, string:"color", null_value:0, string:"type", null_value:0, ]}
+84 0x9561 { 10 [ string:"id", i32:125830982, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+85 0x947d { 2 [ string:"name", string:"QRCodeDialog", ]}
+86 0x81ec { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:442, string:"col", i32:11, ]}
+87 0x833a { 2 [ string:"builder", null_value:0, ]}
+88 0x8d03 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+89 0x97c3 { 4 [ string:"width", i32:50, string:"height", i32:50, ]}
+9 0x7e2c { 2 [ string:"windowId", null_value:0, ]}
+90 0x8396 { 10 [ string:"id", i32:16777245, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+91 0x858b { 2 [ string:"message", null_value:0, ]}
+92 0x9681 { 10 [ string:"id", i32:125831013, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+93 0x7c2d { 2 [ string:"checkedBackgroundColor", null_value:0, ]}
+94 0x869d { 10 [ string:"id", i32:125831041, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+95 0x8aac { 13 [ string:"setInitiallyProvidedValue", method:#~@11>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@11>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@11>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@11>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+96 0x951c { 10 [ string:"id", i32:16777228, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+97 0x8651 { 6 [ string:"symbolStartIcon", null_value:0, string:"content", null_value:0, string:"callback", null_value:0, ]}
+98 0x9168 { 4 [ string:"left", null_value:0, string:"right", null_value:0, ]}
+99 0x9396 { 8 [ string:"theDialogTitle", null_value:0, string:"QRCodeParam", null_value:0, string:"confirm", null_value:0, string:"cancel", null_value:0, ]}
+118 0x1b3d { 0 [
+	MODULE_REQUEST_ARRAY: {
+	};
+]}
+150 0x18fb { 3 [
+	MODULE_REQUEST_ARRAY: {
+		0 : @ohos:app.ability.UIAbility,
+		1 : @ohos:hilog,
+	};
+	ModuleTag: REGULAR_IMPORT, local_name: UIAbility, import_name: default, module_request: @ohos:app.ability.UIAbility;
+	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
+	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
+]}
+160 0x765e { 9 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:arkui.node,
 		1 : @ohos:arkui.modifier,
@@ -271,18 +285,19 @@
 	ModuleTag: REGULAR_IMPORT, local_name: utd, import_name: default, module_request: @ohos:data.uniformTypeDescriptor;
 	ModuleTag: LOCAL_EXPORT, local_name: *default*, export_name: default;
 ]}
-214 0x18f3 { 3 [
-	MODULE_REQUEST_ARRAY: {
-		0 : @ohos:app.ability.UIAbility,
-		1 : @ohos:hilog,
-	};
-	ModuleTag: REGULAR_IMPORT, local_name: UIAbility, import_name: default, module_request: @ohos:app.ability.UIAbility;
-	ModuleTag: REGULAR_IMPORT, local_name: hilog, import_name: default, module_request: @ohos:hilog;
-	ModuleTag: LOCAL_EXPORT, local_name: EntryAbility, export_name: default;
-]}
 
 # ====================
 # RECORDS
+
+.language ArkTS
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x1b39
+	u32 moduleRecordIdx = 0x1b3d
+}
 
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
@@ -290,8 +305,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x18e5
-	u32 moduleRecordIdx = 0x18f3
+	u32 scopeNames = 0x18ed
+	u32 moduleRecordIdx = 0x18fb
 }
 
 .language ArkTS
@@ -300,8 +315,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x747a
-	u32 moduleRecordIdx = 0x754b
+	u32 scopeNames = 0x758d
+	u32 moduleRecordIdx = 0x765e
 }
 
 .language ECMAScript
@@ -353,6 +368,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language ArkTS
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -5277,7 +5303,7 @@ jump_label_6:
 	lda v12
 	callthis1withname 0x44, "fontColor", v13, v14
 	definepropertybyname 0x46, "symbolStartIcon", v11
-	createobjectwithbuffer 0x129, { 10 [ string:"id", i32:16777242, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x129, { 10 [ string:"id", i32:16777239, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v12
 	createemptyarray 0x12a
 	sta v13
@@ -5331,7 +5357,7 @@ jump_label_6:
 	lda v12
 	callthis1withname 0x54, "fontColor", v13, v14
 	definepropertybyname 0x56, "symbolStartIcon", v11
-	createobjectwithbuffer 0x13c, { 10 [ string:"id", i32:16777221, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x13c, { 10 [ string:"id", i32:16777217, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v12
 	createemptyarray 0x13d
 	sta v13
@@ -5358,7 +5384,7 @@ jump_label_6:
 	lda v14
 	ldobjbyname 0x146, "Center"
 	definepropertybyname 0x62, "alignment", v13
-	createobjectwithbuffer 0x148, { 10 [ string:"id", i32:16777251, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x148, { 10 [ string:"id", i32:16777248, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v14
 	createemptyarray 0x149
 	sta v15
@@ -5481,21 +5507,21 @@ L_ESSlotNumberAnnotation:
 	sta v7
 	createobjectwithbuffer 0x0, { 12 [ string:"title", null_value:0, string:"cancelText", null_value:0, string:"confirmText", null_value:0, string:"cancelButtonBackgroundColor", null_value:0, string:"cancel", null_value:0, string:"confirm", null_value:0, ]}
 	sta v9
-	createobjectwithbuffer 0x1, { 10 [ string:"id", i32:16777232, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x1, { 10 [ string:"id", i32:16777229, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v10
 	createemptyarray 0x2
 	sta v11
 	definepropertybyname 0x3, "params", v10
 	lda v10
 	definepropertybyname 0x5, "title", v9
-	createobjectwithbuffer 0x7, { 10 [ string:"id", i32:16777231, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x7, { 10 [ string:"id", i32:16777228, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v10
 	createemptyarray 0x8
 	sta v11
 	definepropertybyname 0x9, "params", v10
 	lda v10
 	definepropertybyname 0xb, "cancelText", v9
-	createobjectwithbuffer 0xd, { 10 [ string:"id", i32:16777220, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0xd, { 10 [ string:"id", i32:16777216, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v10
 	createemptyarray 0xe
 	sta v11
@@ -5669,7 +5695,7 @@ L_ESSlotNumberAnnotation:
 	sta v4
 	createobjectwithbuffer 0x4, { 2 [ string:"message", null_value:0, ]}
 	sta v6
-	createobjectwithbuffer 0x5, { 10 [ string:"id", i32:16777227, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x5, { 10 [ string:"id", i32:16777224, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v7
 	createemptyarray 0x6
 	sta v8
@@ -5693,21 +5719,21 @@ L_ESSlotNumberAnnotation:
 	mov v2, a2
 	createobjectwithbuffer 0x0, { 12 [ string:"title", null_value:0, string:"cancelText", null_value:0, string:"confirmText", null_value:0, string:"cancelButtonBackgroundColor", null_value:0, string:"cancel", null_value:0, string:"confirm", null_value:0, ]}
 	sta v4
-	createobjectwithbuffer 0x1, { 10 [ string:"id", i32:16777232, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x1, { 10 [ string:"id", i32:16777229, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v5
 	createemptyarray 0x2
 	sta v6
 	definepropertybyname 0x3, "params", v5
 	lda v5
 	definepropertybyname 0x5, "title", v4
-	createobjectwithbuffer 0x7, { 10 [ string:"id", i32:16777231, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x7, { 10 [ string:"id", i32:16777228, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v5
 	createemptyarray 0x8
 	sta v6
 	definepropertybyname 0x9, "params", v5
 	lda v5
 	definepropertybyname 0xb, "cancelText", v4
-	createobjectwithbuffer 0xd, { 10 [ string:"id", i32:16777220, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0xd, { 10 [ string:"id", i32:16777216, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v5
 	createemptyarray 0xe
 	sta v6
@@ -5771,7 +5797,7 @@ L_ESSlotNumberAnnotation:
 	sta v4
 	createobjectwithbuffer 0x4, { 2 [ string:"message", null_value:0, ]}
 	sta v6
-	createobjectwithbuffer 0x5, { 10 [ string:"id", i32:16777227, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x5, { 10 [ string:"id", i32:16777224, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v7
 	createemptyarray 0x6
 	sta v8
@@ -6750,7 +6776,7 @@ L_ESSlotNumberAnnotation:
 	sta v4
 	createobjectwithbuffer 0x1a, { 2 [ string:"message", null_value:0, ]}
 	sta v6
-	createobjectwithbuffer 0x1b, { 10 [ string:"id", i32:16777243, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x1b, { 10 [ string:"id", i32:16777240, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v7
 	createemptyarray 0x1c
 	sta v8
@@ -6995,7 +7021,7 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	callthis1withname 0x15, "fontColor", v8, v9
 	definepropertybyname 0x17, "symbolStartIcon", v6
-	createobjectwithbuffer 0x19, { 10 [ string:"id", i32:16777224, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x19, { 10 [ string:"id", i32:16777220, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v7
 	createemptyarray 0x1a
 	sta v8
@@ -7063,7 +7089,7 @@ jump_label_1:
 	lda v9
 	callthis1withname 0x3d, "fontColor", v10, v11
 	definepropertybyname 0x3f, "symbolStartIcon", v8
-	createobjectwithbuffer 0x41, { 10 [ string:"id", i32:16777244, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x41, { 10 [ string:"id", i32:16777241, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v9
 	createemptyarray 0x42
 	sta v10
@@ -7140,7 +7166,7 @@ jump_label_3:
 	lda v9
 	callthis1withname 0x6b, "fontColor", v10, v11
 	definepropertybyname 0x6d, "symbolStartIcon", v8
-	createobjectwithbuffer 0x6f, { 10 [ string:"id", i32:16777240, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x6f, { 10 [ string:"id", i32:16777237, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v9
 	createemptyarray 0x70
 	sta v10
@@ -7201,7 +7227,7 @@ jump_label_5:
 	lda v8
 	callthis1withname 0x91, "fontColor", v9, v10
 	definepropertybyname 0x93, "symbolStartIcon", v7
-	createobjectwithbuffer 0x95, { 10 [ string:"id", i32:16777237, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x95, { 10 [ string:"id", i32:16777234, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0x96
 	sta v9
@@ -7255,7 +7281,7 @@ jump_label_5:
 	lda v8
 	callthis1withname 0xb5, "fontColor", v9, v10
 	definepropertybyname 0xb7, "symbolStartIcon", v7
-	createobjectwithbuffer 0xb9, { 10 [ string:"id", i32:16777233, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0xb9, { 10 [ string:"id", i32:16777230, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0xba
 	sta v9
@@ -7642,7 +7668,7 @@ jump_label_3:
 	sta v7
 	ldlexvar 0x0, 0xe
 	sta v8
-	createobjectwithbuffer 0x2e, { 10 [ string:"id", i32:16777228, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x2e, { 10 [ string:"id", i32:16777225, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v9
 	createemptyarray 0x2f
 	sta v10
@@ -8236,7 +8262,7 @@ L_ESSlotNumberAnnotation:
 	sta v4
 	createobjectwithbuffer 0x23, { 2 [ string:"message", null_value:0, ]}
 	sta v6
-	createobjectwithbuffer 0x24, { 10 [ string:"id", i32:16777222, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x24, { 10 [ string:"id", i32:16777218, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v7
 	createemptyarray 0x25
 	sta v8
@@ -8257,7 +8283,7 @@ jump_label_0:
 	sta v4
 	createobjectwithbuffer 0x2e, { 2 [ string:"message", null_value:0, ]}
 	sta v6
-	createobjectwithbuffer 0x2f, { 10 [ string:"id", i32:16777236, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x2f, { 10 [ string:"id", i32:16777233, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v7
 	createemptyarray 0x30
 	sta v8
@@ -8604,7 +8630,7 @@ handler_end_label_0_0:
 	lda v10
 	callthis1withname 0x5b, "getUriFromPath", v11, v12
 	definepropertybyname 0x5d, "thumbnailUri", v9
-	createobjectwithbuffer 0x5f, { 10 [ string:"id", i32:16777229, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x5f, { 10 [ string:"id", i32:16777226, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v10
 	createemptyarray 0x60
 	sta v11
@@ -9860,7 +9886,7 @@ handler_begin_label_0_0:
 	sta v11
 	ldlexvar 0x1, 0xe
 	sta v12
-	createobjectwithbuffer 0x6d, { 10 [ string:"id", i32:16777235, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x6d, { 10 [ string:"id", i32:16777232, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v13
 	createemptyarray 0x6e
 	sta v14
@@ -11668,7 +11694,7 @@ try_begin_label_0:
 	sta v5
 	createobjectwithbuffer 0x2, { 2 [ string:"message", null_value:0, ]}
 	sta v7
-	createobjectwithbuffer 0x3, { 10 [ string:"id", i32:16777247, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x3, { 10 [ string:"id", i32:16777244, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0x4
 	sta v9
@@ -11846,7 +11872,7 @@ jump_label_8:
 	sta v5
 	createobjectwithbuffer 0x43, { 2 [ string:"message", null_value:0, ]}
 	sta v7
-	createobjectwithbuffer 0x44, { 10 [ string:"id", i32:16777246, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x44, { 10 [ string:"id", i32:16777243, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0x45
 	sta v9
@@ -12052,7 +12078,7 @@ L_ESSlotNumberAnnotation:
 	stownbyindex 0x2d, v11, 0x1
 	lda v11
 	definepropertybyname 0x2f, "detents", v10
-	createobjectwithbuffer 0x31, { 10 [ string:"id", i32:16777248, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x31, { 10 [ string:"id", i32:16777245, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v11
 	createemptyarray 0x32
 	sta v12
@@ -12187,7 +12213,7 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	ldobjbyname 0xb, "backgroundColor"
 	sta v6
-	createobjectwithbuffer 0xd, { 10 [ string:"id", i32:16777248, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0xd, { 10 [ string:"id", i32:16777245, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0xe
 	sta v9
@@ -12779,7 +12805,7 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	ldobjbyname 0xb, "backgroundColor"
 	sta v6
-	createobjectwithbuffer 0xd, { 10 [ string:"id", i32:16777248, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0xd, { 10 [ string:"id", i32:16777245, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0xe
 	sta v9
@@ -12927,7 +12953,7 @@ L_ESSlotNumberAnnotation:
 	sta v11
 	ldlexvar 0x1, 0xe
 	sta v12
-	createobjectwithbuffer 0x2, { 10 [ string:"id", i32:16777223, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x2, { 10 [ string:"id", i32:16777219, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v13
 	createemptyarray 0x3
 	sta v14
@@ -13060,7 +13086,7 @@ jump_label_0:
 	sta v9
 	ldlexvar 0x1, 0xe
 	sta v10
-	createobjectwithbuffer 0x43, { 10 [ string:"id", i32:16777223, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x43, { 10 [ string:"id", i32:16777219, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v11
 	createemptyarray 0x44
 	sta v12
@@ -13237,7 +13263,7 @@ L_ESSlotNumberAnnotation:
 	sta v4
 	ldlexvar 0x1, 0xe
 	sta v5
-	createobjectwithbuffer 0x1, { 10 [ string:"id", i32:16777223, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x1, { 10 [ string:"id", i32:16777219, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v6
 	createemptyarray 0x2
 	sta v7
@@ -13582,7 +13608,7 @@ L_ESSlotNumberAnnotation:
 	sta v9
 	createobjectwithbuffer 0x1, { 2 [ string:"name", null_value:0, ]}
 	sta v11
-	createobjectwithbuffer 0x2, { 10 [ string:"id", i32:16777223, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x2, { 10 [ string:"id", i32:16777219, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v12
 	createemptyarray 0x3
 	sta v13
@@ -13629,7 +13655,7 @@ jump_label_0:
 	sta v8
 	createobjectwithbuffer 0x16, { 2 [ string:"name", null_value:0, ]}
 	sta v9
-	createobjectwithbuffer 0x17, { 10 [ string:"id", i32:16777223, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x17, { 10 [ string:"id", i32:16777219, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v10
 	createemptyarray 0x18
 	sta v11
@@ -13665,7 +13691,7 @@ L_ESSlotNumberAnnotation:
 	mov v2, a2
 	createobjectwithbuffer 0x0, { 2 [ string:"name", null_value:0, ]}
 	sta v4
-	createobjectwithbuffer 0x1, { 10 [ string:"id", i32:16777223, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x1, { 10 [ string:"id", i32:16777219, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v5
 	createemptyarray 0x2
 	sta v6
@@ -14541,7 +14567,7 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	ldobjbyname 0xb, "backgroundColor"
 	sta v6
-	createobjectwithbuffer 0xd, { 10 [ string:"id", i32:16777249, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0xd, { 10 [ string:"id", i32:16777246, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0xe
 	sta v9
@@ -15500,7 +15526,7 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	ldobjbyname 0x1, "create"
 	sta v6
-	createobjectwithbuffer 0x3, { 10 [ string:"id", i32:16777245, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x3, { 10 [ string:"id", i32:16777242, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0x4
 	sta v9
@@ -16659,7 +16685,7 @@ jump_label_1:
 	ldobjbyname 0x14, "isBlurr"
 	callruntime.isfalse 0x16
 	jnez jump_label_2
-	createobjectwithbuffer 0x17, { 10 [ string:"id", i32:16777250, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x17, { 10 [ string:"id", i32:16777247, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0x18
 	sta v9
@@ -16667,7 +16693,7 @@ jump_label_1:
 	lda v8
 	jmp jump_label_3
 jump_label_2:
-	createobjectwithbuffer 0x1b, { 10 [ string:"id", i32:16777248, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x1b, { 10 [ string:"id", i32:16777245, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0x1c
 	sta v9
@@ -16739,7 +16765,7 @@ jump_label_3:
 	sta v6
 	createobjectwithbuffer 0x45, { 8 [ string:"radius", i32:15, string:"offsetY", i32:4, string:"color", null_value:0, string:"type", null_value:0, ]}
 	sta v8
-	createobjectwithbuffer 0x46, { 10 [ string:"id", i32:16777252, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x46, { 10 [ string:"id", i32:16777249, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v9
 	createemptyarray 0x47
 	sta v10
@@ -17016,7 +17042,7 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	ldobjbyname 0x6, "backgroundColor"
 	sta v6
-	createobjectwithbuffer 0x8, { 10 [ string:"id", i32:16777249, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x8, { 10 [ string:"id", i32:16777246, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0x9
 	sta v9
@@ -17325,7 +17351,7 @@ L_ESSlotNumberAnnotation:
 	lda v9
 	callthis1withname 0x11, "fontColor", v10, v11
 	definepropertybyname 0x13, "symbolStartIcon", v8
-	createobjectwithbuffer 0x15, { 10 [ string:"id", i32:16777231, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x15, { 10 [ string:"id", i32:16777228, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v9
 	createemptyarray 0x16
 	sta v10
@@ -18112,7 +18138,7 @@ L_ESSlotNumberAnnotation:
 	sta v12
 	definefunc 0x1, &entry.src.main.ets.pages.Index&.#~@19>@23****#:(any,any,any), 0x0
 	sta v13
-	createobjectwithbuffer 0x2, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:439, string:"col", i32:7, ]}
+	createobjectwithbuffer 0x2, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:902, string:"col", i32:7, ]}
 	sta v15
 	lda v15
 	sta v14
@@ -18192,7 +18218,7 @@ L_ESSlotNumberAnnotation:
 	sta v9
 	createobjectwithbuffer 0x1, { 8 [ string:"theDialogTitle", null_value:0, string:"QRCodeParam", null_value:0, string:"confirm", null_value:0, string:"cancel", null_value:0, ]}
 	sta v11
-	createobjectwithbuffer 0x2, { 10 [ string:"id", i32:16777239, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x2, { 10 [ string:"id", i32:16777236, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v12
 	createemptyarray 0x3
 	sta v13
@@ -18231,7 +18257,7 @@ L_ESSlotNumberAnnotation:
 	sta v12
 	definefunc 0x1d, &entry.src.main.ets.pages.Index&.#~@19>@23**^1**#:(any,any,any), 0x0
 	sta v13
-	createobjectwithbuffer 0x1e, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:443, string:"col", i32:7, ]}
+	createobjectwithbuffer 0x1e, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:906, string:"col", i32:7, ]}
 	sta v15
 	lda v15
 	sta v14
@@ -18263,7 +18289,7 @@ jump_label_0:
 	sta v8
 	createobjectwithbuffer 0x2b, { 4 [ string:"theDialogTitle", null_value:0, string:"QRCodeParam", null_value:0, ]}
 	sta v9
-	createobjectwithbuffer 0x2c, { 10 [ string:"id", i32:16777239, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x2c, { 10 [ string:"id", i32:16777236, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v10
 	createemptyarray 0x2d
 	sta v11
@@ -18368,7 +18394,7 @@ L_ESSlotNumberAnnotation:
 	mov v2, a2
 	createobjectwithbuffer 0x0, { 8 [ string:"theDialogTitle", null_value:0, string:"QRCodeParam", null_value:0, string:"confirm", null_value:0, string:"cancel", null_value:0, ]}
 	sta v4
-	createobjectwithbuffer 0x1, { 10 [ string:"id", i32:16777239, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x1, { 10 [ string:"id", i32:16777236, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v5
 	createemptyarray 0x2
 	sta v6
@@ -18583,7 +18609,7 @@ L_ESSlotNumberAnnotation:
 	sta v12
 	definefunc 0x6, &entry.src.main.ets.pages.Index&.#~@19>@23**^3****#:(any,any,any), 0x0
 	sta v13
-	createobjectwithbuffer 0x7, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:468, string:"col", i32:9, ]}
+	createobjectwithbuffer 0x7, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:931, string:"col", i32:9, ]}
 	sta v15
 	lda v15
 	sta v14
@@ -18690,7 +18716,7 @@ L_ESSlotNumberAnnotation:
 	sta v12
 	definefunc 0x6, &entry.src.main.ets.pages.Index&.#~@19>@23**^3**^1**#:(any,any,any), 0x0
 	sta v13
-	createobjectwithbuffer 0x7, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:471, string:"col", i32:9, ]}
+	createobjectwithbuffer 0x7, { 6 [ string:"page", string:"entry/src/main/ets/pages/Index.ets", string:"line", i32:934, string:"col", i32:9, ]}
 	sta v15
 	lda v15
 	sta v14
@@ -18993,7 +19019,7 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	ldobjbyname 0x1, "create"
 	sta v6
-	createobjectwithbuffer 0x3, { 10 [ string:"id", i32:16777241, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x3, { 10 [ string:"id", i32:16777238, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0x4
 	sta v9
@@ -19545,7 +19571,7 @@ L_ESSlotNumberAnnotation:
 	lda v7
 	ldobjbyname 0xb, "backgroundColor"
 	sta v6
-	createobjectwithbuffer 0xd, { 10 [ string:"id", i32:16777249, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0xd, { 10 [ string:"id", i32:16777246, string:"type", i32:10001, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v8
 	createemptyarray 0xe
 	sta v9
@@ -20028,7 +20054,7 @@ L_ESSlotNumberAnnotation:
 	sta v6
 	ldlexvar 0x1, 0x2d
 	sta v8
-	createobjectwithbuffer 0x8, { 10 [ string:"id", i32:16777234, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
+	createobjectwithbuffer 0x8, { 10 [ string:"id", i32:16777231, string:"type", i32:10003, string:"params", null_value:0, string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", ]}
 	sta v9
 	createemptyarray 0x9
 	sta v10
@@ -22630,594 +22656,594 @@ jump_label_6:
 # ====================
 # STRING
 
-[offset:0x19dc, name_value:UIAbility]
-[offset:0x19f0, name_value:hilog]
-[offset:0x1a3e, name_value:DOMAIN]
-[offset:0x499a, name_value:heightBp]
-[offset:0x49a4, name_value:widthBp]
-[offset:0x4aee, name_value:params]
-[offset:0x5702, name_value:item]
-[offset:0x58a8, name_value:error]
-[offset:0x5943, name_value:shareData]
-[offset:0x594e, name_value:type]
-[offset:0x5f03, name_value:configId]
-[offset:0x6cf1, name_value:id]
-[offset:0x6e62, name_value:callback]
-[offset:0x6ec1, name_value:position]
-[offset:0x6fb3, name_value:reason]
-[offset:0x70c1, name_value:value]
-[offset:0x7350, name_value:AppConfig]
-[offset:0x735b, name_value:UIConfig]
-[offset:0x7365, name_value:EventHub]
-[offset:0x736f, name_value:isON]
-[offset:0x7375, name_value:customAnimationUtil]
-[offset:0x738a, name_value:customVibrator]
-[offset:0x739a, name_value:SocketProxy]
-[offset:0x73a7, name_value:ClashViewModel]
-[offset:0x73b7, name_value:Xb_Share]
-[offset:0x73c1, name_value:Xb_PreferenceUtil]
-[offset:0x73d4, name_value:Xb_ToastUtil]
-[offset:0x73e2, name_value:CellularData]
-[offset:0x73f0, name_value:Nothing]
-[offset:0x73f9, name_value:TopBar]
-[offset:0x7401, name_value:RoundButton]
-[offset:0x740e, name_value:ConfigAdd]
-[offset:0x7419, name_value:ImportConfigFromURL]
-[offset:0x742e, name_value:ImportConfigFromFile]
-[offset:0x7444, name_value:QRCodeDialog]
-[offset:0x7452, name_value:CustomConfirmDialog]
-[offset:0x7467, name_value:ConfigurationPage]
-[offset:0x9761, name_value:initialRender]
-[offset:0x9770, name_value:builder]
-[offset:0x9779, name_value:onDisappear]
-[offset:0x9786, name_value:deepRenderFunction]
-[offset:0x979a, name_value:configListLongPressCtxMenus]
-[offset:0x97b7, name_value:FloatAddButton]
-[offset:0x97c7, name_value:configListLongPressCtxMenuBuilder]
-[offset:0x97ea, name_value:ConfigAddBindSheetBuilder]
-[offset:0x9805, name_value:LoadingBuilder]
-[offset:0x9815, name_value:SortBuilder]
-[offset:0x9822, name_value:aboutToAppear]
-[offset:0x9831, name_value:loadConfig]
-[offset:0x983d, name_value:exportConfig]
-[offset:0x98dc, name_value:JSON]
-[offset:0x98e2, name_value:LengthMetrics]
-[offset:0x98f1, name_value:SymbolGlyphModifier]
-[offset:0x9906, name_value:fileUri]
-[offset:0x990f, name_value:fs]
-[offset:0x9913, name_value:picker]
-[offset:0x991b, name_value:utd]
-[offset:0x992b, name_value:message]
-[offset:0x9963, name_value:symbolStartIcon]
-[offset:0x9974, name_value:content]
-[offset:0x99ae, name_value:thumbnailUri]
-[offset:0x99bc, name_value:title]
-[offset:0x99c3, name_value:description]
-[offset:0x99d7, name_value:]
-[offset:0x99de, name_value:Icon2]
-[offset:0x9a1a, name_value:name]
-[offset:0x9a34, name_value:checkedBackgroundColor]
-[offset:0x9a4c, name_value:info]
-[offset:0x9a52, name_value:overflow]
-[offset:0x9a5c, name_value:windowId]
-[offset:0x9a66, name_value:space]
-[offset:0x9a72, name_value:bottom]
-[offset:0x9a7a, name_value:preview]
-[offset:0x9a83, name_value:previewAnimationOptions]
-[offset:0x9a9c, name_value:placement]
-[offset:0x9aa7, name_value:aboutToDisappear]
-[offset:0x9ab9, name_value:scale]
-[offset:0x9ac7, name_value:onWillDismiss]
-[offset:0x9ae2, name_value:itemCreation]
-[offset:0x9af0, name_value:offsetRemain]
-[offset:0x9afe, name_value:left]
-[offset:0x9b04, name_value:right]
-[offset:0x9b0b, name_value:scrollForward]
-[offset:0x9b1a, name_value:scrollBackward]
-[offset:0x9b2a, name_value:refreshing]
-[offset:0x9b36, name_value:changeEvent]
-[offset:0x9b43, name_value:alignContent]
-[offset:0x9b51, name_value:titleFontSize]
-[offset:0x9b60, name_value:icons]
-[offset:0x9b67, name_value:iconSize]
-[offset:0x9b71, name_value:onFClick]
-[offset:0x9b7b, name_value:onSClick]
-[offset:0x9b88, name_value:y]
-[offset:0x9b8b, name_value:detents]
-[offset:0x9b94, name_value:backgroundColor]
-[offset:0x9ba5, name_value:showClose]
-[offset:0x9bb9, name_value:preferType]
-[offset:0x9bc5, name_value:scrollSizeMode]
-[offset:0x9bd5, name_value:onWillAppear]
-[offset:0x9be3, name_value:onWillDisappear]
-[offset:0x9bf4, name_value:onWillSpringBackWhenDismiss]
-[offset:0x9c11, name_value:cancelText]
-[offset:0x9c1d, name_value:confirmText]
-[offset:0x9c2a, name_value:cancelButtonBackgroundColor]
-[offset:0x9c47, name_value:cancel]
-[offset:0x9c4f, name_value:confirm]
-[offset:0x9c58, name_value:alignment]
-[offset:0x9c63, name_value:width]
-[offset:0x9c6f, name_value:level]
-[offset:0x9c76, name_value:on]
-[offset:0x9c7a, name_value:off]
-[offset:0x9c7f, name_value:sendEvent]
-[offset:0x9c8a, name_value:isOpacity]
-[offset:0x9c95, name_value:isClickEffect]
-[offset:0x9ca4, name_value:isScaleTran]
-[offset:0x9cb1, name_value:getFloatButtonTransition]
-[offset:0x9ccb, name_value:vibratorTriggerOfHapticClockTimer]
-[offset:0x9cee, name_value:reset]
-[offset:0x9cf5, name_value:updateProfileConfig]
-[offset:0x9d0a, name_value:deleteProfile]
-[offset:0x9d19, name_value:inputInfo]
-[offset:0x9d24, name_value:sharePlant]
-[offset:0x9d30, name_value:immersiveListening]
-[offset:0x9d44, name_value:immersiveDisablingListening]
-[offset:0x9d61, name_value:putSync]
-[offset:0x9d6a, name_value:save]
-[offset:0x9d70, name_value:showToast]
-[offset:0x9d7b, name_value:setInitiallyProvidedValue]
-[offset:0x9dca, name_value:aboutToBeDeleted]
-[offset:0x9ddc, name_value:rerender]
-[offset:0x9de6, name_value:setController]
-[offset:0x9dff, name_value:pages/Index]
-[offset:0x9e6b, name_value:NewConfigData]
-[offset:0x9e7a, name_value:TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE]
-[offset:0x9e9e, name_value:BIND_SHEET_CONTAINER_HEIGHT]
-[offset:0x9ebb, name_value:componentName]
-[offset:0x9eca, name_value:TAB_CONTENT_TITLE_HEIGHT]
-[offset:0x9ef7, name_value:TAB_CONTENT_TITLE_FONT_SIZE]
-[offset:0x9f14, name_value:LIST_SPACE]
-[offset:0x9f37, name_value:CONTENT_END_OFFSET_150]
-[offset:0x9f66, name_value:BORDER_RADIUS_20]
-[offset:0x9f78, name_value:PopTips]
-[offset:0x9f81, name_value:LIST_ITEM_PADDING]
-[offset:0x9fb4, name_value:icon_tertiary]
-[offset:0x9fc3, name_value:BIND_SHEET_TITLE_CONTAINER_HEIGHT]
-[offset:0x9fe6, name_value:BIND_SHEET_DRAG_BAR_HEIGHT]
-[offset:0xa019, name_value:APP_LINKING]
-[offset:0xa03c, name_value:duration]
-[offset:0xa052, name_value:playMode]
-[offset:0xa05c, name_value:curve]
-[offset:0xa07d, name_value:configData]
-[offset:0xa089, name_value:theDialogTitle]
-[offset:0xa099, name_value:QRCodeParam]
-[offset:0xa0a6, name_value:url]
-[offset:0xa0bb, name_value:#E6E54E36]
-[offset:0xa0c6, name_value:strokeWidth]
-[offset:0xa0d3, name_value:color]
-[offset:0xa0da, name_value:result]
-[offset:0xa0e2, name_value:fileName]
-[offset:0xa0ec, name_value:height]
-[offset:0xa111, name_value:testTag]
-[offset:0xa11a, name_value:%{public}s]
-[offset:0xa126, name_value:Ability onBackground]
-[offset:0xa13c, name_value:Ability onCreate]
-[offset:0xa14e, name_value:Ability onDestroy]
-[offset:0xa161, name_value:Ability onForeground]
-[offset:0xa177, name_value:Ability onWindowStageCreate]
-[offset:0xa194, name_value:loadContent]
-[offset:0xa1a1, name_value:Ability onWindowStageDestroy]
-[offset:0xa1bf, name_value:code]
-[offset:0xa1c5, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0xa1f4, name_value:stringify]
-[offset:0xa1ff, name_value:Succeeded in loading the content.]
-[offset:0xa222, name_value:prototype]
-[offset:0xa22d, name_value:AddConfig]
-[offset:0xa238, name_value:LoadConfigStr]
-[offset:0xa247, name_value:FetchProfile]
-[offset:0xa255, name_value:Url]
-[offset:0xa25a, name_value:File]
-[offset:0xa260, name_value:Manual]
-[offset:0xa268, name_value:observeComponentCreation2]
-[offset:0xa283, name_value:Column]
-[offset:0xa28b, name_value:Text]
-[offset:0xa291, name_value:pop]
-[offset:0xa296, name_value:create]
-[offset:0xa29e, name_value:upload]
-[offset:0xa2a6, name_value:download]
-[offset:0xa2b0, name_value:total]
-[offset:0xa2ce, name_value:function]
-[offset:0xa2d8, name_value:paramsGenerator_]
-[offset:0xa2ea, name_value:SynchedPropertyObjectOneWayPU]
-[offset:0xa309, name_value:__name]
-[offset:0xa311, name_value:finalizeConstruction]
-[offset:0xa327, name_value:SubscriberManager]
-[offset:0xa33a, name_value:Get]
-[offset:0xa33f, name_value:delete]
-[offset:0xa347, name_value:id__]
-[offset:0xa34d, name_value:aboutToBeDeletedInternal]
-[offset:0xa367, name_value:Row]
-[offset:0xa36c, name_value:get]
-[offset:0xa371, name_value:set]
-[offset:0xa376, name_value:purgeDependencyOnElmtId]
-[offset:0xa38f, name_value:updateDirtyElements]
-[offset:0xa3a4, name_value:__title]
-[offset:0xa3ad, name_value:SynchedPropertySimpleOneWayPU]
-[offset:0xa3cc, name_value:__titleFontSize]
-[offset:0xa3dd, name_value:__icons]
-[offset:0xa3e6, name_value:__iconSize]
-[offset:0xa3f2, name_value:__Icon2]
-[offset:0xa3fb, name_value:__configData]
-[offset:0xa409, name_value:__theDialogTitle]
-[offset:0xa41b, name_value:__QRCodeParam]
-[offset:0xa42a, name_value:controller]
-[offset:0xa436, name_value:__cancelText]
-[offset:0xa444, name_value:__confirmText]
-[offset:0xa453, name_value:__cancelButtonBackgroundColor]
-[offset:0xa472, name_value:confirmButtonBackgroundColor]
-[offset:0xa490, name_value:__confirmButtonBackgroundColor]
-[offset:0xa4b0, name_value:createStorageLink]
-[offset:0xa4c3, name_value:favoriteProfiles]
-[offset:0xa4d5, name_value:Map]
-[offset:0xa4da, name_value:__favoriteProfiles]
-[offset:0xa4ee, name_value:appConfig]
-[offset:0xa4f9, name_value:__appConfig]
-[offset:0xa506, name_value:uiConfig]
-[offset:0xa510, name_value:__uiConfig]
-[offset:0xa51c, name_value:ConfigContent]
-[offset:0xa52b, name_value:configStr]
-[offset:0xa536, name_value:__configStr]
-[offset:0xa543, name_value:initializeConsume]
-[offset:0xa556, name_value:stackAlignContentAlignment]
-[offset:0xa572, name_value:__stackAlignContentAlignment]
-[offset:0xa590, name_value:configAddPageInfos]
-[offset:0xa5a4, name_value:__configAddPageInfos]
-[offset:0xa5ba, name_value:icon_emphasize]
-[offset:0xa5ca, name_value:__icon_emphasize]
-[offset:0xa5dc, name_value:createStorageProp]
-[offset:0xa5ef, name_value:bottomRectHeight]
-[offset:0xa601, name_value:__bottomRectHeight]
-[offset:0xa615, name_value:MainWindowId]
-[offset:0xa623, name_value:mainWindowId]
-[offset:0xa631, name_value:__mainWindowId]
-[offset:0xa641, name_value:ObservedPropertyObjectPU]
-[offset:0xa65b, name_value:__isON]
-[offset:0xa663, name_value:ForwardState]
-[offset:0xa671, name_value:isForward]
-[offset:0xa67c, name_value:__isForward]
-[offset:0xa689, name_value:WindowMode]
-[offset:0xa695, name_value:windowMode]
-[offset:0xa6a1, name_value:__windowMode]
-[offset:0xa6af, name_value:ConfigNew]
-[offset:0xa6ba, name_value:isNewConfig]
-[offset:0xa6c7, name_value:__isNewConfig]
-[offset:0xa6d6, name_value:ObservedPropertySimplePU]
-[offset:0xa6f0, name_value:isRefreshing]
-[offset:0xa6fe, name_value:__isRefreshing]
-[offset:0xa70e, name_value:isShowMenu]
-[offset:0xa71a, name_value:__isShowMenu]
-[offset:0xa728, name_value:isFromFile]
-[offset:0xa734, name_value:__isFromFile]
-[offset:0xa742, name_value:isLoading]
-[offset:0xa74d, name_value:__isLoading]
-[offset:0xa75a, name_value:showSort]
-[offset:0xa764, name_value:__showSort]
-[offset:0xa770, name_value:ShowConfigBindSheet]
-[offset:0xa785, name_value:isShowConfigAddBindSheet]
-[offset:0xa79f, name_value:__isShowConfigAddBindSheet]
-[offset:0xa7bb, name_value:ConfigDownloading]
-[offset:0xa7ce, name_value:isConfigDownloading]
-[offset:0xa7e3, name_value:__isConfigDownloading]
-[offset:0xa7fa, name_value:isShowQRCode]
-[offset:0xa808, name_value:__isShowQRCode]
-[offset:0xa818, name_value:isEnableIndexForegroundBlur]
-[offset:0xa835, name_value:__isEnableIndexForegroundBlur]
-[offset:0xa854, name_value:isSmallSquareScreen]
-[offset:0xa869, name_value:__isSmallSquareScreen]
-[offset:0xa880, name_value:isPXSecScreen]
-[offset:0xa88f, name_value:__isPXSecScreen]
-[offset:0xa8a0, name_value:isClearData]
-[offset:0xa8ad, name_value:__isClearData]
-[offset:0xa8bc, name_value:isRolling]
-[offset:0xa8c7, name_value:__isRolling]
-[offset:0xa8d4, name_value:currentHeightBreakpoint]
-[offset:0xa8ed, name_value:__heightBp]
-[offset:0xa8f9, name_value:currentWidthBreakpoint]
-[offset:0xa911, name_value:__widthBp]
-[offset:0xa91c, name_value:paddingButtom]
-[offset:0xa92b, name_value:__paddingButtom]
-[offset:0xa93c, name_value:tabCurrentPage]
-[offset:0xa94c, name_value:__tabCurrentPage]
-[offset:0xa95e, name_value:curOffsetRemain]
-[offset:0xa96f, name_value:__curOffsetRemain]
-[offset:0xa982, name_value:heightTop]
-[offset:0xa98d, name_value:__heightTop]
-[offset:0xa99a, name_value:curYOffset]
-[offset:0xa9a6, name_value:__curYOffset]
-[offset:0xa9b4, name_value:currentTouchConfigData]
-[offset:0xa9cc, name_value:__currentTouchConfigData]
-[offset:0xa9e6, name_value:Configuration]
-[offset:0xa9f5, name_value:configList]
-[offset:0xaa01, name_value:__configList]
-[offset:0xaa0f, name_value:currentRadioConfigData]
-[offset:0xaa27, name_value:__currentRadioConfigData]
-[offset:0xaa41, name_value:fontSize]
-[offset:0xaa4b, name_value:fontColor]
-[offset:0xaa56, name_value:configListLongPressCtxMenuForUnFavorite]
-[offset:0xaa7f, name_value:configListLongPressCtxMenuForFavorite]
-[offset:0xaaa6, name_value:CustomDialogController]
-[offset:0xaabe, name_value:DialogAlignment]
-[offset:0xaacf, name_value:Center]
-[offset:0xaad7, name_value:configCustomDialogController]
-[offset:0xaaf5, name_value:declareWatch]
-[offset:0xab03, name_value:onChangeConfig]
-[offset:0xab13, name_value:onForwardChange]
-[offset:0xab24, name_value:onConfigListChange]
-[offset:0xab38, name_value:Color]
-[offset:0xab3f, name_value:Transparent]
-[offset:0xab4c, name_value:ViewPU]
-[offset:0xab54, name_value:cancelFavoriteConfig]
-[offset:0xab6a, name_value:favoriteConfig]
-[offset:0xab7a, name_value:deleteConfig]
-[offset:0xab88, name_value:If]
-[offset:0xab8c, name_value:SymbolGlyph]
-[offset:0xab99, name_value:LoadingProgress]
-[offset:0xabaa, name_value:List]
-[offset:0xabb0, name_value:ForEach]
-[offset:0xabb9, name_value:#aboutToAppear executed]
-[offset:0xabd2, name_value:find]
-[offset:0xabd8, name_value:getUIContext]
-[offset:0xabe6, name_value:#aboutToDisappear executed]
-[offset:0xac02, name_value:#aboutToDisappear#置空[配置页`bindSheet`内提示是否删除配置信息的自定义弹框]]
-[offset:0xac65, name_value:all]
-[offset:0xac6a, name_value:#favoriteConfig#取消收藏配置: configName is []
-[offset:0xac9f, name_value:configName]
-[offset:0xacab, name_value:]]
-[offset:0xacae, name_value:isFavorite]
-[offset:0xacba, name_value:Scroll]
-[offset:0xacc2, name_value:Menu]
-[offset:0xacc8, name_value:MenuItem]
-[offset:0xacd2, name_value:disableUpdate]
-[offset:0xace1, name_value:length]
-[offset:0xace9, name_value:sourceType]
-[offset:0xacf5, name_value:#deleteConfig#删除配置: configName is []
-[offset:0xad22, name_value:currentProxyName]
-[offset:0xad34, name_value:currentProfileName]
-[offset:0xad48, name_value:������]
-[offset:0xad50, name_value:#editConfig#编辑配置: configName is []
-[offset:0xad7b, name_value:configUrl]
-[offset:0xad86, name_value:toLowerCase]
-[offset:0xad93, name_value:startsWith]
-[offset:0xad9f, name_value:file://]
-[offset:0xada8, name_value:#exportConfig #导出配置文件: configName is []
-[offset:0xaddc, name_value:getHostContext]
-[offset:0xadec, name_value:lastIndexOf]
-[offset:0xadf9, name_value:.]
-[offset:0xadfc, name_value:slice]
-[offset:0xae03, name_value:console]
-[offset:0xae0c, name_value:debug]
-[offset:0xae13, name_value:待导出配置文件的 fileName: ]
-[offset:0xae38, name_value:filesDir]
-[offset:0xae42, name_value:/ClashBox/profiles/]
-[offset:0xae57, name_value:/config.yaml]
-[offset:0xae65, name_value:getUriFromPath]
-[offset:0xae75, name_value:DocumentViewPicker]
-[offset:0xae89, name_value:DocumentSaveOptions]
-[offset:0xae9e, name_value:newFileNames]
-[offset:0xaeac, name_value:fileSuffixChoices]
-[offset:0xaebf, name_value:DocumentPickerMode]
-[offset:0xaed3, name_value:DOWNLOAD]
-[offset:0xaedd, name_value:pickerMode]
-[offset:0xaee9, name_value:/]
-[offset:0xaeec, name_value:.yaml]
-[offset:0xaef3, name_value:待导出配置文件的 沙箱目录Uri: ]
-[offset:0xaf1f, name_value: 下载目录Uri: ]
-[offset:0xaf33, name_value:copy]
-[offset:0xaf39, name_value:then]
-[offset:0xaf3f, name_value:catch]
-[offset:0xaf46, name_value:配置文件导出失败，name：]
-[offset:0xaf6a, name_value: message：]
-[offset:0xaf77, name_value:配置文件导出失败. Code: ]
-[offset:0xaf99, name_value:, message: ]
-[offset:0xafa6, name_value:#favoriteConfig#收藏配置: configName is []
-[offset:0xafd5, name_value:size]
-[offset:0xafdb, name_value:#generateQRcode#生成二维码: configName is []
-[offset:0xb00d, name_value:radio]
-[offset:0xb014, name_value:touch]
-[offset:0xb01b, name_value:/shared.jpg]
-[offset:0xb028, name_value:openSync]
-[offset:0xb032, name_value:OpenMode]
-[offset:0xb03c, name_value:READ_WRITE]
-[offset:0xb048, name_value:CREATE]
-[offset:0xb050, name_value:writeSync]
-[offset:0xb05b, name_value:fd]
-[offset:0xb05f, name_value:resourceManager]
-[offset:0xb070, name_value:getMediaContentSync]
-[offset:0xb085, name_value:buffer]
-[offset:0xb08d, name_value:closeSync]
-[offset:0xb098, name_value:将背景图写入沙箱中并获取: ]
-[offset:0xb0c0, name_value:error: ]
-[offset:0xb0c9, name_value:UniformDataType]
-[offset:0xb0da, name_value:HYPERLINK]
-[offset:0xb0e5, name_value:?configUrl=]
-[offset:0xb0f2, name_value:&configName=]
-[offset:0xb100, name_value:碰一碰 - 分享的 configUrl: ]
-[offset:0xb123, name_value:Stack]
-[offset:0xb12a, name_value:EditConfig UpdateConfig #loadConfig#加载配置: configName is []
-[offset:0xb16d, name_value:] 是否需要更新：]
-[offset:0xb186, name_value: 更新时间：]
-[offset:0xb198, name_value:updateTime]
-[offset:0xb1a4, name_value:animateTo]
-[offset:0xb1af, name_value:animationSpeed]
-[offset:0xb1bf, name_value:PlayMode]
-[offset:0xb1c9, name_value:Normal]
-[offset:0xb1d1, name_value:Curve]
-[offset:0xb1d8, name_value:Ease]
-[offset:0xb1de, name_value:currentProfileId]
-[offset:0xb1f0, name_value:socketProxy]
-[offset:0xb1fd, name_value:配置页-加载]
-[offset:0xb20f, name_value:EditConfig #loadConfig#更新并加载完成 configName is []
-[offset:0xb24d, name_value:loadConfigList]
-[offset:0xb25d, name_value:选中项变更取消监听分享 - error: ]
-[offset:0xb28a, name_value:openShare]
-[offset:0xb295, name_value:EditConfig #onConfigListChange#配置列表长度: []
-[offset:0xb2cb, name_value:isFirstImportConfig]
-[offset:0xb2e0, name_value:EditConfig #onConfigListChange#设置数据清除: []
-[offset:0xb316, name_value:toggleAnim]
-[offset:0xb322, name_value:EditConfig #onConfigListChange: 首次导入：]
-[offset:0xb353, name_value: configName is []
-[offset:0xb365, name_value:log]
-[offset:0xb36a, name_value:onForwardChange 解除碰一碰事件]
-[offset:0xb391, name_value:canIUse]
-[offset:0xb39a, name_value:SystemCapability.Collaboration.HarmonyShare]
-[offset:0xb3c7, name_value:getShareData]
-[offset:0xb3d5, name_value:#updateConfig#更新配置{单个}: configUrl is []
-[offset:0xb409, name_value:], configId is []
-[offset:0xb41b, name_value:#updateConfig#更新配置{所有}]
-[offset:0xb43f, name_value:100%]
-[offset:0xb445, name_value:Alignment]
-[offset:0xb450, name_value:Top]
-[offset:0xb455, name_value:bindSheet]
-[offset:0xb460, name_value:SheetSize]
-[offset:0xb46b, name_value:LARGE]
-[offset:0xb472, name_value:SheetType]
-[offset:0xb47d, name_value:CENTER]
-[offset:0xb485, name_value:ScrollSizeMode]
-[offset:0xb495, name_value:CONTINUOUS]
-[offset:0xb4a1, name_value:ifElseBranchUpdateFunction]
-[offset:0xb4bd, name_value:isFloatButtonVisible]
-[offset:0xb4d3, name_value:call]
-[offset:0xb4d9, name_value:setTimeout]
-[offset:0xb4e5, name_value:#button#bindSheet#onWillAppear() executed]
-[offset:0xb510, name_value:DismissReason]
-[offset:0xb51f, name_value:CLOSE_BUTTON]
-[offset:0xb52d, name_value:dismiss]
-[offset:0xb536, name_value:clear]
-[offset:0xb53d, name_value:#button#bindSheet#onWillDismiss()#关闭配置添加按钮的bindSheet：DismissSheetAction.dismiss()]
-[offset:0xb5a5, name_value:#button#bindSheet#onWillDismiss()#关闭配置添加按钮的bindSheet：DismissSheetAction.dismiss() ConfigSort Xb_PreferenceUtil 首选项保存成功]
-[offset:0xb640, name_value:#button#bindSheet#onWillDismiss()#关闭配置添加按钮的bindSheet：DismissSheetAction.dismiss() ConfigSort Xb_PreferenceUtil 首选项保存失败，message：]
-[offset:0xb6e8, name_value:zIndex]
-[offset:0xb6f0, name_value:alignItems]
-[offset:0xb6fc, name_value:VerticalAlign]
-[offset:0xb70b, name_value:updateStateVarsOfChildByElmtId]
-[offset:0xb72b, name_value:#button#onClick()#更新配置]
-[offset:0xb74b, name_value:updateConfig]
-[offset:0xb759, name_value:__Common__]
-[offset:0xb765, name_value:Refresh]
-[offset:0xb76e, name_value:90%]
-[offset:0xb773, name_value:bind]
-[offset:0xb779, name_value:refreshOffset]
-[offset:0xb788, name_value:pullToRefresh]
-[offset:0xb797, name_value:onRefreshing]
-[offset:0xb7a5, name_value:onScrollFrameBegin]
-[offset:0xb7b9, name_value:padding]
-[offset:0xb7c2, name_value:contentEndOffset]
-[offset:0xb7d4, name_value:lanes]
-[offset:0xb7db, name_value:edgeEffect]
-[offset:0xb7e7, name_value:EdgeEffect]
-[offset:0xb7f3, name_value:Spring]
-[offset:0xb7fb, name_value:chainAnimation]
-[offset:0xb80b, name_value:nestedScroll]
-[offset:0xb819, name_value:NestedScrollMode]
-[offset:0xb82b, name_value:PARENT_FIRST]
-[offset:0xb839, name_value:SELF_FIRST]
-[offset:0xb845, name_value:forEachUpdateFunction]
-[offset:0xb85c, name_value:Blank]
-[offset:0xb863, name_value:ListItem]
-[offset:0xb86d, name_value:Radio]
-[offset:0xb874, name_value:ViewStackProcessor]
-[offset:0xb888, name_value:StartGetAccessRecordingFor]
-[offset:0xb8a4, name_value:StopGetAccessRecording]
-[offset:0xb8bc, name_value:clickEffect]
-[offset:0xb8c9, name_value:ObservedObject]
-[offset:0xb8d9, name_value:GetRawObject]
-[offset:0xb8e7, name_value:borderRadius]
-[offset:0xb8f5, name_value:hoverEffect]
-[offset:0xb902, name_value:HoverEffect]
-[offset:0xb90f, name_value:Scale]
-[offset:0xb916, name_value:transition]
-[offset:0xb922, name_value:bindContextMenu]
-[offset:0xb933, name_value:MenuPreviewMode]
-[offset:0xb944, name_value:IMAGE]
-[offset:0xb94b, name_value:Placement]
-[offset:0xb956, name_value:BottomRight]
-[offset:0xb963, name_value:Gesture]
-[offset:0xb96c, name_value:GesturePriority]
-[offset:0xb97d, name_value:Low]
-[offset:0xb982, name_value:TapGesture]
-[offset:0xb98e, name_value:onAction]
-[offset:0xb998, name_value:onMouse]
-[offset:0xb9a1, name_value:LongPressGesture]
-[offset:0xb9b3, name_value:bindPopup]
-[offset:0xb9be, name_value:ShowConfigPop]
-[offset:0xb9cd, name_value:#TapGesture 配置列表项双击]
-[offset:0xb9f0, name_value:#TapGesture 配置列表项单击]
-[offset:0xba13, name_value:action]
-[offset:0xba1b, name_value:MouseAction]
-[offset:0xba28, name_value:Press]
-[offset:0xba2f, name_value:button]
-[offset:0xba37, name_value:MouseButton]
-[offset:0xba44, name_value:Right]
-[offset:0xba4b, name_value:isVibrate]
-[offset:0xba56, name_value:HorizontalAlign]
-[offset:0xba67, name_value:Start]
-[offset:0xba6e, name_value:maxLines]
-[offset:0xba78, name_value:textOverflow]
-[offset:0xba86, name_value:TextOverflow]
-[offset:0xba94, name_value:Ellipsis]
-[offset:0xba9e, name_value:lastUpdateDateTime]
-[offset:0xbab2, name_value:subscriptionInfo]
-[offset:0xbac4, name_value:justifyContent]
-[offset:0xbad4, name_value:FlexAlign]
-[offset:0xbadf, name_value:End]
-[offset:0xbae4, name_value:checked]
-[offset:0xbaed, name_value:radioStyle]
-[offset:0xbaf9, name_value:hitTestBehavior]
-[offset:0xbb0a, name_value:HitTestMode]
-[offset:0xbb17, name_value:None]
-[offset:0xbb1d, name_value:tabStyle]
-[offset:0xbb27, name_value:custom]
-[offset:0xbb2f, name_value:buttonPositionIndex]
-[offset:0xbb44, name_value:onClick]
-[offset:0xbb4d, name_value:editConfig]
-[offset:0xbb59, name_value:shareConfigUrl]
-[offset:0xbb69, name_value:generateQRcode]
-[offset:0xbb79, name_value:backdropBlur]
-[offset:0xbb87, name_value:isBlurr]
-[offset:0xbb90, name_value:margin]
-[offset:0xbb98, name_value:shadow]
-[offset:0xbba0, name_value:ShadowType]
-[offset:0xbbac, name_value:COLOR]
-[offset:0xbbb3, name_value:menuItemDivider]
-[offset:0xbbc4, name_value:vp]
-[offset:0xbbc8, name_value:auto]
-[offset:0xbbce, name_value:isAnimation]
-[offset:0xbbdb, name_value:TransitionEffect]
-[offset:0xbbed, name_value:asymmetric]
-[offset:0xbbf9, name_value:move]
-[offset:0xbbff, name_value:TransitionEdge]
-[offset:0xbc0f, name_value:END]
-[offset:0xbc14, name_value:START]
-[offset:0xbc1b, name_value:animation]
-[offset:0xbc26, name_value:combine]
-[offset:0xbc2f, name_value:OPACITY]
-[offset:0xbc38, name_value:has]
-[offset:0xbc3d, name_value:contentFontColor]
-[offset:0xbc4f, name_value:open]
-[offset:0xbc55, name_value:Context]
-[offset:0xbc5e, name_value:fontWeight]
-[offset:0xbc6a, name_value:FontWeight]
-[offset:0xbc76, name_value:Bold]
-[offset:0xbc7c, name_value:MARQUEE]
-[offset:0xbc85, name_value:onMove]
-[offset:0xbc8d, name_value:splice]
-[offset:0xbc95, name_value:config_sort]
-[offset:0xbca2, name_value:map]
-[offset:0xbca7, name_value:ConfigSort  Xb_PreferenceUtil config_sort 更新为，]
-[offset:0xbcdf, name_value:SpaceBetween]
-[offset:0xbced, name_value:Succeeded in copying.]
-[offset:0xbd04, name_value:: ]
-[offset:0xbd08, name_value:Failed to copy. Code: ]
-[offset:0xbd20, name_value:ClickEffectLevel]
-[offset:0xbd32, name_value:LIGHT]
-[offset:0xbd39, name_value:__info]
-[offset:0xbd41, name_value:Reflect]
-[offset:0xbd4a, name_value:16fp]
-[offset:0xbd50, name_value:clashbox://share]
-[offset:0xbd62, name_value:#99000000]
-[offset:0xbd6d, name_value:onDidBuild]
-[offset:0xbd79, name_value:onIndexChange]
-[offset:0xbd88, name_value:getEntryName]
-[offset:0xbd96, name_value:registerNamedRoute]
+[offset:0x19e4, name_value:UIAbility]
+[offset:0x19f8, name_value:hilog]
+[offset:0x1a46, name_value:DOMAIN]
+[offset:0x4aad, name_value:heightBp]
+[offset:0x4ab7, name_value:widthBp]
+[offset:0x4c01, name_value:params]
+[offset:0x5815, name_value:item]
+[offset:0x59bb, name_value:error]
+[offset:0x5a56, name_value:shareData]
+[offset:0x5a61, name_value:type]
+[offset:0x6016, name_value:configId]
+[offset:0x6e04, name_value:id]
+[offset:0x6f75, name_value:callback]
+[offset:0x6fd4, name_value:position]
+[offset:0x70c6, name_value:reason]
+[offset:0x71d4, name_value:value]
+[offset:0x7463, name_value:AppConfig]
+[offset:0x746e, name_value:UIConfig]
+[offset:0x7478, name_value:EventHub]
+[offset:0x7482, name_value:isON]
+[offset:0x7488, name_value:customAnimationUtil]
+[offset:0x749d, name_value:customVibrator]
+[offset:0x74ad, name_value:SocketProxy]
+[offset:0x74ba, name_value:ClashViewModel]
+[offset:0x74ca, name_value:Xb_Share]
+[offset:0x74d4, name_value:Xb_PreferenceUtil]
+[offset:0x74e7, name_value:Xb_ToastUtil]
+[offset:0x74f5, name_value:CellularData]
+[offset:0x7503, name_value:Nothing]
+[offset:0x750c, name_value:TopBar]
+[offset:0x7514, name_value:RoundButton]
+[offset:0x7521, name_value:ConfigAdd]
+[offset:0x752c, name_value:ImportConfigFromURL]
+[offset:0x7541, name_value:ImportConfigFromFile]
+[offset:0x7557, name_value:QRCodeDialog]
+[offset:0x7565, name_value:CustomConfirmDialog]
+[offset:0x757a, name_value:ConfigurationPage]
+[offset:0x9874, name_value:initialRender]
+[offset:0x9883, name_value:builder]
+[offset:0x988c, name_value:onDisappear]
+[offset:0x9899, name_value:deepRenderFunction]
+[offset:0x98ad, name_value:configListLongPressCtxMenus]
+[offset:0x98ca, name_value:FloatAddButton]
+[offset:0x98da, name_value:configListLongPressCtxMenuBuilder]
+[offset:0x98fd, name_value:ConfigAddBindSheetBuilder]
+[offset:0x9918, name_value:LoadingBuilder]
+[offset:0x9928, name_value:SortBuilder]
+[offset:0x9935, name_value:aboutToAppear]
+[offset:0x9944, name_value:loadConfig]
+[offset:0x9950, name_value:exportConfig]
+[offset:0x99ef, name_value:JSON]
+[offset:0x99f5, name_value:LengthMetrics]
+[offset:0x9a04, name_value:SymbolGlyphModifier]
+[offset:0x9a19, name_value:fileUri]
+[offset:0x9a22, name_value:fs]
+[offset:0x9a26, name_value:picker]
+[offset:0x9a2e, name_value:utd]
+[offset:0x9a3e, name_value:message]
+[offset:0x9a76, name_value:symbolStartIcon]
+[offset:0x9a87, name_value:content]
+[offset:0x9ac1, name_value:thumbnailUri]
+[offset:0x9acf, name_value:title]
+[offset:0x9ad6, name_value:description]
+[offset:0x9aea, name_value:]
+[offset:0x9af1, name_value:Icon2]
+[offset:0x9b2d, name_value:name]
+[offset:0x9b47, name_value:checkedBackgroundColor]
+[offset:0x9b5f, name_value:info]
+[offset:0x9b65, name_value:overflow]
+[offset:0x9b6f, name_value:windowId]
+[offset:0x9b79, name_value:space]
+[offset:0x9b85, name_value:bottom]
+[offset:0x9b8d, name_value:preview]
+[offset:0x9b96, name_value:previewAnimationOptions]
+[offset:0x9baf, name_value:placement]
+[offset:0x9bba, name_value:aboutToDisappear]
+[offset:0x9bcc, name_value:scale]
+[offset:0x9bda, name_value:onWillDismiss]
+[offset:0x9bf5, name_value:itemCreation]
+[offset:0x9c03, name_value:offsetRemain]
+[offset:0x9c11, name_value:left]
+[offset:0x9c17, name_value:right]
+[offset:0x9c1e, name_value:scrollForward]
+[offset:0x9c2d, name_value:scrollBackward]
+[offset:0x9c3d, name_value:refreshing]
+[offset:0x9c49, name_value:changeEvent]
+[offset:0x9c56, name_value:alignContent]
+[offset:0x9c64, name_value:titleFontSize]
+[offset:0x9c73, name_value:icons]
+[offset:0x9c7a, name_value:iconSize]
+[offset:0x9c84, name_value:onFClick]
+[offset:0x9c8e, name_value:onSClick]
+[offset:0x9c9b, name_value:y]
+[offset:0x9c9e, name_value:detents]
+[offset:0x9ca7, name_value:backgroundColor]
+[offset:0x9cb8, name_value:showClose]
+[offset:0x9ccc, name_value:preferType]
+[offset:0x9cd8, name_value:scrollSizeMode]
+[offset:0x9ce8, name_value:onWillAppear]
+[offset:0x9cf6, name_value:onWillDisappear]
+[offset:0x9d07, name_value:onWillSpringBackWhenDismiss]
+[offset:0x9d24, name_value:cancelText]
+[offset:0x9d30, name_value:confirmText]
+[offset:0x9d3d, name_value:cancelButtonBackgroundColor]
+[offset:0x9d5a, name_value:cancel]
+[offset:0x9d62, name_value:confirm]
+[offset:0x9d6b, name_value:alignment]
+[offset:0x9d76, name_value:width]
+[offset:0x9d82, name_value:level]
+[offset:0x9d89, name_value:on]
+[offset:0x9d8d, name_value:off]
+[offset:0x9d92, name_value:sendEvent]
+[offset:0x9d9d, name_value:isOpacity]
+[offset:0x9da8, name_value:isClickEffect]
+[offset:0x9db7, name_value:isScaleTran]
+[offset:0x9dc4, name_value:getFloatButtonTransition]
+[offset:0x9dde, name_value:vibratorTriggerOfHapticClockTimer]
+[offset:0x9e01, name_value:reset]
+[offset:0x9e08, name_value:updateProfileConfig]
+[offset:0x9e1d, name_value:deleteProfile]
+[offset:0x9e2c, name_value:inputInfo]
+[offset:0x9e37, name_value:sharePlant]
+[offset:0x9e43, name_value:immersiveListening]
+[offset:0x9e57, name_value:immersiveDisablingListening]
+[offset:0x9e74, name_value:putSync]
+[offset:0x9e7d, name_value:save]
+[offset:0x9e83, name_value:showToast]
+[offset:0x9e8e, name_value:setInitiallyProvidedValue]
+[offset:0x9edd, name_value:aboutToBeDeleted]
+[offset:0x9eef, name_value:rerender]
+[offset:0x9ef9, name_value:setController]
+[offset:0x9f12, name_value:pages/Index]
+[offset:0x9f7e, name_value:NewConfigData]
+[offset:0x9f8d, name_value:TAB_CONTENT_TITLE_SYMBOL_FONT_SIZE]
+[offset:0x9fb1, name_value:BIND_SHEET_CONTAINER_HEIGHT]
+[offset:0x9fce, name_value:componentName]
+[offset:0x9fdd, name_value:TAB_CONTENT_TITLE_HEIGHT]
+[offset:0xa00a, name_value:TAB_CONTENT_TITLE_FONT_SIZE]
+[offset:0xa027, name_value:LIST_SPACE]
+[offset:0xa04a, name_value:CONTENT_END_OFFSET_150]
+[offset:0xa079, name_value:BORDER_RADIUS_20]
+[offset:0xa08b, name_value:PopTips]
+[offset:0xa094, name_value:LIST_ITEM_PADDING]
+[offset:0xa0c7, name_value:icon_tertiary]
+[offset:0xa0d6, name_value:BIND_SHEET_TITLE_CONTAINER_HEIGHT]
+[offset:0xa0f9, name_value:BIND_SHEET_DRAG_BAR_HEIGHT]
+[offset:0xa12c, name_value:APP_LINKING]
+[offset:0xa14f, name_value:duration]
+[offset:0xa165, name_value:playMode]
+[offset:0xa16f, name_value:curve]
+[offset:0xa190, name_value:configData]
+[offset:0xa19c, name_value:theDialogTitle]
+[offset:0xa1ac, name_value:QRCodeParam]
+[offset:0xa1b9, name_value:url]
+[offset:0xa1ce, name_value:#E6E54E36]
+[offset:0xa1d9, name_value:strokeWidth]
+[offset:0xa1e6, name_value:color]
+[offset:0xa1ed, name_value:result]
+[offset:0xa1f5, name_value:fileName]
+[offset:0xa1ff, name_value:height]
+[offset:0xa224, name_value:testTag]
+[offset:0xa22d, name_value:%{public}s]
+[offset:0xa239, name_value:Ability onBackground]
+[offset:0xa24f, name_value:Ability onCreate]
+[offset:0xa261, name_value:Ability onDestroy]
+[offset:0xa274, name_value:Ability onForeground]
+[offset:0xa28a, name_value:Ability onWindowStageCreate]
+[offset:0xa2a7, name_value:loadContent]
+[offset:0xa2b4, name_value:Ability onWindowStageDestroy]
+[offset:0xa2d2, name_value:code]
+[offset:0xa2d8, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0xa307, name_value:stringify]
+[offset:0xa312, name_value:Succeeded in loading the content.]
+[offset:0xa335, name_value:prototype]
+[offset:0xa340, name_value:AddConfig]
+[offset:0xa34b, name_value:LoadConfigStr]
+[offset:0xa35a, name_value:FetchProfile]
+[offset:0xa368, name_value:Url]
+[offset:0xa36d, name_value:File]
+[offset:0xa373, name_value:Manual]
+[offset:0xa37b, name_value:observeComponentCreation2]
+[offset:0xa396, name_value:Column]
+[offset:0xa39e, name_value:Text]
+[offset:0xa3a4, name_value:pop]
+[offset:0xa3a9, name_value:create]
+[offset:0xa3b1, name_value:upload]
+[offset:0xa3b9, name_value:download]
+[offset:0xa3c3, name_value:total]
+[offset:0xa3e1, name_value:function]
+[offset:0xa3eb, name_value:paramsGenerator_]
+[offset:0xa3fd, name_value:SynchedPropertyObjectOneWayPU]
+[offset:0xa41c, name_value:__name]
+[offset:0xa424, name_value:finalizeConstruction]
+[offset:0xa43a, name_value:SubscriberManager]
+[offset:0xa44d, name_value:Get]
+[offset:0xa452, name_value:delete]
+[offset:0xa45a, name_value:id__]
+[offset:0xa460, name_value:aboutToBeDeletedInternal]
+[offset:0xa47a, name_value:Row]
+[offset:0xa47f, name_value:get]
+[offset:0xa484, name_value:set]
+[offset:0xa489, name_value:purgeDependencyOnElmtId]
+[offset:0xa4a2, name_value:updateDirtyElements]
+[offset:0xa4b7, name_value:__title]
+[offset:0xa4c0, name_value:SynchedPropertySimpleOneWayPU]
+[offset:0xa4df, name_value:__titleFontSize]
+[offset:0xa4f0, name_value:__icons]
+[offset:0xa4f9, name_value:__iconSize]
+[offset:0xa505, name_value:__Icon2]
+[offset:0xa50e, name_value:__configData]
+[offset:0xa51c, name_value:__theDialogTitle]
+[offset:0xa52e, name_value:__QRCodeParam]
+[offset:0xa53d, name_value:controller]
+[offset:0xa549, name_value:__cancelText]
+[offset:0xa557, name_value:__confirmText]
+[offset:0xa566, name_value:__cancelButtonBackgroundColor]
+[offset:0xa585, name_value:confirmButtonBackgroundColor]
+[offset:0xa5a3, name_value:__confirmButtonBackgroundColor]
+[offset:0xa5c3, name_value:createStorageLink]
+[offset:0xa5d6, name_value:favoriteProfiles]
+[offset:0xa5e8, name_value:Map]
+[offset:0xa5ed, name_value:__favoriteProfiles]
+[offset:0xa601, name_value:appConfig]
+[offset:0xa60c, name_value:__appConfig]
+[offset:0xa619, name_value:uiConfig]
+[offset:0xa623, name_value:__uiConfig]
+[offset:0xa62f, name_value:ConfigContent]
+[offset:0xa63e, name_value:configStr]
+[offset:0xa649, name_value:__configStr]
+[offset:0xa656, name_value:initializeConsume]
+[offset:0xa669, name_value:stackAlignContentAlignment]
+[offset:0xa685, name_value:__stackAlignContentAlignment]
+[offset:0xa6a3, name_value:configAddPageInfos]
+[offset:0xa6b7, name_value:__configAddPageInfos]
+[offset:0xa6cd, name_value:icon_emphasize]
+[offset:0xa6dd, name_value:__icon_emphasize]
+[offset:0xa6ef, name_value:createStorageProp]
+[offset:0xa702, name_value:bottomRectHeight]
+[offset:0xa714, name_value:__bottomRectHeight]
+[offset:0xa728, name_value:MainWindowId]
+[offset:0xa736, name_value:mainWindowId]
+[offset:0xa744, name_value:__mainWindowId]
+[offset:0xa754, name_value:ObservedPropertyObjectPU]
+[offset:0xa76e, name_value:__isON]
+[offset:0xa776, name_value:ForwardState]
+[offset:0xa784, name_value:isForward]
+[offset:0xa78f, name_value:__isForward]
+[offset:0xa79c, name_value:WindowMode]
+[offset:0xa7a8, name_value:windowMode]
+[offset:0xa7b4, name_value:__windowMode]
+[offset:0xa7c2, name_value:ConfigNew]
+[offset:0xa7cd, name_value:isNewConfig]
+[offset:0xa7da, name_value:__isNewConfig]
+[offset:0xa7e9, name_value:ObservedPropertySimplePU]
+[offset:0xa803, name_value:isRefreshing]
+[offset:0xa811, name_value:__isRefreshing]
+[offset:0xa821, name_value:isShowMenu]
+[offset:0xa82d, name_value:__isShowMenu]
+[offset:0xa83b, name_value:isFromFile]
+[offset:0xa847, name_value:__isFromFile]
+[offset:0xa855, name_value:isLoading]
+[offset:0xa860, name_value:__isLoading]
+[offset:0xa86d, name_value:showSort]
+[offset:0xa877, name_value:__showSort]
+[offset:0xa883, name_value:ShowConfigBindSheet]
+[offset:0xa898, name_value:isShowConfigAddBindSheet]
+[offset:0xa8b2, name_value:__isShowConfigAddBindSheet]
+[offset:0xa8ce, name_value:ConfigDownloading]
+[offset:0xa8e1, name_value:isConfigDownloading]
+[offset:0xa8f6, name_value:__isConfigDownloading]
+[offset:0xa90d, name_value:isShowQRCode]
+[offset:0xa91b, name_value:__isShowQRCode]
+[offset:0xa92b, name_value:isEnableIndexForegroundBlur]
+[offset:0xa948, name_value:__isEnableIndexForegroundBlur]
+[offset:0xa967, name_value:isSmallSquareScreen]
+[offset:0xa97c, name_value:__isSmallSquareScreen]
+[offset:0xa993, name_value:isPXSecScreen]
+[offset:0xa9a2, name_value:__isPXSecScreen]
+[offset:0xa9b3, name_value:isClearData]
+[offset:0xa9c0, name_value:__isClearData]
+[offset:0xa9cf, name_value:isRolling]
+[offset:0xa9da, name_value:__isRolling]
+[offset:0xa9e7, name_value:currentHeightBreakpoint]
+[offset:0xaa00, name_value:__heightBp]
+[offset:0xaa0c, name_value:currentWidthBreakpoint]
+[offset:0xaa24, name_value:__widthBp]
+[offset:0xaa2f, name_value:paddingButtom]
+[offset:0xaa3e, name_value:__paddingButtom]
+[offset:0xaa4f, name_value:tabCurrentPage]
+[offset:0xaa5f, name_value:__tabCurrentPage]
+[offset:0xaa71, name_value:curOffsetRemain]
+[offset:0xaa82, name_value:__curOffsetRemain]
+[offset:0xaa95, name_value:heightTop]
+[offset:0xaaa0, name_value:__heightTop]
+[offset:0xaaad, name_value:curYOffset]
+[offset:0xaab9, name_value:__curYOffset]
+[offset:0xaac7, name_value:currentTouchConfigData]
+[offset:0xaadf, name_value:__currentTouchConfigData]
+[offset:0xaaf9, name_value:Configuration]
+[offset:0xab08, name_value:configList]
+[offset:0xab14, name_value:__configList]
+[offset:0xab22, name_value:currentRadioConfigData]
+[offset:0xab3a, name_value:__currentRadioConfigData]
+[offset:0xab54, name_value:fontSize]
+[offset:0xab5e, name_value:fontColor]
+[offset:0xab69, name_value:configListLongPressCtxMenuForUnFavorite]
+[offset:0xab92, name_value:configListLongPressCtxMenuForFavorite]
+[offset:0xabb9, name_value:CustomDialogController]
+[offset:0xabd1, name_value:DialogAlignment]
+[offset:0xabe2, name_value:Center]
+[offset:0xabea, name_value:configCustomDialogController]
+[offset:0xac08, name_value:declareWatch]
+[offset:0xac16, name_value:onChangeConfig]
+[offset:0xac26, name_value:onForwardChange]
+[offset:0xac37, name_value:onConfigListChange]
+[offset:0xac4b, name_value:Color]
+[offset:0xac52, name_value:Transparent]
+[offset:0xac5f, name_value:ViewPU]
+[offset:0xac67, name_value:cancelFavoriteConfig]
+[offset:0xac7d, name_value:favoriteConfig]
+[offset:0xac8d, name_value:deleteConfig]
+[offset:0xac9b, name_value:If]
+[offset:0xac9f, name_value:SymbolGlyph]
+[offset:0xacac, name_value:LoadingProgress]
+[offset:0xacbd, name_value:List]
+[offset:0xacc3, name_value:ForEach]
+[offset:0xaccc, name_value:#aboutToAppear executed]
+[offset:0xace5, name_value:find]
+[offset:0xaceb, name_value:getUIContext]
+[offset:0xacf9, name_value:#aboutToDisappear executed]
+[offset:0xad15, name_value:#aboutToDisappear#置空[配置页`bindSheet`内提示是否删除配置信息的自定义弹框]]
+[offset:0xad78, name_value:all]
+[offset:0xad7d, name_value:#favoriteConfig#取消收藏配置: configName is []
+[offset:0xadb2, name_value:configName]
+[offset:0xadbe, name_value:]]
+[offset:0xadc1, name_value:isFavorite]
+[offset:0xadcd, name_value:Scroll]
+[offset:0xadd5, name_value:Menu]
+[offset:0xaddb, name_value:MenuItem]
+[offset:0xade5, name_value:disableUpdate]
+[offset:0xadf4, name_value:length]
+[offset:0xadfc, name_value:sourceType]
+[offset:0xae08, name_value:#deleteConfig#删除配置: configName is []
+[offset:0xae35, name_value:currentProxyName]
+[offset:0xae47, name_value:currentProfileName]
+[offset:0xae5b, name_value:������]
+[offset:0xae63, name_value:#editConfig#编辑配置: configName is []
+[offset:0xae8e, name_value:configUrl]
+[offset:0xae99, name_value:toLowerCase]
+[offset:0xaea6, name_value:startsWith]
+[offset:0xaeb2, name_value:file://]
+[offset:0xaebb, name_value:#exportConfig #导出配置文件: configName is []
+[offset:0xaeef, name_value:getHostContext]
+[offset:0xaeff, name_value:lastIndexOf]
+[offset:0xaf0c, name_value:.]
+[offset:0xaf0f, name_value:slice]
+[offset:0xaf16, name_value:console]
+[offset:0xaf1f, name_value:debug]
+[offset:0xaf26, name_value:待导出配置文件的 fileName: ]
+[offset:0xaf4b, name_value:filesDir]
+[offset:0xaf55, name_value:/ClashBox/profiles/]
+[offset:0xaf6a, name_value:/config.yaml]
+[offset:0xaf78, name_value:getUriFromPath]
+[offset:0xaf88, name_value:DocumentViewPicker]
+[offset:0xaf9c, name_value:DocumentSaveOptions]
+[offset:0xafb1, name_value:newFileNames]
+[offset:0xafbf, name_value:fileSuffixChoices]
+[offset:0xafd2, name_value:DocumentPickerMode]
+[offset:0xafe6, name_value:DOWNLOAD]
+[offset:0xaff0, name_value:pickerMode]
+[offset:0xaffc, name_value:/]
+[offset:0xafff, name_value:.yaml]
+[offset:0xb006, name_value:待导出配置文件的 沙箱目录Uri: ]
+[offset:0xb032, name_value: 下载目录Uri: ]
+[offset:0xb046, name_value:copy]
+[offset:0xb04c, name_value:then]
+[offset:0xb052, name_value:catch]
+[offset:0xb059, name_value:配置文件导出失败，name：]
+[offset:0xb07d, name_value: message：]
+[offset:0xb08a, name_value:配置文件导出失败. Code: ]
+[offset:0xb0ac, name_value:, message: ]
+[offset:0xb0b9, name_value:#favoriteConfig#收藏配置: configName is []
+[offset:0xb0e8, name_value:size]
+[offset:0xb0ee, name_value:#generateQRcode#生成二维码: configName is []
+[offset:0xb120, name_value:radio]
+[offset:0xb127, name_value:touch]
+[offset:0xb12e, name_value:/shared.jpg]
+[offset:0xb13b, name_value:openSync]
+[offset:0xb145, name_value:OpenMode]
+[offset:0xb14f, name_value:READ_WRITE]
+[offset:0xb15b, name_value:CREATE]
+[offset:0xb163, name_value:writeSync]
+[offset:0xb16e, name_value:fd]
+[offset:0xb172, name_value:resourceManager]
+[offset:0xb183, name_value:getMediaContentSync]
+[offset:0xb198, name_value:buffer]
+[offset:0xb1a0, name_value:closeSync]
+[offset:0xb1ab, name_value:将背景图写入沙箱中并获取: ]
+[offset:0xb1d3, name_value:error: ]
+[offset:0xb1dc, name_value:UniformDataType]
+[offset:0xb1ed, name_value:HYPERLINK]
+[offset:0xb1f8, name_value:?configUrl=]
+[offset:0xb205, name_value:&configName=]
+[offset:0xb213, name_value:碰一碰 - 分享的 configUrl: ]
+[offset:0xb236, name_value:Stack]
+[offset:0xb23d, name_value:EditConfig UpdateConfig #loadConfig#加载配置: configName is []
+[offset:0xb280, name_value:] 是否需要更新：]
+[offset:0xb299, name_value: 更新时间：]
+[offset:0xb2ab, name_value:updateTime]
+[offset:0xb2b7, name_value:animateTo]
+[offset:0xb2c2, name_value:animationSpeed]
+[offset:0xb2d2, name_value:PlayMode]
+[offset:0xb2dc, name_value:Normal]
+[offset:0xb2e4, name_value:Curve]
+[offset:0xb2eb, name_value:Ease]
+[offset:0xb2f1, name_value:currentProfileId]
+[offset:0xb303, name_value:socketProxy]
+[offset:0xb310, name_value:配置页-加载]
+[offset:0xb322, name_value:EditConfig #loadConfig#更新并加载完成 configName is []
+[offset:0xb360, name_value:loadConfigList]
+[offset:0xb370, name_value:选中项变更取消监听分享 - error: ]
+[offset:0xb39d, name_value:openShare]
+[offset:0xb3a8, name_value:EditConfig #onConfigListChange#配置列表长度: []
+[offset:0xb3de, name_value:isFirstImportConfig]
+[offset:0xb3f3, name_value:EditConfig #onConfigListChange#设置数据清除: []
+[offset:0xb429, name_value:toggleAnim]
+[offset:0xb435, name_value:EditConfig #onConfigListChange: 首次导入：]
+[offset:0xb466, name_value: configName is []
+[offset:0xb478, name_value:log]
+[offset:0xb47d, name_value:onForwardChange 解除碰一碰事件]
+[offset:0xb4a4, name_value:canIUse]
+[offset:0xb4ad, name_value:SystemCapability.Collaboration.HarmonyShare]
+[offset:0xb4da, name_value:getShareData]
+[offset:0xb4e8, name_value:#updateConfig#更新配置{单个}: configUrl is []
+[offset:0xb51c, name_value:], configId is []
+[offset:0xb52e, name_value:#updateConfig#更新配置{所有}]
+[offset:0xb552, name_value:100%]
+[offset:0xb558, name_value:Alignment]
+[offset:0xb563, name_value:Top]
+[offset:0xb568, name_value:bindSheet]
+[offset:0xb573, name_value:SheetSize]
+[offset:0xb57e, name_value:LARGE]
+[offset:0xb585, name_value:SheetType]
+[offset:0xb590, name_value:CENTER]
+[offset:0xb598, name_value:ScrollSizeMode]
+[offset:0xb5a8, name_value:CONTINUOUS]
+[offset:0xb5b4, name_value:ifElseBranchUpdateFunction]
+[offset:0xb5d0, name_value:isFloatButtonVisible]
+[offset:0xb5e6, name_value:call]
+[offset:0xb5ec, name_value:setTimeout]
+[offset:0xb5f8, name_value:#button#bindSheet#onWillAppear() executed]
+[offset:0xb623, name_value:DismissReason]
+[offset:0xb632, name_value:CLOSE_BUTTON]
+[offset:0xb640, name_value:dismiss]
+[offset:0xb649, name_value:clear]
+[offset:0xb650, name_value:#button#bindSheet#onWillDismiss()#关闭配置添加按钮的bindSheet：DismissSheetAction.dismiss()]
+[offset:0xb6b8, name_value:#button#bindSheet#onWillDismiss()#关闭配置添加按钮的bindSheet：DismissSheetAction.dismiss() ConfigSort Xb_PreferenceUtil 首选项保存成功]
+[offset:0xb753, name_value:#button#bindSheet#onWillDismiss()#关闭配置添加按钮的bindSheet：DismissSheetAction.dismiss() ConfigSort Xb_PreferenceUtil 首选项保存失败，message：]
+[offset:0xb7fb, name_value:zIndex]
+[offset:0xb803, name_value:alignItems]
+[offset:0xb80f, name_value:VerticalAlign]
+[offset:0xb81e, name_value:updateStateVarsOfChildByElmtId]
+[offset:0xb83e, name_value:#button#onClick()#更新配置]
+[offset:0xb85e, name_value:updateConfig]
+[offset:0xb86c, name_value:__Common__]
+[offset:0xb878, name_value:Refresh]
+[offset:0xb881, name_value:90%]
+[offset:0xb886, name_value:bind]
+[offset:0xb88c, name_value:refreshOffset]
+[offset:0xb89b, name_value:pullToRefresh]
+[offset:0xb8aa, name_value:onRefreshing]
+[offset:0xb8b8, name_value:onScrollFrameBegin]
+[offset:0xb8cc, name_value:padding]
+[offset:0xb8d5, name_value:contentEndOffset]
+[offset:0xb8e7, name_value:lanes]
+[offset:0xb8ee, name_value:edgeEffect]
+[offset:0xb8fa, name_value:EdgeEffect]
+[offset:0xb906, name_value:Spring]
+[offset:0xb90e, name_value:chainAnimation]
+[offset:0xb91e, name_value:nestedScroll]
+[offset:0xb92c, name_value:NestedScrollMode]
+[offset:0xb93e, name_value:PARENT_FIRST]
+[offset:0xb94c, name_value:SELF_FIRST]
+[offset:0xb958, name_value:forEachUpdateFunction]
+[offset:0xb96f, name_value:Blank]
+[offset:0xb976, name_value:ListItem]
+[offset:0xb980, name_value:Radio]
+[offset:0xb987, name_value:ViewStackProcessor]
+[offset:0xb99b, name_value:StartGetAccessRecordingFor]
+[offset:0xb9b7, name_value:StopGetAccessRecording]
+[offset:0xb9cf, name_value:clickEffect]
+[offset:0xb9dc, name_value:ObservedObject]
+[offset:0xb9ec, name_value:GetRawObject]
+[offset:0xb9fa, name_value:borderRadius]
+[offset:0xba08, name_value:hoverEffect]
+[offset:0xba15, name_value:HoverEffect]
+[offset:0xba22, name_value:Scale]
+[offset:0xba29, name_value:transition]
+[offset:0xba35, name_value:bindContextMenu]
+[offset:0xba46, name_value:MenuPreviewMode]
+[offset:0xba57, name_value:IMAGE]
+[offset:0xba5e, name_value:Placement]
+[offset:0xba69, name_value:BottomRight]
+[offset:0xba76, name_value:Gesture]
+[offset:0xba7f, name_value:GesturePriority]
+[offset:0xba90, name_value:Low]
+[offset:0xba95, name_value:TapGesture]
+[offset:0xbaa1, name_value:onAction]
+[offset:0xbaab, name_value:onMouse]
+[offset:0xbab4, name_value:LongPressGesture]
+[offset:0xbac6, name_value:bindPopup]
+[offset:0xbad1, name_value:ShowConfigPop]
+[offset:0xbae0, name_value:#TapGesture 配置列表项双击]
+[offset:0xbb03, name_value:#TapGesture 配置列表项单击]
+[offset:0xbb26, name_value:action]
+[offset:0xbb2e, name_value:MouseAction]
+[offset:0xbb3b, name_value:Press]
+[offset:0xbb42, name_value:button]
+[offset:0xbb4a, name_value:MouseButton]
+[offset:0xbb57, name_value:Right]
+[offset:0xbb5e, name_value:isVibrate]
+[offset:0xbb69, name_value:HorizontalAlign]
+[offset:0xbb7a, name_value:Start]
+[offset:0xbb81, name_value:maxLines]
+[offset:0xbb8b, name_value:textOverflow]
+[offset:0xbb99, name_value:TextOverflow]
+[offset:0xbba7, name_value:Ellipsis]
+[offset:0xbbb1, name_value:lastUpdateDateTime]
+[offset:0xbbc5, name_value:subscriptionInfo]
+[offset:0xbbd7, name_value:justifyContent]
+[offset:0xbbe7, name_value:FlexAlign]
+[offset:0xbbf2, name_value:End]
+[offset:0xbbf7, name_value:checked]
+[offset:0xbc00, name_value:radioStyle]
+[offset:0xbc0c, name_value:hitTestBehavior]
+[offset:0xbc1d, name_value:HitTestMode]
+[offset:0xbc2a, name_value:None]
+[offset:0xbc30, name_value:tabStyle]
+[offset:0xbc3a, name_value:custom]
+[offset:0xbc42, name_value:buttonPositionIndex]
+[offset:0xbc57, name_value:onClick]
+[offset:0xbc60, name_value:editConfig]
+[offset:0xbc6c, name_value:shareConfigUrl]
+[offset:0xbc7c, name_value:generateQRcode]
+[offset:0xbc8c, name_value:backdropBlur]
+[offset:0xbc9a, name_value:isBlurr]
+[offset:0xbca3, name_value:margin]
+[offset:0xbcab, name_value:shadow]
+[offset:0xbcb3, name_value:ShadowType]
+[offset:0xbcbf, name_value:COLOR]
+[offset:0xbcc6, name_value:menuItemDivider]
+[offset:0xbcd7, name_value:vp]
+[offset:0xbcdb, name_value:auto]
+[offset:0xbce1, name_value:isAnimation]
+[offset:0xbcee, name_value:TransitionEffect]
+[offset:0xbd00, name_value:asymmetric]
+[offset:0xbd0c, name_value:move]
+[offset:0xbd12, name_value:TransitionEdge]
+[offset:0xbd22, name_value:END]
+[offset:0xbd27, name_value:START]
+[offset:0xbd2e, name_value:animation]
+[offset:0xbd39, name_value:combine]
+[offset:0xbd42, name_value:OPACITY]
+[offset:0xbd4b, name_value:has]
+[offset:0xbd50, name_value:contentFontColor]
+[offset:0xbd62, name_value:open]
+[offset:0xbd68, name_value:Context]
+[offset:0xbd71, name_value:fontWeight]
+[offset:0xbd7d, name_value:FontWeight]
+[offset:0xbd89, name_value:Bold]
+[offset:0xbd8f, name_value:MARQUEE]
+[offset:0xbd98, name_value:onMove]
+[offset:0xbda0, name_value:splice]
+[offset:0xbda8, name_value:config_sort]
+[offset:0xbdb5, name_value:map]
+[offset:0xbdba, name_value:ConfigSort  Xb_PreferenceUtil config_sort 更新为，]
+[offset:0xbdf2, name_value:SpaceBetween]
+[offset:0xbe00, name_value:Succeeded in copying.]
+[offset:0xbe17, name_value:: ]
+[offset:0xbe1b, name_value:Failed to copy. Code: ]
+[offset:0xbe33, name_value:ClickEffectLevel]
+[offset:0xbe45, name_value:LIGHT]
+[offset:0xbe4c, name_value:__info]
+[offset:0xbe54, name_value:Reflect]
+[offset:0xbe5d, name_value:16fp]
+[offset:0xbe63, name_value:clashbox://share]
+[offset:0xbe75, name_value:#99000000]
+[offset:0xbe80, name_value:onDidBuild]
+[offset:0xbe8c, name_value:onIndexChange]
+[offset:0xbe9b, name_value:getEntryName]
+[offset:0xbea9, name_value:registerNamedRoute]

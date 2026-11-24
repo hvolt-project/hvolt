@@ -23,7 +23,24 @@ class NamespaceImportChild extends ViewPU {
 		this.observeComponentCreation2((elmtId, isInitialRender) => {
 			Column.create();
 		}, Column);
-		Names.Card({ title: 'qualified' });
+		{
+			this.observeComponentCreation2((elmtId, isInitialRender) => {
+				if (isInitialRender) {
+					let componentCall = new Names.Card(this, { title: 'qualified' }, undefined, elmtId, () => {}, {
+						page: 'entry/src/main/ets/pages/Index.ets',
+						line: 13,
+						col: 7
+					});
+					ViewPU.create(componentCall);
+					let paramsLambda = () => {
+						return { title: 'qualified' };
+					};
+					componentCall.paramsGenerator_ = paramsLambda;
+				} else {
+					this.updateStateVarsOfChildByElmtId(elmtId, { title: 'qualified' });
+				}
+			}, { name: 'Card' });
+		}
 		Column.pop();
 	}
 	rerender() {

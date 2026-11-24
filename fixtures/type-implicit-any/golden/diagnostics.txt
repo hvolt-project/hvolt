@@ -1,3 +1,4 @@
-ERROR 10605008 ets/pages/Index.ets:1:21 Use explicit types instead of "any", "unknown" (arkts-no-any-unknown)
-ERROR 10605090 ets/pages/Index.ets:1:10 Function return type inference is limited (arkts-no-implicit-return-types)
+ERROR 10605008 ets/pages/Index.ets:2:5 Use explicit types instead of "any", "unknown" (arkts-no-any-unknown)
+ERROR 10605008 ets/pages/Index.ets:4:7 Use explicit types instead of "any", "unknown" (arkts-no-any-unknown)
+ERROR 10905402 ets/pages/Index.ets:-:- A page configured in 'main_pages.json or build-profile.json5' must have one and only one '@Entry' decorator.
 WARN - -:-:- For details about ArkTS syntax errors, see FAQs

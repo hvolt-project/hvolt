@@ -9,7 +9,7 @@ interface LocalBuilderView_Params {
 //  2. a builder method may be lowercase and take parameters;
 //  3. a comment inside a child's argument list must not swallow the generated line.
 function isHex(hex: string): boolean {
-  return /^[0-9A-F]{2}$/.test(hex);
+    return /^[0-9A-F]{2}$/.test(hex);
 }
 export class LocalBuilderView extends ViewPU {
 	constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {

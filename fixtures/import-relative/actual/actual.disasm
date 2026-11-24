@@ -3,35 +3,28 @@
 # ====================
 # LITERALS
 
-0 0x7ef { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
-1 0xcbd { 22 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@0>#initialRender, method_affiliate:0, string:"rerender", method:#~@0>#rerender, method_affiliate:0, string:"getEntryName", method:#~@0<#getEntryName, method_affiliate:0, i32:6, ]}
-10 0x1184 { 2 [ string:"RelativeImports", string:"initialRender", ]}
-12 0x846 { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
-15 0x1611 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/nested/Deep", string:"pageFullPath", string:"entry/src/main/ets/pages/nested/Deep", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-16 0xc8b { 2 [ string:"HelperPage", string:"initialRender", ]}
-18 0xd61 { 3 [ i32:1, string:"HelperPage", i32:0, ]}
-19 0x7a1 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
-2 0xd21 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Helper", string:"pageFullPath", string:"entry/src/main/ets/pages/Helper", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-3 0x1651 { 3 [ i32:1, string:"DeepPage", i32:0, ]}
-4 0x125a { 3 [ i32:1, string:"RelativeImports", i32:0, ]}
-5 0x15ad { 22 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@0>#initialRender, method_affiliate:0, string:"rerender", method:#~@0>#rerender, method_affiliate:0, string:"getEntryName", method:#~@0<#getEntryName, method_affiliate:0, i32:6, ]}
-6 0x11dd { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
-7 0x156d { 2 [ string:"DeepPage", string:"initialRender", ]}
-8 0x121a { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
-9 0x11ca { 3 [ i32:1, string:"this", i32:0, ]}
-11 0xc99 { 1 [
+0 0xe34 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Helper", string:"pageFullPath", string:"entry/src/main/ets/pages/Helper", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+1 0xdd0 { 22 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@0>#initialRender, method_affiliate:0, string:"rerender", method:#~@0>#rerender, method_affiliate:0, string:"getEntryName", method:#~@0<#getEntryName, method_affiliate:0, i32:6, ]}
+10 0xe74 { 3 [ i32:1, string:"HelperPage", i32:0, ]}
+12 0x7a9 { 2 [ string:"EntryAbility", string:"onWindowStageCreate", ]}
+14 0x132d { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/Index", string:"pageFullPath", string:"entry/src/main/ets/pages/Index", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+15 0x1680 { 2 [ string:"DeepPage", string:"initialRender", ]}
+17 0x7f7 { 19 [ string:"onCreate", method:#~@0>#onCreate, method_affiliate:2, string:"onDestroy", method:#~@0>#onDestroy, method_affiliate:0, string:"onWindowStageCreate", method:#~@0>#onWindowStageCreate, method_affiliate:1, string:"onWindowStageDestroy", method:#~@0>#onWindowStageDestroy, method_affiliate:0, string:"onForeground", method:#~@0>#onForeground, method_affiliate:0, string:"onBackground", method:#~@0>#onBackground, method_affiliate:0, i32:6, ]}
+18 0x1724 { 12 [ string:"bundleName", string:"com.example.demo", string:"moduleName", string:"entry", string:"pagePath", string:"pages/nested/Deep", string:"pageFullPath", string:"entry/src/main/ets/pages/nested/Deep", string:"integratedHsp", string:"false", string:"moduleType", string:"followWithHap", ]}
+19 0x136d { 3 [ i32:1, string:"RelativeImports", i32:0, ]}
+2 0x84e { 3 [ i32:1, string:"DOMAIN", i32:0, ]}
+20 0x16c0 { 22 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, string:"initialRender", method:#~@0>#initialRender, method_affiliate:0, string:"rerender", method:#~@0>#rerender, method_affiliate:0, string:"getEntryName", method:#~@0<#getEntryName, method_affiliate:0, i32:6, ]}
+21 0x1764 { 3 [ i32:1, string:"DeepPage", i32:0, ]}
+3 0x12dd { 3 [ i32:1, string:"this", i32:0, ]}
+5 0xd9e { 2 [ string:"HelperPage", string:"initialRender", ]}
+7 0x12f0 { 13 [ string:"setInitiallyProvidedValue", method:#~@0>#setInitiallyProvidedValue, method_affiliate:1, string:"updateStateVars", method:#~@0>#updateStateVars, method_affiliate:1, string:"purgeVariableDependenciesOnElmtId", method:#~@0>#purgeVariableDependenciesOnElmtId, method_affiliate:1, string:"aboutToBeDeleted", method:#~@0>#aboutToBeDeleted, method_affiliate:0, i32:4, ]}
+8 0x9f5 
+9 0x1297 { 2 [ string:"RelativeImports", string:"initialRender", ]}
+11 0x9f9 { 0 [
 	MODULE_REQUEST_ARRAY: {
 	};
-	ModuleTag: LOCAL_EXPORT, local_name: helper, export_name: helper;
 ]}
-13 0x157b { 2 [
-	MODULE_REQUEST_ARRAY: {
-		0 : @normalized:N&&&entry/src/main/ets/pages/Helper&,
-	};
-	ModuleTag: REGULAR_IMPORT, local_name: helper, import_name: helper, module_request: @normalized:N&&&entry/src/main/ets/pages/Helper&;
-	ModuleTag: LOCAL_EXPORT, local_name: deep, export_name: deep;
-]}
-14 0x1192 { 2 [
+13 0x12a5 { 2 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @normalized:N&&&entry/src/main/ets/pages/Helper&,
 		1 : @normalized:N&&&entry/src/main/ets/pages/nested/Deep&,
@@ -39,7 +32,19 @@
 	ModuleTag: REGULAR_IMPORT, local_name: deep, import_name: deep, module_request: @normalized:N&&&entry/src/main/ets/pages/nested/Deep&;
 	ModuleTag: REGULAR_IMPORT, local_name: helper, import_name: helper, module_request: @normalized:N&&&entry/src/main/ets/pages/Helper&;
 ]}
-17 0x7af { 3 [
+16 0x168e { 2 [
+	MODULE_REQUEST_ARRAY: {
+		0 : @normalized:N&&&entry/src/main/ets/pages/Helper&,
+	};
+	ModuleTag: REGULAR_IMPORT, local_name: helper, import_name: helper, module_request: @normalized:N&&&entry/src/main/ets/pages/Helper&;
+	ModuleTag: LOCAL_EXPORT, local_name: deep, export_name: deep;
+]}
+4 0xdac { 1 [
+	MODULE_REQUEST_ARRAY: {
+	};
+	ModuleTag: LOCAL_EXPORT, local_name: helper, export_name: helper;
+]}
+6 0x7b7 { 3 [
 	MODULE_REQUEST_ARRAY: {
 		0 : @ohos:app.ability.UIAbility,
 		1 : @ohos:hilog,
@@ -52,14 +57,24 @@
 # ====================
 # RECORDS
 
+.language TypeScript
+.record &entry.build.generated.r.ResourceTable& {
+	u8 pkgName@entry = 0x0
+	u8 isCommonjs = 0x0
+	u8 hasTopLevelAwait = 0x0
+	u8 isSharedModule = 0x0
+	u32 scopeNames = 0x9f5
+	u32 moduleRecordIdx = 0x9f9
+}
+
 .language ArkTS
 .record &entry.src.main.ets.EntryAbility& {
 	u8 pkgName@entry = 0x0
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x7a1
-	u32 moduleRecordIdx = 0x7af
+	u32 scopeNames = 0x7a9
+	u32 moduleRecordIdx = 0x7b7
 }
 
 .language ArkTS
@@ -68,8 +83,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0xc8b
-	u32 moduleRecordIdx = 0xc99
+	u32 scopeNames = 0xd9e
+	u32 moduleRecordIdx = 0xdac
 }
 
 .language ArkTS
@@ -78,8 +93,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x1184
-	u32 moduleRecordIdx = 0x1192
+	u32 scopeNames = 0x1297
+	u32 moduleRecordIdx = 0x12a5
 }
 
 .language ArkTS
@@ -88,8 +103,8 @@
 	u8 isCommonjs = 0x0
 	u8 hasTopLevelAwait = 0x0
 	u8 isSharedModule = 0x0
-	u32 scopeNames = 0x156d
-	u32 moduleRecordIdx = 0x157b
+	u32 scopeNames = 0x1680
+	u32 moduleRecordIdx = 0x168e
 }
 
 .language ECMAScript
@@ -141,6 +156,17 @@
 
 # ====================
 # METHODS
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x0 }
+.language TypeScript
+.function any &entry.build.generated.r.ResourceTable&.func_main_0(any a0, any a1, any a2) <static> {
+	mov v0, a0
+	mov v1, a1
+	mov v2, a2
+	ldundefined
+	returnundefined
+}
 
 L_ESSlotNumberAnnotation:
 	u32 SlotNumber { 0x0 }
@@ -1777,61 +1803,61 @@ jump_label_2:
 # ====================
 # STRING
 
-[offset:0x898, name_value:UIAbility]
-[offset:0x8ac, name_value:hilog]
-[offset:0x8fa, name_value:DOMAIN]
-[offset:0xc7f, name_value:HelperPage]
-[offset:0xd74, name_value:initialRender]
-[offset:0xd83, name_value:helper]
-[offset:0xd8b, name_value:setInitiallyProvidedValue]
-[offset:0xdda, name_value:aboutToBeDeleted]
-[offset:0xdec, name_value:rerender]
-[offset:0xdf6, name_value:getEntryName]
-[offset:0x1173, name_value:RelativeImports]
-[offset:0x12d6, name_value:deep]
-[offset:0x12dc, name_value:pages/Index]
-[offset:0x1563, name_value:DeepPage]
-[offset:0x16a9, name_value:info]
-[offset:0x16af, name_value:testTag]
-[offset:0x16b8, name_value:%{public}s]
-[offset:0x16c4, name_value:Ability onBackground]
-[offset:0x16da, name_value:Ability onCreate]
-[offset:0x16ec, name_value:Ability onDestroy]
-[offset:0x16ff, name_value:Ability onForeground]
-[offset:0x1715, name_value:Ability onWindowStageCreate]
-[offset:0x1732, name_value:loadContent]
-[offset:0x173f, name_value:Ability onWindowStageDestroy]
-[offset:0x175d, name_value:code]
-[offset:0x1763, name_value:error]
-[offset:0x176a, name_value:Failed to load the content. Cause: %{public}s]
-[offset:0x1799, name_value:JSON]
-[offset:0x179f, name_value:stringify]
-[offset:0x17aa, name_value:Succeeded in loading the content.]
-[offset:0x17cd, name_value:prototype]
-[offset:0x17d8, name_value:h]
-[offset:0x17db, name_value:function]
-[offset:0x17e5, name_value:paramsGenerator_]
-[offset:0x17f7, name_value:finalizeConstruction]
-[offset:0x180d, name_value:SubscriberManager]
-[offset:0x1820, name_value:Get]
-[offset:0x1825, name_value:delete]
-[offset:0x182d, name_value:id__]
-[offset:0x1833, name_value:aboutToBeDeletedInternal]
-[offset:0x184d, name_value:observeComponentCreation2]
-[offset:0x1868, name_value:Column]
-[offset:0x1870, name_value:Text]
-[offset:0x1876, name_value:pop]
-[offset:0x187b, name_value:updateDirtyElements]
-[offset:0x1890, name_value:create]
-[offset:0x1898, name_value:ViewPU]
-[offset:0x18a0, name_value:Reflect]
-[offset:0x18a9, name_value:set]
-[offset:0x18ae, name_value:registerNamedRoute]
-[offset:0x18c2, name_value:]
-[offset:0x18c4, name_value:ObservedPropertySimplePU]
-[offset:0x18de, name_value:text]
-[offset:0x18e4, name_value:__text]
-[offset:0x1903, name_value:purgeDependencyOnElmtId]
-[offset:0x191c, name_value:get]
-[offset:0x1921, name_value:aboutToAppear]
-[offset:0x1930, name_value:d]
+[offset:0x8a0, name_value:UIAbility]
+[offset:0x8b4, name_value:hilog]
+[offset:0x902, name_value:DOMAIN]
+[offset:0xd92, name_value:HelperPage]
+[offset:0xe87, name_value:initialRender]
+[offset:0xe96, name_value:helper]
+[offset:0xe9e, name_value:setInitiallyProvidedValue]
+[offset:0xeed, name_value:aboutToBeDeleted]
+[offset:0xeff, name_value:rerender]
+[offset:0xf09, name_value:getEntryName]
+[offset:0x1286, name_value:RelativeImports]
+[offset:0x13e9, name_value:deep]
+[offset:0x13ef, name_value:pages/Index]
+[offset:0x1676, name_value:DeepPage]
+[offset:0x17bc, name_value:info]
+[offset:0x17c2, name_value:testTag]
+[offset:0x17cb, name_value:%{public}s]
+[offset:0x17d7, name_value:Ability onBackground]
+[offset:0x17ed, name_value:Ability onCreate]
+[offset:0x17ff, name_value:Ability onDestroy]
+[offset:0x1812, name_value:Ability onForeground]
+[offset:0x1828, name_value:Ability onWindowStageCreate]
+[offset:0x1845, name_value:loadContent]
+[offset:0x1852, name_value:Ability onWindowStageDestroy]
+[offset:0x1870, name_value:code]
+[offset:0x1876, name_value:error]
+[offset:0x187d, name_value:Failed to load the content. Cause: %{public}s]
+[offset:0x18ac, name_value:JSON]
+[offset:0x18b2, name_value:stringify]
+[offset:0x18bd, name_value:Succeeded in loading the content.]
+[offset:0x18e0, name_value:prototype]
+[offset:0x18eb, name_value:h]
+[offset:0x18ee, name_value:function]
+[offset:0x18f8, name_value:paramsGenerator_]
+[offset:0x190a, name_value:finalizeConstruction]
+[offset:0x1920, name_value:SubscriberManager]
+[offset:0x1933, name_value:Get]
+[offset:0x1938, name_value:delete]
+[offset:0x1940, name_value:id__]
+[offset:0x1946, name_value:aboutToBeDeletedInternal]
+[offset:0x1960, name_value:observeComponentCreation2]
+[offset:0x197b, name_value:Column]
+[offset:0x1983, name_value:Text]
+[offset:0x1989, name_value:pop]
+[offset:0x198e, name_value:updateDirtyElements]
+[offset:0x19a3, name_value:create]
+[offset:0x19ab, name_value:ViewPU]
+[offset:0x19b3, name_value:Reflect]
+[offset:0x19bc, name_value:set]
+[offset:0x19c1, name_value:registerNamedRoute]
+[offset:0x19d5, name_value:]
+[offset:0x19d7, name_value:ObservedPropertySimplePU]
+[offset:0x19f1, name_value:text]
+[offset:0x19f7, name_value:__text]
+[offset:0x1a16, name_value:purgeDependencyOnElmtId]
+[offset:0x1a2f, name_value:get]
+[offset:0x1a34, name_value:aboutToAppear]
+[offset:0x1a43, name_value:d]

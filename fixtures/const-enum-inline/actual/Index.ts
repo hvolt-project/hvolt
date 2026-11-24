@@ -8,8 +8,8 @@ interface ConstEnumInline_Params {
 // `const enum` 的成员访问在参考实现里被内联成常量；普通 `enum` 不内联。
 // 本 fixture 钉住每一类形态的发射值。
 const enum ConstKind {
-  A = 1,
-  B = 2
+    A = 1,
+    B = 2
 }
 const enum ConstStr {
 	X = 'x',
@@ -26,8 +26,8 @@ enum PlainKind {
 }
 // 普通 enum 的**声明**也按常量值重写（B = A * 2 → B = 2），但成员访问不内联。
 enum PlainExpr {
-  A = 1,
-  B = 2
+    A = 1,
+    B = 2
 }
 const enum ConstHex {
 	H = 16
@@ -39,7 +39,7 @@ const enum ConstNeg {
 let typedValue: ConstMix.A = 0
 // 成员作类型：参数表 / 返回类型 / 联合类型（ConstMix 的成员全是字面量，才允许这么写）
 function takesMember(a: ConstMix.A): number {
-  return a
+    return a
 }
 function returnsMember(): ConstMix.C {
 	return 6;

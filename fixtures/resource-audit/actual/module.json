@@ -6,7 +6,7 @@
     "versionName": "1.0.0",
     "icon": "$media:layered_image",
     "label": "$string:app_name",
-    "apiReleaseType": "Release",
+    "apiReleaseType": "Release1",
     "compileSdkVersion": "26.0.0.38",
     "targetAPIVersion": 60000020,
     "minAPIVersion": 50005017,
@@ -46,6 +46,10 @@
         "exported": true,
         "description": "$string:EntryAbility_desc",
         "descriptionId": 16777216,
+        "iconId": 16777224,
+        "labelId": 16777217,
+        "startWindowIconId": 16777225,
+        "startWindowBackgroundId": 16777220,
         "skills": [
           {
             "actions": [
@@ -55,18 +59,14 @@
               "entity.system.home"
             ]
           }
-        ],
-        "iconId": 16777224,
-        "labelId": 16777217,
-        "startWindowIconId": 16777225,
-        "startWindowBackgroundId": 16777220
+        ]
       }
     ],
-    "packageName": "entry",
-    "virtualMachine": "ark12.0.6.0",
-    "compileMode": "esmodule",
     "dependencies": [],
+    "virtualMachine": "ark12.0.6.0",
     "description": "$string:module_desc",
+    "packageName": "entry",
+    "compileMode": "esmodule",
     "descriptionId": 16777219
   }
 }

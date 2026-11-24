@@ -1,0 +1,3 @@
+ERROR 10505001 ets/pages/Index.ets:6:37 Type '{ name: string; extra: number; }' is not assignable to type 'Config'. Object literal may only specify known properties, and 'extra' does not exist in type 'Config'.
+ERROR 10605038 ets/pages/Index.ets:6:24 Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs
