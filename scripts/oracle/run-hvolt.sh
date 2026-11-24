@@ -23,12 +23,23 @@ RUN_DIR="${HVOLT_RUN_DIR:-$FIXTURE}"
 
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/hvolt-$NAME-XXXXXX")"
 rsync -a "$PROJECT/" "$WORK/project/"
+# `build/` is this build's output directory, not an input. A fixture that carries one from an
+# earlier run also carries `build/hvolt-out/res/ids_map/id_defined.json`, and that preset pins
+# every resource id to the old allocation: `fixtures/resource-audit` then compiles `$r(…)` to
+# 0x01000003 while restool numbers it 0x01000006.
+rm -rf "$WORK/project/build"
 # hvolt stages its emitted `.ts` tree under `std::env::temp_dir()` as `hvolt-ets-<pid>`. Point
 # TMPDIR at this run's own directory: the pid is not unique across concurrent builds, and
 # picking a staging tree out of the shared temp dir by name order reads another fixture's
 # sources (measured 2026-11-06: component-v2 was built from lazy-forms' tree).
 mkdir -p "$WORK/tmp"
 cd "$WORK/project"
+# Only artifacts this run writes count as its output: the project directory carries whatever
+# `build/` the fixture was committed with, and a build that fails before packaging must not be
+# reported as having produced it (`fixtures/import-unresolved-rollup`: the reference writes no
+# package, and its golden lists only `diagnostics.txt`).
+BUILD_STAMP="$WORK/build-stamp"
+: > "$BUILD_STAMP"
 if ! TMPDIR="$WORK/tmp" HVOLT_KEEP_TS=1 "$HVOLT" build > "$WORK/hvolt.log" 2>&1; then
   # A fixture that declares `expect-build-failure` is expected to stop here; the diagnostics it
   # printed are the artifact under test, so the run continues to the harvest below.
@@ -49,6 +60,8 @@ MANIFEST="$RUN_DIR/actual/manifest.txt"
 : > "$MANIFEST"
 stage() {
   [ -f "$1" ] || return 0
+  # A file older than this build was left by a previous one and is not this run's output.
+  [ "$1" -nt "$BUILD_STAMP" ] || return 0
   cp "$1" "$RUN_DIR/actual/$2"
   echo "$2" >> "$MANIFEST"
 }
@@ -56,7 +69,12 @@ OUT="$WORK/project/build/hvolt-out"
 for artifact in module.json pack.info pkgContextInfo.json resources.index; do
   stage "$OUT/$artifact" "$artifact"
 done
-ABC="$(find "$WORK/project/build" -name 'modules.abc' | head -1)"
+# The entry package owns `hvolt-out/ets/modules.abc`. A multi-package project also writes
+# one abc per member under `hvolt-out/<member>/ets/`, and `find | head -1` picked a
+# member package instead of the entry one (measured on `fixtures/three-package-shared`:
+# 1712 bytes of shared2 against the entry package's 8580).
+ABC="$OUT/ets/modules.abc"
+[ -f "$ABC" ] || ABC="$(find "$WORK/project/build" -name 'modules.abc' | head -1)"
 [ -n "$ABC" ] && stage "$ABC" modules.abc
 # The intent manifest lives in the module's profile resources, not at the output root.
 PROFILE_JSON="$(find "$OUT" -path "*base/profile/insight_intent.json" -type f 2>/dev/null | head -1)"
@@ -64,7 +82,7 @@ PROFILE_JSON="$(find "$OUT" -path "*base/profile/insight_intent.json" -type f 2>
 # A source map is a build artifact, not part of `modules.abc`: stage it when hvolt emits one so
 # the comparison has something to judge. An absent map is recorded as absent — `stage` only
 # writes the manifest entry for a file that exists.
-SOURCE_MAP="$(find "$WORK/project/build" -name 'sourceMaps.map' -type f 2>/dev/null | head -1)"
+SOURCE_MAP="$(find "$WORK/project/build" -name 'sourceMaps.map' -newer "$BUILD_STAMP" -type f 2>/dev/null | head -1)"
 [ -n "$SOURCE_MAP" ] && stage "$SOURCE_MAP" sourceMaps.map
 # The same canonical form the golden side uses. An empty file is a claim ("no diagnostics"), not
 # an absence, so it is always written and always listed.
