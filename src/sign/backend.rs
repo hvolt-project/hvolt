@@ -40,14 +40,18 @@ pub enum TokenState {
 }
 
 /// Remote signing through AppGallery Connect.
-pub fn sign_remote(project_dir: &Path) -> Result<(), String> {
+///
+/// `release` selects the profile kind: `false` provisions the debug profile
+/// (debug certificate, device UDID, `signing/debug/`), `true` provisions a release
+/// profile (release certificate, no device, `signing/release/`).
+pub fn sign_remote(project_dir: &Path, release: bool) -> Result<(), String> {
     #[cfg(feature = "agc-local")]
     {
-        imp::sign_remote_entry(project_dir)
+        imp::sign_remote_entry(project_dir, release)
     }
     #[cfg(not(feature = "agc-local"))]
     {
-        let _ = project_dir;
+        let _ = (project_dir, release);
         Err(NO_BACKEND.to_string())
     }
 }
@@ -88,6 +92,45 @@ pub fn login() -> Result<(), String> {
     }
     #[cfg(not(feature = "agc-local"))]
     {
+        Err(NO_BACKEND.to_string())
+    }
+}
+
+/// The browser URL plus the port its callback targets, so the caller can open the browser
+/// and then wait on the same port.
+pub fn login_port_and_url() -> Result<(u16, String), String> {
+    #[cfg(feature = "agc-local")]
+    {
+        Ok(imp::auth::authorization_url())
+    }
+    #[cfg(not(feature = "agc-local"))]
+    {
+        Err(NO_BACKEND.to_string())
+    }
+}
+
+/// Waits for the authorization callback on `port` and finishes the login.
+pub fn login_on_port(port: u16) -> Result<(), String> {
+    #[cfg(feature = "agc-local")]
+    {
+        imp::auth::await_callback(port).map(|_| ())
+    }
+    #[cfg(not(feature = "agc-local"))]
+    {
+        let _ = port;
+        Err(NO_BACKEND.to_string())
+    }
+}
+
+/// Complete a login from a callback URL captured elsewhere.
+pub fn login_with_callback(callback: &str) -> Result<(), String> {
+    #[cfg(feature = "agc-local")]
+    {
+        imp::auth::complete_login(callback).map(|_| ())
+    }
+    #[cfg(not(feature = "agc-local"))]
+    {
+        let _ = callback;
         Err(NO_BACKEND.to_string())
     }
 }
@@ -183,7 +226,8 @@ mod no_backend_tests {
     /// public build must never look like it has AGC support.
     #[test]
     fn every_entry_point_reports_the_missing_backend() {
-        assert_eq!(sign_remote(Path::new(".")).unwrap_err(), NO_BACKEND);
+        assert_eq!(sign_remote(Path::new("."), false).unwrap_err(), NO_BACKEND);
+        assert_eq!(sign_remote(Path::new("."), true).unwrap_err(), NO_BACKEND);
         assert_eq!(login().unwrap_err(), NO_BACKEND);
         assert_eq!(list_certs().unwrap_err(), NO_BACKEND);
         assert_eq!(delete_cert("1").unwrap_err(), NO_BACKEND);

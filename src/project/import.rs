@@ -386,6 +386,7 @@ fn read_app_config(from: &Path, gaps: &mut Gaps) -> Result<AppConfig, String> {
             products,
             runtime_os: crate::support::config::DEFAULT_RUNTIME_OS.into(),
             members,
+            build: Default::default(),
             signing,
         },
         dependencies: BTreeMap::new(),

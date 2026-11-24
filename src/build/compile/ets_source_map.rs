@@ -44,6 +44,10 @@ pub(crate) struct Anchor {
 }
 
 /// One compiled file and the anchors that describe it.
+///
+/// Cloned once per package: a multi-module build writes one `sourceMaps.map` per package, each
+/// describing only the files that package's abc carries.
+#[derive(Clone)]
 pub(crate) struct MapEntry {
     /// The module the file belongs to (`entry`).
     pub module: String,

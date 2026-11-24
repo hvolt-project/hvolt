@@ -192,7 +192,7 @@ pub fn init(name: &str) {
 
     if root.exists() {
         eprintln!("Error: directory '{}' already exists", name);
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     }
 
     // FS errors are reported, not surfaced as panics
@@ -200,7 +200,7 @@ pub fn init(name: &str) {
         eprintln!("✗ {}", e);
         // remove what was already written — no half-scaffold left behind
         let _ = fs::remove_dir_all(root);
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     }
 
     // Print summary

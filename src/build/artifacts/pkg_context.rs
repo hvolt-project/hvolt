@@ -14,6 +14,24 @@ use serde_json::{json, Value};
 
 use crate::support::config::{AppConfig, NativeModuleConfig};
 
+/// One ETS module this package links against.
+///
+/// hvigor's `getDependenciesPkgContextInfo` (`generate-pkg-context-info.js`) fills each field
+/// from the dependency's own manifest: `moduleName` only for a shared package (HSP), `version`
+/// only for a HAR, and `entryPath` from the dependency's package entry. The truth for a HAP
+/// that consumes an HSP is `.scratch/multi-module/truth/entry/pkgContextInfo.json`:
+/// `{"isSO":false,"moduleName":"shared","bundleName":"","dependencyAlias":"","packageName":"shared","entryPath":"src/main/Index.ets","version":""}`.
+pub struct EtsDep {
+    /// The package the runtime looks the dependency up by (`shared`).
+    pub package_name: String,
+    /// The dependency's `module.json` `module.name`; empty for a non-HSP member.
+    pub module_name: String,
+    /// The dependency's package entry, relative to its module root (`src/main/Index.ets`).
+    pub entry_path: String,
+    /// The version its records carry; empty for a shared package.
+    pub version: String,
+}
+
 /// Dependency entries collected from a project: path dependencies declared in
 /// hvolt.toml, plus the `.so` files a native module builds.
 pub struct PkgContextInput<'a> {
@@ -23,12 +41,13 @@ pub struct PkgContextInput<'a> {
     pub project_dir: &'a std::path::Path,
     /// Every native dependency declared in the root hvolt.toml.
     pub native_deps: &'a [(String, NativeModuleConfig)],
-    /// Version every record carries; the device matches `<record>&<version>`.
-    pub module_version: &'a str,
-    /// ETS dependency modules linked into the same abc (name, srcEntry). Without an entry
-    /// the device expands `from '<pkg>'` with its own default root and the composed name
-    /// does not match the record the module actually carries.
-    pub ets_deps: &'a [(String, String)],
+    /// The entry's own `entryPath` (`src/main/` for an entry module; empty for a shared
+    /// package — `.scratch/multi-module/truth/shared/pkgContextInfo.json`).
+    pub own_entry_path: &'a str,
+    /// ETS dependency modules linked into the package. Without an entry the device expands
+    /// `from '<pkg>'` with its own default root and the composed name does not match the
+    /// record the module actually carries.
+    pub ets_deps: &'a [EtsDep],
     /// Third-party packages compiled into the same abc (`yaml`, `@mcui/mccharts`, …).
     /// Each one needs an entry, or the runtime cannot resolve an import of its package root.
     pub packages: &'a [crate::build::deps::npm::Package],
@@ -37,11 +56,17 @@ pub struct PkgContextInput<'a> {
 }
 
 /// One context entry.
-fn entry(package_name: &str, version: &str, entry_path: &str, is_so: bool) -> Value {
+fn entry(
+    package_name: &str,
+    module_name: &str,
+    version: &str,
+    entry_path: &str,
+    is_so: bool,
+) -> Value {
     json!({
         "packageName": package_name,
         "bundleName": "",
-        "moduleName": "",
+        "moduleName": module_name,
         "version": version,
         "entryPath": entry_path,
         "isSO": is_so,
@@ -105,20 +130,26 @@ pub fn render(input: &PkgContextInput<'_>) -> Value {
     // composes `<pkg>/<entryPath><relative>` from it.
     // The entry's own version stays empty: the device appends `&<version>` to the entry
     // request only when the context carries one, and the entry record has none.
-    let own = entry(input.module_name, "", "src/main/", false);
+    let own = entry(input.module_name, "", "", input.own_entry_path, false);
     map.insert(input.module_name.to_string(), own);
 
-    // ETS dependency modules share the module's own path model, so they carry the same
-    // entryPath kind as the entry module.
-    // A dependency module is addressed through its package entry (`from 'proxy_core'`),
-    // so its context entryPath names that entry file, not the source root.
-    for (name, src_entry) in input.ets_deps {
-        if name == input.module_name {
+    // ETS dependency modules are addressed through their package entry (`from 'shared'`), so
+    // the context entryPath names that entry file, not the source root. A shared package also
+    // records its `module.json` module.name; the version stays empty (its records carry none,
+    // and the device appends `&<version>` only when the context has one).
+    for dep in input.ets_deps {
+        if dep.package_name == input.module_name {
             continue;
         }
         map.insert(
-            name.clone(),
-            entry(name, input.module_version, src_entry, false),
+            dep.package_name.clone(),
+            entry(
+                &dep.package_name,
+                &dep.module_name,
+                &dep.version,
+                &dep.entry_path,
+                false,
+            ),
         );
     }
 
@@ -156,7 +187,7 @@ pub fn render(input: &PkgContextInput<'_>) -> Value {
         };
         map.insert(
             package.name.clone(),
-            entry(&package.name, &package.version, &path, false),
+            entry(&package.name, "", &package.version, &path, false),
         );
     }
 
@@ -175,14 +206,14 @@ pub fn render(input: &PkgContextInput<'_>) -> Value {
         }
         map.insert(
             format!("{name}.so"),
-            entry(&format!("{name}.so"), "", &entry_path, true),
+            entry(&format!("{name}.so"), "", "", &entry_path, true),
         );
         let dep_dir = input.project_dir.join(name);
         for so in so_files_for(name, &dep_dir) {
             let key = so.split('/').next_back().unwrap_or(&so).to_string();
             // The declared entry above wins; on-disk duplicates are skipped.
             if !map.contains_key(&key) {
-                map.insert(key.clone(), entry(&key, "", "", true));
+                map.insert(key.clone(), entry(&key, "", "", "", true));
             }
         }
     }
@@ -220,7 +251,7 @@ mod tests {
             module_name: "src",
             project_dir: std::path::Path::new("/tmp/nonexistent"),
             native_deps: &[],
-            module_version: "1.0.0",
+            own_entry_path: "src/main/",
             ets_deps: &[],
             packages: &[],
             app: &app,
@@ -241,7 +272,7 @@ mod tests {
             module_name: "src",
             project_dir: std::path::Path::new("/tmp/nonexistent"),
             native_deps: &deps,
-            module_version: "1.0.0",
+            own_entry_path: "src/main/",
             ets_deps: &[],
             packages: &[],
             app: &app,
@@ -263,12 +294,65 @@ mod tests {
             module_name: "src",
             project_dir: std::path::Path::new("/tmp/nonexistent"),
             native_deps: &[],
-            module_version: "1.0.0",
+            own_entry_path: "src/main/",
             ets_deps: &[],
             packages: &[],
             app: &app,
         });
         let obj = out.as_object().unwrap();
         assert!(!obj.contains_key("@ohos/hypium"));
+    }
+
+    /// A HAP that consumes a shared package names it the way the reference does
+    /// (`truth/entry/pkgContextInfo.json`): `moduleName` is the dependency's module name, the
+    /// version is empty, and `entryPath` is its package entry under `src/main/`.
+    #[test]
+    fn an_hsp_dependency_records_its_module_name_and_src_main_entry() {
+        let app = AppConfig::default_for("x");
+        let deps = [EtsDep {
+            package_name: "shared".into(),
+            module_name: "shared".into(),
+            entry_path: "src/main/Index.ets".into(),
+            version: String::new(),
+        }];
+        let out = render(&PkgContextInput {
+            module_name: "entry",
+            project_dir: std::path::Path::new("/tmp/nonexistent"),
+            native_deps: &[],
+            own_entry_path: "src/main/",
+            ets_deps: &deps,
+            packages: &[],
+            app: &app,
+        });
+        let shared = &out["shared"];
+        assert_eq!(shared["packageName"], "shared");
+        assert_eq!(shared["moduleName"], "shared");
+        assert_eq!(shared["version"], "");
+        assert_eq!(shared["entryPath"], "src/main/Index.ets");
+        assert_eq!(shared["isSO"], false);
+        // The HAP's own entry keeps the source root as its entryPath.
+        assert_eq!(out["entry"]["moduleName"], "");
+        assert_eq!(out["entry"]["entryPath"], "src/main/");
+    }
+
+    /// A shared package's own entry carries an empty `entryPath`
+    /// (`truth/shared/pkgContextInfo.json`).
+    #[test]
+    fn a_shared_package_names_only_itself_with_an_empty_entry_path() {
+        let app = AppConfig::default_for("x");
+        let out = render(&PkgContextInput {
+            module_name: "shared",
+            project_dir: std::path::Path::new("/tmp/nonexistent"),
+            native_deps: &[],
+            own_entry_path: "",
+            ets_deps: &[],
+            packages: &[],
+            app: &app,
+        });
+        let obj = out.as_object().unwrap();
+        assert_eq!(obj.len(), 1, "{obj:?}");
+        assert_eq!(obj["shared"]["entryPath"], "");
+        assert_eq!(obj["shared"]["moduleName"], "");
+        assert_eq!(obj["shared"]["version"], "");
     }
 }

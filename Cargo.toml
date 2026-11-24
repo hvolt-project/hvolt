@@ -22,9 +22,27 @@ strip = "symbols"   # no symbol names in shipped binaries
 panic = "abort"
 
 [features]
+default = ["usb"]
+# Native USB device transport (desktop side). Off for embedders: on a device the
+# IDE reaches its own hdcd over TCP, and nusb does not build for ohos.
+usb = ["dep:nusb"]
+# Device-side posture: consumed by the embedder build (libhvolt.so).
+ohos = []
 # Compile the AppGallery Connect backend from an `agc-local/` overlay next to
 # this crate. The overlay is not part of this repository.
 agc-local = []
+
+[lib]
+# rlib for the binary, cdylib for embedders (the on-device IDE loads it via NAPI).
+name = "hvolt"
+path = "src/lib.rs"
+crate-type = ["rlib", "cdylib"]
+
+[profile.ohos]
+# Embedder profile: a panic inside a command must not take the host app down,
+# so the cdylib unwinds and the FFI boundary catches it.
+inherits = "release"
+panic = "unwind"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
@@ -38,9 +56,11 @@ rand = "0.8"
 # hdc wire protocol: RSA-3072 challenge-response, PKCS#1 v1.5 over SHA-256.
 rsa = { version = "0.9", features = ["sha2", "pem"] }
 zip = { version = "2", default-features = false, features = ["deflate"] }
+flate2 = "1"
+tar = "0.4"
 # Native USB transport to hdcd (enumerate + bulk endpoints). Pure Rust, no
 # libusb; each platform backend is implemented in-tree by nusb.
-nusb = "0.2"
+nusb = { version = "0.2", optional = true }
 regex-lite = "0.1"
 hapsigner = { version = "0.2.0", default-features = false }
 # Already pulled in by hapsigner; used directly to read a certificate's notAfter.
@@ -51,11 +71,13 @@ oxc_allocator = "0.75.0"
 oxc_span = "0.75.0"
 oxc_ast = "0.75.0"
 oxc_ast_visit = "0.75.1"
+oxc_semantic = "0.75.1"
 oxc_codegen = "0.75.0"
 rcgen = { version = "0.14.7", features = ["pem"] }
 p12 = "0.6"
 pkcs8 = "0.10"
 p256 = "0.13"
+rhai = { version = "1.27.0", default-features = false, features = ["std"] }
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"

@@ -3,6 +3,10 @@
 // target.rs semantics.
 
 /// Debug detail dump of every interface on the HDCD device (class/subclass).
+///
+/// `nusb` does not build for ohos, and the embedder build omits the `usb` feature, so the
+/// function only exists where the transport does.
+#[cfg(feature = "usb")]
 fn print_usb_detail(serial: &str) {
     use nusb::MaybeFuture;
     if let Ok(list) = nusb::list_devices().wait() {
@@ -23,17 +27,24 @@ fn print_usb_detail(serial: &str) {
 pub fn list() {
     // Native USB enumeration (nusb): HDCD interfaces over bulk endpoints.
     // No external hdc is spawned.
-    let usb = crate::device::usb::enumerate_hdcd();
-    if usb.is_empty() {
-        println!("(no device over USB)");
-    } else {
-        for d in &usb {
-            if std::env::var("HVOLT_USB_DEBUG").is_ok() {
-                print_usb_detail(&d.serial);
+    #[cfg(feature = "usb")]
+    {
+        let usb = crate::device::usb::enumerate_hdcd();
+        if usb.is_empty() {
+            println!("(no device over USB)");
+        } else {
+            for d in &usb {
+                if std::env::var("HVOLT_USB_DEBUG").is_ok() {
+                    print_usb_detail(&d.serial);
+                }
+                println!("{}\t\tUSB\tConnected\tlocalhost", d.serial);
             }
-            println!("{}\t\tUSB\tConnected\tlocalhost", d.serial);
         }
     }
+    // Embedder build (ohos): the IDE reaches its own hdcd over TCP and there is no USB host
+    // stack to enumerate on, so the list starts from the persisted target.
+    #[cfg(not(feature = "usb"))]
+    println!("(USB transport not built in; targets come from ~/.hvolt/config.json)");
     let cfg = crate::sdk::manage::load_global_config();
     if !cfg.device_target.is_empty() {
         println!(
@@ -49,7 +60,7 @@ pub fn list() {
 pub fn connect(addr: &str) {
     crate::device::target::connect_and_save(addr).unwrap_or_else(|e| {
         eprintln!("✗ Failed to connect: {}", e);
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     });
 }
 
@@ -91,11 +102,11 @@ pub fn set_remote(host: &str, serial: &str, hdc: &str) {
             if let Ok(pubk) = std::fs::read_to_string(format!("{}.pub", key.display())) {
                 eprintln!("     echo '{}' >> ~/.ssh/authorized_keys", pubk.trim());
             }
-            std::process::exit(1);
+            crate::support::cli_exit(1);
         }
         Err(e) => {
             eprintln!("✗ ssh probe failed: {}", e);
-            std::process::exit(1);
+            crate::support::cli_exit(1);
         }
     }
     let mut cfg = crate::sdk::manage::load_global_config();
@@ -104,7 +115,7 @@ pub fn set_remote(host: &str, serial: &str, hdc: &str) {
     cfg.device_hdc = hdc.to_string();
     crate::sdk::manage::save_global_config(&cfg).unwrap_or_else(|e| {
         eprintln!("✗ {}", e);
-        std::process::exit(1);
+        crate::support::cli_exit(1);
     });
     println!(
         "✓ Remote install target set: {} serial={} hdc={}",

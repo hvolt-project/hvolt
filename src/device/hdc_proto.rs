@@ -367,6 +367,10 @@ fn opening_buf(version_tag: &str) -> String {
 /// newline here is silently accepted by the parser but the key never verifies.
 const PUBKEY_SEPARATOR: char = '\u{0c}';
 
+/// Length a host public key must have for the daemon to accept it as known
+/// (`HdcDaemon::AlreadyInKnownHosts` in daemon.cpp compares against 625).
+pub const KNOWN_HOST_KEY_LEN: usize = 625;
+
 /// The host key pair a device remembers (`auth.cpp`: `hdckey` / `hdckey.pub` under `~/.harmony`).
 pub struct HostIdentity {
     pub public_key_pem: String,
@@ -383,14 +387,75 @@ impl HostIdentity {
         let dir = std::path::Path::new(&home).join(".harmony");
         let pub_path = dir.join("hdckey.pub");
         let pri_path = dir.join("hdckey");
+        // A device that has never paired has no key of its own; make one instead of
+        // failing the first connection.
+        if !pub_path.exists() || !pri_path.exists() {
+            return Self::generate_in(&dir);
+        }
         let public_key_pem = std::fs::read_to_string(&pub_path)
             .map_err(|e| format!("read {}: {e}", pub_path.display()))?;
+        // The daemon only treats a key as known when its PEM is exactly 625 bytes
+        // (`AlreadyInKnownHosts`), i.e. RSA-3072. Anything shorter re-prompts on every
+        // connection, so a pair from an older build is replaced instead of reused.
+        if public_key_pem.len() != KNOWN_HOST_KEY_LEN {
+            return Self::generate_in(&dir);
+        }
         let private_pem = std::fs::read_to_string(&pri_path)
             .map_err(|e| format!("read {}: {e}", pri_path.display()))?;
         let private_key = rsa::RsaPrivateKey::from_pkcs8_pem(&private_pem)
             .map_err(|e| format!("parse {}: {e}", pri_path.display()))?;
+        crate::ffi::trace(&format!(
+            "identity: loaded {} len={}",
+            Self::fingerprint(&public_key_pem),
+            public_key_pem.len()
+        ));
         Ok(Self {
             public_key_pem,
+            private_key,
+        })
+    }
+
+    /// Short digest of the public key, so the trace shows whether the same pair is being
+    /// reused across launches or a new one is minted every time.
+    fn fingerprint(pem: &str) -> String {
+        use sha2::{Digest, Sha256};
+        let digest = Sha256::digest(pem.as_bytes());
+        digest.iter().take(8).map(|b| format!("{b:02x}")).collect()
+    }
+
+    /// Writes a fresh RSA host pair under `dir`, the same shape `hdc` keeps in
+    /// `~/.harmony`: PKCS#8 private key, SPKI public key.
+    fn generate_in(dir: &std::path::Path) -> Result<Self, String> {
+        use rsa::pkcs8::{EncodePrivateKey, EncodePublicKey, LineEnding};
+        let mut rng = rand::thread_rng();
+        let private_key = rsa::RsaPrivateKey::new(&mut rng, 3072)
+            .map_err(|e| format!("generate host key: {e}"))?;
+        let private_pem = private_key
+            .to_pkcs8_pem(LineEnding::LF)
+            .map_err(|e| format!("encode host key: {e}"))?
+            .to_string();
+        let mut public_pem = private_key
+            .to_public_key()
+            .to_public_key_pem(LineEnding::LF)
+            .map_err(|e| format!("encode host public key: {e}"))?;
+        // The daemon stores and looks up this string with a hardcoded length test of 625
+        // (`AlreadyInKnownHosts`), so a shorter encoding never counts as known and every
+        // connection re-prompts. Pad to that length; PEM parsers ignore trailing newlines.
+        while public_pem.len() < KNOWN_HOST_KEY_LEN {
+            public_pem.push('\n');
+        }
+        std::fs::create_dir_all(dir).map_err(|e| format!("create {}: {e}", dir.display()))?;
+        std::fs::write(dir.join("hdckey"), &private_pem)
+            .map_err(|e| format!("write hdckey: {e}"))?;
+        std::fs::write(dir.join("hdckey.pub"), &public_pem)
+            .map_err(|e| format!("write hdckey.pub: {e}"))?;
+        crate::ffi::trace(&format!(
+            "identity: generated {} len={}",
+            Self::fingerprint(&public_pem),
+            public_pem.len()
+        ));
+        Ok(Self {
+            public_key_pem: public_pem,
             private_key,
         })
     }
@@ -433,6 +498,45 @@ pub struct AuthReport {
     pub device_name: String,
     pub auth_status: String,
     pub device_message: String,
+}
+
+/// Build the report from the reply that carries the daemon's final TLV map.
+fn report_from_reply(reply: &SessionHandShake, hostname: &str) -> AuthReport {
+    let fields = parse_tlv(&reply.buf);
+    AuthReport {
+        hostname: hostname.to_string(),
+        device_name: fields.get("devname").cloned().unwrap_or_default(),
+        auth_status: fields.get("daemonauthstatus").cloned().unwrap_or_default(),
+        device_message: fields.get("emgmsg").cloned().unwrap_or_default(),
+    }
+}
+
+/// What the device's first reply (to the opening capability frame) permits.
+///
+/// `Ok(Some(report))` means the device already considers the session authenticated
+/// (`AUTH_OK`), so there is no token to sign and the handshake is complete.
+/// `Ok(None)` means the usual public-key/signature exchange must run.
+fn opening_reply_outcome(
+    reply: &SessionHandShake,
+    hostname: &str,
+) -> Result<Option<AuthReport>, String> {
+    match reply.auth_type {
+        // 3 = AUTH_PUBLICKEY: the device does not know our key yet and wants it.
+        AUTH_PUBLICKEY => Ok(None),
+        // 4 = AUTH_OK: the device needs no authentication (the HarmonyOS emulator
+        // answers the opening frame this way). The session is usable as-is.
+        AUTH_OK => Ok(Some(report_from_reply(reply, hostname))),
+        // 0 = AUTH_NONE / 2 = AUTH_SIGNATURE: states this client cannot complete
+        // from the opening reply. Keep the raw value so the failure is diagnosable.
+        auth_type @ (AUTH_NONE | AUTH_SIGNATURE) => Err(format!(
+            "expected AUTH_PUBLICKEY or AUTH_OK, device answered auth_type={auth_type} ({})",
+            reply.buf
+        )),
+        other => Err(format!(
+            "expected AUTH_PUBLICKEY or AUTH_OK, device answered auth_type={other} ({})",
+            reply.buf
+        )),
+    }
 }
 
 /// Run the three-step handshake: advertise capabilities, offer the public key, sign the token.
@@ -540,6 +644,57 @@ pub fn shell(
     Ok(output)
 }
 
+/// Run a command and hand its output over as it arrives.
+///
+/// [`shell`] ends the read after an idle timeout because it wants one dump; a log
+/// follower is the opposite case — the command keeps producing, and every chunk has to
+/// reach the caller. The device closes the task channel when the command exits; an idle
+/// stretch that long means the stream stalled, so the caller is told to reconnect.
+pub fn shell_stream<F>(
+    addr: &str,
+    version: &str,
+    identity: &HostIdentity,
+    command: &str,
+    idle: Duration,
+    stop: &std::sync::atomic::AtomicBool,
+    mut on_chunk: F,
+) -> Result<(), String>
+where
+    F: FnMut(&str),
+{
+    let mut conn = HdcConn::connect(addr, Duration::from_secs(10))?;
+    handshake(&mut conn, addr, version, identity)?;
+    let channel = rand::random::<u32>() & 0x7fff_ffff;
+    let protect = PayloadProtect {
+        channel_id: channel,
+        command_flag: CMD_UNITY_EXECUTE,
+        check_sum: 0,
+        v_code: V_CODE,
+    };
+    let mut cmdline = command.as_bytes().to_vec();
+    cmdline.push(0);
+    conn.send_packet(protect, &cmdline)?;
+    conn.set_read_timeout(idle)?;
+    loop {
+        if stop.load(std::sync::atomic::Ordering::Relaxed) {
+            return Ok(());
+        }
+        match conn.recv_packet() {
+            Ok((p, payload)) => {
+                if p.command_flag == CMD_KERNEL_CHANNEL_CLOSE && p.channel_id == channel {
+                    return Ok(());
+                }
+                if p.channel_id == channel && !payload.is_empty() {
+                    on_chunk(&String::from_utf8_lossy(&payload));
+                }
+            }
+            Err(e) => {
+                return Err(format!("stream ended: {e}"));
+            }
+        }
+    }
+}
+
 /// Push one local file to `remote_path` on the device.
 ///
 /// The device expects three frames on one channel: a `TransferConfig` announcement, a
@@ -552,6 +707,7 @@ pub fn send_file(
     identity: &HostIdentity,
     local_path: &std::path::Path,
     remote_path: &str,
+    bundle: Option<&str>,
     timeout: Duration,
 ) -> Result<(), String> {
     let data =
@@ -582,7 +738,14 @@ pub fn send_file(
     put_uint(&mut config, 1, data.len() as u64); // fileSize
     put_uint(&mut config, 2, 0); // atime
     put_uint(&mut config, 3, 0); // mtime
-    put_str(&mut config, 4, ""); // options
+    put_str(
+        &mut config,
+        4,
+        bundle
+            .map(|b| format!("--bundle-name={}", b))
+            .as_deref()
+            .unwrap_or(""),
+    ); // options
     put_str(&mut config, 5, remote_path); // path: destination on the device
     put_str(&mut config, 6, name); // optionalName
     put_uint(&mut config, 7, 0); // updateIfNew
@@ -798,7 +961,14 @@ pub fn install(
     // No ack for the wakeup frame: the daemon creates the task and moves on
     // without replying (its dispatch has no handler), and the next frame on
     // this channel is the one that answers.
-    let staging = format!("{:x}.hap", rand::random::<u32>());
+    // The daemon stages the streamed bytes under this name and hands it to the installer; keep
+    // the package's own extension (`.hap` / `.hsp`) so the staged file is the same kind of
+    // package the device is asked to install.
+    let extension = package
+        .extension()
+        .and_then(|extension| extension.to_str())
+        .unwrap_or("hap");
+    let staging = format!("{:x}.{}", rand::random::<u32>(), extension);
     let mut config = Vec::new();
     put_uint(&mut config, 1, data.len() as u64);
     put_uint(&mut config, 2, 0);
@@ -941,11 +1111,8 @@ fn handshake(
     // the legacy RSA_ENCRYPT scheme, and our SHA-512 signature fails
     // (`HandDaemonAuthSignature auth failed`).
     let mut reply = exchange(conn, &step(opening_buf(version), AUTH_NONE))?;
-    if reply.auth_type != AUTH_PUBLICKEY {
-        return Err(format!(
-            "expected AUTH_PUBLICKEY, device answered auth_type={} ({})",
-            reply.auth_type, reply.buf
-        ));
+    if let Some(report) = opening_reply_outcome(&reply, &hostname)? {
+        return Ok(report);
     }
 
     // Step 2: the public key. The daemon answers with a 20-byte challenge token.
@@ -953,6 +1120,12 @@ fn handshake(
         conn,
         &step(identity.public_key_buf(&hostname), AUTH_PUBLICKEY),
     )?;
+    // A device that already trusts this key answers the public-key step with AUTH_OK and
+    // skips the challenge: the daemon log shows `RsaSignVerify: sign verify success`
+    // followed by `auth success`, so treating that as a failure drops a working session.
+    if reply.auth_type == AUTH_OK {
+        return Ok(report_from_reply(&reply, &hostname));
+    }
     if reply.auth_type != AUTH_SIGNATURE {
         return Err(format!(
             "expected AUTH_SIGNATURE, device answered auth_type={} ({})",
@@ -977,13 +1150,7 @@ fn handshake(
         ));
     }
 
-    let fields = parse_tlv(&reply.buf);
-    Ok(AuthReport {
-        hostname,
-        device_name: fields.get("devname").cloned().unwrap_or_default(),
-        auth_status: fields.get("daemonauthstatus").cloned().unwrap_or_default(),
-        device_message: fields.get("emgmsg").cloned().unwrap_or_default(),
-    })
+    Ok(report_from_reply(&reply, &hostname))
 }
 
 fn exchange(conn: &mut HdcConn, message: &SessionHandShake) -> Result<SessionHandShake, String> {
@@ -1103,12 +1270,20 @@ impl HdcConn {
     /// native USB transport.
     pub fn connect_device(target: &str, timeout: Duration) -> Result<Self, String> {
         if target.contains(':') {
-            Self::connect(target, timeout)
-        } else {
+            return Self::connect(target, timeout);
+        }
+        #[cfg(feature = "usb")]
+        {
             let usb = crate::device::usb::UsbTransport::open(target, timeout)?;
             Ok(Self {
                 stream: Box::new(usb),
             })
+        }
+        #[cfg(not(feature = "usb"))]
+        {
+            Err(format!(
+                "USB transport is not part of this build; give <host>:<port> instead of {target}"
+            ))
         }
     }
 
@@ -1246,6 +1421,51 @@ mod handshake_tests {
         assert_eq!(h.banner, "OHOS HDC");
         assert_eq!(h.auth_type, 0);
         assert_eq!(h.connect_key, "127.0.0.1:9999");
+    }
+
+    /// A device that needs no authentication (the HarmonyOS emulator) answers the
+    /// opening frame with `AUTH_OK`; that must complete the handshake, not fail with
+    /// "expected AUTH_PUBLICKEY".
+    #[test]
+    fn auth_ok_at_opening_completes_the_handshake() {
+        let mut buf = String::new();
+        tlv_append(&mut buf, "emgmsg", "0");
+        tlv_append(&mut buf, "devname", "localhost");
+        tlv_append(&mut buf, "daemonauthstatus", "7 SUCCESS");
+        let reply = SessionHandShake::decode(
+            &SessionHandShake {
+                banner: HANDSHAKE_MESSAGE.into(),
+                auth_type: AUTH_OK,
+                session_id: 4242,
+                connect_key: "127.0.0.1:5555".into(),
+                buf,
+                version: "Ver: 3.2.0".into(),
+            }
+            .encode(),
+        )
+        .expect("device reply decodes");
+
+        let report = opening_reply_outcome(&reply, "myhost")
+            .expect("AUTH_OK must not be an error")
+            .expect("AUTH_OK means the session is already authorized");
+        assert_eq!(report.hostname, "myhost");
+        assert_eq!(report.device_name, "localhost");
+        assert_eq!(report.auth_status, "7 SUCCESS");
+        assert_eq!(report.device_message, "0");
+
+        // The normal device (needing the key exchange) must still get the challenge path.
+        let mut normal = reply.clone();
+        normal.auth_type = AUTH_PUBLICKEY;
+        assert!(opening_reply_outcome(&normal, "myhost")
+            .expect("AUTH_PUBLICKEY is not an error")
+            .is_none());
+
+        // The fix must not become "anything but AUTH_PUBLICKEY is accepted": 2 stays
+        // an error that names the value it actually saw.
+        let mut wrong = reply.clone();
+        wrong.auth_type = AUTH_SIGNATURE;
+        let err = opening_reply_outcome(&wrong, "myhost").unwrap_err();
+        assert!(err.contains("auth_type=2"), "{err}");
     }
 
     /// A round-trip over all six fields keeps the message intact.

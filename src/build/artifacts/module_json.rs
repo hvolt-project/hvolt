@@ -38,6 +38,14 @@ pub struct RenderInput<'a> {
     /// `can't find name in config file` while still creating an empty node — measured on
     /// clashbox 2026-11-08, where the packaged `route_map.json` was present but unreferenced.
     pub has_route_map: bool,
+    /// The modules this package depends on, as `module.dependencies` writes them:
+    /// `[(moduleName, versionCode)]`.
+    ///
+    /// hvigor derives the list from the module's `oh-package.json5` HSP dependencies; a HAP
+    /// that consumes a shared package names it here (`.scratch/multi-module/truth/entry/module.json`:
+    /// `[{"moduleName":"shared","versionCode":1000000}]`), while the shared package itself
+    /// declares an empty array.
+    pub dependencies: &'a [(String, u32)],
 }
 
 /// Resolve `$string:name` / `$media:name` / `$color:name` / `$profile:name` to its
@@ -46,6 +54,30 @@ fn res_id(ids: &ResourceTable, reference: &str) -> Option<u32> {
     let rest = reference.strip_prefix('$')?;
     let (kind, name) = rest.split_once(':')?;
     ids.get(&(kind.to_string(), name.to_string())).copied()
+}
+
+/// The `module.dependencies` a package declares: every shared package (HSP) this project
+/// builds, except the module itself.
+///
+/// hvigor derives the same list from the module's `oh-package.json5` dependencies and stamps
+/// the app's `versionCode` on each entry (hvigor drops the `bundleName` an `oh-package.json5`
+/// carries); the truth for this project is
+/// `.scratch/multi-module/truth/entry/module.json`:
+/// `"dependencies":[{"moduleName":"shared","versionCode":1000000}]`. A shared package's own
+/// list is empty (`.scratch/multi-module/truth/shared/module.json`: `"dependencies":[]`).
+pub fn module_dependencies(
+    project_dir: &std::path::Path,
+    app: &AppConfig,
+    module: &ModuleConfig,
+) -> Vec<(String, u32)> {
+    let Ok((modules, _native)) = crate::translator::discover_modules(project_dir, app) else {
+        return Vec::new();
+    };
+    modules
+        .iter()
+        .filter(|(_, cfg)| cfg.module.is_hsp() && cfg.module.name != module.module.name)
+        .map(|(_, cfg)| (cfg.module.name.clone(), app.app.version_code()))
+        .collect()
 }
 
 /// The `app.*` block.
@@ -365,6 +397,14 @@ pub fn render(input: &RenderInput<'_>) -> Value {
     let appf = &input.app.app;
     let info = &input.module.module;
     let runtime_os = &appf.runtime_os;
+    // `module.dependencies`: the packages this module links against. hvigor fills it from the
+    // module's `oh-package.json5` dependencies (`.scratch/multi-module/truth/entry/module.json`),
+    // and a shared package declares the empty array.
+    let dependencies: Vec<Value> = input
+        .dependencies
+        .iter()
+        .map(|(name, version_code)| json!({ "moduleName": name, "versionCode": version_code }))
+        .collect();
     let mut abilities = vec![entry_ability(info, &appf.icon, input.ids, runtime_os)];
     abilities.extend(extra_abilities(
         &info.abilities,
@@ -380,33 +420,53 @@ pub fn render(input: &RenderInput<'_>) -> Value {
         .file_stem()
         .and_then(|s| s.to_str())
         .unwrap_or(&info.entry);
-    let mut module = json!({
-        "name": info.name,
-        "type": if info.module_type.is_empty() { "entry" } else { &info.module_type },
-        "mainElement": main_element,
-        "pages": "$profile:main_pages",
-        "deviceTypes": info.device_types,
-        "deliveryWithInstall": info.delivery_with_install.unwrap_or(true),
-        "installationFree": info.installation_free.unwrap_or(false),
-        "abilities": abilities,
-        "packageName": info.name,
-        "virtualMachine": input.virtual_machine,
-        "compileMode": "esmodule",
-        "dependencies": Vec::<Value>::new(),
-    });
+    // A shared package is a library module: it has no ability, no page table and no main
+    // element, and its entry is `src/main/<entry>` spelled `./<entry>`
+    // (`.scratch/multi-module/truth/shared/module.json`).
+    let mut module = if info.is_hsp() {
+        json!({
+            "name": info.name,
+            "type": info.module_type,
+            "srcEntry": format!("./{}", info.entry.trim_start_matches("./")),
+            "deviceTypes": info.device_types,
+            "deliveryWithInstall": info.delivery_with_install.unwrap_or(true),
+            "installationFree": info.installation_free.unwrap_or(false),
+            "packageName": info.name,
+            "virtualMachine": input.virtual_machine,
+            "compileMode": "esmodule",
+            "dependencies": dependencies,
+        })
+    } else {
+        json!({
+            "name": info.name,
+            "type": if info.module_type.is_empty() { "entry" } else { &info.module_type },
+            "mainElement": main_element,
+            "pages": "$profile:main_pages",
+            "deviceTypes": info.device_types,
+            "deliveryWithInstall": info.delivery_with_install.unwrap_or(true),
+            "installationFree": info.installation_free.unwrap_or(false),
+            "abilities": abilities,
+            "packageName": info.name,
+            "virtualMachine": input.virtual_machine,
+            "compileMode": "esmodule",
+            "dependencies": dependencies,
+        })
+    };
     if input.has_insight_intent {
         module["hasInsightIntent"] = json!(true);
     }
-    if input.has_route_map {
+    if input.has_route_map && !info.is_hsp() {
         // The installer loads a route table only through this reference; the packaged
         // `route_map.json` alone is inert (`ImportConfigFromURL`/`ImportConfigFromFile` both
         // resolve through it).
         module["routerMap"] = json!("$profile:route_map");
     }
-    if let Some(src) = &info.src_entry {
-        // The device loads this file as the application entry point; without it the runtime
-        // derives an entry from the main ability and never finds it.
-        module["srcEntry"] = json!(ability_src_entry("", src));
+    if !info.is_hsp() {
+        if let Some(src) = &info.src_entry {
+            // The device loads this file as the application entry point; without it the runtime
+            // derives an entry from the main ability and never finds it.
+            module["srcEntry"] = json!(ability_src_entry("", src));
+        }
     }
     if !extensions.is_empty() {
         module["extensionAbilities"] = json!(extensions);
@@ -532,6 +592,7 @@ color start_window_background 0x01000008
             build_mode: "release",
             compile_sdk_version: "26.0.0.23",
             api_release_type: "Beta1",
+            dependencies: &[],
         });
         assert_eq!(out["app"]["labelId"], 0x01000000);
         assert_eq!(out["module"]["descriptionId"], 0x01000004);
@@ -556,9 +617,67 @@ color start_window_background 0x01000008
             build_mode: "release",
             compile_sdk_version: "26.0.0.23",
             api_release_type: "Beta1",
+            dependencies: &[],
         });
         let ability = &out["module"]["abilities"][0];
         assert_eq!(ability["srcEntry"], "./ets/EntryAbility.ets");
         assert_eq!(out["module"]["mainElement"], "EntryAbility");
+    }
+
+    /// A shared package's manifest is a library manifest: `type: shared`, `srcEntry` relative
+    /// to `src/main/`, no ability, no page table, and the dependencies list the HAP declares
+    /// is absent from it (`truth/shared/module.json`).
+    #[test]
+    fn a_shared_package_has_no_ability_and_a_src_main_entry() {
+        let (app, mut module) = input();
+        module.module.name = "shared".into();
+        module.module.module_type = "shared".into();
+        module.module.entry = "Index.ets".into();
+        module.module.routes = Vec::new();
+        let ids = ids();
+        let out = render(&RenderInput {
+            has_insight_intent: false,
+            has_route_map: false,
+            virtual_machine: "",
+            app: &app,
+            module: &module,
+            ids: &ids,
+            build_mode: "debug",
+            compile_sdk_version: "26.0.0.23",
+            api_release_type: "Beta1",
+            dependencies: &[],
+        });
+        let body = &out["module"];
+        assert_eq!(body["type"], "shared");
+        assert_eq!(body["srcEntry"], "./Index.ets");
+        assert!(body.get("abilities").is_none(), "{body}");
+        assert!(body.get("mainElement").is_none(), "{body}");
+        assert!(body.get("pages").is_none(), "{body}");
+        assert_eq!(body["dependencies"], json!([]));
+    }
+
+    /// The HAP-side dependency declaration is the shape the reference packages
+    /// (`truth/entry/module.json`: `[{"moduleName":"shared","versionCode":1000000}]`).
+    #[test]
+    fn dependencies_are_module_name_and_version_code() {
+        let (app, module) = input();
+        let ids = ids();
+        let deps = [("shared".to_string(), 1_000_000u32)];
+        let out = render(&RenderInput {
+            has_insight_intent: false,
+            has_route_map: false,
+            virtual_machine: "",
+            app: &app,
+            module: &module,
+            ids: &ids,
+            build_mode: "debug",
+            compile_sdk_version: "26.0.0.23",
+            api_release_type: "Beta1",
+            dependencies: &deps,
+        });
+        assert_eq!(
+            out["module"]["dependencies"],
+            json!([{ "moduleName": "shared", "versionCode": 1_000_000 }])
+        );
     }
 }

@@ -23,18 +23,29 @@ use crate::build::stage::process_import::load_kit_configs;
 /// probed in that order rather than assuming one from `cfg!`, because a release build must
 /// work on every platform the npm package targets — including both Linux targets.
 pub fn sdk_es2abc() -> Result<PathBuf, String> {
-    let root = crate::sdk::manage::sdk_root().ok_or_else(|| "no SDK root resolved".to_string())?;
-    let ark =
-        crate::sdk::manage::component_root(&root, "ets").join("build-tools/ets-loader/bin/ark");
-    es2abc_under(&ark).ok_or_else(|| {
-        format!(
-            "es2abc not found under {} (probed build-win, build-mac, build)",
-            ark.display()
-        )
-    })
+    // The device ships no es2abc executable: the merge runs in-process against
+    // libes2abc.so, so this is only the argv[0] stand-in there.
+    #[cfg(feature = "ohos")]
+    {
+        Ok(PathBuf::from("es2abc"))
+    }
+    #[cfg(not(feature = "ohos"))]
+    {
+        let root =
+            crate::sdk::manage::sdk_root().ok_or_else(|| "no SDK root resolved".to_string())?;
+        let ark =
+            crate::sdk::manage::component_root(&root, "ets").join("build-tools/ets-loader/bin/ark");
+        es2abc_under(&ark).ok_or_else(|| {
+            format!(
+                "es2abc not found under {} (probed build-win, build-mac, build)",
+                ark.display()
+            )
+        })
+    }
 }
 
 /// Locate the launcher under any of the host-specific layouts, in probe order.
+#[cfg(not(feature = "ohos"))]
 fn es2abc_under(ark: &std::path::Path) -> Option<PathBuf> {
     for sub in ["build-win", "build-mac", "build"] {
         for name in crate::support::platform::exe_names("es2abc") {
@@ -140,12 +151,50 @@ pub struct AssembleOptions<'a> {
     pub debug: bool,
 }
 
+/// One package's abc: which staged modules go into it, and where it is written.
+///
+/// A multi-module project produces one package per module type — an entry/feature module's
+/// `.hap` and a shared module's `.hsp` — and each carries its own `ets/modules.abc`
+/// (`.scratch/multi-module/truth/`: the entry package's abc has zero `&shared.` records, the
+/// shared package's has its own two). `entry_module` is the module the package is built for:
+/// the records it names carry no version (`&shared.src.main.Index&`), which is what the device
+/// addresses the package's own entry by.
+pub struct AbcPackage<'a> {
+    pub entry_module: &'a str,
+    /// The staged module trees whose files belong in this abc.
+    pub modules: &'a [String],
+    pub out_abc: &'a Path,
+    pub compile_context_info: Option<&'a Path>,
+}
+
 pub fn assemble(
     modules: &[StageModule<'_>],
     ts_root: &Path,
     out_abc: &Path,
     opts: &AssembleOptions<'_>,
 ) -> Result<std::path::PathBuf, String> {
+    let names: Vec<String> = modules.iter().map(|m| m.name.to_string()).collect();
+    let entry_module = modules.first().map(|m| m.name).unwrap_or("");
+    let packages = [AbcPackage {
+        entry_module,
+        modules: &names,
+        out_abc,
+        compile_context_info: opts.compile_context_info,
+    }];
+    assemble_packages(modules, ts_root, &packages, opts)?;
+    Ok(out_abc.to_path_buf())
+}
+
+/// Transpile every staged module once, then merge one abc per package.
+///
+/// The transpile is a project-wide pass (component table, builder names, const enums), so it
+/// runs once; only the es2abc merge is per package, and it is fed the files of that package.
+pub fn assemble_packages(
+    modules: &[StageModule<'_>],
+    ts_root: &Path,
+    packages_out: &[AbcPackage<'_>],
+    opts: &AssembleOptions<'_>,
+) -> Result<Vec<std::path::PathBuf>, String> {
     let AssembleOptions {
         bundle,
         version,
@@ -157,7 +206,7 @@ pub fn assemble(
         build_version,
         kit_configs_dir,
         es2abc,
-        compile_context_info,
+        compile_context_info: _,
         packages,
         target_api_version,
         debug,
@@ -166,13 +215,31 @@ pub fn assemble(
     // `$r('app.<kind>.<name>')` has to become the object literal the runtime expects: left
     // as a call it resolves against the system table only, and an app resource comes back as
     // an invalid id (`getStringSync` → 401).
-    // `out_abc` is `<out>/ets/modules.abc`; the resource stage lands in `<out>/res`.
-    let resource_table = out_abc
-        .parent()
-        .and_then(|ets| ets.parent())
-        .map(|out| out.join("res/ResourceTable.txt"))
-        .and_then(|path| std::fs::read_to_string(path).ok())
-        .map(|text| crate::build::compile::ets_resources::parse_table(&text))
+    // Each package has its own compiled resource table (`<out>/res/ResourceTable.txt`), so a
+    // file's `$r(…)` resolves to the ids of the package it is packed into.
+    let mut resource_tables: std::collections::BTreeMap<
+        String,
+        crate::build::compile::ets_resources::ResourceTable,
+    > = std::collections::BTreeMap::new();
+    let mut module_package: std::collections::BTreeMap<String, String> =
+        std::collections::BTreeMap::new();
+    for package in packages_out {
+        let table = package
+            .out_abc
+            .parent()
+            .and_then(|ets| ets.parent())
+            .map(|out| out.join("res/ResourceTable.txt"))
+            .and_then(|path| std::fs::read_to_string(path).ok())
+            .map(|text| crate::build::compile::ets_resources::parse_table(&text))
+            .unwrap_or_default();
+        for module in package.modules {
+            resource_tables.insert(module.clone(), table.clone());
+            module_package.insert(module.clone(), package.entry_module.to_string());
+        }
+    }
+    let resource_table = resource_tables
+        .get(modules.first().map(|m| m.name).unwrap_or(""))
+        .cloned()
         .unwrap_or_default();
     // The module the device addresses without a version: the entry module.
     let entry_module = modules.first().map(|m| m.name).unwrap_or("");
@@ -283,17 +350,6 @@ pub fn assemble(
         })
         .collect();
     crate::build::compile::abc_compile::set_module_entries(module_entries);
-    // The entry module's own entry record, which the device looks up without a version.
-    let entry_record_addr = modules
-        .first()
-        .map(|m| {
-            let entry = m
-                .entry_file
-                .trim_start_matches("./")
-                .trim_end_matches(".ets");
-            crate::build::compile::abc_compile::module_path(m.name, entry)
-        })
-        .unwrap_or_default();
     // Every source is read before any is emitted: a call site has to know whether the name
     // it calls is a user component, and under which protocol.
     let mut component_index: crate::build::compile::component_index::ComponentMap =
@@ -536,15 +592,23 @@ pub fn assemble(
                         })
                     },
                 };
-                crate::build::lower::ets_transpile::transpile(&src, &opts)
-                    .map_err(|e| format!("{}: {e}", f.display()))?
+                {
+                    let lowered = crate::build::lower::ets_transpile::transpile(&src, &opts)
+                        .map_err(|e| format!("{}: {e}", f.display()))?;
+                    check_lowered(rel, &lowered);
+                    lowered
+                }
             } else {
                 // Every plain module goes through the AST. The printed text is layout-equivalent
                 // and keeps each import/export as a node, so a later pass cannot drop one; the
                 // line-based rewriter stays only as the fallback for a source the parser
                 // rejects after preprocessing.
-                crate::build::lower::ets_plain::lower(&src, &kits)
-                    .map_err(|e| format!("{}: {e}", f.display()))?
+                {
+                    let lowered = crate::build::lower::ets_plain::lower(&src, &kits)
+                        .map_err(|e| format!("{}: {e}", f.display()))?;
+                    check_lowered(rel, &lowered);
+                    lowered
+                }
             };
             // A `declare enum` used to be folded into its member literal here, and the import
             // deleted with it. `declares_as_type` classifies an enum as a value now, so the
@@ -637,11 +701,17 @@ pub fn assemble(
                     &content,
                     Some(&src),
                     &|request| {
-                        // The module's own version rule, not the app version: the entry
-                        // module's urls carry none (`abc_compile::record_version`).
+                        // The package's own version rule, not the app version: the module the
+                        // package is built for carries no version (`abc_compile::record_version`).
+                        // A shared package is its own package, so its files are rewritten with
+                        // *its* rule even though the whole project is transpiled in one pass.
+                        let package_module = module_package
+                            .get(module)
+                            .map(String::as_str)
+                            .unwrap_or(entry_module);
                         let module_version = crate::build::compile::abc_compile::record_version(
                             module,
-                            entry_module,
+                            package_module,
                         );
                         rewrite_spec(
                             request,
@@ -650,7 +720,7 @@ pub fn assemble(
                             module_version,
                             packages,
                             &members,
-                            entry_module,
+                            package_module,
                             &profile_record,
                         )
                     },
@@ -706,12 +776,18 @@ pub fn assemble(
             // owns the source file: the loader gets one `moduleName` for the whole CompileArkTS
             // task (`projectConfig.moduleName`, read by `addBundleAndModuleParam` in
             // `lib/process_ui_syntax.js`), so a resource used by `xb_components` and packed
-            // into `entry` still records `entry`.
+            // into `entry` still records `entry`. In a multi-package build that module is the
+            // package's own, and so is the table the ids come from.
+            let package_module = module_package
+                .get(module)
+                .map(String::as_str)
+                .unwrap_or(entry_module);
+            let table = resource_tables.get(module).unwrap_or(&resource_table);
             let (content, missing) = crate::build::compile::ets_resources::rewrite(
                 &content,
-                &resource_table,
+                table,
                 bundle,
-                entry_module,
+                package_module,
             );
             if !missing.is_empty() && std::env::var_os("HVOLT_DEBUG_RES").is_some() {
                 eprintln!("[res] {}: 未解析 {}", dest.display(), missing.len());
@@ -749,6 +825,28 @@ pub fn assemble(
             }
             std::fs::write(&dest, content).map_err(|e| format!("write {}: {e}", dest.display()))?;
             crate::build::compile::component_index::restore_source(previous_source);
+        }
+    }
+    // Every package's abc carries the generated resource-table module. The reference compiles
+    // `<module>/build/<mode>/generated/r/<mode>/ResourceTable.ts` and its abc names the record
+    // `&<module>.build.generated.r.ResourceTable&` (`.scratch/multi-module/truth/{entry,shared}/
+    // modules.disasm`), which is also the first entry of the reference's compile context
+    // (`reference-answers.md` §1.3). hvolt resolves `$r(…)` inline and has no source for it, so
+    // the module is staged here: one per module of each package, at the path whose record name
+    // is the reference's (`abc_compile::record_name_from_ts` drops the build-mode segment).
+    for package in packages_out {
+        for module in package.modules {
+            let dir = ts_root
+                .join(module)
+                .join("build/default/generated/r/default");
+            std::fs::create_dir_all(&dir).map_err(|e| format!("mkdir {}: {e}", dir.display()))?;
+            // A single value export: the merge emits a record for it, and nothing imports it
+            // (the resource ids are inlined by the lowering).
+            std::fs::write(
+                dir.join("ResourceTable.ts"),
+                "export const __hvolt_resource_table__ = 0;\n",
+            )
+            .map_err(|e| format!("write ResourceTable for {module}: {e}"))?;
         }
     }
     // The profile module itself, at the path `rewrite_spec` sends `import … from 'BuildProfile'`
@@ -797,7 +895,6 @@ pub fn assemble(
         }
         std::fs::write(&path, content).map_err(|e| format!("write Index: {e}"))?;
     }
-    write_source_maps(out_abc, modules, version, &map_entries)?;
     if !any_page {
         return Err(format!(
             "{}: no @Component page found",
@@ -834,21 +931,51 @@ pub fn assemble(
             &wanted,
         )?;
     }
-    crate::build::compile::abc_compile::merge(&crate::build::compile::abc_compile::MergeInput {
-        ts_root,
-        es2abc,
-        out_abc,
-        file_threads: 8,
-        target_api_version,
-        debug,
-        version,
-        entry_module,
-        entry_record: Some(entry_record_addr.as_str()),
-        compile_context_info,
-        npm: packages,
-        abc_inputs: &abc_inputs,
-        shared: &shared,
-    })
+    // One merge per package. A package's table only names its own module trees, and its
+    // records carry that package's version rule: the package's own module is the one the
+    // device addresses without a version.
+    let staged_module_names: Vec<String> = modules.iter().map(|m| m.name.to_string()).collect();
+    let mut written: Vec<std::path::PathBuf> = Vec::new();
+    for package in packages_out {
+        let entry_record = modules
+            .iter()
+            .find(|m| m.name == package.entry_module)
+            .map(|m| {
+                let entry = m
+                    .entry_file
+                    .trim_start_matches("./")
+                    .trim_end_matches(".ets");
+                crate::build::compile::abc_compile::module_path(m.name, entry)
+            })
+            .unwrap_or_default();
+        let entries: Vec<crate::build::compile::ets_source_map::MapEntry> = map_entries
+            .iter()
+            .filter(|entry| package.modules.iter().any(|module| module == &entry.module))
+            .cloned()
+            .collect();
+        write_source_maps(package.out_abc, package.entry_module, version, &entries)?;
+        crate::build::compile::abc_compile::merge(
+            &crate::build::compile::abc_compile::MergeInput {
+                ts_root,
+                es2abc,
+                out_abc: package.out_abc,
+                file_threads: 8,
+                target_api_version,
+                debug,
+                version,
+                entry_module: package.entry_module,
+                entry_record: Some(entry_record.as_str()),
+                compile_context_info: package.compile_context_info,
+                npm: packages,
+                abc_inputs: &abc_inputs,
+                shared: &shared,
+                staged_modules: &staged_module_names,
+                package_modules: Some(package.modules),
+            },
+        )?;
+        written.push(package.out_abc.to_path_buf());
+    }
+    Ok(written)
 }
 
 /// Whether a source file declares the shared-module directive.
@@ -1558,6 +1685,35 @@ fn rewrite_spec(
     // A native library is addressed with the `Y` prefix (no package record behind it).
     if spec.ends_with(".so") {
         return Some(format!("@normalized:Y&&&{spec}&"));
+    }
+    // A shared package the project also builds is an *external* package to this one: it is
+    // compiled into its own abc, and a request for it names its package entry through the
+    // normalized url the reference emits — `N&<moduleName>&<bundleName>&<packageName>/<entryPath>&<version>`
+    // (`hvigor-ohos-plugin/src/utils/ohmurl-utils.js`). The package's own `pkgContextInfo`
+    // entry has `moduleName: "shared"`, `bundleName: ""`, `version: ""` and
+    // `entryPath: "src/main/Index.ets"`, which composes exactly the url measured in
+    // `.scratch/multi-module/truth/entry/modules.disasm`: `@normalized:N&shared&&shared/src/main/Index&`.
+    let shared_member = members
+        .iter()
+        .find(|m| spec == m.as_str() || spec.starts_with(&format!("{m}/")))
+        .filter(|m| crate::build::compile::abc_compile::shared_entry_path(m).is_some());
+    if let Some(member) = shared_member {
+        let rest = spec[member.len()..].trim_start_matches('/');
+        let path = if rest.is_empty() {
+            crate::build::compile::abc_compile::shared_entry_path(member)
+                .unwrap_or_default()
+                .trim_start_matches("./")
+                .trim_end_matches(".ets")
+                .to_string()
+        } else {
+            // A subpath names a file of the shared package's source root (`src/main/`).
+            format!(
+                "{}/{}",
+                crate::build::compile::abc_compile::MODULE_SOURCE_ROOT_SHARED,
+                rest
+            )
+        };
+        return Some(format!("@normalized:N&{member}&&{member}/{path}&"));
     }
     // A bare specifier that names a sibling module: its package entry is `<module>/Index`,
     // and a specifier that already carries the source root keeps that path verbatim.
@@ -2945,6 +3101,7 @@ mod tests {
     /// SDK carries `build-mac`, a Linux one carries plain `build`; a resolver that assumes
     /// `build-mac` makes every Linux release build fail at `es2abc not found`.
     #[test]
+    #[cfg(not(feature = "ohos"))]
     fn es2abc_resolves_under_each_host_layout() {
         for sub in ["build-win", "build-mac", "build"] {
             let dir =
@@ -2964,6 +3121,7 @@ mod tests {
 
     /// An SDK with no launcher reports the path it searched instead of a bare "not found".
     #[test]
+    #[cfg(not(feature = "ohos"))]
     fn es2abc_absent_reports_the_probed_root() {
         let dir = std::env::temp_dir().join(format!("hvolt-es2abc-empty-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
@@ -3623,14 +3781,13 @@ fn source_map_entry(
 /// (the debug copy next to `modules.abc`) and once in the packaged output.
 fn write_source_maps(
     out_abc: &std::path::Path,
-    modules: &[StageModule<'_>],
+    entry_package: &str,
     version: &str,
     entries: &[crate::build::compile::ets_source_map::MapEntry],
 ) -> Result<(), String> {
     if entries.is_empty() {
         return Ok(());
     }
-    let entry_package = modules.first().map(|module| module.name).unwrap_or("");
     let document = crate::build::compile::ets_source_map::document(entry_package, version, entries);
     let text =
         serde_json::to_string_pretty(&document).map_err(|e| format!("sourceMaps.map: {e}"))?;
@@ -3643,6 +3800,7 @@ fn write_source_maps(
     std::fs::create_dir_all(&packaged).map_err(|e| format!("mkdir {}: {e}", packaged.display()))?;
     std::fs::write(packaged.join("sourceMaps.map"), &text)
         .map_err(|e| format!("write packaged sourceMaps.map: {e}"))?;
+    fail_on_undefined();
     Ok(())
 }
 
@@ -3717,5 +3875,47 @@ mod dialog_builder_tests {
         let text = "a\n\t\tthis.x = 1;\n";
         assert_eq!(line_indent(text, 4), "\t\t");
         assert_eq!(line_indent("plain", 0), "");
+    }
+}
+
+/// Rejects a lowered file whose references do not resolve.
+///
+/// The source the project wrote is ArkTS; the lowered text is what `es2abc` accepts, and it is
+/// also the first form a TypeScript parser can read in full. Checking here therefore looks at the
+/// same names the compiler will see, without a separate ArkTS parser.
+fn check_lowered(rel: &std::path::Path, text: &str) {
+    if !crate::build::stage::semantic_check::enabled() {
+        return;
+    }
+    let name = rel.to_string_lossy().to_string();
+    for diagnostic in crate::build::stage::semantic_check::check_file(&name, text) {
+        eprintln!(
+            "{}:{}:{}: error: {} (undefined identifier; HVOLT_SEMANTIC=off to build anyway)",
+            diagnostic.file, diagnostic.line, diagnostic.column, diagnostic.message
+        );
+        undefined_identifiers::bump();
+    }
+}
+
+mod undefined_identifiers {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    static COUNT: AtomicUsize = AtomicUsize::new(0);
+
+    pub(super) fn bump() {
+        COUNT.fetch_add(1, Ordering::SeqCst);
+    }
+
+    pub(super) fn total() -> usize {
+        COUNT.load(Ordering::SeqCst)
+    }
+}
+
+/// Fails the build if any file reported an undefined identifier.
+fn fail_on_undefined() {
+    let total = undefined_identifiers::total();
+    if total > 0 {
+        eprintln!("✗ {total} undefined identifier(s)");
+        crate::support::cli_exit(1);
     }
 }
