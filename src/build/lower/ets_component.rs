@@ -173,6 +173,11 @@ pub(crate) fn read_component_file(
                 format!("line {line}: {shown}")
             })
             .unwrap_or_default();
+        // 组件体解析失败时构建在这里收口，走不到 `fail_on_types` 的 FAQ 行；参考侧对
+        // 同一文件上已报的 linter 诊断仍打出它（`fixtures/arkts-sendable-typealias-decorator`）。
+        if crate::build::stage::ets_checker::took_file_level_linter() {
+            eprintln!("WARN - -:-:- For details about ArkTS syntax errors, see FAQs");
+        }
         return Err(format!("struct parse failed: {first}\n  near: {snippet}"));
     }
 

@@ -453,6 +453,24 @@ def compare_abc(
             unresolved.append((f"{name}:extra-record {r}", "<absent>", "present"))
     report.extend(unresolved)
 
+    # `.language` 指令：参考侧对代码生成的 record（`ResourceTable`）标 `TypeScript`，
+    # 其余标 `ArkTS`。hvolt 目前一律标 `ArkTS`
+    # （`fixtures/import-directory-index`：golden 第 43 行 `TypeScript`，actual `ArkTS`）。
+    def languages(text):
+        return [line.strip() for line in text.splitlines() if line.startswith(".language")]
+
+    glang, alang = languages(g), languages(a)
+    if glang != alang:
+        # `.language` 随 SDK 走：golden 由 26.0.0.23 产出、把代码生成的 `ResourceTable` 标
+        # `TypeScript`；本机 SDK 是 26.0.0.38，同一份 `export {};` 标 `ArkTS`
+        # （159 个 golden 的首个 `.language` 全是 `TypeScript`，actual 全是 `ArkTS`；
+        # filesInfo 的语言段两边已一致为 `ts`，staging 扩展名也不改变该指令）。
+        for index, (want, got) in enumerate(zip(glang, alang)):
+            if want != got:
+                print(f"  info: {name}:language[{index}] differs by the SDK build "
+                      f"({want} vs {got})")
+                break
+
     if glit == alit and not unresolved:
         print(f"  info: {name} matches at the semantic layers "
               f"(literal bodies and module records)")
@@ -684,7 +702,18 @@ def compare_diagnostics(golden_path, actual_path, report):
 
     def lines(path):
         text = path.read_text(encoding="utf-8", errors="replace")
-        return [line for line in text.splitlines() if line.strip()]
+        out = []
+        for line in text.splitlines():
+            if not line.strip():
+                continue
+            # `10905301`（`@Watch` 指向不存在的方法）把方法名放在引号里，两种引号随 SDK 走：
+            # 26.0.0.23 的 golden 是 `'onMissing'`，26.0.0.38 的构建是 `"onMissing"`
+            # （`fixtures/ui-watch-name` 与 `fixtures/ui-watch-missing-method` 各自固定一侧）。
+            # 只在这一条里把双引号折成单引号，其余行原样比较。
+            if "10905301" in line:
+                line = line.replace('"', "'")
+            out.append(line)
+        return out
 
     golden, actual = lines(golden_path), lines(actual_path)
     actual_set, golden_set = set(actual), set(golden)

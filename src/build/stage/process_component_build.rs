@@ -484,6 +484,19 @@ fn component_chain<'a, 'b>(
                 return Some((name, current, attributes));
             }
             Expression::StaticMemberExpression(member) => {
+                // `Names.Card({…})`: a child reached through a namespace import is a
+                // `StaticMemberExpression` whose object is a plain identifier. It is not an
+                // attribute chain, so the qualified name is the component
+                // (`fixtures/_namespace-import-child`).
+                if attributes.is_empty() {
+                    if let Expression::Identifier(namespace) = &member.object {
+                        return Some((
+                            format!("{}.{}", namespace.name, member.property.name),
+                            current,
+                            Vec::new(),
+                        ));
+                    }
+                }
                 // `Text.fontSize(16)` in a chain reads as a member call on the previous link.
                 attributes.push(UiAttribute {
                     name: member.property.name.to_string(),
@@ -1098,7 +1111,12 @@ fn emit_node(
     }
     // A name the project declares is a child component: its call site builds an instance and
     // hands it to the view stack, instead of calling a `create()` on a built-in.
-    if let Some(meta) = crate::build::compile::component_index::meta_of(name) {
+    //
+    // A namespace import reaches the child as a qualified name (`Names.Card`); the index keys
+    // on the declared name, so the last segment is what it is looked up by
+    // (`fixtures/_namespace-import-child`).
+    let declared = name.rsplit('.').next().unwrap_or(name);
+    if let Some(meta) = crate::build::compile::component_index::meta_of(declared) {
         emit_child(node, meta, out, indent, builders, extends, styles);
         return;
     }

@@ -455,6 +455,8 @@ fn package_name_of(spec: &str) -> Option<String> {
         || spec.starts_with('/')
         || spec.starts_with('#')
         || spec.starts_with("@normalized:")
+        // `@bundle:<bundle>/<module>/<path>` 是工程内文件的绝对 ohm-url，不是包。
+        || spec.starts_with("@bundle:")
     {
         return None;
     }

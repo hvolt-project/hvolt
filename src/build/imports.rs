@@ -135,6 +135,14 @@ fn imports_of(text: &str) -> Vec<(Vec<String>, String)> {
         }
         out.push((names, caps[2].to_string()));
     }
+    // `import './x';`: a side-effect import names a module without naming anything in it. The
+    // reference resolves it the same way and fails with its own bundler message
+    // (`Could not resolve "./side" from "entry/src/main/ets/pages/Index.ets".`,
+    // `fixtures/import-unresolved-rollup`), which carries no ArkTS diagnostic line.
+    let bare = Regex::new(r#"(?m)^import\s+['"]([^'"]+)['"]\s*;"#).expect("bare import pattern");
+    for caps in bare.captures_iter(text) {
+        out.push((Vec::new(), caps[1].to_string()));
+    }
     // `export * from './x'` and `export { a } from './x'` name a module too. They are not imports,
     // but they cross the same file boundary, and a TS file reaching an ArkTS one through them is
     // refused the same way (`fixtures/import-ts-to-ets`: the barrel is a `.ts`).
@@ -147,6 +155,44 @@ fn imports_of(text: &str) -> Vec<(Vec<String>, String)> {
 }
 
 /// Resolves a relative specifier against the importing file, trying the source extensions.
+/// `@bundle:<bundle>/<module>/<path>` minus its prefix: the file the url names, when it exists.
+///
+/// The path segment is relative to the module's `src/main`, so `entry/ets/lib/utils` and
+/// `entry/src/main/ets/lib/utils` both name the same file. `source_root` is the staged
+/// `<module>/src/main/ets` of the module being checked; the project root is three levels up.
+fn resolve_ohm_url(source_root: &Path, rest: &str) -> Option<PathBuf> {
+    let mut parts = rest.splitn(3, '/');
+    let _bundle = parts.next()?;
+    let module = parts.next()?;
+    let tail = parts.next().unwrap_or("");
+    if module.is_empty() || tail.is_empty() {
+        return None;
+    }
+    let module_root = source_root.parent()?.parent()?.parent()?.join(module);
+    // The path is relative to the module root first (`<module>/ets/lib/utils`), and to the
+    // source root after that: the reference rejects the first form when nothing is there
+    // (`fixtures/ohmurl-import`, where the file lives under `src/main/ets`).
+    let mut candidates = vec![module_root.join(tail)];
+    candidates.push(module_root.join("src/main/ets").join(tail));
+    candidates.push(module_root.join("src/main").join(tail));
+    for candidate in candidates {
+        if candidate.is_file() {
+            return Some(candidate);
+        }
+        for ext in SOURCE_EXTS {
+            let appended = PathBuf::from(format!("{}.{}", candidate.display(), ext));
+            if appended.is_file() {
+                return Some(appended);
+            }
+            let replaced = candidate.with_extension(ext);
+            if replaced.is_file() {
+                return Some(replaced);
+            }
+        }
+    }
+    None
+}
+
 fn resolve(from: &Path, specifier: &str) -> Option<PathBuf> {
     let normalised = normalize(&from.parent()?.join(specifier));
     if normalised.is_file() {
@@ -174,6 +220,19 @@ fn resolve(from: &Path, specifier: &str) -> Option<PathBuf> {
     let index_ts = normalised.join("index.ts");
     if index_ts.is_file() {
         return Some(index_ts);
+    }
+    // 只带声明的模块：参考侧把 `.d.ts` / `.d.ets` 当作可解析目标并做类型检查
+    // （`fixtures/dts-return-type-mismatch`：布局里带上 `types.d.ts` 后，参考侧报
+    // `Type 'string' is not assignable to type 'number'.`）。
+    for ext in ["d.ts", "d.ets"] {
+        let declared = PathBuf::from(format!("{}.{}", normalised.display(), ext));
+        if declared.is_file() {
+            return Some(declared);
+        }
+        let index_declared = normalised.join(format!("index.{ext}"));
+        if index_declared.is_file() {
+            return Some(index_declared);
+        }
     }
     None
 }
@@ -339,7 +398,149 @@ pub(crate) fn check(source_root: &Path) -> Result<usize, String> {
     for path in &files {
         let text =
             fs::read_to_string(path).map_err(|e| format!("read {}: {}", path.display(), e))?;
+        // 默认导入 / 默认再导出指向没有 `export default` 的模块
+        // （`fixtures/import-default-missing`）：`imports_of` 只收集具名成员，默认导入要单独扫。
+        for (line_number, line_text) in text.lines().enumerate() {
+            let trimmed = line_text.trim_start();
+            let file = format!("ets/{}", relative_to(source_root, path));
+            if let Some(rest) = trimmed.strip_prefix("import ") {
+                if rest.contains('{') {
+                    continue;
+                }
+                if rest.starts_with("* as ") {
+                    // 通配导入在 `.ts` 里指向 `.ets` 是 `arkts-no-ts-import-ets`
+                    // （`fixtures/ts-namespace-import` 的 1:25）。
+                    if let Some(from_at) = rest.find(" from ") {
+                        let raw = rest[from_at + " from ".len()..].trim();
+                        let specifier = raw
+                            .trim_matches(|c| c == '"' || c == '\'' || c == ';')
+                            .to_string();
+                        let into_ets = path.extension().and_then(|e| e.to_str()) == Some("ts")
+                            && (specifier.ends_with(".ets")
+                                || path
+                                    .parent()
+                                    .map(|dir| dir.join(format!("{specifier}.ets")).exists())
+                                    .unwrap_or(false));
+                        if into_ets {
+                            if let Some(offset) = line_text.find(raw.trim_matches(';')) {
+                                eprintln!(
+                                    "ERROR 10605999 {file}:{}:{} Importing ArkTS files in JS and TS files is forbidden.",
+                                    line_number + 1,
+                                    offset + 1
+                                );
+                            }
+                        }
+                    }
+                    continue;
+                }
+                let Some(from_at) = rest.find(" from ") else {
+                    continue;
+                };
+                let binding = rest[..from_at].trim();
+                if binding.is_empty() {
+                    continue;
+                }
+                let specifier = rest[from_at + " from ".len()..]
+                    .trim()
+                    .trim_matches(|c| c == '"' || c == '\'' || c == ';')
+                    .to_string();
+                let Some(target) = resolve(path, &specifier) else {
+                    continue;
+                };
+                let target_text = fs::read_to_string(&target).unwrap_or_default();
+                if target_text.contains("export default") {
+                    continue;
+                }
+                if let Some((line, column)) = locate_name(&text, binding) {
+                    eprintln!(
+                        "ERROR 10505001 {file}:{line}:{column} Module '\"{}\"' has no default export.",
+                        target.display()
+                    );
+                }
+            }
+            if let Some(rest) = trimmed.strip_prefix("export {") {
+                let Some(close) = rest.find('}') else {
+                    continue;
+                };
+                let members = &rest[..close];
+                if !members.split(',').any(|item| item.trim() == "default") {
+                    continue;
+                }
+                let Some(from_at) = rest.find("from ") else {
+                    continue;
+                };
+                let specifier = rest[from_at + "from ".len()..]
+                    .trim()
+                    .trim_matches(|c| c == '"' || c == '\'' || c == ';')
+                    .to_string();
+                let Some(target) = resolve(path, &specifier) else {
+                    continue;
+                };
+                let target_text = fs::read_to_string(&target).unwrap_or_default();
+                if target_text.contains("export default") {
+                    continue;
+                }
+                if let Some((line, column)) = locate_name(&text, "default") {
+                    eprintln!(
+                        "ERROR 10505001 {file}:{line}:{column} Module '\"{specifier}\"' has no exported member 'default'."
+                    );
+                }
+            }
+        }
+        // `import { default as X } from "…"`：目标模块没有 default 导出时参考侧报
+        // `Module '"…"' has no exported member 'default'.`，锚在 `default`
+        // （`fixtures/import-default-as` 的 2:10）。
+        for line_text in text.lines() {
+            let Some(rest) = line_text.trim_start().strip_prefix("import {") else {
+                continue;
+            };
+            let Some(close) = rest.find('}') else {
+                continue;
+            };
+            if !rest[..close]
+                .split(',')
+                .any(|item| item.trim().starts_with("default as "))
+            {
+                continue;
+            }
+            let Some(from_at) = line_text.find("from ") else {
+                continue;
+            };
+            let specifier = line_text[from_at + "from ".len()..]
+                .trim()
+                .trim_matches(|c| c == '"' || c == '\'' || c == ';')
+                .to_string();
+            let Some(target) = resolve(path, &specifier) else {
+                continue;
+            };
+            let target_text = fs::read_to_string(&target).unwrap_or_default();
+            if target_text.contains("export default") {
+                continue;
+            }
+            if let Some((line, column)) = locate_name(&text, "default") {
+                let file = format!("ets/{}", relative_to(source_root, path));
+                eprintln!(
+                    "ERROR 10505001 {file}:{line}:{column} Module '\"{specifier}\"' has no exported member 'default'."
+                );
+            }
+        }
         for (names, specifier) in imports_of(&text) {
+            if let Some(rest) = specifier.strip_prefix("@bundle:") {
+                // `@bundle:<bundle>/<module>/<path>`: an absolute ohm-url into this project.
+                // The reference resolves it against the module's source root and reports
+                // `Cannot find module '…' or its corresponding type declarations.` when nothing
+                // is there (`fixtures/ohmurl-import`, 1:24).
+                if resolve_ohm_url(source_root, rest).is_none() {
+                    if let Some((line, column)) = locate_specifier(&text, &specifier) {
+                        let file = format!("ets/{}", relative_to(source_root, path));
+                        eprintln!(
+                            "ERROR 10505001 {file}:{line}:{column} Cannot find module '{specifier}' or its corresponding type declarations."
+                        );
+                    }
+                    problems.push(format!("{}: cannot resolve '{specifier}'", path.display()));
+                }
+                continue;
+            }
             if !specifier.starts_with('.') {
                 // A package installed under `oh_modules` is resolved here: its named exports are
                 // known from the entry file.
@@ -388,7 +589,7 @@ pub(crate) fn check(source_root: &Path) -> Result<usize, String> {
                 continue; // Kit and SDK packages are resolved by the compiler, not here.
             }
             if let Some(target) = resolve(path, &specifier) {
-                // A `.ts` file may not pull in a `.ets` one: `Importing ArkTS files in JS and TS
+                // `arkts-no-ts-import-ets`：A `.ts` file may not pull in a `.ets` one: `Importing ArkTS files in JS and TS
                 // files is forbidden.` (10605999, at the specifier — 1:15 of
                 // `fixtures/import-ts-to-ets`).
                 let into_ets = path.extension().and_then(|e| e.to_str()) == Some("ts")
@@ -407,11 +608,17 @@ pub(crate) fn check(source_root: &Path) -> Result<usize, String> {
                 // (`Cannot find module '../utils/types' or its corresponding type declarations.`,
                 // 1:24 of `fixtures/import-missing-module`), so the console line is printed here
                 // too, in the shape `scripts/oracle/diagnostics.py` reads.
-                if let Some((line, column)) = locate_specifier(&text, &specifier) {
-                    let file = format!("ets/{}", relative_to(source_root, path));
-                    eprintln!(
-                        "ERROR 10505001 {file}:{line}:{column} Cannot find module '{specifier}' or its corresponding type declarations."
-                    );
+                //
+                // A side-effect import (`import './x';`) gets no such line: the reference fails
+                // the bundle with its own message and reports no ArkTS diagnostic
+                // (`fixtures/import-unresolved-rollup`).
+                if !names.is_empty() {
+                    if let Some((line, column)) = locate_specifier(&text, &specifier) {
+                        let file = format!("ets/{}", relative_to(source_root, path));
+                        eprintln!(
+                            "ERROR 10505001 {file}:{line}:{column} Cannot find module '{specifier}' or its corresponding type declarations."
+                        );
+                    }
                 }
                 problems.push(format!("{}: cannot resolve '{specifier}'", path.display()));
                 continue;

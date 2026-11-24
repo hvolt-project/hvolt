@@ -25,6 +25,9 @@ import tomllib
 APP_SDK_TARGET = "6.0.0(20)"
 # hvolt spells a shared package either way; hvigor's module type is `shared` in both cases.
 HSP_TYPES = {"shared", "hsp"}
+# A HAR is a static library: `harTasks`, `type: har`, and every module that depends on it links
+# its sources rather than a runtime package.
+HAR_TYPES = {"har"}
 
 
 def load(path):
@@ -140,6 +143,53 @@ def emit_shared(src_root, out, mod, app_cfg):
     }})
 
 
+def emit_har(src_root, out, mod, app_cfg):
+    """A HAR member: `harTasks`, `type: har`, source at `src/main/`."""
+    name = mod["name"]
+    mod_root = out / name
+    mod_root.mkdir(parents=True, exist_ok=True)
+    entry = mod["entry"]
+    (mod_root / "hvigorfile.ts").write_text(
+        "import { harTasks } from '@ohos/hvigor-ohos-plugin';\n"
+        "export default { system: harTasks, plugins: [] };\n", encoding="utf-8")
+    write_json(mod_root / "build-profile.json5",
+               {"apiType": "stageMode", "buildOption": {}, "targets": [{"name": "default"}]})
+
+    main_out = mod_root / "src" / "main"
+    main_out.mkdir(parents=True, exist_ok=True)
+    for source in (src_root / mod["member"]).rglob("*"):
+        if not source.is_file() or source.suffix not in {".ets", ".ts"}:
+            continue
+        rel = source.relative_to(src_root / mod["member"])
+        target = main_out / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+    shutil.copy2(src_root / mod["member"] / entry, main_out / entry)
+
+    res_src = module_resources(src_root, mod["member"])
+    if res_src.is_dir():
+        shutil.copytree(res_src, main_out / "resources", dirs_exist_ok=True)
+
+    packages = staged_packages(src_root, mod["member"])
+    write_json(mod_root / "oh-package.json5", {
+        "name": name, "version": "1.0.0", "description": "",
+        "main": f"src/main/{entry}",
+        "author": "", "license": "Apache-2.0",
+        "dependencies": {pkg: "1.0.0" for pkg in packages},
+    })
+    for pkg, source in packages.items():
+        shutil.copytree(source, mod_root / "oh_modules" / pkg, dirs_exist_ok=True)
+
+    # A HAR's `module.json5` carries no `srcEntry` and no install flags: hvigor's schema
+    # rejects them (`Schema validate failed` on the first attempt with the shared module's
+    # shape). The package's `main` in `oh-package.json5` is what names the entry file.
+    write_json(main_out / "module.json5", {"module": {
+        "name": name,
+        "type": "har",
+        "deviceTypes": mod["device_types"],
+    }})
+
+
 def emit_entry(src_root, out, mod, app_cfg, hsp_names):
     """An entry (HAP) member: `hapTasks`, abilities, pages, and its HSP dependencies."""
     name = mod["name"]
@@ -183,7 +233,11 @@ def emit_entry(src_root, out, mod, app_cfg, hsp_names):
         if not source.is_file() or source.suffix not in {".ets", ".ts"}:
             continue
         rel = source.relative_to(src_root / mod["member"])
-        if rel.as_posix() in copied or rel.name.endswith((".d.ets", ".d.ts")):
+        # `.d.ts` / `.d.ets` are copied too: they are type declarations the compiler reads, and
+        # dropping them made an import of a declaration-only module fail to resolve — the
+        # reference then reported `Cannot find module …` against a layout artefact rather than
+        # against the source (`fixtures/dts-only-module`).
+        if rel.as_posix() in copied:
             continue
         target = ets_out / rel
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -313,6 +367,8 @@ def main():
     for mod in modules:
         if mod["type"] in HSP_TYPES:
             emit_shared(src_root, out, mod, app_cfg)
+        elif mod["type"] in HAR_TYPES:
+            emit_har(src_root, out, mod, app_cfg)
         else:
             emit_entry(src_root, out, mod, app_cfg, hsp_names)
 
@@ -337,9 +393,15 @@ def main():
     write_json(out.parent / f"{out.name}.modules.json", {"modules": [{
         "name": mod["name"],
         "dir": mod["name"],
-        "kind": "shared" if mod["type"] in HSP_TYPES else "entry",
-        "task": "assembleHsp" if mod["type"] in HSP_TYPES else "assembleHap",
-        "extension": "hsp" if mod["type"] in HSP_TYPES else "hap",
+        "kind": ("shared" if mod["type"] in HSP_TYPES
+                 else "har" if mod["type"] in HAR_TYPES
+                 else "entry"),
+        "task": ("assembleHsp" if mod["type"] in HSP_TYPES
+                 else "assembleHar" if mod["type"] in HAR_TYPES
+                 else "assembleHap"),
+        "extension": ("hsp" if mod["type"] in HSP_TYPES
+                      else "har" if mod["type"] in HAR_TYPES
+                      else "hap"),
     } for mod in modules]})
     print(f"layout: {out}")
 

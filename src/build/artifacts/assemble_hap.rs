@@ -180,6 +180,11 @@ pub fn run_with(
         // (`.scratch/multi-module/truth/shared/pkgContextInfo.json`). A HAP names the shared
         // packages it consumes, plus the ETS members it compiles into its own abc.
         .filter(|(_, cfg)| !module_cfg.module.is_hsp() || cfg.module.is_hsp())
+        // A HAP's package context names itself and the shared packages it links; a sibling HAP
+        // and a HAR stay out (`fixtures/two-hap-one-shared`: golden keys are `shared` and
+        // `entry` only, this build also emitted `entry2`; `fixtures/har-member-present`:
+        // golden has no `harlib` key).
+        .filter(|(_, cfg)| module_cfg.module.is_hsp() || cfg.module.is_hsp())
         .map(|(_dir, cfg)| {
             if cfg.module.is_hsp() {
                 crate::build::artifacts::pkg_context::EtsDep {
