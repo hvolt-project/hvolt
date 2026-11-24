@@ -13,6 +13,7 @@ hvolt（HarmonyOS Volt）是一个社区构建工具，将扁平化项目结构�
 从 DevEco 工程到设备上跑起来，五步：
 
 ```bash
+hvolt doctor                       # 1. 环境自检：SDK、设备后端与凭据
 hvolt migrate --dry-run --from .   # 2. 看它打算怎么迁（不落盘）
 hvolt migrate --from .             # 3. 迁成扁平工程，输出目录在 <name>-flat/
 cd <name>-flat && hvolt build      # 4. 编译打包；没配 [app.signing] 时只出 unsigned
@@ -332,9 +333,10 @@ pub struct SdkEnv {
 
 ### 发现优先级
 
-1. `hvolt config` 中的配置
-2. 环境变量（`JAVA_HOME`）
-3. `PATH` 查找
+1. `~/.hvolt/config.json` 的 `sdk_path`
+2. 用户托管的 SDK 存储 `~/.hvolt/sdk/`
+3. DevEco Studio 安装位置（macOS 的 app bundle、Windows 的 `Program Files` / `LOCALAPPDATA`）
+4. 环境变量 `DEVECO_SDK_HOME` / `HOS_SDK_HOME` / `OHOS_SDK_HOME`
 
 ## 已知限制
 
