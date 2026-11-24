@@ -453,8 +453,17 @@ fn system_member_reads(
             if member.is_empty() {
                 continue;
             }
-            // 类型位置上的 `ns.Type` 不是值读取：`const mgr: resourceManager.ResourceManager = …`。
-            if source[..start].trim_end().ends_with(':') {
+            // 类型位置上的 `ns.Type` 不是值读取：`const mgr: resourceManager.ResourceManager = …`、
+            // `… as common.UIAbilityContext`、`x extends ns.Base`。
+            // `fixtures/configuration-page` 的 1165:95 是 `as common.UIAbilityContext`，参考侧不报；
+            // 而 `fixtures/system-module-member` 的 8:24 是 `util.AutoFinalizer === undefined`，
+            // 那是值位置，参考侧要报。
+            let prefix = source[..start].trim_end();
+            if prefix.ends_with(':')
+                || prefix.ends_with("as")
+                || prefix.ends_with("extends")
+                || prefix.ends_with("implements")
+            {
                 continue;
             }
             // 成员名首字母大写的是枚举成员或类静态成员，不是模块自己的导出名：
@@ -462,10 +471,16 @@ fn system_member_reads(
             // 参考侧对它们不按「模块没有这个导出」判
             // （`fixtures/declare-enum-value`、`fixtures/kit-arkui-state` 金标里都没有诊断，
             // 而 `fixtures/system-module-member` 的小写 `notAReal` 要报）。
+            // 大写成员只在「这个名字确实是本模块声明过的名字」时才判：`util.AutoFinalizer`
+            // 是模块里的 interface，落在类型空间，`typeof util` 上没有它，参考侧要报
+            // （`fixtures/system-module-member` 的 8:24）。而 `KeyCode.KEYCODE_ESCAPE`、
+            // `AppStorageV2.connect` 是具名导入的**值**的成员，模块顶层没有这些名字，
+            // 参考侧不报（`fixtures/declare-enum-value`、`fixtures/kit-arkui-state`）。
             if member
                 .chars()
                 .next()
                 .is_some_and(|c| c.is_ascii_uppercase())
+                && system_module_has_symbol(request, &member) != Some(true)
             {
                 continue;
             }
@@ -9438,7 +9453,10 @@ fn restricted_children_violations(
         };
         let inner = &text[*block_start..*block_end];
         let bytes = inner.as_bytes();
-        let mut index = 0usize;
+        // `block_start` 指在父组件块自己的 `{` 上（`component_blocks` 的 `after.starts_with('{')`
+        // 分支），所以从 1 起扫：从 0 起会把那个 `{` 当成一层嵌套，depth 立刻变成 1，
+        // 整个检查静默失效（`fixtures/ui-restricted-children` 的 10905219 因此丢失）。
+        let mut index = usize::from(inner.starts_with('{'));
         let mut offending = false;
         // 只看父组件块的直接子层级。`List() { ForEach(… (x) => { ListItem() { Text(x) } }) }`
         // 里的 `Text` 在 `ForEach` 的块内，参考侧不拿 `List` 的子组件限制判它
