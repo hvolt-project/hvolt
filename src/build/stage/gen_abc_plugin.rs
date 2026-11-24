@@ -1,25 +1,30 @@
 // process stage: `gen_abc_plugin.js` — the es2abc merge input.
 //
-// The reference records one `ModuleInfo` per source file (its ohm-url, whether it is an ESM
-// record, and its package) and feeds `filesInfo.txt` / `npmEntries.txt` to the es2abc merge;
-// `initAbcEnv(...)` at `gen_abc_plugin.js` builds the environment, `GenAbcPlugin` walks it.
-//
-// hvolt performs the same merge from `crate::build::compile::abc_compile`, which writes both
-// files and invokes es2abc. This module carries the record shapes so the two can be joined
-// without moving that file; nothing here is called yet.
-#![allow(dead_code)] // the merge lives in build/compile/abc_compile.rs today
+// The reference records one `ModuleInfo` per source file and feeds `filesInfo.txt` /
+// `npmEntries.txt` to the es2abc merge. hvolt builds the same table here and
+// `crate::build::compile::abc_compile` renders it with [`render_files_info`]; the row format is
+// the reference's (`path;record;esm;carrier|package|version|source;package;shared;lang`), with
+// the fields the merge actually needs named instead of positional.
+#![allow(dead_code)] // `AbcEnv` and `EntryInfo` carry the reference's shapes; the merge reads them
 
-/// One record of the merge: the file, the record name it is emitted under, its kind and the
-/// package it belongs to.
+/// One row of `filesInfo.txt`.
 pub(crate) struct ModuleInfo {
-    /// `filesInfo.txt` column 1: the expanded `.ts` path.
+    /// Column 1: the expanded `.ts` path.
     pub(crate) ts_path: std::path::PathBuf,
-    /// `filesInfo.txt` column 2: the record name inside `modules.abc`.
+    /// Column 2: the record name inside `modules.abc`.
     pub(crate) record_name: String,
-    /// `is_esm_record`: the module kind column (`esm` for an ESM record).
-    pub(crate) is_esm_record: bool,
-    /// The owning package, or nothing for a file inside the project.
-    pub(crate) package: Option<String>,
+    /// Column 3: the module carrier (`esm`).
+    pub(crate) carrier: String,
+    /// Column 4, before the first `|`: the package the file belongs to.
+    pub(crate) package_name: String,
+    /// Column 4, second field: the package version.
+    pub(crate) version: String,
+    /// Column 4, third field: the package-relative source path.
+    pub(crate) source_rel: String,
+    /// Column 5: the language marker (`ets` for an expanded `.ets`, `ts` for a `.js`).
+    pub(crate) lang: String,
+    /// Column 6: whether the record belongs to a shared package.
+    pub(crate) shared: bool,
 }
 
 /// One `--npm-module-entry-list` entry: a virtual module name and the native stub it maps to.
@@ -35,8 +40,39 @@ pub(crate) struct AbcEnv<'a> {
     pub(crate) es2abc: &'a std::path::Path,
 }
 
-/// `initAbcEnv`: fill the merge environment for one invocation.
-#[allow(clippy::todo)] // the stage is not implemented; the signature is the reference's
-pub(crate) fn init_abc_env(_records: &[ModuleInfo], _entries: &[EntryInfo]) -> String {
-    todo!()
+/// `initAbcEnv`: the environment one merge runs in.
+pub(crate) fn init_abc_env<'a>(
+    ts_root: &'a std::path::Path,
+    output: &'a std::path::Path,
+    es2abc: &'a std::path::Path,
+) -> AbcEnv<'a> {
+    AbcEnv {
+        ts_root,
+        output,
+        es2abc,
+    }
+}
+
+/// The `filesInfo.txt` text for one merge: one row per record, in the order given.
+///
+/// The row format is the reference's — `path;record;esm;a|b|c;package;shared;lang` — which is
+/// what es2abc parses; `fixtures/*/golden/modules.abc` are the merged outputs this table
+/// produces.
+pub(crate) fn render_files_info(records: &[ModuleInfo]) -> String {
+    let mut text = String::new();
+    for record in records {
+        text.push_str(&format!(
+            "{};{};esm;{}|{}|{}|{};{};{};{}\n",
+            record.ts_path.display(),
+            record.record_name,
+            record.carrier,
+            record.package_name,
+            record.version,
+            record.source_rel,
+            record.package_name,
+            record.shared,
+            record.lang
+        ));
+    }
+    text
 }

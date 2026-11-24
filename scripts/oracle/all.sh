@@ -37,6 +37,16 @@ set -- ${ARGS[@]+"${ARGS[@]}"}
 needs_golden() {
   local fixture="$1"
   [ "$REGEN" -eq 1 ] && return 0
+  # 没有 project 目录的 fixture 无法构建（fixtures/rpcid 只有参考侧产出的
+  # rpcid.json/rpcid.sc，fixtures/v2-index 只有 native-hello/resources.index）。
+  [ -d "$fixture/project" ] || return 1
+  # A fixture that declares `expect-build-failure` emits no tree: its golden set is the
+  # diagnostic text, so the presence of `golden/diagnostics.txt` is what says it was harvested
+  # (`fixtures/type-call-arity` carries only that file and a manifest).
+  if [ -f "$fixture/expect-build-failure" ]; then
+    [ -f "$fixture/golden/diagnostics.txt" ] && return 1
+    return 0
+  fi
   [ -f "$fixture/golden/Index.ts" ] || return 0
   [ "$fixture/golden.ts" -nt "$fixture/golden/Index.ts" ] && return 0
   [ "$fixture/input.ets" -nt "$fixture/golden/Index.ts" ] && return 0
@@ -78,6 +88,10 @@ done
 check_one() {
   local name="$1"
   local fixture="$ROOT/fixtures/$name"
+  if [ ! -d "$fixture/project" ]; then
+    echo "SKIP $name (no project)"
+    return 0
+  fi
   local run="$RUN_ROOT/$name"
   mkdir -p "$run"
   # `compare.js` addresses both sides by fixed names inside one directory, so the run directory
@@ -107,6 +121,7 @@ check_one() {
 }
 export ROOT
 export -f check_one
-jobs="${ORACLE_JOBS:-$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4)}"
+# 同 verify.sh：默认 3 并发，避免把共享机器的 CPU 打满。
+jobs="${ORACLE_JOBS:-3}"
 printf '%s\n' "${FIXTURES[@]}" | xargs -P "$jobs" -I{} bash -c 'check_one "$@"' _ {} || fail=1
 exit $fail

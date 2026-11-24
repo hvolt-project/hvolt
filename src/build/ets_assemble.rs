@@ -66,6 +66,1027 @@ fn es2abc_under(ark: &std::path::Path) -> Option<PathBuf> {
 /// An SDK ships two: the OpenHarmony one and the HMS one. Some kits exist in only one of
 /// them (`@kit.DeskTopExtensionKit` is HMS-only), so picking a single directory silently
 /// drops those kits and leaves their imports unresolvable on the device.
+/// Publishes the names of the system modules the installed SDK declares, for the type pass.
+///
+/// The reference resolves `@ohos.*` against the SDK's `api` directories and reports a request it
+/// cannot find there (`process_system_module.js`). The same list is what this publishes; when no
+/// declaration files are found the set stays unpublished, and the checker then claims nothing —
+/// an SDK laid out differently must not turn every system import into an error.
+fn publish_system_modules() {
+    use std::collections::HashSet;
+    let Some(sdk) = crate::sdk::manage::sdk_root() else {
+        return;
+    };
+    let mut modules: HashSet<String> = HashSet::new();
+    let Ok(entries) = std::fs::read_dir(&sdk) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let root = entry.path();
+        for candidate in [
+            root.join("ets/api"),
+            root.join("openharmony/ets/api"),
+            root.join("hms/ets/api"),
+            // `@kit.*` 聚合模块的声明在 `ets/kits/` 下（`@kit.ArkTS.d.ts`）；不扫这一层，
+            // 具名导入的成员就没法按模块声明的名字判定
+            // （`fixtures/system-module-named-import`）。
+            root.join("ets/kits"),
+            root.join("openharmony/ets/kits"),
+            root.join("hms/ets/kits"),
+        ] {
+            let Ok(files) = std::fs::read_dir(&candidate) else {
+                continue;
+            };
+            for file in files.flatten() {
+                let name = file.file_name();
+                let Some(name) = name.to_str() else { continue };
+                // `@hms.core.map.MapComponent` is declared as `.d.ets`, the ArkUI-shaped
+                // declaration file; both suffixes name a module.
+                let Some(module) = name
+                    .strip_suffix(".d.ts")
+                    .or_else(|| name.strip_suffix(".d.ets"))
+                else {
+                    continue;
+                };
+                if module.starts_with('@') {
+                    modules.insert(module.to_string());
+                }
+            }
+        }
+    }
+    if modules.is_empty() {
+        return;
+    }
+    // The names each of those modules declares, read from its declaration file: a named import
+    // the file does not have is what `process_system_module.js` reports
+    // (`fixtures/ohos-missing-symbol`). `None` marks a module whose file re-exports everything.
+    let mut symbols: std::collections::HashMap<String, Option<std::collections::HashSet<String>>> =
+        std::collections::HashMap::new();
+    let Ok(entries) = std::fs::read_dir(&sdk) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let root = entry.path();
+        for candidate in [
+            root.join("ets/api"),
+            root.join("openharmony/ets/api"),
+            root.join("hms/ets/api"),
+            // `@kit.*` 聚合模块的声明在 `ets/kits/` 下（`@kit.ArkTS.d.ts`）；不扫这一层，
+            // 具名导入的成员就没法按模块声明的名字判定
+            // （`fixtures/system-module-named-import`）。
+            root.join("ets/kits"),
+            root.join("openharmony/ets/kits"),
+            root.join("hms/ets/kits"),
+        ] {
+            let Ok(files) = std::fs::read_dir(&candidate) else {
+                continue;
+            };
+            for file in files.flatten() {
+                let name = file.file_name();
+                let Some(name) = name.to_str() else { continue };
+                let Some(module) = name
+                    .strip_suffix(".d.ts")
+                    .or_else(|| name.strip_suffix(".d.ets"))
+                else {
+                    continue;
+                };
+                if !modules.contains(module) || symbols.contains_key(module) {
+                    continue;
+                }
+                let Ok(text) = std::fs::read_to_string(file.path()) else {
+                    continue;
+                };
+                symbols.insert(module.to_string(), declared_names(&text));
+            }
+        }
+    }
+    if !symbols.is_empty() {
+        crate::build::stage::ets_checker::set_system_module_symbols(symbols.clone());
+    }
+    // `typeof <module>` only carries the module's *values*: an `interface` sits in the type space
+    // and a member read on the module answers `Property 'X' does not exist on type 'typeof m'.`
+    // (`fixtures/system-module-member`, where `util.AutoFinalizer` is an interface).
+    let mut values: std::collections::HashMap<String, std::collections::HashSet<String>> =
+        std::collections::HashMap::new();
+    let mut links: Vec<(String, String)> = Vec::new();
+    for entry in std::fs::read_dir(&sdk).into_iter().flatten().flatten() {
+        let root = entry.path();
+        for candidate in [
+            root.join("ets/api"),
+            root.join("openharmony/ets/api"),
+            root.join("hms/ets/api"),
+            // `@kit.*` 聚合模块的声明在 `ets/kits/` 下（`@kit.ArkTS.d.ts`）；不扫这一层，
+            // 具名导入的成员就没法按模块声明的名字判定
+            // （`fixtures/system-module-named-import`）。
+            root.join("ets/kits"),
+            root.join("openharmony/ets/kits"),
+            root.join("hms/ets/kits"),
+        ] {
+            let Ok(files) = std::fs::read_dir(&candidate) else {
+                continue;
+            };
+            for file in files.flatten() {
+                let name = file.file_name();
+                let Some(name) = name.to_str() else { continue };
+                let Some(module) = name
+                    .strip_suffix(".d.ts")
+                    .or_else(|| name.strip_suffix(".d.ets"))
+                else {
+                    continue;
+                };
+                if !modules.contains(module) || values.contains_key(module) {
+                    continue;
+                }
+                let Ok(text) = std::fs::read_to_string(file.path()) else {
+                    continue;
+                };
+                if let Some(names) = declared_value_names(&text) {
+                    values.insert(module.to_string(), names);
+                }
+                // 聚合模块（`@kit.CoreFileKit`）只是重导出：`export { default as fs } from
+                // '@ohos.file.fs'`。记下它指向的模块，稍后把对方的声明名并进来，否则
+                // `fs.openSync` 会被判成不存在（`fixtures/configuration-page` 的 1209:21）。
+                for line in text.lines() {
+                    let Some(at) = line.find("from '") else {
+                        continue;
+                    };
+                    let rest = &line[at + "from '".len()..];
+                    let Some(end) = rest.find('\'') else {
+                        continue;
+                    };
+                    let target = &rest[..end];
+                    if target.starts_with('@') {
+                        links.push((module.to_string(), target.to_string()));
+                    }
+                }
+            }
+        }
+    }
+    // 把聚合模块指向的声明名并进它自己的集合（两遍：先收直连的，再收一层传递的）。
+    for _ in 0..2 {
+        let snapshot = values.clone();
+        for (kit, target) in &links {
+            if let Some(names) = snapshot.get(target) {
+                values
+                    .entry(kit.clone())
+                    .or_default()
+                    .extend(names.iter().cloned());
+            }
+        }
+    }
+    if std::env::var("HVOLT_DEBUG_VALUES").is_ok() {
+        eprintln!(
+            "DEBUG values: modules={} values={} util={:?} has_fs={:?} fs_opensync={:?} has_autofinalizer={:?}",
+            modules.len(),
+            values.len(),
+            values.contains_key("@ohos.util"),
+            values.get("@ohos.file.fs").map(|set| set.len()),
+            values
+                .get("@ohos.file.fs")
+                .map(|set| set.contains("openSync")),
+            values
+                .get("@ohos.util")
+                .map(|names| names.contains("AutoFinalizer"))
+        );
+    }
+    if !values.is_empty() {
+        crate::build::stage::ets_checker::set_system_module_values(values);
+    }
+    crate::build::stage::ets_checker::set_system_modules(modules);
+    // `@kit.*` 的每个成员实际来自哪个模块：kit 文件是 `import util from '@ohos.util'` 的
+    // 聚合，成员判定要按源模块的名字来。
+    let mut kit_members: std::collections::HashMap<
+        String,
+        std::collections::HashMap<String, String>,
+    > = std::collections::HashMap::new();
+    for entry in std::fs::read_dir(&sdk).into_iter().flatten().flatten() {
+        let root = entry.path();
+        for candidate in [
+            root.join("ets/kits"),
+            root.join("openharmony/ets/kits"),
+            root.join("hms/ets/kits"),
+        ] {
+            let Ok(files) = std::fs::read_dir(&candidate) else {
+                continue;
+            };
+            for file in files.flatten() {
+                let name = file.file_name();
+                let Some(name) = name.to_str() else { continue };
+                let Some(kit) = name.strip_suffix(".d.ts") else {
+                    continue;
+                };
+                if !kit.starts_with('@') {
+                    continue;
+                }
+                let Ok(text) = std::fs::read_to_string(file.path()) else {
+                    continue;
+                };
+                let mut members: std::collections::HashMap<String, String> =
+                    std::collections::HashMap::new();
+                for line in text.lines() {
+                    let trimmed = line.trim_start();
+                    let Some(rest) = trimmed.strip_prefix("import ") else {
+                        continue;
+                    };
+                    let Some(from_at) = rest.find(" from ") else {
+                        continue;
+                    };
+                    let local = rest[..from_at].trim();
+                    if local.is_empty() || local.contains('{') || local.contains('*') {
+                        continue;
+                    }
+                    let specifier = rest[from_at + " from ".len()..]
+                        .trim()
+                        .trim_matches(|c| c == '"' || c == '\'' || c == ';')
+                        .to_string();
+                    if specifier.starts_with('@') {
+                        members.insert(local.to_string(), specifier);
+                    }
+                }
+                if !members.is_empty() {
+                    kit_members.insert(kit.to_string(), members);
+                }
+            }
+        }
+    }
+    if !kit_members.is_empty() {
+        crate::build::stage::ets_checker::set_kit_members(kit_members);
+    }
+}
+
+/// Names the installed SDK declares in the global scope, for the redeclaration rule.
+///
+/// The reference reports `Cannot redeclare block-scoped variable 'Counter'.` when a file declares a
+/// class or interface the SDK already has (`fixtures/type-redeclare`). The names are read from the
+/// `declare class` / `declare interface` heads of the SDK's `ets/api/*.d.ts` and
+/// `ets/component/*.d.ts`; when no such files are found the set stays unpublished and the checker
+/// claims nothing.
+pub fn publish_global_declarations() {
+    use std::collections::HashSet;
+    let Some(sdk) = crate::sdk::manage::sdk_root() else {
+        return;
+    };
+    let mut names: HashSet<String> = HashSet::new();
+    let Ok(entries) = std::fs::read_dir(&sdk) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let root = entry.path();
+        for base in [root.join("ets"), root.join("openharmony/ets")] {
+            // Both folders: a component declares its global name as `declare const Counter:
+            // CounterInterface`, and a file that declares a class of that name is refused as a
+            // redeclaration (`fixtures/type-redeclare`). An *interface* of a component's name is a
+            // different case — `arkts-unique-names` answers it (`fixtures/arkts-unique-names`) —
+            // so the rule that reads this set judges classes only.
+            for folder in [base.join("api"), base.join("component")] {
+                let Ok(files) = std::fs::read_dir(&folder) else {
+                    continue;
+                };
+                for file in files.flatten() {
+                    let path = file.path();
+                    let Some(name) = path.file_name().and_then(|it| it.to_str()) else {
+                        continue;
+                    };
+                    if !name.ends_with(".d.ts") {
+                        continue;
+                    }
+                    let Ok(text) = std::fs::read_to_string(&path) else {
+                        continue;
+                    };
+                    for line in text.lines() {
+                        // Only the file's own top level: `class Holder` nested inside a
+                        // `declare namespace contact { … }` is namespace-scoped and does not
+                        // collide with a page's class of that name
+                        // (`fixtures/type-class-member` measures a page declaring `Holder`).
+                        if line.len() != line.trim_start().len() {
+                            continue;
+                        }
+                        let line = line.trim_start();
+                        let line = line.strip_prefix("export ").unwrap_or(line);
+                        let line = line.strip_prefix("declare ").unwrap_or(line);
+                        // Only a `class` declaration (and the `declare const X: XInterface`
+                        // shape ArkUI components use) collides with a page's class: an SDK
+                        // `interface Point` does not, and counting it made
+                        // `fixtures/redeclare-sdk-builtin-name` report a redeclaration the
+                        // reference does not.
+                        let Some(rest) = line
+                            .strip_prefix("class ")
+                            .or_else(|| line.strip_prefix("const "))
+                            .or_else(|| line.strip_prefix("function "))
+                            .or_else(|| line.strip_prefix("enum "))
+                        else {
+                            continue;
+                        };
+                        let declared: String = rest
+                            .chars()
+                            .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+                            .collect();
+                        if !declared.is_empty() {
+                            names.insert(declared);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if names.is_empty() {
+        return;
+    }
+    crate::build::stage::ets_checker::set_global_declarations(names);
+}
+
+/// Members of the primitive types, from the TypeScript standard library the loader ships.
+///
+/// `Property 'notARealMethod' does not exist on type 'string'.` is the type checker's answer for a
+/// member the primitive does not have (measured 7:24 of `fixtures/type-primitive-member`), so the
+/// set it accepts comes from the same files the compiler reads: every `interface String`,
+/// `interface Number` and `interface Boolean` in `<ets>/build-tools/ets-loader/node_modules/
+/// typescript/lib/lib.es*.d.ts`.
+/// 发布本模块的资源名表：`$r('app.<kind>.<name>')` 与 `$rawfile('<name>')` 的缺失诊断要靠它
+/// （参考侧 10903329 / 10904333）。
+///
+/// 名字来自模块的 `resources/<kind>/` 目录：JSON 资源取文件名，`rawfile` 取相对路径。
+pub fn publish_resource_names(project_dir: &Path, member: &str) {
+    use std::collections::HashSet;
+    let root = project_dir.join(member).join("resources");
+    let root = if root.is_dir() {
+        root
+    } else {
+        project_dir.join("resources")
+    };
+    let mut names: HashSet<(String, String)> = HashSet::new();
+    let mut rawfiles: HashSet<String> = HashSet::new();
+    // 资源按 qualifier 分层：`resources/base/element/string.json`。只有文件名是资源名的地方
+    // 才取 json 条目里的 `name`，所以整棵树都要走一遍。
+    collect_resource_names(&root, &mut names, &mut rawfiles);
+    crate::build::stage::ets_checker::set_resource_names(names, rawfiles);
+}
+
+fn collect_resource_names(
+    dir: &Path,
+    names: &mut std::collections::HashSet<(String, String)>,
+    rawfiles: &mut std::collections::HashSet<String>,
+) {
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        let file_name = entry.file_name().to_string_lossy().to_string();
+        if path.is_dir() {
+            match file_name.as_str() {
+                // `rawfile/` 下是原样拷进包的文件。
+                "rawfile" => collect_rawfiles(&path, &path, rawfiles),
+                // `media/` 下没有清单：文件名（去掉扩展名）就是资源名。
+                "media" => {
+                    if let Ok(files) = std::fs::read_dir(&path) {
+                        for file in files.flatten() {
+                            let name = file.file_name().to_string_lossy().to_string();
+                            if let Some((stem, _)) = name.rsplit_once('.') {
+                                names.insert(("media".to_string(), stem.to_string()));
+                            }
+                        }
+                    }
+                }
+                _ => collect_resource_names(&path, names, rawfiles),
+            }
+            continue;
+        }
+        if !file_name.ends_with(".json") {
+            continue;
+        }
+        let Ok(text) = std::fs::read_to_string(&path) else {
+            continue;
+        };
+        let Ok(doc) = serde_json::from_str::<serde_json::Value>(&text) else {
+            continue;
+        };
+        for (kind, entries) in doc.as_object().into_iter().flatten() {
+            for entry in entries.as_array().into_iter().flatten() {
+                if let Some(found) = entry.get("name").and_then(|value| value.as_str()) {
+                    names.insert((kind.clone(), found.to_string()));
+                }
+            }
+        }
+    }
+}
+
+/// `rawfile` 下的相对路径。
+fn collect_rawfiles(root: &Path, dir: &Path, out: &mut std::collections::HashSet<String>) {
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            collect_rawfiles(root, &path, out);
+            continue;
+        }
+        if let Ok(rel) = path.strip_prefix(root) {
+            out.insert(rel.to_string_lossy().replace('\\', "/"));
+        }
+    }
+}
+
+/// 发布 `CustomDialogControllerOptions` 的合法键：SDK 的 `component/custom_dialog_controller.d.ts`
+/// 里那个接口的成员名。参考侧对未知名报
+/// `Argument of type '{ … }' is not assignable to parameter of type 'CustomDialogControllerOptions'.`
+/// 收集整棵树里 `@Extend(...)` 的函数名（跨文件可见）。
+pub fn publish_extend_styles(root: &Path) {
+    let mut names: std::collections::HashSet<String> = Default::default();
+    collect_extend_styles(root, &mut names);
+    crate::build::stage::ets_checker::set_extend_styles(names);
+}
+
+fn collect_extend_styles(dir: &Path, out: &mut std::collections::HashSet<String>) {
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            collect_extend_styles(&path, out);
+            continue;
+        }
+        let is_source = path
+            .extension()
+            .and_then(|e| e.to_str())
+            .is_some_and(|e| e == "ets" || e == "ts");
+        if !is_source {
+            continue;
+        }
+        let Ok(text) = std::fs::read_to_string(&path) else {
+            continue;
+        };
+        let mut pending = false;
+        for line in text.lines() {
+            let trimmed = line.trim_start();
+            let mut rest = None;
+            if let Some(after) = trimmed.strip_prefix("@Extend(") {
+                let tail = after.find(')').map(|i| &after[i + 1..]).unwrap_or("");
+                rest = Some(tail.to_string());
+            } else if pending {
+                rest = Some(trimmed.to_string());
+            }
+            let Some(rest) = rest else {
+                pending = false;
+                continue;
+            };
+            let tail = rest.trim_start();
+            if let Some(after) = tail.strip_prefix("function ") {
+                let name: String = after
+                    .chars()
+                    .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+                    .collect();
+                if !name.is_empty() {
+                    out.insert(name);
+                }
+                pending = false;
+            } else {
+                // `@Extend(...)` 独占一行时，函数名在下一行。
+                pending = tail.is_empty();
+            }
+        }
+    }
+}
+
+pub fn publish_dialog_options() {
+    use std::collections::HashSet;
+    let Some(sdk) = crate::sdk::manage::sdk_root() else {
+        return;
+    };
+    let mut names: HashSet<String> = HashSet::new();
+    let Ok(entries) = std::fs::read_dir(&sdk) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        for base in [
+            entry.path().join("openharmony/ets/component"),
+            entry.path().join("ets/component"),
+        ] {
+            let Ok(text) = std::fs::read_to_string(base.join("custom_dialog_controller.d.ts"))
+            else {
+                continue;
+            };
+            let mut inside = false;
+            for line in text.lines() {
+                let trimmed = line.trim();
+                // 声明行是 `declare interface CustomDialogControllerOptions {`。
+                if trimmed.contains("interface CustomDialogControllerOptions") {
+                    inside = true;
+                    continue;
+                }
+                if inside {
+                    if trimmed == "}" {
+                        break;
+                    }
+                    if let Some(colon) = trimmed.find(':') {
+                        let name = trimmed[..colon].trim().trim_end_matches('?').trim();
+                        if !name.is_empty() && !name.starts_with('*') && !name.starts_with('/') {
+                            names.insert(name.to_string());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if !names.is_empty() {
+        crate::build::stage::ets_checker::set_dialog_options(names);
+    }
+}
+
+pub fn publish_primitive_members() {
+    use std::collections::{HashMap, HashSet};
+    let Some(sdk) = crate::sdk::manage::sdk_root() else {
+        return;
+    };
+    let mut members: HashMap<String, HashSet<String>> = HashMap::new();
+    let Ok(entries) = std::fs::read_dir(&sdk) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let root = entry.path();
+        for base in [root.join("ets"), root.join("openharmony/ets")] {
+            let lib = base.join("build-tools/ets-loader/node_modules/typescript/lib");
+            let Ok(files) = std::fs::read_dir(&lib) else {
+                continue;
+            };
+            for file in files.flatten() {
+                let name = file.file_name();
+                let Some(name) = name.to_str() else { continue };
+                if !name.starts_with("lib.es") || !name.ends_with(".d.ts") {
+                    continue;
+                }
+                let Ok(text) = std::fs::read_to_string(file.path()) else {
+                    continue;
+                };
+                for (interface, kind) in [
+                    ("interface String {", "string"),
+                    ("interface Number {", "number"),
+                    ("interface Boolean {", "boolean"),
+                ] {
+                    let Some(start) = text.find(interface) else {
+                        continue;
+                    };
+                    let rest = &text[start + interface.len()..];
+                    let end = rest.find("\n}").unwrap_or(rest.len());
+                    let set = members.entry(kind.to_string()).or_default();
+                    for line in rest[..end].lines() {
+                        let trimmed = line.trim_start();
+                        let trimmed = trimmed.strip_prefix("readonly ").unwrap_or(trimmed);
+                        let member: String = trimmed
+                            .chars()
+                            .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+                            .collect();
+                        if member.is_empty() {
+                            continue;
+                        }
+                        let after = &trimmed[member.len()..];
+                        if after.starts_with('(')
+                            || after.starts_with(':')
+                            || after.starts_with('?')
+                        {
+                            set.insert(member);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if members.is_empty() {
+        return;
+    }
+    crate::build::stage::ets_checker::set_primitive_members(members);
+}
+
+/// Reads the ArkUI attribute names the reference accepts, for the component attribute check.
+///
+/// Two sources, both from the installed SDK: `components/*.json` gives each component's own
+/// attributes (`Text` → `fontColor`, `fontSize`, …), and `component/common.d.ts` gives the ones
+/// every component inherits (`CommonMethod`: `width`, `height`, `onClick`, …). Measured message:
+/// `Property 'notARealAttribute' does not exist on type 'TextAttribute'.`
+/// The components the SDK declares outside the ArkUI component metadata: `@Component struct`s under
+/// `hms/ets/api/*.d.ets` (`external_component_map`). Each carries its non-method members with the
+/// type text the reference prints, so a parameter literal can be judged against it.
+pub fn publish_external_components() {
+    use std::collections::HashMap;
+    let Some(sdk) = crate::sdk::manage::sdk_root() else {
+        return;
+    };
+    let mut table: HashMap<String, Vec<(String, String)>> = HashMap::new();
+    let Ok(entries) = std::fs::read_dir(&sdk) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        for base in [
+            entry.path().join("hms/ets/api"),
+            entry.path().join("ets/api"),
+        ] {
+            let Ok(files) = std::fs::read_dir(&base) else {
+                continue;
+            };
+            for file in files.flatten() {
+                let name = file.file_name();
+                let Some(name) = name.to_str() else { continue };
+                if !(name.ends_with(".d.ets") || name.ends_with(".d.ts")) {
+                    continue;
+                }
+                let Ok(text) = std::fs::read_to_string(file.path()) else {
+                    continue;
+                };
+                for (component, members) in external_structs(&text) {
+                    table.entry(component).or_insert(members);
+                }
+            }
+        }
+    }
+    if !table.is_empty() {
+        crate::build::stage::ets_checker::set_external_components(table);
+    }
+}
+
+/// Every `@Component … struct Name { … }` in one declaration file, with its non-method members.
+fn external_structs(text: &str) -> Vec<(String, Vec<(String, String)>)> {
+    let mut found = Vec::new();
+    let lines: Vec<&str> = text.lines().collect();
+    let mut index = 0usize;
+    while index < lines.len() {
+        let line = lines[index].trim();
+        if line.starts_with("@Component") && index + 1 < lines.len() {
+            let next = lines[index + 1].trim();
+            if let Some(rest) = next.strip_prefix("export struct ") {
+                let name: String = rest
+                    .chars()
+                    .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+                    .collect();
+                if !name.is_empty() {
+                    let mut members: Vec<(String, String)> = Vec::new();
+                    let mut depth = 0usize;
+                    let mut cursor = index + 1;
+                    while cursor < lines.len() {
+                        let inner = lines[cursor].trim();
+                        depth += inner.matches('{').count();
+                        depth = depth.saturating_sub(inner.matches('}').count());
+                        if cursor > index + 1 && depth == 0 {
+                            break;
+                        }
+                        if depth == 1 {
+                            if let Some((member, spelling)) = struct_member(inner) {
+                                members.push((member, spelling));
+                            }
+                        }
+                        cursor += 1;
+                    }
+                    found.push((name, members));
+                    index = cursor;
+                    continue;
+                }
+            }
+        }
+        index += 1;
+    }
+    found
+}
+
+/// One `name: Type;` member line, reduced to the reference's spelling: optional, namespace
+/// prefixes dropped, `AsyncCallback<T>` widened to `AsyncCallback<T, void>`.
+fn struct_member(line: &str) -> Option<(String, String)> {
+    if line.starts_with('@')
+        || line.starts_with("build")
+        || line.starts_with('/')
+        || line.starts_with('*')
+        || line.is_empty()
+    {
+        return None;
+    }
+    let colon = line.find(':')?;
+    let name = line[..colon].trim();
+    if name.is_empty() || name.contains('(') {
+        return None;
+    }
+    let mut spelling = line[colon + 1..]
+        .trim()
+        .trim_end_matches(';')
+        .trim()
+        .to_string();
+    if spelling.contains('(') {
+        return None;
+    }
+    if let Some(open) = spelling.find('<') {
+        let head = spelling[..open].to_string();
+        let inner = spelling[open + 1..].trim_end_matches('>').to_string();
+        let inner = inner.rsplit('.').next().unwrap_or(&inner).to_string();
+        spelling = if head == "AsyncCallback" && !inner.contains(',') {
+            format!("{head}<{inner}, void>")
+        } else {
+            format!("{head}<{inner}>")
+        };
+    } else if let Some((_, tail)) = spelling.rsplit_once('.') {
+        spelling = tail.to_string();
+    }
+    Some((name.to_string(), spelling))
+}
+
+pub fn publish_component_attributes() {
+    use std::collections::{HashMap, HashSet};
+    let Some(sdk) = crate::sdk::manage::sdk_root() else {
+        return;
+    };
+    let mut attributes: HashMap<String, HashSet<String>> = HashMap::new();
+    let mut parents: HashMap<String, Vec<String>> = HashMap::new();
+    let mut children: HashMap<String, Vec<String>> = HashMap::new();
+    let mut common: HashSet<String> = HashSet::new();
+    let Ok(entries) = std::fs::read_dir(&sdk) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let root = entry.path();
+        for base in [root.join("ets"), root.join("openharmony/ets")] {
+            let components = base.join("build-tools/ets-loader/components");
+            if let Ok(files) = std::fs::read_dir(&components) {
+                for file in files.flatten() {
+                    let Ok(text) = std::fs::read_to_string(file.path()) else {
+                        continue;
+                    };
+                    let Ok(value) = serde_json::from_str::<serde_json::Value>(&text) else {
+                        continue;
+                    };
+                    let Some(name) = value.get("name").and_then(|name| name.as_str()) else {
+                        continue;
+                    };
+                    if let Some(list) = value.get("children").and_then(|list| list.as_array()) {
+                        let allowed: Vec<String> = list
+                            .iter()
+                            .filter_map(|child| child.as_str())
+                            .map(|child| child.to_string())
+                            .collect();
+                        if !allowed.is_empty() {
+                            children.insert(name.to_string(), allowed);
+                        }
+                    }
+                    if let Some(list) = value.get("parents").and_then(|list| list.as_array()) {
+                        let allowed: Vec<String> = list
+                            .iter()
+                            .filter_map(|parent| parent.as_str())
+                            .map(|parent| parent.to_string())
+                            .collect();
+                        if !allowed.is_empty() {
+                            parents.insert(name.to_string(), allowed);
+                        }
+                    }
+                    let set = attributes.entry(name.to_string()).or_default();
+                    for attribute in value
+                        .get("attrs")
+                        .and_then(|attrs| attrs.as_array())
+                        .into_iter()
+                        .flatten()
+                    {
+                        if let Some(attribute) = attribute.as_str() {
+                            set.insert(attribute.to_string());
+                        }
+                    }
+                }
+            }
+            if let Ok(text) = std::fs::read_to_string(base.join("component/common.d.ts")) {
+                if let Some(start) = text.find("declare class CommonMethod") {
+                    let body = &text[start..];
+                    let end = body.find("\n}").unwrap_or(body.len());
+                    for line in body[..end].lines() {
+                        let trimmed = line.trim_start();
+                        let name: String = trimmed
+                            .chars()
+                            .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+                            .collect();
+                        if name.is_empty() || !trimmed[name.len()..].starts_with('(') {
+                            continue;
+                        }
+                        common.insert(name);
+                    }
+                }
+            }
+        }
+    }
+    if attributes.is_empty() || common.is_empty() {
+        return;
+    }
+    crate::build::stage::ets_checker::set_component_attributes(
+        attributes, common, parents, children,
+    );
+}
+
+/// Top-level names a declaration file introduces, or `None` when it re-exports everything
+/// (`export *`), in which case nothing can be called missing.
+/// The names a declaration file carries in *value* position: what `typeof <module>` has.
+///
+/// `declared_names` also counts `interface`/`type`, which live in the type space only; a member
+/// read on the imported namespace finds just these.
+fn declared_value_names(text: &str) -> Option<std::collections::HashSet<String>> {
+    // `export *` 的模块仍要收本文件自己声明的名字：`@ohos.file.fs` 既有 `export *` 又有
+    // `function openSync(…)`、`enum OpenMode`，整份放弃会把它们全判成不存在
+    // （`fixtures/configuration-page` 的 1209:21、1210:10）。re-export 来的名字收不到。
+    let _re_exports_everything = text.contains("export *");
+    let mut names = std::collections::HashSet::new();
+    // 聚合模块（`@kit.CoreFileKit`）只重导出：`export { openSync, OpenMode } from '@ohos.file.fs'`。
+    // 这类模块的 d.ts 里没有自己的声明，只查本文件会把 `fs.openSync` 判成不存在
+    // （`fixtures/configuration-page` 的 1209:21：`fs` 来自 `@kit.CoreFileKit`）。
+    for line in text.lines() {
+        let trimmed = line.trim_start();
+        let Some(rest) = trimmed.strip_prefix("export {") else {
+            continue;
+        };
+        let Some(close) = rest.find('}') else {
+            continue;
+        };
+        for part in rest[..close].split(',') {
+            let part = part.trim();
+            if part.is_empty() {
+                continue;
+            }
+            let exported = match part.rsplit_once(" as ") {
+                Some((_, alias)) => alias.trim(),
+                None => part,
+            };
+            if !exported.is_empty() {
+                names.insert(exported.to_string());
+            }
+        }
+    }
+    // 多行 `declare namespace fs { … }` 体里的成员也要收：`fs.copy` 在 `@ohos.file.fs` 里
+    // 就是这种多行形式，只取单行体会漏（`fixtures/configuration-page` 的 1290:10）。
+    for keyword in ["function ", "const ", "let ", "var ", "class ", "enum "] {
+        let mut rest = text;
+        while let Some(at) = rest.find(keyword) {
+            rest = &rest[at + keyword.len()..];
+            let member: String = rest
+                .chars()
+                .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+                .collect();
+            if !member.is_empty() {
+                names.insert(member);
+            }
+        }
+    }
+    // `declare namespace fs { function copy(…) … }`：模块的导出面是 `fs` 这个命名空间，
+    // `fs.copy` 的成员写在命名空间体内，只收顶层名会把它们全判成不存在
+    // （`fixtures/configuration-page` 的 1290:10）。
+    for line in text.lines() {
+        let trimmed = line.trim_start();
+        let body = trimmed
+            .strip_prefix("export declare namespace ")
+            .or_else(|| trimmed.strip_prefix("declare namespace "))
+            .or_else(|| trimmed.strip_prefix("export namespace "))
+            .or_else(|| trimmed.strip_prefix("namespace "));
+        let Some(body) = body else {
+            continue;
+        };
+        let name: String = body
+            .chars()
+            .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+            .collect();
+        let Some(open) = body.find('{') else {
+            continue;
+        };
+        if name.is_empty() {
+            continue;
+        }
+        // 只在单行体（`namespace fs { function copy(): void }`）上取；多行体的成员在同文件
+        // 里已有顶层 `declare` 形式。
+        let inner = &body[open + 1..];
+        let inner = inner.split('}').next().unwrap_or("");
+        for keyword in ["function ", "const ", "let ", "var ", "class ", "enum "] {
+            let mut rest = inner;
+            while let Some(at) = rest.find(keyword) {
+                rest = &rest[at + keyword.len()..];
+                let member: String = rest
+                    .chars()
+                    .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+                    .collect();
+                if !member.is_empty() {
+                    names.insert(member);
+                }
+            }
+        }
+    }
+    for line in text.lines() {
+        let line = line.trim_start();
+        let line = line.strip_prefix("export ").unwrap_or(line);
+        let line = line.strip_prefix("declare ").unwrap_or(line);
+        let line = line.strip_prefix("default ").unwrap_or(line);
+        let line = line.strip_prefix("abstract ").unwrap_or(line);
+        for keyword in [
+            "class ",
+            "function ",
+            "const ",
+            "let ",
+            "var ",
+            "enum ",
+            "namespace ",
+            "module ",
+            "struct ",
+        ] {
+            let Some(rest) = line.strip_prefix(keyword) else {
+                continue;
+            };
+            let name: String = rest
+                .chars()
+                .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+                .collect();
+            if !name.is_empty() {
+                names.insert(name);
+            }
+            break;
+        }
+    }
+    Some(names)
+}
+
+/// `export declare function f(...): T;` 的返回类型表：`f` → `T`（原文，去首尾空白）。
+///
+/// 只读声明文件：带实现的函数由 `ets_checker` 自己的签名表覆盖。
+fn declared_returns(text: &str) -> Vec<(String, String)> {
+    let mut out = Vec::new();
+    for line in text.lines() {
+        let line = line.trim_start();
+        let line = line.strip_prefix("export ").unwrap_or(line);
+        let line = line.strip_prefix("declare ").unwrap_or(line);
+        let Some(rest) = line.strip_prefix("function ") else {
+            continue;
+        };
+        let Some(open) = rest.find('(') else {
+            continue;
+        };
+        let name = rest[..open].trim().to_string();
+        let Some(close) = rest.rfind("):") else {
+            continue;
+        };
+        let ty = rest[close + 2..]
+            .trim()
+            .trim_end_matches(';')
+            .trim()
+            .to_string();
+        if !name.is_empty() && !ty.is_empty() {
+            out.push((name, ty));
+        }
+    }
+    out
+}
+
+fn declared_names(text: &str) -> Option<std::collections::HashSet<String>> {
+    if text.contains("export *") {
+        return None;
+    }
+    let mut names = std::collections::HashSet::new();
+    for line in text.lines() {
+        let line = line.trim_start();
+        let line = line.strip_prefix("export ").unwrap_or(line);
+        let line = line.strip_prefix("declare ").unwrap_or(line);
+        let line = line.strip_prefix("default ").unwrap_or(line);
+        let line = line.strip_prefix("abstract ").unwrap_or(line);
+        for keyword in [
+            "class ",
+            "interface ",
+            "function ",
+            "const ",
+            "let ",
+            "var ",
+            "type ",
+            "enum ",
+            "namespace ",
+            "module ",
+            // `@Component export struct MapComponent { … }` is how an ArkUI-shaped module
+            // declares a component (`fixtures/hms-component-params`).
+            "struct ",
+        ] {
+            let Some(rest) = line.strip_prefix(keyword) else {
+                continue;
+            };
+            let name: String = rest
+                .chars()
+                .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '$')
+                .collect();
+            if !name.is_empty() {
+                names.insert(name);
+            }
+            break;
+        }
+        // `export { A, B as C };`
+        if let Some(rest) = line.strip_prefix('{') {
+            for part in rest.split('}').next().unwrap_or_default().split(',') {
+                let part = part.trim();
+                let name = part.rsplit(" as ").next().unwrap_or(part).trim();
+                if !name.is_empty()
+                    && name
+                        .chars()
+                        .all(|c| c.is_alphanumeric() || c == '_' || c == '$')
+                {
+                    names.insert(name.to_string());
+                }
+            }
+        }
+    }
+    Some(names)
+}
+
 pub fn sdk_kit_configs() -> Result<Vec<PathBuf>, String> {
     let sdk = crate::sdk::manage::sdk_root().ok_or_else(|| "no SDK root resolved".to_string())?;
     let mut dirs: Vec<PathBuf> = Vec::new();
@@ -212,6 +1233,12 @@ pub fn assemble_packages(
         debug,
     } = *opts;
     let kits = load_kit_configs(kit_configs_dir).unwrap_or_default();
+    publish_system_modules();
+    publish_component_attributes();
+    publish_external_components();
+    publish_primitive_members();
+    publish_dialog_options();
+    publish_global_declarations();
     // `$r('app.<kind>.<name>')` has to become the object literal the runtime expects: left
     // as a call it resolves against the system table only, and an app resource comes back as
     // an invalid id (`getStringSync` → 401).
@@ -566,6 +1593,10 @@ pub fn assemble_packages(
             );
             let src =
                 std::fs::read_to_string(f).map_err(|e| format!("read {}: {e}", f.display()))?;
+            // Judged on the source the project wrote, not on the lowered text: the diagnostic
+            // carries a line and a column the reader resolves against their own file, and
+            // lowering moves both (`fixtures/type-error` pins the positions).
+            check_types(rel, &src, f.parent());
             if is_shared_module(&src) {
                 shared.insert(dest.clone());
             }
@@ -595,7 +1626,7 @@ pub fn assemble_packages(
                 {
                     let lowered = crate::build::lower::ets_transpile::transpile(&src, &opts)
                         .map_err(|e| format!("{}: {e}", f.display()))?;
-                    check_lowered(rel, &lowered);
+                    check_lowered(rel, &src, &lowered);
                     lowered
                 }
             } else {
@@ -606,7 +1637,7 @@ pub fn assemble_packages(
                 {
                     let lowered = crate::build::lower::ets_plain::lower(&src, &kits)
                         .map_err(|e| format!("{}: {e}", f.display()))?;
-                    check_lowered(rel, &lowered);
+                    check_lowered(rel, &src, &lowered);
                     lowered
                 }
             };
@@ -713,6 +1744,51 @@ pub fn assemble_packages(
                             module,
                             package_module,
                         );
+                        // 目录导入：`from '../utils'` 落在 `utils/index.ets` 上时，url 的路径带
+                        // `index`，与参考侧的模块记录一致（`fixtures/import-directory-index`）。
+                        let expanded;
+                        let request = if !request.starts_with('@')
+                            && !request.ends_with(".so")
+                            && request != "BuildProfile"
+                            && !["ets", "ts", "js"]
+                                .iter()
+                                .any(|ext| request.ends_with(&format!(".{ext}")))
+                        {
+                            let candidate = format!("{request}/index");
+                            // `resolve` answers the declarations a request names, not its path, so the
+                            // expanded request asks the disk for the file's own name instead.
+                            let mut target = base.join(file_dir);
+                            for seg in candidate.split('/') {
+                                match seg {
+                                    "." | "" => {}
+                                    ".." => {
+                                        target.pop();
+                                    }
+                                    other => target.push(other),
+                                }
+                            }
+                            let file = ["ets", "ts", "js"].iter().find_map(|ext| {
+                                let path = target.with_extension(ext);
+                                path.is_file().then(|| {
+                                    path.file_name()
+                                        .map(|name| name.to_string_lossy().to_string())
+                                })?
+                            });
+                            match file {
+                                Some(file) => {
+                                    let stem = [".ets", ".ts", ".js"]
+                                        .iter()
+                                        .find_map(|ext| file.strip_suffix(ext))
+                                        .map(str::to_string)
+                                        .unwrap_or(file);
+                                    expanded = format!("{request}/{stem}");
+                                    expanded.as_str()
+                                }
+                                None => request,
+                            }
+                        } else {
+                            request
+                        };
                         rewrite_spec(
                             request,
                             file_dir,
@@ -840,13 +1916,13 @@ pub fn assemble_packages(
                 .join(module)
                 .join("build/default/generated/r/default");
             std::fs::create_dir_all(&dir).map_err(|e| format!("mkdir {}: {e}", dir.display()))?;
-            // A single value export: the merge emits a record for it, and nothing imports it
-            // (the resource ids are inlined by the lowering).
-            std::fs::write(
-                dir.join("ResourceTable.ts"),
-                "export const __hvolt_resource_table__ = 0;\n",
-            )
-            .map_err(|e| format!("write ResourceTable for {module}: {e}"))?;
+            // An empty module: the merge emits a record for it, and nothing imports it (the
+            // resource ids are inlined by the lowering). No export may be declared — the
+            // reference's record carries no `ModuleTag: LOCAL_EXPORT` at all, and an exported
+            // name is exactly that literal (`fixtures/*/golden/modules.abc` disassembled:
+            // the module's body is `"use strict"` and nothing else).
+            std::fs::write(dir.join("ResourceTable.ts"), "export {};\n")
+                .map_err(|e| format!("write ResourceTable for {module}: {e}"))?;
         }
     }
     // The profile module itself, at the path `rewrite_spec` sends `import … from 'BuildProfile'`
@@ -896,6 +1972,11 @@ pub fn assemble_packages(
         std::fs::write(&path, content).map_err(|e| format!("write Index: {e}"))?;
     }
     if !any_page {
+        // 没有组件页时构建在这里就收口，走不到 `fail_on_types` 的 FAQ 行；参考侧对这条
+        // 整文件规则仍打出它（`fixtures/type-implicit-any`）。
+        if crate::build::stage::ets_checker::took_file_level_linter() {
+            eprintln!("WARN - -:-:- For details about ArkTS syntax errors, see FAQs");
+        }
         return Err(format!(
             "{}: no @Component page found",
             modules[0].dir.display()
@@ -931,6 +2012,22 @@ pub fn assemble_packages(
             &wanted,
         )?;
     }
+    // A pruned module leaves no source-map entry either: the map describes what the abc
+    // carries, and the reference emits nothing for a module it never loads.
+    let removed: std::collections::BTreeSet<String> = prune_unreached(ts_root, modules)?
+        .into_iter()
+        .map(|path| {
+            path.strip_prefix(ts_root)
+                .unwrap_or(&path)
+                .to_string_lossy()
+                .replace('\\', "/")
+        })
+        .collect();
+    map_entries.retain(|entry| {
+        let tail = entry.module_path.trim_start_matches("src/main/ets/");
+        !removed.contains(&format!("{}/{}", entry.module, tail))
+    });
+
     // One merge per package. A package's table only names its own module trees, and its
     // records carry that package's version rule: the package's own module is the one the
     // device addresses without a version.
@@ -2081,7 +3178,7 @@ fn source_closure(
             .parent()
             .and_then(|dir| dir.strip_prefix(root).ok())
             .unwrap_or_else(|| Path::new(""));
-        for request in crate::build::ets_transform::module_requests(&text) {
+        for request in crate::build::ets_transform::value_requests(&text) {
             let Some(next) = resolve_source(root, from, &request) else {
                 continue;
             };
@@ -3768,13 +4865,148 @@ fn source_map_entry(
     } else {
         crate::build::compile::ets_source_map::plain_anchors(source, content)
     };
+    // The map names the file with the extension the project wrote: `fixtures/create-new-config`
+    // pins `.ets` (`BreakPoint.ets`, `Common.ets`) and `fixtures/favorite-configuration` pins
+    // `.ts` (`EventHub.ts`, `BreakPoint.ts`) for the same kind of file. Only the source has it.
+    let source_extension = rel
+        .extension()
+        .map(|ext| ext.to_string_lossy().to_string())
+        .unwrap_or_else(|| "ets".to_string());
+    let extension = source_extension.as_str();
     crate::build::compile::ets_source_map::MapEntry {
         module: module.to_string(),
         module_path: module_path.clone(),
-        file: format!("{stem}.ets"),
-        source: format!("{module}/{}.ets", module_path.trim_end_matches(".ts")),
+        file: format!("{stem}.{extension}"),
+        source: format!(
+            "{module}/{}.{extension}",
+            module_path.trim_end_matches(".ts")
+        ),
         anchors,
     }
+}
+
+/// Remove staged modules that nothing in the emitted program loads.
+///
+/// The staging walk follows imports textually, so a module named only where TypeScript erases
+/// the reference is pulled in anyway: `fixtures/create-new-config` imports `BreakpointState`
+/// only in an annotation, `fixtures/const-enum-import` imports a `const enum` whose members are
+/// inlined. The reference emits no record and no source-map entry for either, because the
+/// emitted program never loads them.
+///
+/// The staged tree answers the question exactly: every import has already been rewritten to the
+/// ohm-url the runtime resolves (`@normalized:N&&&<module>/src/main/ets/<path>&`), and a binding
+/// the lowering erased is gone from the file. So the roots are the module's compile roots, its
+/// pages and the generated modules hvolt stages itself; the edges are the staged requests; and a
+/// module tree file no walk reaches is deleted before the merge names it.
+fn prune_unreached(
+    ts_root: &std::path::Path,
+    modules: &[StageModule<'_>],
+) -> Result<Vec<std::path::PathBuf>, String> {
+    let mut staged_files: Vec<std::path::PathBuf> = Vec::new();
+    for module in modules {
+        let dir = ts_root.join(module.name);
+        if dir.is_dir() {
+            collect_staged_ts(&dir, &mut staged_files)?;
+        }
+    }
+    if staged_files.is_empty() {
+        return Ok(Vec::new());
+    }
+    let is_root = |path: &std::path::Path| -> bool {
+        let rel = path
+            .strip_prefix(ts_root)
+            .unwrap_or(path)
+            .to_string_lossy()
+            .replace('\\', "/");
+        if rel.contains("/pages/") || rel.ends_with("/ResourceTable.ts") {
+            return true;
+        }
+        modules.iter().any(|module| {
+            let entry = module
+                .entry_file
+                .trim_start_matches("./")
+                .trim_end_matches(".ets");
+            let stem = std::path::Path::new(entry)
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or(entry);
+            let declared = rel.ends_with(&format!("/{stem}.ts"));
+            let listed = module.entries.iter().any(|root| {
+                let root = root.trim_start_matches("./").trim_end_matches(".ets");
+                rel.ends_with(&format!("/{root}.ts"))
+            });
+            declared || listed
+        })
+    };
+    let mut reached: std::collections::BTreeSet<std::path::PathBuf> = staged_files
+        .iter()
+        .filter(|path| is_root(path))
+        .cloned()
+        .collect();
+    let mut pending: Vec<std::path::PathBuf> = reached.iter().cloned().collect();
+    while let Some(path) = pending.pop() {
+        let text =
+            std::fs::read_to_string(&path).map_err(|e| format!("read {}: {e}", path.display()))?;
+        for request in crate::build::ets_transform::value_requests(&text) {
+            let Some(next) = staged_target(ts_root, &staged_files, &path, &request) else {
+                continue;
+            };
+            if reached.insert(next.clone()) {
+                pending.push(next);
+            }
+        }
+    }
+    let mut removed: Vec<std::path::PathBuf> = Vec::new();
+    for path in &staged_files {
+        if !reached.contains(path) {
+            std::fs::remove_file(path).map_err(|e| format!("remove {}: {e}", path.display()))?;
+            removed.push(path.clone());
+        }
+    }
+    Ok(removed)
+}
+
+/// The staged file a request names: a relative path, or the ohm-url the lowering rewrote it to.
+fn staged_target(
+    ts_root: &std::path::Path,
+    staged_files: &[std::path::PathBuf],
+    from: &std::path::Path,
+    request: &str,
+) -> Option<std::path::PathBuf> {
+    let resolve = |base: &std::path::Path, relative: &str| -> Option<std::path::PathBuf> {
+        let candidate = base.join(relative);
+        [candidate.clone(), candidate.with_extension("ts")]
+            .into_iter()
+            .find(|attempt| staged_files.contains(attempt))
+    };
+    if request.starts_with('.') {
+        return resolve(from.parent().unwrap_or(ts_root), request);
+    }
+    let rest = request
+        .strip_prefix("@normalized:")
+        .and_then(|tail| tail.split("&&&").nth(1))
+        .map(|path| path.trim_end_matches('&'))?;
+    // `<module>/src/main/ets/<path>` → `<ts_root>/<module>/<path>`
+    let (module, after) = rest.split_once('/')?;
+    let relative = after.strip_prefix("src/main/ets/")?;
+    resolve(&ts_root.join(module), relative)
+}
+
+/// Every `.ts` under `dir`.
+fn collect_staged_ts(
+    dir: &std::path::Path,
+    out: &mut Vec<std::path::PathBuf>,
+) -> Result<(), String> {
+    for entry in std::fs::read_dir(dir).map_err(|e| format!("read_dir {}: {e}", dir.display()))? {
+        let entry = entry.map_err(|e| format!("read_dir entry {}: {e}", dir.display()))?;
+        let path = entry.path();
+        if path.is_dir() {
+            collect_staged_ts(&path, out)?;
+        } else if path.extension().is_some_and(|ext| ext == "ts") {
+            out.push(path);
+        }
+    }
+    Ok(())
 }
 
 /// Write `sourceMaps.map` where the reference keeps it: once in the module build directory
@@ -3801,6 +5033,7 @@ fn write_source_maps(
     std::fs::write(packaged.join("sourceMaps.map"), &text)
         .map_err(|e| format!("write packaged sourceMaps.map: {e}"))?;
     fail_on_undefined();
+    fail_on_types();
     Ok(())
 }
 
@@ -3883,18 +5116,94 @@ mod dialog_builder_tests {
 /// The source the project wrote is ArkTS; the lowered text is what `es2abc` accepts, and it is
 /// also the first form a TypeScript parser can read in full. Checking here therefore looks at the
 /// same names the compiler will see, without a separate ArkTS parser.
-fn check_lowered(rel: &std::path::Path, text: &str) {
+fn check_lowered(rel: &std::path::Path, source: &str, text: &str) {
     if !crate::build::stage::semantic_check::enabled() {
         return;
     }
     let name = rel.to_string_lossy().to_string();
+    let file = format!("ets/{}", name);
     for diagnostic in crate::build::stage::semantic_check::check_file(&name, text) {
-        eprintln!(
-            "{}:{}:{}: error: {} (undefined identifier; HVOLT_SEMANTIC=off to build anyway)",
-            diagnostic.file, diagnostic.line, diagnostic.column, diagnostic.message
-        );
+        // The check runs on the lowered text, and the reference reports the *source* position
+        // (`fixtures/undefined-identifier`: 6:12 there, 26:16 in the lowered file). The name is
+        // the one thing both forms share, so it is located in the source; the occurrence chosen
+        // is the unique one, or the one nearest the lowered line when the name repeats.
+        // Only the undefined-name shape is translated here. The pass also reports member
+        // collisions, and those already reach the console through the type checker's own channel
+        // (`fixtures/member-collision`); translating them again invented
+        // `Cannot find name 'Duplicate'.`
+        let Some(bare) = diagnostic.message.strip_suffix(" is not defined") else {
+            continue;
+        };
+        // `as const` and the other spellings a type can have are not names to resolve: the lowered
+        // text keeps them, and reporting `Cannot find name 'const'` next to the real diagnostic for
+        // the assertion would be wrong (`fixtures/arkts-as-const`).
+        if matches!(
+            bare,
+            "const"
+                | "any"
+                | "unknown"
+                | "string"
+                | "number"
+                | "boolean"
+                | "void"
+                | "never"
+                | "null"
+                | "undefined"
+                | "this"
+                | "true"
+                | "false"
+                // 内置名：参考侧对 `arguments` 不报未定义
+                // （`fixtures/type-spread-argument` 只报 spread 实参那条）。
+                | "arguments"
+        ) {
+            continue;
+        };
+        // `import x = require("…")` 绑定的名字在 lowering 后不再声明，tsc 会报
+        // `x is not defined`；参考侧对 import assignment 有自己的两条诊断，不再补这一条
+        // （`fixtures/arkts-import-equals`）。
+        if source.contains(&format!("import {bare} = require(")) {
+            continue;
+        }
+        let bare = bare.to_string();
+        let (line, column) = match source_position(source, &bare, diagnostic.line) {
+            Some(position) => position,
+            None => (diagnostic.line, diagnostic.column),
+        };
+        eprintln!("ERROR 10505001 {file}:{line}:{column} Cannot find name '{bare}'.");
         undefined_identifiers::bump();
     }
+}
+
+/// Where `name` is written in `source`: the unique occurrence, else the one nearest `near_line`.
+fn source_position(source: &str, name: &str, near_line: usize) -> Option<(usize, usize)> {
+    use crate::build::lex::{tokenize, Kind};
+    let tokens = tokenize(source);
+    let mut hits: Vec<(usize, usize)> = Vec::new();
+    let mut line = 1usize;
+    let mut line_start = 0usize;
+    let mut next_token = 0usize;
+    for (offset, byte) in source.bytes().enumerate() {
+        while next_token < tokens.len() && tokens[next_token].start == offset {
+            if tokens[next_token].kind == Kind::Ident
+                && source.get(tokens[next_token].start..tokens[next_token].end) == Some(name)
+            {
+                hits.push((line, offset - line_start + 1));
+            }
+            next_token += 1;
+        }
+        if byte == b'\n' {
+            line += 1;
+            line_start = offset + 1;
+        }
+    }
+    if hits.is_empty() {
+        return None;
+    }
+    if hits.len() == 1 {
+        return hits.first().copied();
+    }
+    hits.into_iter()
+        .min_by_key(|(at, _)| at.abs_diff(near_line))
 }
 
 mod undefined_identifiers {
@@ -3916,6 +5225,99 @@ fn fail_on_undefined() {
     let total = undefined_identifiers::total();
     if total > 0 {
         eprintln!("✗ {total} undefined identifier(s)");
+        crate::support::cli_exit(1);
+    }
+}
+
+/// Reports the diagnostics the type pass proves, in the reference's console shape.
+///
+/// The file is named the way the reference names it — `ets/…` is the path under the module's
+/// `src/main` — because that string is what a reader matches against their own tree and what the
+/// oracle's golden set stores.
+fn check_types(rel: &std::path::Path, source: &str, dir: Option<&std::path::Path>) {
+    if !crate::build::stage::ets_checker::enabled() {
+        return;
+    }
+    let file = format!("ets/{}", rel.to_string_lossy().replace('\\', "/"));
+    // 被 import 的声明文件里的函数返回类型：参考侧把它们纳入类型检查
+    // （`fixtures/dts-return-type-mismatch`：`Type 'string' is not assignable to type 'number'.`）。
+    let mut returns: Vec<(String, String)> = Vec::new();
+    if let Some(dir) = dir {
+        for line in source.lines() {
+            let line = line.trim();
+            let Some(rest) = line.strip_prefix("import ") else {
+                continue;
+            };
+            let Some(from) = rest.split(" from ").nth(1) else {
+                continue;
+            };
+            let specifier = from
+                .trim()
+                .trim_end_matches(';')
+                .trim()
+                .trim_matches(|c| c == '\'' || c == '"');
+            if !specifier.starts_with('.') {
+                continue;
+            }
+            for candidate in [format!("{specifier}.d.ts"), format!("{specifier}.d.ets")] {
+                let path = dir.join(&candidate);
+                if let Ok(text) = std::fs::read_to_string(&path) {
+                    returns.extend(declared_returns(&text));
+                    break;
+                }
+            }
+        }
+    }
+    let diagnostics =
+        crate::build::stage::ets_checker::check_with_declarations(&file, source, &returns);
+    for diagnostic in diagnostics {
+        eprintln!("{}", diagnostic.line());
+        if diagnostic.severity == "ERROR" {
+            type_errors::bump();
+        }
+        // The reference's FAQ line is printed by the ArkTS linter, not by every failing build:
+        // `fixtures/type-error` (one `arkts-*` rule) has it, `fixtures/kit-import-errors` (two
+        // type-level errors, no rule) does not — `COMPILE RESULT:FAIL {ERROR:3}` with no WARN.
+        // 有些 linter 规则的消息里没有 `(arkts-` 后缀（`10605999` 的「没有初始化器」），
+        // 参考侧仍打出 FAQ 行（`fixtures/ui-state-no-init`）。
+        if diagnostic.message.contains("(arkts-") || diagnostic.code == "10605999" {
+            type_errors::bump_linter();
+        }
+    }
+}
+
+mod type_errors {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    static COUNT: AtomicUsize = AtomicUsize::new(0);
+    static LINTER: AtomicUsize = AtomicUsize::new(0);
+
+    pub(super) fn bump() {
+        COUNT.fetch_add(1, Ordering::SeqCst);
+    }
+
+    pub(super) fn bump_linter() {
+        LINTER.fetch_add(1, Ordering::SeqCst);
+    }
+
+    pub(super) fn total() -> usize {
+        COUNT.load(Ordering::SeqCst)
+    }
+
+    pub(super) fn linter_total() -> usize {
+        LINTER.load(Ordering::SeqCst)
+    }
+}
+
+/// Fails the build if any file carried a diagnostic, and prints the reference's own summary
+/// warning once — it prints it whenever the linter reported anything.
+fn fail_on_types() {
+    let total = type_errors::total();
+    if total > 0 {
+        if type_errors::linter_total() > 0 {
+            eprintln!("WARN - -:-:- For details about ArkTS syntax errors, see FAQs");
+        }
+        eprintln!("✗ {total} type error(s)");
         crate::support::cli_exit(1);
     }
 }

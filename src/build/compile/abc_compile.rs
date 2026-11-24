@@ -72,6 +72,7 @@ pub struct MergeInput<'a> {
 }
 
 /// One fileInfo line, split out for the tests.
+#[allow(dead_code)] // 单测的形状，构建走 `write_files_info`
 pub fn files_info_line(
     ts_path: &Path,
     record_name: &str,
@@ -115,18 +116,18 @@ pub fn files_info_line_v(
     lang: &str,
     shared: bool,
 ) -> String {
-    format!(
-        "{};{};esm;{}|{}|{}|{};{};{};{}\n",
-        ts_path.display(),
-        record_name,
-        carrier,
-        package_name,
-        version,
-        source_rel,
-        package_name,
-        shared,
-        lang
-    )
+    crate::build::stage::gen_abc_plugin::render_files_info(&[
+        crate::build::stage::gen_abc_plugin::ModuleInfo {
+            ts_path: ts_path.to_path_buf(),
+            record_name: record_name.to_string(),
+            carrier: carrier.to_string(),
+            package_name: package_name.to_string(),
+            version: version.to_string(),
+            source_rel: source_rel.to_string(),
+            lang: lang.to_string(),
+            shared,
+        },
+    ])
 }
 
 /// The source-root segment the device prepends when it addresses a module-internal
@@ -299,46 +300,9 @@ pub fn module_path(module: &str, rel: &str) -> String {
 /// itself is `<module>/` so the record keeps `<module>/<root-relative>`.
 /// For the flat hvolt layout we accept `<module>/<rel>` and normalize the
 /// `src/main/ets/` segment away.
+/// `getOhmUrlByFilepath`, kept here as the name the merge already uses.
 pub fn record_name_from_ts(ts_root: &Path, ts_path: &Path, entry_module: &str) -> String {
-    let rel = ts_path
-        .strip_prefix(ts_root)
-        .unwrap_or(ts_path)
-        .to_string_lossy()
-        .replace('\\', "/");
-    let rel = rel.trim_end_matches(".ts");
-    let rel = rel.trim_end_matches(".js");
-    // A package entry (`from '<pkg>'`) is addressed as `<pkg>.Index` — no source root.
-    let rel = match rel.split_once('/') {
-        // A member module's package entry is staged at the module root, so its record has no
-        // source root (`&proxy_core/Index&1.0.0`). The entry module has no package entry: its
-        // `entryPath` is the source root, so a file of its own keeps the full form.
-        //
-        // A shared package is the exception among member modules: its package entry is
-        // `src/main/Index` (not `Index` at the module root), so it takes the ordinary
-        // `module_path` form — which is exactly `&shared.src.main.Index&`.
-        Some((module, entry))
-            if module != entry_module
-                && !is_shared_module(module)
-                && module_entry(module) == entry =>
-        {
-            module_entry_path(module)
-        }
-        Some((module, rest)) => module_path(module, rest),
-        None => rel.to_string(),
-    };
-    let rel = rel.as_str();
-    // The generated ResourceTable header lives at
-    // `<module>/build/<mode>/generated/r/<mode>/ResourceTable.{js,ts}` and
-    // the reference names its record `<module>/build/generated/r/ResourceTable` —
-    // the build-mode segment is dropped from both occurrences.
-    if let Some(i) = rel.find("/build/") {
-        let tail = &rel[i + "/build/".len()..];
-        if tail.starts_with("default/generated/r/default/") {
-            let head = &rel[..i + "/build/".len()];
-            return format!("{}generated/r/ResourceTable", head);
-        }
-    }
-    rel.to_string()
+    crate::build::stage::ark_utils::get_ohm_url_by_filepath(ts_root, ts_path, entry_module)
 }
 
 /// Write filesInfo.txt for every .ts under `ts_root`.
@@ -360,7 +324,7 @@ pub fn write_files_info(
     staged_modules: &[String],
     package_modules: Option<&[String]>,
 ) -> Result<(), String> {
-    let mut lines = String::new();
+    let mut records: Vec<crate::build::stage::gen_abc_plugin::ModuleInfo> = Vec::new();
     let mut files: Vec<PathBuf> = Vec::new();
     collect_sources(ts_root, &mut files)?;
     files.sort();
@@ -396,18 +360,18 @@ pub fn write_files_info(
                 format!("{}/{}", package.record_prefix_slash(), stem)
             };
             let record = format!("&{path}&{}", package.version);
-            lines.push_str(&files_info_line_v(
-                &f,
-                &record,
-                entry_module,
-                &package.name,
-                &package.version,
+            records.push(crate::build::stage::gen_abc_plugin::ModuleInfo {
+                ts_path: f.clone(),
+                record_name: record,
+                carrier: entry_module.to_string(),
+                package_name: package.name.clone(),
+                version: package.version.clone(),
                 // The fourth field is package-relative, so it keeps the package's source
                 // root (`browser/dist/index.js`), which the staged path also carries.
-                &package.package_rel(rest),
-                if rel.ends_with(".js") { "ts" } else { "ets" },
-                false,
-            ));
+                source_rel: package.package_rel(rest),
+                lang: if rel.ends_with(".js") { "ts" } else { "ets" }.to_string(),
+                shared: false,
+            });
             continue;
         }
         // The record field carries an ohm url, not a bare path: that is what makes es2abc
@@ -431,23 +395,32 @@ pub fn write_files_info(
         let _ = version;
         // Source language marker, sampled from the reference's filesInfo: expanded .ts
         // files are `ets` (they came from .ets), generated .js files are `ts`.
-        let lang = if rel.ends_with(".js") { "ts" } else { "ets" };
+        // 代码生成的 `build/generated/…` 源码（`ResourceTable`）参考侧标 `ts`
+        // （`fixtures/import-directory-index`：golden 的第 43 行是 `.language TypeScript`，
+        // 本构建输出 `.language ArkTS`）。
+        let lang = if rel.ends_with(".js") || rel.contains("generated/r/") {
+            "ts"
+        } else {
+            "ets"
+        };
         // The source carrier path drops the module-root segment (`src/…` →
         // `…`), while the record name keeps it.
         let source_rel = match rel.split_once('/') {
             Some((_, rest)) => rest.to_string(),
             None => rel.to_string(),
         };
-        lines.push_str(&files_info_line(
-            &f,
-            &record,
-            entry_module,
-            &pkg,
-            &source_rel,
-            lang,
-            shared.contains(&f),
-        ));
+        records.push(crate::build::stage::gen_abc_plugin::ModuleInfo {
+            ts_path: f.clone(),
+            record_name: record,
+            carrier: entry_module.to_string(),
+            package_name: pkg.to_string(),
+            version: "1.0.0".to_string(),
+            source_rel: source_rel.clone(),
+            lang: lang.to_string(),
+            shared: shared.contains(&f),
+        });
     }
+    let lines = crate::build::stage::gen_abc_plugin::render_files_info(&records);
     std::fs::write(out, lines).map_err(|e| format!("write {}: {e}", out.display()))
 }
 
@@ -503,15 +476,15 @@ pub fn merge(input: &MergeInput<'_>) -> Result<PathBuf, String> {
                 .iter()
                 .filter(|p| p.kind == crate::build::deps::npm::Kind::ByteCode),
         ) {
-            extra.push_str(&format!(
-                "{};{}&{};esm;{}|{}|{}|;{};false;ets\n",
-                path.display(),
-                package.alias,
-                package.version,
-                package.alias,
-                package.alias,
-                package.version,
-                package.alias
+            extra.push_str(&files_info_line_v(
+                path,
+                &format!("{}&{}", package.alias, package.version),
+                &package.alias,
+                &package.alias,
+                &package.version,
+                "",
+                "ets",
+                false,
             ));
         }
         let mut text = std::fs::read_to_string(&files_info).map_err(|e| e.to_string())?;

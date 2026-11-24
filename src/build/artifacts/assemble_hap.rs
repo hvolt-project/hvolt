@@ -30,6 +30,15 @@ pub fn run_with(
         .map_err(|e| format!("discover modules: {e}"))?;
     // Third-party packages compiled into the abc also need a package context entry.
     let packages = crate::build::deps::npm::discover(app, project)?;
+    // `$r('app.<kind>.<name>')` / `$rawfile('<name>')` 的缺失诊断要靠本模块的资源名表
+    // （参考侧 10903329 / 10904333），资源在这一步已经确定。
+    if let Some((module_dir_for_resources, _)) = modules
+        .iter()
+        .find(|(name, _)| module_arg.is_empty() || name == module_arg)
+        .or_else(|| modules.first())
+    {
+        crate::build::ets_assemble::publish_resource_names(project, module_dir_for_resources);
+    }
     // The source directory is only a lookup key here: everything the package records comes
     // from the module's declared name.
     let (module_dir, module_cfg) = if module_arg.is_empty() {
@@ -171,6 +180,11 @@ pub fn run_with(
         // (`.scratch/multi-module/truth/shared/pkgContextInfo.json`). A HAP names the shared
         // packages it consumes, plus the ETS members it compiles into its own abc.
         .filter(|(_, cfg)| !module_cfg.module.is_hsp() || cfg.module.is_hsp())
+        // A HAP's package context names itself and the shared packages it links; a sibling HAP
+        // and a HAR stay out (`fixtures/two-hap-one-shared`: golden keys are `shared` and
+        // `entry` only, this build also emitted `entry2`; `fixtures/har-member-present`:
+        // golden has no `harlib` key).
+        .filter(|(_, cfg)| module_cfg.module.is_hsp() || cfg.module.is_hsp())
         .map(|(_dir, cfg)| {
             if cfg.module.is_hsp() {
                 crate::build::artifacts::pkg_context::EtsDep {

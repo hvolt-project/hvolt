@@ -75,6 +75,29 @@ function canonical(node, out) {
       out.push('LocMeta');
       return;
     }
+    // `{ "id": 16777219, "type": 10003, params: [] }`: a `$r(…)` compiled to its resource
+    // record. restool numbers ids in file-system walk order, so the same 11 entries come out
+    // permuted on the machine that produced the golden and on the one running hvolt
+    // (`fixtures/resource-audit`: identical names, ids 0…10 reassigned). The number is a build
+    // artifact, not translated source — the type and the params still compare.
+    const keys = node.properties.map((property) =>
+      ts.isPropertyAssignment(property) ? String(property.name.text || property.name.escapedText) : ''
+    );
+    if (keys.includes('id') && keys.includes('type')) {
+      out.push('ResourceRef');
+      for (const property of node.properties) {
+        if (!ts.isPropertyAssignment(property)) {
+          canonical(property, out);
+          continue;
+        }
+        if (String(property.name.text || property.name.escapedText) === 'id') {
+          out.push('LocMeta');
+          continue;
+        }
+        canonical(property, out);
+      }
+      return;
+    }
   }
   out.push(kind + extra);
   // The sixth constructor argument of a component call is its source coordinate; the two
@@ -122,12 +145,29 @@ function problemsBetween(goldenFile, actualFile) {
   const problems = [];
   if (golden.structure !== actual.structure) {
     problems.push('AST differs');
+    if (process.env.CMP_DEBUG) {
+      const g = golden.structure.split('\n');
+      const a = actual.structure.split('\n');
+      let at = 0;
+      while (at < Math.min(g.length, a.length) && g[at] === a[at]) at += 1;
+      console.error(`[ast] first diff at token ${at} of ${g.length}/${a.length}`);
+      console.error(`[ast] golden: ${g.slice(Math.max(0, at - 6), at + 6).join(' ')}`);
+      console.error(`[ast] actual: ${a.slice(Math.max(0, at - 6), at + 6).join(' ')}`);
+    }
   }
   if (golden.identity.join('|') !== actual.identity.join('|')) {
     problems.push(`project identity differs: ${golden.identity.join(',')} vs ${actual.identity.join(',')}`);
   }
-  const goldenComments = golden.comments.filter((c) => c.startsWith('//') || c.startsWith('/*'));
-  const actualComments = actual.comments.filter((c) => c.startsWith('//') || c.startsWith('/*'));
+  // 注释比较忽略行内空白：块注释的续行缩进会随输出重排变化，那不是注释内容
+  // （`fixtures/configuration-page` 的 `/*  { symbolStartIcon: … }` 和 JSDoc 的 `*` 缩进，
+  // 文字完全相同而缩进差 1–2 个空格）。去掉空白后仍逐字比较，注释丢失照旧能抓。
+  const flatten = (c) => c.replace(/\s+/g, ' ');
+  const goldenComments = golden.comments
+    .filter((c) => c.startsWith('//') || c.startsWith('/*'))
+    .map(flatten);
+  const actualComments = actual.comments
+    .filter((c) => c.startsWith('//') || c.startsWith('/*'))
+    .map(flatten);
   if (goldenComments.length && JSON.stringify(goldenComments) !== JSON.stringify(actualComments)) {
     problems.push(`comment text differs (${goldenComments.length} vs ${actualComments.length})`);
   }

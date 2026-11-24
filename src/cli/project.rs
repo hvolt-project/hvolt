@@ -67,6 +67,89 @@ pub(crate) fn clean() {
     }
 }
 
+/// Print a `resources.index` as JSON: the structure the oracle compares.
+///
+/// Two builds of one project must agree on what the index *says* — every config, every
+/// `(type, name)` entry, its value bytes, and which entries share an id — while the id numbers
+/// themselves are the producing tool's business (the reference numbers resources in its own
+/// order, see `compare-artifacts.py`).
+pub(crate) fn index_dump(file: PathBuf) {
+    let data = match std::fs::read(&file) {
+        Ok(data) => data,
+        Err(error) => {
+            eprintln!("{}: {error}", file.display());
+            crate::support::cli_exit(1);
+        }
+    };
+    let index = match crate::build::artifacts::res_index::parse(&data) {
+        Ok(index) => index,
+        Err(error) => {
+            eprintln!("{}: {error}", file.display());
+            crate::support::cli_exit(1);
+        }
+    };
+    let mut out = String::new();
+    out.push_str("{\"version\":");
+    out.push_str(&json_string(&index.version));
+    out.push_str(",\"configs\":[");
+    for (at, config) in index.configs.iter().enumerate() {
+        if at > 0 {
+            out.push(',');
+        }
+        out.push_str("{\"qualifiers\":[");
+        for (pos, qualifier) in config.qualifiers.iter().enumerate() {
+            if pos > 0 {
+                out.push(',');
+            }
+            out.push_str(&format!("[{},{}]", qualifier.kind, qualifier.value));
+        }
+        out.push_str("],\"entries\":[");
+        for (pos, entry) in config.entries.iter().enumerate() {
+            if pos > 0 {
+                out.push(',');
+            }
+            // The value is compared by digest, not by length: two values of the same length
+            // are not the same value.
+            let digest = {
+                use sha2::{Digest, Sha256};
+                let mut hasher = Sha256::new();
+                hasher.update(&entry.value);
+                format!("{:x}", hasher.finalize())
+            };
+            out.push_str(&format!(
+                "{{\"id\":{},\"type\":\"{:?}\",\"name\":{},\"value\":{},\"value_len\":{}}}",
+                entry.id,
+                entry.kind,
+                json_string(&entry.name),
+                json_string(&digest[..16]),
+                entry.value.len()
+            ));
+        }
+        out.push_str("]}");
+    }
+    out.push_str("]}");
+    println!("{out}");
+}
+
+/// A JSON string literal for `text` (the output never carries control bytes: names and version
+/// strings, both read from the file's own pool).
+fn json_string(text: &str) -> String {
+    let mut out = String::with_capacity(text.len() + 2);
+    out.push('"');
+    for ch in text.chars() {
+        match ch {
+            '"' => out.push_str("\\\""),
+            '\\' => out.push_str("\\\\"),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            '\t' => out.push_str("\\t"),
+            other => out.push(other),
+        }
+    }
+    out.push('"');
+    out
+}
+
 pub(crate) fn check(package: Option<PathBuf>, size_limit: Option<u64>) {
     // Source-level names first: the package gate only sees files, and a package can be perfectly
     // well formed while a file inside it calls a name that was never imported.
