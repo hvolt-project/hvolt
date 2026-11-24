@@ -158,6 +158,7 @@ mod tests {
     fn module() -> ModuleConfig {
         ModuleConfig {
             module: ModuleInfo {
+                extra: Default::default(),
                 router_map: Vec::new(),
                 main: None,
                 forms: Vec::new(),

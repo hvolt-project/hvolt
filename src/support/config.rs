@@ -71,6 +71,51 @@ pub struct ProductConfig {
     pub resources: ProductResources,
 }
 
+/// What `icon` accepts: a resource reference or a file path, or a foreground/background pair
+/// for the layered icon HarmonyOS uses.
+///
+/// `app.json` can only hold `$media:` references, so a path or a pair is a build input, not a
+/// manifest value: the build copies the files into `resources/base/media` and points the
+/// manifest at the result.
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+#[serde(untagged)]
+pub enum IconInput {
+    /// `$media:name` or a project-relative image path.
+    Ref(String),
+    /// `{ foreground = "...", background = "..." }`.
+    Layered {
+        foreground: String,
+        background: String,
+    },
+}
+
+impl Default for IconInput {
+    fn default() -> Self {
+        IconInput::Ref(default_icon())
+    }
+}
+
+impl IconInput {
+    /// The manifest value: the reference itself, or the layered icon the pair becomes.
+    pub fn reference(&self) -> &str {
+        match self {
+            IconInput::Ref(value) => value,
+            IconInput::Layered { .. } => "$media:layered_image",
+        }
+    }
+
+    /// The pair when one was given, plus the value as written for a `Ref`.
+    pub fn as_layers(&self) -> Option<(&str, &str)> {
+        match self {
+            IconInput::Layered {
+                foreground,
+                background,
+            } => Some((foreground, background)),
+            IconInput::Ref(_) => None,
+        }
+    }
+}
+
 /// The artifact-level identity fields a product may override.
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
 pub struct ProductApp {
@@ -85,7 +130,7 @@ pub struct ProductApp {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub vendor: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub icon: Option<String>,
+    pub icon: Option<IconInput>,
 }
 
 /// `[products.<name>.resources]`: resource directories this product overlays.
@@ -161,8 +206,8 @@ pub struct AppFields {
     pub build_version: String,
     #[serde(default = "default_vendor")]
     pub vendor: String,
-    #[serde(default = "default_icon")]
-    pub icon: String,
+    #[serde(default)]
+    pub icon: IconInput,
     /// SDK installation path. None = auto-detect from env / global config.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sdk_path: Option<String>,
@@ -513,12 +558,23 @@ pub struct Skill {
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
 pub struct AbilityConfig {
     pub name: String,
+    /// Keys of an ability table this struct does not model, carried into module.json under the
+    /// same snake_case -> camelCase rule (e.g. `background_modes` -> `backgroundModes`).
+    #[serde(flatten)]
+    pub extra: std::collections::BTreeMap<String, toml::Value>,
     /// Source entry file (e.g. "EntryFormAbility.ets").
     pub entry: String,
     /// Resource reference for the ability label (e.g. "$string:My_label").
     /// Empty = generated from the ability name.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub label: String,
+    /// Resource reference for this ability's icon (`$media:...`). Empty = the app icon, which
+    /// is what the manifest schema calls the default ("can be left blank by default").
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub icon: String,
+    /// Resource reference for the start-window icon. Empty = this ability's icon.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub start_window_icon: String,
     /// Resource reference for the ability description. Empty = generated.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub description: String,
@@ -697,6 +753,14 @@ pub struct RouterMapDef {
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct ModuleInfo {
     pub name: String,
+    /// Keys of `[module]` this struct does not model, carried through to module.json.
+    ///
+    /// The manifest schema has 45 module fields and grows with each SDK, so the ones hvolt has
+    /// no behaviour for are kept verbatim instead of being dropped on parse. `render` merges
+    /// them under the same snake_case -> camelCase rule the modelled fields follow, and a
+    /// modelled field always wins.
+    #[serde(flatten)]
+    pub extra: std::collections::BTreeMap<String, toml::Value>,
     /// Page routes for main_pages.json.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub routes: Vec<String>,
@@ -901,7 +965,7 @@ impl AppConfig {
                 version_code: 0,
                 build_version: String::new(),
                 vendor: default_vendor(),
-                icon: default_icon(),
+                icon: IconInput::default(),
                 sdk_path: None,
                 sdk_version: default_sdk_version(),
                 compile_sdk_version: default_sdk_version(),
@@ -1190,6 +1254,7 @@ impl ModuleConfig {
         ModuleConfig {
             dependencies: BTreeMap::new(),
             module: ModuleInfo {
+                extra: Default::default(),
                 router_map: Vec::new(),
                 main: None,
                 forms: Vec::new(),

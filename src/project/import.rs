@@ -376,7 +376,9 @@ fn read_app_config(from: &Path, gaps: &mut Gaps) -> Result<AppConfig, String> {
                 .unwrap_or_default()
                 .to_string(),
             vendor: str_at(&a, &["vendor"]).unwrap_or_else(|| "example".into()),
-            icon: str_at(&a, &["icon"]).unwrap_or_else(|| "$media:app_icon".into()),
+            icon: crate::support::config::IconInput::Ref(
+                str_at(&a, &["icon"]).unwrap_or_else(|| "$media:app_icon".into()),
+            ),
             sdk_path: None,
             sdk_version: sdk_version.clone(),
             compile_sdk_version: sdk_version.clone(),
@@ -910,6 +912,7 @@ fn read_modules(from: &Path, gaps: &mut Gaps) -> Result<Vec<(String, ModuleConfi
             // Module-scoped deps come from the source module's own oh-package.json5.
             dependencies: module_dependencies(&dir, &from.join(&dir)),
             module: ModuleInfo {
+                extra: Default::default(),
                 name,
                 routes,
                 // Route names only: the page and its `@Builder` are derived by the build.

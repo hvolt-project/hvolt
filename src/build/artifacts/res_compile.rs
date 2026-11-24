@@ -334,6 +334,91 @@ fn merge_element_table(from: &Path, to: &Path) -> Result<(), String> {
 
 /// Stage the resource tree restool compiles: the project's `resources/` plus a
 /// generated `profile/main_pages.json` (the reference injects it the same way).
+/// Materialise a `{ foreground, background }` icon into the staged media directory.
+///
+/// The pair is a build input: `app.json` can only name a resource, so the files are copied in
+/// under fixed names and `layered_image.json` is written to reference them. A project that
+/// ships its own `layered_image.json` keeps it — only a pair from the toml generates one.
+fn generate_layered_icon(
+    stage: &Path,
+    project_dir: &Path,
+    foreground: &str,
+    background: &str,
+) -> Result<(), String> {
+    let media = stage.join("base").join("media");
+    std::fs::create_dir_all(&media).map_err(|e| format!("mkdir {}: {e}", media.display()))?;
+    for (source, stem) in [
+        (foreground, "icon_foreground"),
+        (background, "icon_background"),
+    ] {
+        let path = project_dir.join(source);
+        let ext = path
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("png")
+            .to_string();
+        let dest = media.join(format!("{stem}.{ext}"));
+        std::fs::copy(&path, &dest)
+            .map_err(|e| format!("copy icon {} -> {}: {e}", path.display(), dest.display()))?;
+    }
+    let manifest = serde_json::json!({
+        "layered-image": {
+            "background": "$media:icon_background",
+            "foreground": "$media:icon_foreground"
+        }
+    });
+    let path = media.join("layered_image.json");
+    std::fs::write(
+        &path,
+        serde_json::to_string_pretty(&manifest).map_err(|e| e.to_string())?,
+    )
+    .map_err(|e| format!("write {}: {e}", path.display()))?;
+    Ok(())
+}
+
+/// Write the `hvolt.toml` application name into the staged `string.json` as `app_name`.
+///
+/// `app.json` can only point `label` at a string resource, so the manifest alone cannot carry a
+/// literal. Doing it here keeps the toml the single place a project names itself: the entry is
+/// replaced when present and appended when not, and a product overlay still runs afterwards.
+fn inject_app_name(stage: &Path, name: &str) -> Result<(), String> {
+    if name.is_empty() {
+        return Ok(());
+    }
+    let dir = stage.join("base").join("element");
+    let path = dir.join("string.json");
+    let mut doc: serde_json::Value = if path.is_file() {
+        let text =
+            std::fs::read_to_string(&path).map_err(|e| format!("read {}: {e}", path.display()))?;
+        serde_json::from_str(&text).map_err(|e| format!("parse {}: {e}", path.display()))?
+    } else {
+        std::fs::create_dir_all(&dir).map_err(|e| format!("mkdir {}: {e}", dir.display()))?;
+        serde_json::json!({ "string": [] })
+    };
+    let Some(list) = doc.get_mut("string").and_then(|v| v.as_array_mut()) else {
+        return Err(format!(
+            "{} has no \"string\" array to write app_name into",
+            path.display()
+        ));
+    };
+    let mut replaced = false;
+    for entry in list.iter_mut() {
+        if entry.get("name").and_then(|v| v.as_str()) == Some("app_name") {
+            entry["value"] = serde_json::json!(name);
+            replaced = true;
+        }
+    }
+    if !replaced {
+        list.push(serde_json::json!({ "name": "app_name", "value": name }));
+    }
+    std::fs::write(
+        &path,
+        serde_json::to_string_pretty(&doc).map_err(|e| e.to_string())?,
+    )
+    .map_err(|e| format!("write {}: {e}", path.display()))?;
+    Ok(())
+}
+
 pub(crate) fn stage_resources(input: &ResCompileInput<'_>, stage: &Path) -> Result<(), String> {
     // Two layouts are valid: a migrated project keeps resources beside its module
     // (`entry/resources/`), a scaffolded one keeps them at the project root
@@ -352,6 +437,12 @@ pub(crate) fn stage_resources(input: &ResCompileInput<'_>, stage: &Path) -> Resu
         ));
     }
     copy_dir_recursive(&project_res, stage)?;
+    // The application name is a string resource (`app.json` label must be `$string:...`), so the
+    // toml value is written into the staged table instead of the project declaring it twice.
+    inject_app_name(stage, &input.app.app.name)?;
+    if let Some((foreground, background)) = input.app.app.icon.as_layers() {
+        generate_layered_icon(stage, input.project_dir, foreground, background)?;
+    }
     // The selected product's directories are overlaid before the app scope is split out: an
     // icon or label a product redefines has to land in the same tree the split reads.
     overlay_product_resources(input, stage)?;
@@ -464,7 +555,7 @@ fn split_app_resources(
     module_stage: &Path,
     app_stage: &Path,
 ) -> Result<(), String> {
-    let icon = &app.app.icon;
+    let icon = app.app.icon.reference();
     let media_name = icon
         .split(':')
         .next_back()
@@ -1594,6 +1685,30 @@ pub(crate) fn run(
     )
     .map_err(|e| format!("write module.json with ids: {e}"))?;
 
+    // Check the final manifest against the schema the SDK itself validates with. This is the
+    // shape that ships, so a package the system would refuse fails the build here instead.
+    if let Some(root) = crate::sdk::manage::sdk_root() {
+        let runtime_os = &input.app.app.runtime_os;
+        // Each schema describes one document, so hand it the document it describes rather
+        // than the combined value this stage writes.
+        if let Some(module) = manifest.get("module") {
+            crate::build::artifacts::module_check::check(
+                &root,
+                runtime_os,
+                "module.json",
+                &serde_json::json!({ "module": module }),
+            )?;
+        }
+        if let Some(app) = manifest.get("app") {
+            crate::build::artifacts::module_check::check(
+                &root,
+                runtime_os,
+                "app.json",
+                &serde_json::json!({ "app": app }),
+            )?;
+        }
+    }
+
     // 3) the intent manifest is package content, not a resource: writing it into the restool
     //    input would add a `profile insight_intent` entry the reference package does not have.
     if let Some(manifest) = crate::build::artifacts::insight_intent::render(
@@ -1620,11 +1735,50 @@ mod tests {
     };
     use crate::support::config::{Dependency, ModuleConfig, ModuleInfo, ResolvedProduct};
 
+    /// A foreground/background pair in the toml becomes the layered icon the manifest names.
+    #[test]
+    fn a_layered_pair_generates_the_icon_set() {
+        let root = std::env::temp_dir().join(format!("hvolt-icon-{}", std::process::id()));
+        let assets = root.join("assets");
+        let stage = root.join("stage");
+        std::fs::create_dir_all(&assets).unwrap();
+        std::fs::create_dir_all(&stage).unwrap();
+        std::fs::write(assets.join("fg.png"), b"fg").unwrap();
+        std::fs::write(assets.join("bg.png"), b"bg").unwrap();
+        super::generate_layered_icon(&stage, &root, "assets/fg.png", "assets/bg.png").unwrap();
+        let media = stage.join("base").join("media");
+        assert!(media.join("icon_foreground.png").is_file());
+        assert!(media.join("icon_background.png").is_file());
+        let text = std::fs::read_to_string(media.join("layered_image.json")).unwrap();
+        assert!(text.contains("$media:icon_foreground"), "{text}");
+        assert!(text.contains("$media:icon_background"), "{text}");
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// The application name comes from `hvolt.toml`, not from a copy in string.json.
+    #[test]
+    fn the_toml_name_replaces_the_staged_app_name() {
+        let root = std::env::temp_dir().join(format!("hvolt-appname-{}", std::process::id()));
+        let element = root.join("base").join("element");
+        std::fs::create_dir_all(&element).unwrap();
+        std::fs::write(
+            element.join("string.json"),
+            r#"{"string":[{"name":"app_name","value":"old"},{"name":"other","value":"keep"}]}"#,
+        )
+        .unwrap();
+        super::inject_app_name(&root, "New Name").unwrap();
+        let text = std::fs::read_to_string(element.join("string.json")).unwrap();
+        assert!(text.contains("New Name"), "{text}");
+        assert!(text.contains("keep"), "unrelated entries survive: {text}");
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
     /// generate_main_pages (via stage) drops the .ets suffix and keeps order.
     #[test]
     fn main_pages_strips_ets_and_keeps_order() {
         let module = ModuleConfig {
             module: ModuleInfo {
+                extra: Default::default(),
                 router_map: Vec::new(),
                 main: None,
                 forms: Vec::new(),
