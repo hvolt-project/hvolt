@@ -143,7 +143,11 @@ pub(crate) fn value_requests(text: &str) -> Vec<String> {
         if type_only {
             continue;
         }
-        out.push(text[literal.start + 1..literal.end.saturating_sub(1)].to_string());
+        // `''` 的 `start + 1` 已经越过 `end - 1`，反向切片会 panic
+        // （`fixtures/import-forms` 的 `from ''`）。
+        if literal.end > literal.start + 1 {
+            out.push(text[literal.start + 1..literal.end - 1].to_string());
+        }
     }
     out
 }
@@ -1267,6 +1271,15 @@ fn render_import(
     // The source's own `import type` / `export type` is a decision this pass reproduces, not
     // one it re-derives: the reference keeps the clause's flag on every line a kit statement
     // expands into (`process_kit_import.js`: `createImportClause(o.importClause.isTypeOnly, …)`).
+    // `@kit.*` 的具名导入在聚合模块里只是重导出，成员在自己的源模块可能是 default 导出：
+    // 参考侧把它落成 `import X from '<target>'`（`process_kit_import.js`）。实测
+    // `fixtures/configuration-page` 的 `import { harmonyShare } from '@kit.ShareKit'`
+    // 输出成 `import harmonyShare from "@hms:collaboration.harmonyShare"`。
+    if !statement.is_export && !statement.type_only && statement.request.starts_with("@kit.") {
+        if let Some(replacement) = render_kit_default_import(text, statement, used) {
+            return replacement;
+        }
+    }
     let Classified {
         values,
         types,
@@ -1347,6 +1360,40 @@ fn render_import(
         ));
     }
     lines.join("\n")
+}
+
+/// A named import from an `@kit.*` aggregate, rendered as one default import per binding.
+///
+/// The kit file is a re-export layer (`import harmonyShare from
+/// '@hms.collaboration.harmonyShare'`), so the binding the runtime loads is that module's
+/// default export. Half-known lists are left alone: the kit table answers per name, and a
+/// statement mixing resolved and unresolved names keeps its written form.
+fn render_kit_default_import(
+    text: &str,
+    statement: &ImportStatement,
+    used: &UsedNames,
+) -> Option<String> {
+    if statement.star || statement.namespace.is_some() || statement.bindings.is_empty() {
+        return None;
+    }
+    if statement.default_binding.is_some() {
+        return None;
+    }
+    let indent = line_indent(text, statement.start);
+    let quote = quote_of(&text[statement.start..statement.end], &statement.request);
+    let mut lines = Vec::new();
+    for (imported, local) in &statement.bindings {
+        if !used.all.contains(local) {
+            return None;
+        }
+        let target =
+            crate::build::stage::ets_checker::kit_member_module(&statement.request, imported)?;
+        let request = normalize_system(&target);
+        lines.push(format!(
+            "{indent}import {local} from {quote}{request}{quote};"
+        ));
+    }
+    Some(lines.join("\n"))
 }
 
 /// One emitted statement. `named` holds `(written, local-or-exported)` pairs; `explicit_alias`
