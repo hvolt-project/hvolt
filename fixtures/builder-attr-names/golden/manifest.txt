@@ -4,4 +4,3 @@ pack.info
 pkgContextInfo.json
 modules.abc
 sourceMaps.map
-diagnostics.txt
