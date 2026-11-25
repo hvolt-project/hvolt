@@ -1,0 +1,2 @@
+ERROR 10505001 ets/pages/Index.ets:5:3 Property 'build' in type 'BuildParamProbe' is not assignable to the same property in base type 'CustomComponent'. Type '(value: number) => void' is not assignable to type '() => void'.
+ERROR 10905106 ets/pages/Index.ets:5:3 The 'build' method can not have arguments.

@@ -1,0 +1,7 @@
+ERROR 10605017 ets/pages/Index.ets:2:3 Indexed signatures are not supported (arkts-no-indexed-signatures)
+ERROR 10605022 ets/pages/Index.ets:5:23 Conditional types are not supported (arkts-no-conditional-types)
+ERROR 10605038 ets/pages/Index.ets:17:32 Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)
+ERROR 10605040 ets/pages/Index.ets:17:16 Object literals cannot be used as type declarations (arkts-no-obj-literals-as-types)
+ERROR 10605060 ets/pages/Index.ets:12:15 "typeof" operator is allowed only in expression contexts (arkts-no-type-query)
+ERROR 10605083 ets/pages/Index.ets:7:15 Mapped type expression is not supported (arkts-no-mapped-types)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

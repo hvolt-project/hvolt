@@ -1,0 +1,2 @@
+ERROR 10605171 ets/pages/Index.ets:4:3 Field in sendable class must have type annotation (arkts-sendable-explicit-field-type)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

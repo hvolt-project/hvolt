@@ -1,0 +1,2 @@
+ERROR 10605080 ets/pages/Index.ets:8:18 "for .. in" is not supported (arkts-no-for-in)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

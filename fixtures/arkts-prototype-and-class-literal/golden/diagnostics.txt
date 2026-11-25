@@ -1,0 +1,4 @@
+ERROR 10505001 ets/pages/Index.ets:5:18 Property 'extra' does not exist on type 'Animal'.
+ERROR 10605050 ets/pages/Index.ets:7:19 Class literals are not supported (arkts-no-class-literals)
+ERROR 10605136 ets/pages/Index.ets:5:8 Prototype assignment is not supported (arkts-no-prototype-assignment)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

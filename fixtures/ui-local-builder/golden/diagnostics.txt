@@ -1,0 +1,2 @@
+ERROR 10905115 ets/pages/Index.ets:1:1 '@LocalBuilder' can only decorate method.
+ERROR 10905117 ets/pages/Index.ets:1:1 A function can only be decorated by one of the '@AnimatableExtend', '@Builder', '@Extend', '@Styles', '@Concurrent' and '@Sendable'.

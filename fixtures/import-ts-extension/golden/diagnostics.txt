@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:2:21 An import path cannot end with a '.ts' extension. Consider importing '../lib/helper.js' instead.

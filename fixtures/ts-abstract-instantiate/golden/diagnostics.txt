@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:7:10 Cannot create an instance of an abstract class.

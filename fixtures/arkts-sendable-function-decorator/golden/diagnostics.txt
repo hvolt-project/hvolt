@@ -1,0 +1,4 @@
+ERROR 10505001 ets/pages/Index.ets:5:1 Decorators are not valid here.
+ERROR 10605173 ets/pages/Index.ets:5:1 Only "@Sendable" decorator can be used on "Sendable" function (arkts-sendable-function-decorator)
+ERROR 10905117 ets/pages/Index.ets:5:1 A function can only be decorated by one of the '@AnimatableExtend', '@Builder', '@Extend', '@Styles', '@Concurrent' and '@Sendable'.
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

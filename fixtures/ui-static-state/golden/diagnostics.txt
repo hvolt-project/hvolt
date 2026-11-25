@@ -1,0 +1,4 @@
+ERROR 10505001 ets/pages/Index.ets:10:20 Property 'counter' does not exist on type 'UiStaticState'. Did you mean to access the static member 'UiStaticState.counter' instead?
+ERROR 10905304 ets/pages/Index.ets:6:9 The '@Link' property cannot be specified a default value.
+ERROR 10905313 ets/pages/Index.ets:4:3 The static variable of struct cannot be used together with built-in decorators.
+WARN - ets/pages/Index.ets:6:9 The '@Entry' component 'UiStaticState' cannot have the '@Link' property 'linked'.

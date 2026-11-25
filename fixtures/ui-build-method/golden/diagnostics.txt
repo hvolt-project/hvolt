@@ -1,0 +1,1 @@
+ERROR 10905103 ets/pages/Index.ets:2:8 The struct 'NoBuildMethod' must have at least and at most one 'build' method.

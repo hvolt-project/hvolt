@@ -1,0 +1,1 @@
+ERROR 10905204 ets/pages/Index.ets:15:7 'this.helper();' does not meet UI component syntax.

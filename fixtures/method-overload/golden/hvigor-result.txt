@@ -1,0 +1,7 @@
+fixture: method-overload
+question: 方法重载（同名声明 + 一个实现）是否被接受？
+ran:    2026-11-12，mac 侧 hvigorw assembleHap
+result:  BUILD SUCCESSFUL in 2 s 428 ms
+conclusion:
+  同名的方法声明属于重载，合法。重名规则只对「访问器 vs 普通方法」报错。
+  实测：hvolt 侧同样静默（run-hvolt.sh 无诊断）。

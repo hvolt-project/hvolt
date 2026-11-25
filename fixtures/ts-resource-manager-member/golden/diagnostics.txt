@@ -1,0 +1,2 @@
+ERROR 10505001 ets/pages/Index.ets:7:14 Property 'nope' does not exist on type 'ResourceManager'.
+WARN - ets/pages/Index.ets:5:15 'getContext' has been deprecated.

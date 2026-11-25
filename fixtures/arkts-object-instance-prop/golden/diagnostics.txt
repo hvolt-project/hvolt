@@ -1,0 +1,4 @@
+ERROR 10505001 ets/pages/Index.ets:3:13 Property 'added' does not exist on type 'Object'.
+ERROR 10505001 ets/pages/Index.ets:4:30 Property 'added' does not exist on type 'Object'.
+ERROR 10605008 ets/pages/Index.ets:4:7 Use explicit types instead of "any", "unknown" (arkts-no-any-unknown)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

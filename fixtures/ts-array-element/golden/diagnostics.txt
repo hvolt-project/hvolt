@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:3:30 Type 'string' is not assignable to type 'number'.

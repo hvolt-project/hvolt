@@ -1,0 +1,5 @@
+ERROR 10505001 ets/pages/Index.ets:12:15 Catch clause variable type annotation must be 'any' or 'unknown' if specified.
+ERROR 10605059 ets/pages/Index.ets:2:3 "delete" operator is not supported (arkts-no-delete)
+ERROR 10605079 ets/pages/Index.ets:12:12 Type annotation in catch clause is not supported (arkts-no-types-in-catch)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs
+WARN - ets/pages/Index.ets:6:3 "globalThis" is not supported (arkts-no-globalthis)

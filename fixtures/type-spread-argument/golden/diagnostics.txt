@@ -1,0 +1,3 @@
+ERROR 10505001 ets/pages/Index.ets:6:19 A spread argument must either have a tuple type or be passed to a rest parameter.
+ERROR 10605090 ets/pages/Index.ets:5:10 Function return type inference is limited (arkts-no-implicit-return-types)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

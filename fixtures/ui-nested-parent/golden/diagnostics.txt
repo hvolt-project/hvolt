@@ -1,0 +1,1 @@
+ERROR 10905201 ets/pages/Index.ets:6:7 The 'Span' component can only be nested in the 'Text,RichEditor,ContainerSpan' parent component.

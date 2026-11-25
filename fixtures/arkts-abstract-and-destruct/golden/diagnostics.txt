@@ -1,0 +1,3 @@
+ERROR 10605038 ets/pages/Index.ets:6:18 Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)
+ERROR 10605074 ets/pages/Index.ets:7:9 Destructuring variable declarations are not supported (arkts-no-destruct-decls)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

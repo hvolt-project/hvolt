@@ -1,0 +1,2 @@
+ERROR 10605027 ets/pages/Index.ets:3:3 Construct signatures are not supported in interfaces (arkts-no-ctor-signatures-iface)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

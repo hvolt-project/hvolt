@@ -1,0 +1,2 @@
+ERROR 10605999 ets/pages/Index.ets:3:9 Type 'null' is not assignable to type 'string'.
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

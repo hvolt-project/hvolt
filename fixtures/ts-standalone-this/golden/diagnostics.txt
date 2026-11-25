@@ -1,0 +1,2 @@
+ERROR 10605093 ets/pages/Index.ets:3:10 Using "this" inside stand-alone functions is not supported (arkts-no-standalone-this)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

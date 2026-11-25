@@ -1,0 +1,2 @@
+ERROR 10605116 ets/pages/Index.ets:4:3 Non-declaration statements in namespaces are not supported (single semicolons are considered as empty non-delcaration statements) (arkts-no-ns-statements)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

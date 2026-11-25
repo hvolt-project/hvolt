@@ -1,0 +1,3 @@
+ERROR 10505001 ets/pages/Index.ets:5:1 Decorators are not valid here.
+ERROR 10605174 ets/pages/Index.ets:5:1 Only "@Sendable" decorator can be used on "Sendable" typeAlias (arkts-sendable-typealias-decorator)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:7:7 Class 'Item' incorrectly implements interface 'Named'. Property 'size' is missing in type 'Item' but required in type 'Named'.

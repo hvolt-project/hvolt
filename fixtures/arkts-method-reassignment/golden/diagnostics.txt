@@ -1,0 +1,2 @@
+ERROR 10605052 ets/pages/Index.ets:14:3 Reassigning object methods is not supported (arkts-no-method-reassignment)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

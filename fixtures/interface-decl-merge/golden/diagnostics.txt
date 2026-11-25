@@ -1,0 +1,5 @@
+ERROR 10605004 ets/pages/Index.ets:2:11 Use unique names for types and namespaces. (arkts-unique-names)
+ERROR 10605004 ets/pages/Index.ets:6:11 Use unique names for types and namespaces. (arkts-unique-names)
+ERROR 10605103 ets/pages/Index.ets:2:1 Declaration merging is not supported (arkts-no-decl-merging)
+ERROR 10605103 ets/pages/Index.ets:6:1 Declaration merging is not supported (arkts-no-decl-merging)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

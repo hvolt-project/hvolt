@@ -1,0 +1,3 @@
+ERROR 10605059 ets/pages/Index.ets:7:3 "delete" operator is not supported (arkts-no-delete)
+ERROR 10605999 ets/pages/Index.ets:7:10 The operand of a 'delete' operator must be optional.
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

@@ -1,0 +1,2 @@
+ERROR 10605128 ets/pages/Index.ets:1:1 Ambient module declaration is not supported (arkts-no-ambient-decls)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

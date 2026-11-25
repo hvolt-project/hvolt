@@ -1,0 +1,2 @@
+ERROR 10605159 ets/pages/Index.ets:7:25 Objects of "Sendable" type can not be initialized using object literal or array literal (arkts-sendable-obj-init)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

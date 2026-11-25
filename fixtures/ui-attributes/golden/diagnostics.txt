@@ -1,0 +1,2 @@
+ERROR 10505001 ets/pages/Index.ets:6:17 Property 'notARealAttribute' does not exist on type 'TextAttribute'.
+ERROR 10505001 ets/pages/Index.ets:8:6 Property 'alsoNotAReal' does not exist on type 'ColumnAttribute'.

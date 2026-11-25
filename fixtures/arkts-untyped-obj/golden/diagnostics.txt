@@ -1,0 +1,2 @@
+ERROR 10605038 ets/pages/Index.ets:7:17 Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

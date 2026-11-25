@@ -1,0 +1,6 @@
+ERROR 10605038 ets/pages/Index.ets:10:13 Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)
+ERROR 10605038 ets/pages/Index.ets:2:10 Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)
+ERROR 10605090 ets/pages/Index.ets:14:10 Function return type inference is limited (arkts-no-implicit-return-types)
+ERROR 10605093 ets/pages/Index.ets:15:10 Using "this" inside stand-alone functions is not supported (arkts-no-standalone-this)
+ERROR 10605099 ets/pages/Index.ets:2:12 It is possible to spread only arrays or classes derived from arrays into the rest parameter or array literals (arkts-no-spread)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

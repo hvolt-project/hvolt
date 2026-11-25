@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:1:29 Cannot find module '@ohos.notARealModule' or its corresponding type declarations.

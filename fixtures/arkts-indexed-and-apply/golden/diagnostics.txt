@@ -1,0 +1,5 @@
+ERROR 10605028 ets/pages/Index.ets:7:21 Indexed access types are not supported (arkts-no-aliases-by-index)
+ERROR 10605152 ets/pages/Index.ets:10:10 'Function.apply', 'Function.call' are not supported (arkts-no-func-apply-call)
+ERROR 10605152 ets/pages/Index.ets:11:10 'Function.apply', 'Function.call' are not supported (arkts-no-func-apply-call)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs
+WARN - ets/pages/Index.ets:12:10 'Function.bind' is not supported (arkts-no-func-bind)

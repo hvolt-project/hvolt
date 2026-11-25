@@ -1,0 +1,3 @@
+ERROR 10905209 ets/pages/Index.ets:5:5 Only UI component syntax can be written here.
+ERROR 10905231 ets/pages/Index.ets:-:- A page can't contain more than one '@Entry' decorator.
+ERROR 10905402 ets/pages/Index.ets:-:- A page configured in 'main_pages.json or build-profile.json5' must have one and only one '@Entry' decorator.

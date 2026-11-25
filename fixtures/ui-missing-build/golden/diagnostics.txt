@@ -1,0 +1,4 @@
+ERROR 10505001 ets/pages/Index.ets:6:14 ';' expected.
+ERROR 10905103 ets/pages/Index.ets:2:8 The struct 'NoBuild' must have at least and at most one 'build' method.
+ERROR 10905236 ets/pages/Index.ets:6:5 UI component 'Column' cannot be used in this place.
+ERROR 10905236 ets/pages/Index.ets:7:7 UI component 'Text' cannot be used in this place.

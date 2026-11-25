@@ -1,0 +1,2 @@
+ERROR 10605005 ets/pages/Index.ets:11:1 Use "let" instead of "var" (arkts-no-var)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

@@ -1,0 +1,4 @@
+ERROR 10505001 ets/pages/Index.ets:11:30 Property 'hidden' is private and only accessible within class 'Priv'.
+ERROR 10605029 ets/pages/Index.ets:3:18 Indexed access is not supported for fields (arkts-no-props-by-index)
+ERROR 10605038 ets/pages/Index.ets:1:13 Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs
