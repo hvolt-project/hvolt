@@ -1,0 +1,3 @@
+ERROR 10505001 ets/pages/Index.ets:2:7 Cannot redeclare block-scoped variable 'Counter'.
+ERROR 10605093 ets/pages/Index.ets:6:12 Using "this" inside stand-alone functions is not supported (arkts-no-standalone-this)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

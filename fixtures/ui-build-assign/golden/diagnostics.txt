@@ -1,0 +1,1 @@
+ERROR 10905204 ets/pages/Index.ets:9:7 'this.value = 1;' does not meet UI component syntax.

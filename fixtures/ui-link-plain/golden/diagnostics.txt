@@ -1,0 +1,1 @@
+ERROR 10905315 ets/pages/Index.ets:19:26 The 'regular' property 'plain' cannot be assigned to the '@Link' property 'value'.

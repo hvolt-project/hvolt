@@ -1,0 +1,2 @@
+ERROR 10605163 ets/pages/Index.ets:5:17 Only "Sendable" entities can be exported in shared module (arkts-shared-module-exports)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

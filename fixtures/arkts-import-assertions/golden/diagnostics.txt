@@ -1,0 +1,3 @@
+ERROR 10505001 ets/pages/Index.ets:1:37 Import assertions are only supported when the '--module' option is set to 'esnext' or 'nodenext'.
+ERROR 10605143 ets/pages/Index.ets:1:37 Import assertions are not supported (arkts-no-import-assertions)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

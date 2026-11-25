@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:8:22 Property 'getHostContext' does not exist on type 'typeof window'.

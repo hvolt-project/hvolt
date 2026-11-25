@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:6:22 Expected 1 arguments, but got 2.

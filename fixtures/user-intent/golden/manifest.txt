@@ -5,3 +5,4 @@ pkgContextInfo.json
 modules.abc
 insight_intent.json
 sourceMaps.map
+diagnostics.txt

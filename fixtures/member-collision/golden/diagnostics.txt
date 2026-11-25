@@ -1,0 +1,3 @@
+ERROR 10505001 ets/pages/Index.ets:15:17 This expression is not callable. Type 'String' has no call signatures.
+ERROR 10505001 ets/pages/Index.ets:7:18 Duplicate identifier 'sdkState'.
+ERROR 10505001 ets/pages/Index.ets:9:11 Duplicate identifier 'sdkState'.

@@ -1,0 +1,7 @@
+ERROR 10505001 ets/pages/Index.ets:10:19 Left side of comma operator is unused and has no side effects.
+ERROR 10605019 ets/pages/Index.ets:1:19 Use inheritance instead of intersection types (arkts-no-intersection-types)
+ERROR 10605022 ets/pages/Index.ets:2:23 Conditional types are not supported (arkts-no-conditional-types)
+ERROR 10605040 ets/pages/Index.ets:1:28 Object literals cannot be used as type declarations (arkts-no-obj-literals-as-types)
+ERROR 10605071 ets/pages/Index.ets:10:19 The comma operator "," is supported only in "for" loops (arkts-no-comma-outside-loops)
+ERROR 10605092 ets/pages/Index.ets:5:3 Nested functions are not supported (arkts-no-nested-funcs)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

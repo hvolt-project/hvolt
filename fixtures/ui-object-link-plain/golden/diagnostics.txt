@@ -1,0 +1,1 @@
+ERROR 10905315 ets/pages/Index.ets:23:22 The 'regular' property 'plain' cannot be assigned to the '@ObjectLink' property 'model'.

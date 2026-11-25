@@ -1,0 +1,2 @@
+ERROR 10605158 ets/pages/Index.ets:6:1 Only "@Sendable" decorator can be used on "Sendable" class (arkts-sendable-class-decorator)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

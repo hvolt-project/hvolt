@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:15:65 Argument of type '{ nope: MyDialog; }' is not assignable to parameter of type 'CustomDialogControllerOptions'. Object literal may only specify known properties, and 'nope' does not exist in type 'CustomDialogControllerOptions'.

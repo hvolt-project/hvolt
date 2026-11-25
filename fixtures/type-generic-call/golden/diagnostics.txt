@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:5:30 Argument of type 'string' is not assignable to parameter of type 'number'.

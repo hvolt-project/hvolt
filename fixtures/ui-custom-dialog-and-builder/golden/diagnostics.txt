@@ -1,0 +1,2 @@
+ERROR 10905209 ets/pages/Index.ets:15:5 Only UI component syntax can be written here.
+ERROR 10905211 ets/pages/Index.ets:2:7 The '@CustomDialog' decorated custom component must contain a property of the CustomDialogController type.

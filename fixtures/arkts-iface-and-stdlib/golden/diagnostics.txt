@@ -1,0 +1,5 @@
+ERROR 10605027 ets/pages/Index.ets:2:3 Construct signatures are not supported in interfaces (arkts-no-ctor-signatures-iface)
+ERROR 10605038 ets/pages/Index.ets:7:24 Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)
+ERROR 10605144 ets/pages/Index.ets:6:18 Usage of standard library is restricted (arkts-limited-stdlib)
+ERROR 10605144 ets/pages/Index.ets:7:10 Usage of standard library is restricted (arkts-limited-stdlib)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

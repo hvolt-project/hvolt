@@ -1,0 +1,2 @@
+ERROR 10605022 ets/pages/Index.ets:13:23 Conditional types are not supported (arkts-no-conditional-types)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

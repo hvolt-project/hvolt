@@ -1,0 +1,2 @@
+ERROR 10605155 ets/pages/Index.ets:4:3 Definite assignment assertion is not allowed in "Sendable" classes (arkts-sendable-definite-assignment)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

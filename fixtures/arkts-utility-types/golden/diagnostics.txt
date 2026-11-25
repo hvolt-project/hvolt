@@ -1,0 +1,4 @@
+ERROR 10605008 ets/pages/Index.ets:9:29 Use explicit types instead of "any", "unknown" (arkts-no-any-unknown)
+ERROR 10605040 ets/pages/Index.ets:1:31 Object literals cannot be used as type declarations (arkts-no-obj-literals-as-types)
+ERROR 10605138 ets/pages/Index.ets:2:17 Some of utility types are not supported (arkts-no-utility-types)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

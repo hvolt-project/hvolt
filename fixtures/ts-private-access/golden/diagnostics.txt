@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:7:16 Property 'secret' is private and only accessible within class 'Holder'.

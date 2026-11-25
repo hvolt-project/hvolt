@@ -1,0 +1,2 @@
+ERROR 10605104 ets/pages/Index.ets:6:26 Interfaces cannot extend classes (arkts-extends-only-class)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

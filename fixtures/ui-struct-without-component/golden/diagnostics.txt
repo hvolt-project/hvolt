@@ -1,0 +1,2 @@
+ERROR 10905103 ets/pages/Index.ets:2:8 The struct 'Plain' must have at least and at most one 'build' method.
+ERROR 10905233 ets/pages/Index.ets:2:1 Decorator '@Component', '@ComponentV2', or '@CustomDialog' is missing for struct 'Plain'.

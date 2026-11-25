@@ -1,0 +1,2 @@
+ERROR 10605150 ets/pages/Index.ets:9:1 "import" statements after other statements are not allowed (arkts-no-misplaced-imports)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

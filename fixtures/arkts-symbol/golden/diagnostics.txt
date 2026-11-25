@@ -1,0 +1,4 @@
+ERROR 10605002 ets/pages/Index.ets:3:15 "Symbol()" API is not supported (arkts-no-symbol)
+ERROR 10605002 ets/pages/Index.ets:4:10 "Symbol()" API is not supported (arkts-no-symbol)
+ERROR 10605999 ets/pages/Index.ets:4:10 'tag.description' is possibly 'undefined'.
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

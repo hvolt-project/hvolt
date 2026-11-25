@@ -1,0 +1,3 @@
+ERROR 10605180 ets/pages/Index.ets:2:1 The "@Sendable" decorator can only be used on "class", "function" and "typeAlias" (arkts-sendable-decorator-limited)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs
+WARN - ets/pages/Index.ets:2:2 The struct 'ShareComponent' use invalid decorator.

@@ -1,0 +1,2 @@
+ERROR 10505001 ets/pages/Index.ets:16:1 Decorators are not valid here.
+ERROR 10905337 ets/pages/Index.ets:16:2 The '@Entry' decorator can only be used with 'struct'.

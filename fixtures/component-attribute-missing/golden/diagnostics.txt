@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:8:10 Property 'missingAttr' does not exist on type 'TextAttribute'.

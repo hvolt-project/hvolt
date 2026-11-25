@@ -1,0 +1,3 @@
+ERROR 10505001 ets/pages/Index.ets:2:1 Global module exports may only appear in declaration files.
+ERROR 10605130 ets/pages/Index.ets:2:1 Universal module definitions (UMD) are not supported (arkts-no-umd)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

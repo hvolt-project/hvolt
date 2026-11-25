@@ -1,0 +1,5 @@
+ERROR 10505001 ets/pages/Index.ets:2:3 Declaration or statement expected.
+ERROR 10505001 ets/pages/Index.ets:2:4 Cannot find name 'fontSize'.
+WARN - ets/pages/Index.ets:10:17 Property 'fancy' does not exist on type 'TextAttribute'.
+WARN - ets/pages/Index.ets:1:2 'Nope' parameter cannot be passed in the '@Extend' decorator.
+WARN - ets/pages/Index.ets:2:4 Only UI component syntax can be written here.

@@ -1,0 +1,1 @@
+ERROR 10905209 ets/pages/Index.ets:7:7 Only UI component syntax can be written here.

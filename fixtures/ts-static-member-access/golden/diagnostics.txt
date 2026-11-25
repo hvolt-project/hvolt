@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:7:16 Property 'total' does not exist on type 'Holder'. Did you mean to access the static member 'Holder.total' instead?

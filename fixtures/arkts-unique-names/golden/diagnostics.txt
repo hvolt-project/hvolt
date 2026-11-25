@@ -1,0 +1,2 @@
+ERROR 10605004 ets/pages/Index.ets:1:11 Use unique names for types and namespaces. (arkts-unique-names)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

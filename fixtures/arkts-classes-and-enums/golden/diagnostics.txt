@@ -1,0 +1,4 @@
+ERROR 10605106 ets/pages/Index.ets:10:16 Constructor function type is not supported (arkts-no-ctor-signatures-funcs)
+ERROR 10605111 ets/pages/Index.ets:3:3 Enumeration members can be initialized only with compile time expressions of the same type (arkts-no-enum-mixed-types)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs
+WARN - ets/pages/Index.ets:13:10 Classes cannot be used as objects (arkts-no-classes-as-obj)

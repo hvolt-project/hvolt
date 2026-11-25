@@ -1,0 +1,1 @@
+ERROR 10905339 ets/pages/Index.ets:4:4 The '@State' decorator can only be used in a 'struct' decorated with '@Component'.

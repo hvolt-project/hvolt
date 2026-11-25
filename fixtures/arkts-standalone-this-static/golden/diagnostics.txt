@@ -1,0 +1,8 @@
+ERROR 10505001 ets/pages/Index.ets:14:15 Value of type 'typeof Counter' is not callable. Did you mean to include 'new'?
+ERROR 10505001 ets/pages/Index.ets:14:22 '(' expected.
+ERROR 10505001 ets/pages/Index.ets:14:23 Cannot find name 'bump'.
+ERROR 10505001 ets/pages/Index.ets:14:29 ',' expected.
+ERROR 10505001 ets/pages/Index.ets:1:7 Cannot redeclare block-scoped variable 'Counter'.
+ERROR 10605093 ets/pages/Index.ets:5:12 Using "this" inside stand-alone functions is not supported (arkts-no-standalone-this)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs
+WARN - ets/pages/Index.ets:14:15 Classes cannot be used as objects (arkts-no-classes-as-obj)

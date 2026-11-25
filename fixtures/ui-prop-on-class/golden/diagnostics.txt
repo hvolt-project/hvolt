@@ -1,0 +1,1 @@
+ERROR 10905337 ets/pages/Index.ets:3:4 The '@Prop' decorator can only be used with 'struct'.

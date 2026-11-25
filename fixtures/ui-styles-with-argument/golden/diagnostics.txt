@@ -1,0 +1,1 @@
+ERROR 10905110 ets/pages/Index.ets:6:1 '@Styles' decorated functions and methods cannot have arguments.

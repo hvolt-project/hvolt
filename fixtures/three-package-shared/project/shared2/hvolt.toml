@@ -1,0 +1,7 @@
+[module]
+name = "shared2"
+type = "shared"
+entry = "Index.ets"
+device_types = ["phone", "tablet", "2in1", "car"]
+obfuscation = false
+abi_filters = ["arm64-v8a"]

@@ -1,0 +1,3 @@
+ERROR 10605025 ets/pages/Index.ets:2:15 Declaring fields in "constructor" is not supported (arkts-no-ctor-prop-decls)
+ERROR 10605053 ets/pages/Index.ets:6:19 Only "as T" syntax is supported for type casts (arkts-as-casts)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

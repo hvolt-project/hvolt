@@ -1,0 +1,4 @@
+ERROR 10505001 ets/pages/Index.ets:2:9 Augmentations for the global scope can only be directly nested in external modules or ambient module declarations.
+ERROR 10505001 ets/pages/Index.ets:8:22 Cannot find name 'Window'.
+ERROR 10605128 ets/pages/Index.ets:2:1 Ambient module declaration is not supported (arkts-no-ambient-decls)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

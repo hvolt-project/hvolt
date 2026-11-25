@@ -1,0 +1,2 @@
+ERROR 10505001 ets/pages/Index.ets:10:9 Type 'number' is not assignable to type 'string'.
+ERROR 10505001 ets/pages/Index.ets:6:15 Argument of type 'string' is not assignable to parameter of type 'number'.

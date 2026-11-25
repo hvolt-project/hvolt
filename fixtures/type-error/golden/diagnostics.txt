@@ -1,0 +1,3 @@
+ERROR 10505001 ets/pages/Index.ets:4:11 Type 'string' is not assignable to type 'number'.
+ERROR 10605008 ets/pages/Index.ets:6:20 Use explicit types instead of "any", "unknown" (arkts-no-any-unknown)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

@@ -1,0 +1,2 @@
+ERROR 10605178 ets/pages/Index.ets:7:1 The property of "Sendable" function is limited (arkts-sendable-function-property)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

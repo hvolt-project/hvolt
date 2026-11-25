@@ -1,0 +1,2 @@
+ERROR 10605172 ets/pages/Index.ets:6:10 Only imported variables can be captured by "Sendable" function (arkts-sendable-function-imported-variables)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:1:7 Cannot redeclare block-scoped variable 'Counter'.

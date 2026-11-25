@@ -1,0 +1,4 @@
+ERROR 10605154 ets/pages/Index.ets:7:3 Properties in "Sendable" classes and interfaces must have a Sendable data type (arkts-sendable-prop-types)
+ERROR 10605154 ets/pages/Index.ets:8:3 Properties in "Sendable" classes and interfaces must have a Sendable data type (arkts-sendable-prop-types)
+ERROR 10605157 ets/pages/Index.ets:7:27 Only imported variables can be captured by "Sendable" class (arkts-sendable-imported-variables)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

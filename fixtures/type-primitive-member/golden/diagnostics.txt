@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:6:8 Property 'notARealMethod' does not exist on type 'string'.

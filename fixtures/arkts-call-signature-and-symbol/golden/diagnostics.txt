@@ -1,0 +1,4 @@
+ERROR 10605002 ets/pages/Index.ets:5:28 "Symbol()" API is not supported (arkts-no-symbol)
+ERROR 10605002 ets/pages/Index.ets:5:37 "Symbol()" API is not supported (arkts-no-symbol)
+ERROR 10605014 ets/pages/Index.ets:2:3 Use "class" instead of a type with call signature (arkts-no-call-signatures)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

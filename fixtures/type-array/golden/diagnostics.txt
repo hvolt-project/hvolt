@@ -1,0 +1,4 @@
+ERROR 10505001 ets/pages/Index.ets:3:11 Argument of type 'string' is not assignable to parameter of type 'number'.
+ERROR 10505001 ets/pages/Index.ets:4:13 Property 'notAReal' does not exist on type 'number[]'.
+ERROR 10605090 ets/pages/Index.ets:1:10 Function return type inference is limited (arkts-no-implicit-return-types)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

@@ -1,0 +1,2 @@
+ERROR 10605029 ets/pages/Index.ets:7:10 Indexed access is not supported for fields (arkts-no-props-by-index)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

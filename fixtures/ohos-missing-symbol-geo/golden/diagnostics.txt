@@ -1,0 +1,1 @@
+ERROR 10505001 ets/pages/Index.ets:1:10 Module '"@ohos.geoLocationManager"' has no exported member 'nope'. Did you mean to use 'import nope from "@ohos.geoLocationManager"' instead?

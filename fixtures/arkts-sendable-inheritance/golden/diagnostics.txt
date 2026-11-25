@@ -1,0 +1,2 @@
+ERROR 10605153 ets/pages/Index.ets:6:29 The inheritance for "Sendable" classes is limited (arkts-sendable-class-inheritance)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

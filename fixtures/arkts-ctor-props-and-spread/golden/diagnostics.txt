@@ -1,0 +1,4 @@
+ERROR 10605025 ets/pages/Index.ets:2:15 Declaring fields in "constructor" is not supported (arkts-no-ctor-prop-decls)
+ERROR 10605038 ets/pages/Index.ets:6:16 Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals)
+ERROR 10605099 ets/pages/Index.ets:6:18 It is possible to spread only arrays or classes derived from arrays into the rest parameter or array literals (arkts-no-spread)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs

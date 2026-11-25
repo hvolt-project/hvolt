@@ -1,0 +1,3 @@
+ERROR 10605090 ets/pages/Index.ets:1:10 Function return type inference is limited (arkts-no-implicit-return-types)
+WARN - -:-:- For details about ArkTS syntax errors, see FAQs
+WARN - ets/pages/Index.ets:2:17 'Function.bind' is not supported (arkts-no-func-bind)
