@@ -112,7 +112,11 @@ artifact_dirs=()
 for dir in "$ORACLE_RUN_ROOT"/*/; do
   name="$(basename "$dir")"
   case "$name" in _*|project) continue ;; esac
-  [ -f "$dir/golden/modules.abc" ] || continue
+  # A fixture that stops at the diagnostic never emits a tree, so `modules.abc` alone would
+  # skip it: 258 of the 466 fixtures are `expect-build-failure` and carry only
+  # `golden/diagnostics.txt`. Judging only the ones with artifacts left 55% of the fixtures
+  # uncompared while the counts still read `0 not compared`.
+  [ -f "$dir/golden/modules.abc" ] || [ -f "$dir/golden/diagnostics.txt" ] || continue
   artifact_dirs+=("$dir")
 done
 # 并发上限固定 3：这台机器是多人共享的 32 核，默认按 nproc 会把 CPU 打满

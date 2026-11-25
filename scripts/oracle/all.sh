@@ -105,10 +105,25 @@ check_one() {
   if [ -f "$fixture/extra-files.json" ]; then
     ln -sf "$fixture/extra-files.json" "$run/extra-files.json"
   fi
+  # `compare-artifacts.py` decides "only the diagnostics are judged" from the fixture's own
+  # `expect-build-failure` marker. It reads the directory it is handed, which is this run's
+  # view, so the marker has to be in it: without the link every diagnostics-only fixture was
+  # judged as if it owed a full artifact set, and 253 of them reported `module.json:presence`.
+  if [ -f "$fixture/expect-build-failure" ]; then
+    ln -sf "$fixture/expect-build-failure" "$run/expect-build-failure"
+  fi
   HVOLT_RUN_DIR="$run" "$ROOT/scripts/oracle/run-hvolt.sh" "$name" > /dev/null || {
     echo "ACTUAL FAIL $name"
     return 1
   }
+  # A fixture whose reference stopped at the diagnostic has no `golden.ts`: `compare.js`
+  # fingerprints the reference's emitted page, and reading a file that was never emitted threw
+  # ENOENT, which produced neither PASS nor FAIL and left the fixture silently uncounted.
+  # Its verdict is the diagnostics one (`compare-artifacts.py`), so name the bucket instead.
+  if [ ! -f "$fixture/golden.ts" ]; then
+    printf 'DIAG %s\n' "$fixture"
+    return 0
+  fi
   # The verdict is `compare.js`'s; the only thing rewritten here is the directory it names, so a
   # failure still points at the fixture rather than at this run's temporary tree.
   local report
