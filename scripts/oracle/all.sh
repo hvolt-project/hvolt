@@ -34,6 +34,19 @@ for arg in "$@"; do
 done
 set -- ${ARGS[@]+"${ARGS[@]}"}
 
+# `git checkout` writes a whole fixture at once and does not preserve mtimes, so the file
+# written a fraction of a millisecond later looks "newer" than the golden sitting next to it.
+# Measured: on a fresh checkout of `fixtures/accessor-pair`, `input.ets` is 0.0008 s newer than
+# `golden/Index.ts`, which flipped 62 fixtures to `GOLDEN FAIL` without anything having changed.
+# A real edit is seconds apart, so the comparison keeps a one-second tolerance.
+newer_than() {
+  [ "$1" -nt "$2" ] || return 1
+  local a b
+  a=$(stat -c %Y "$1" 2>/dev/null || stat -f %m "$1")
+  b=$(stat -c %Y "$2" 2>/dev/null || stat -f %m "$2")
+  [ $((a - b)) -gt 1 ]
+}
+
 needs_golden() {
   local fixture="$1"
   [ "$REGEN" -eq 1 ] && return 0
@@ -48,15 +61,15 @@ needs_golden() {
     return 0
   fi
   [ -f "$fixture/golden/Index.ts" ] || return 0
-  [ "$fixture/golden.ts" -nt "$fixture/golden/Index.ts" ] && return 0
-  [ "$fixture/input.ets" -nt "$fixture/golden/Index.ts" ] && return 0
+  newer_than "$fixture/golden.ts" "$fixture/golden/Index.ts" && return 0
+  newer_than "$fixture/input.ets" "$fixture/golden/Index.ts" && return 0
   # The manifest records which artifacts this harvest produced. A golden set generated before
   # the manifest existed is incomplete (it may be missing artifacts the reference does emit),
   # so it is rebuilt once.
   [ -f "$fixture/golden/manifest.txt" ] || return 0
   # A fixture that declares extra files declares *which* files are part of its golden: a
   # declaration newer than the golden means the set may have changed.
-  if [ -f "$fixture/extra-files.json" ] && [ "$fixture/extra-files.json" -nt "$fixture/golden/Index.ts" ]; then
+  if [ -f "$fixture/extra-files.json" ] && newer_than "$fixture/extra-files.json" "$fixture/golden/Index.ts"; then
     return 0
   fi
   return 1
